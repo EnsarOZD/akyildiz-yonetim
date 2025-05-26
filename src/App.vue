@@ -1,30 +1,41 @@
-<script setup>
-import HelloWorld from './components/HelloWorld.vue'
-</script>
 
 <template>
-  <div>
-    <a href="https://vite.dev" target="_blank">
-      <img src="/vite.svg" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://vuejs.org/" target="_blank">
-      <img src="./assets/vue.svg" class="logo vue" alt="Vue logo" />
-    </a>
+  <div class="min-h-screen bg-base-200">
+    <!-- Kart tipi dış çerçeve -->
+    <div class="max-w-6xl mx-auto bg-base-100 shadow-lg rounded-xl overflow-hidden">
+      
+      <!-- Header -->
+      <Header />
+
+      <!-- Sekme Menü -->
+      <TabMenu :activeTab="activeTab" @change-tab="activeTab = $event" />
+
+      <!-- İçerik -->
+      <div class="p-6">
+        <Dashboard v-if="activeTab === 'dashboard'" />
+        <Tenants v-if="activeTab === 'tenants'" />
+        <Payments v-if="activeTab === 'payments'" />
+        <Expenses v-if="activeTab === 'expenses'" />
+        <Utilities v-if="activeTab === 'utilities'" />
+      </div>
+      
+    </div>
   </div>
-  <HelloWorld msg="Vite + Vue" />
 </template>
 
+<script setup>
+import { ref } from 'vue'
+import Header from './components/Header.vue'
+import TabMenu from './components/TabMenu.vue'
+import Dashboard from './components/Dashboard.vue'
+import Tenants from './components/Tenants.vue'
+import Payments from './components/Payments.vue'
+import Expenses from './components/Expenses.vue'
+import Utilities from './components/Utilities.vue'
+
+const activeTab = ref('dashboard')
+</script>
+
 <style scoped>
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.vue:hover {
-  filter: drop-shadow(0 0 2em #42b883aa);
-}
+
 </style>
