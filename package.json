@@ -9,8 +9,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@fontsource/cinzel": "^5.2.5",
+    "@fontsource/cormorant-garamond": "^5.2.7",
     "firebase": "^11.8.1",
-    "vue": "^3.4.27"
+    "vue": "^3.4.27",
+    "vue-router": "^4.5.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.7",
