@@ -5,12 +5,59 @@
     <div class="card bg-base-100 shadow-lg border border-base-300 p-6 rounded-xl">
       <h2 class="text-center text-lg font-semibold mb-4">Kiracı {{ editMode ? 'Güncelle' : 'Ekle' }}</h2>
       <form @submit.prevent="saveTenant" class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <input v-model="newTenant.firstName" placeholder="Ad" class="input input-bordered w-full" required />
-        <input v-model="newTenant.lastName" placeholder="Soyad" class="input input-bordered w-full" required />
-        <input v-model="newTenant.unit" placeholder="Daire No" class="input input-bordered w-full" required />
-        <input v-model="newTenant.phone" placeholder="Telefon" class="input input-bordered w-full" required />
-        <input v-model="newTenant.email" placeholder="E-posta" class="input input-bordered w-full" />
-        <input v-model="newTenant.company" placeholder="Şirket Unvanı" class="input input-bordered w-full" required />
+        <div>
+          <label class="label font-semibold">Ad</label>
+          <input v-model="newTenant.firstName" placeholder="Ad" class="input input-bordered w-full" required />
+        </div>
+        <div>
+          <label class="label font-semibold">Soyad</label>
+          <input v-model="newTenant.lastName" placeholder="Soyad" class="input input-bordered w-full" required />
+        </div>
+        <div>
+          <label class="label font-semibold">Telefon</label>
+          <input v-model="newTenant.phone" placeholder="Telefon" class="input input-bordered w-full" required />
+        </div>
+        <div>
+          <label class="label font-semibold">E-posta</label>
+          <input v-model="newTenant.email" placeholder="E-posta" class="input input-bordered w-full" />
+        </div>
+        <div>
+          <label class="label font-semibold">Şirket Unvanı</label>
+          <input v-model="newTenant.company" placeholder="Şirket Unvanı" class="input input-bordered w-full" required />
+        </div>
+
+        <!-- Giriş Tarihi -->
+        <div>
+          <label class="label font-semibold">Giriş Tarihi</label>
+          <input type="date" v-model="newTenant.entryDate" class="input input-bordered w-full" required />
+        </div>
+
+        <!-- Çoklu Kat Seçimi (profesyonel ve erişim kontrollü) -->
+        <div>
+          <label class="label font-semibold">Katlar</label>
+          <div class="flex flex-wrap gap-2">
+            <label v-for="unit in UNIT_OPTIONS" :key="unit" class="flex items-center gap-1">
+              <input
+                type="checkbox"
+                :value="unit"
+                v-model="newTenant.units"
+                :disabled="isUnitTaken(unit) && !(editMode && newTenant.units.includes(unit))"
+              />
+              <span :class="isUnitTaken(unit) && !(editMode && newTenant.units.includes(unit)) ? 'text-gray-400 line-through' : ''">
+                {{ unit }}
+              </span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Aktif/Pasif Seçimi -->
+        <div class="md:col-span-3 flex items-center gap-4">
+          <label class="label cursor-pointer">
+            <span class="label-text font-semibold">Aktif mi?</span>
+            <input type="checkbox" v-model="newTenant.isActive" class="toggle toggle-success" />
+          </label>
+        </div>
+
         <div class="md:col-span-3 flex justify-end gap-2">
           <button type="submit" class="btn btn-success">{{ editMode ? 'Kaydet' : 'Ekle' }}</button>
           <button v-if="editMode" type="button" @click="cancelEdit" class="btn btn-outline btn-warning">Vazgeç</button>
@@ -27,10 +74,12 @@
             <tr>
               <th class="text-center">Ad</th>
               <th class="text-center">Soyad</th>
-              <th class="text-center">Daire</th>
+              <th class="text-center">Kat(lar)</th>
               <th class="text-center">Telefon</th>
               <th class="text-center">E-posta</th>
               <th class="text-center">Şirket</th>
+              <th class="text-center">Giriş Tarihi</th>
+              <th class="text-center">Durum</th>
               <th class="text-center">İşlem</th>
             </tr>
           </thead>
@@ -38,10 +87,16 @@
             <tr v-for="(t, index) in tenants" :key="index">
               <td class="text-center">{{ t.firstName }}</td>
               <td class="text-center">{{ t.lastName }}</td>
-              <td class="text-center">{{ t.unit }}</td>
+              <td class="text-center">{{ t.units?.join(', ') }}</td>
               <td class="text-center">{{ t.phone }}</td>
               <td class="text-center">{{ t.email }}</td>
               <td class="text-center">{{ t.company }}</td>
+              <td class="text-center">{{ t.entryDate }}</td>
+              <td class="text-center">
+                <span :class="t.isActive ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold'">
+                  {{ t.isActive ? 'Aktif' : 'Pasif' }}
+                </span>
+              </td>
               <td class="text-center">
                 <div class="flex justify-center gap-2">
                   <button @click="startEdit(t)" class="btn btn-xs btn-info">Düzenle</button>
@@ -64,15 +119,18 @@ import { ref, onMounted } from 'vue'
 import { db } from '../firebase'
 import { collection, addDoc, getDocs, deleteDoc, doc, updateDoc } from 'firebase/firestore'
 import TenantSummary from './TenantSummary.vue'
+import { UNIT_OPTIONS } from '../constants/units'
 
 const tenants = ref([])
 const newTenant = ref({
   firstName: '',
   lastName: '',
-  unit: '',
+  units: [],
   phone: '',
   email: '',
-  company: ''
+  company: '',
+  entryDate: new Date().toISOString().slice(0, 10),
+  isActive: true
 })
 const editMode = ref(false)
 const selectedTenantId = ref(null)
@@ -90,6 +148,12 @@ const fetchTenants = async () => {
   })
 }
 
+const isUnitTaken = (unit) => {
+  return tenants.value.some(t =>
+    t.isActive && t.units?.includes(unit) && (!editMode.value || t.id !== selectedTenantId.value)
+  )
+}
+
 const saveTenant = async () => {
   if (editMode.value && selectedTenantId.value) {
     const tenantRef = doc(db, "tenants", selectedTenantId.value)
@@ -101,10 +165,12 @@ const saveTenant = async () => {
   newTenant.value = {
     firstName: '',
     lastName: '',
-    unit: '',
+    units: [],
     phone: '',
     email: '',
-    company: ''
+    company: '',
+    entryDate: new Date().toISOString().slice(0, 10),
+    isActive: true
   }
   editMode.value = false
   selectedTenantId.value = null
@@ -120,10 +186,12 @@ const startEdit = (tenant) => {
   newTenant.value = {
     firstName: tenant.firstName || '',
     lastName: tenant.lastName || '',
-    unit: tenant.unit || '',
+    units: tenant.units || [],
     phone: tenant.phone || '',
     email: tenant.email || '',
-    company: tenant.company || ''
+    company: tenant.company || '',
+    entryDate: tenant.entryDate || new Date().toISOString().slice(0, 10),
+    isActive: tenant.isActive ?? true
   }
   selectedTenantId.value = tenant.id
   editMode.value = true
@@ -133,10 +201,12 @@ const cancelEdit = () => {
   newTenant.value = {
     firstName: '',
     lastName: '',
-    unit: '',
+    units: [],
     phone: '',
     email: '',
-    company: ''
+    company: '',
+    entryDate: new Date().toISOString().slice(0, 10),
+    isActive: true
   }
   editMode.value = false
   selectedTenantId.value = null

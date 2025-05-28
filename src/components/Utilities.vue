@@ -1,116 +1,106 @@
 <template>
-  <section class="p-4 space-y-6 max-w-5xl mx-auto">
+  <section class="p-4 max-w-5xl mx-auto space-y-6">
+    <h2 class="text-xl font-bold text-center">Sayaç Kayıtları</h2>
 
-    <!-- Sayaç Ekle/Güncelle -->
-    <div class="card bg-base-100 shadow-lg border border-base-300 p-6 rounded-xl">
-      <h2 class="text-center text-lg font-semibold mb-4">Sayaç {{ editMode ? 'Güncelle' : 'Ekle' }}</h2>
-      <form @submit.prevent="saveUtility" class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <input v-model="newUtility.date" type="date" class="input input-bordered w-full" required />
-        <input v-model="newUtility.type" placeholder="Tür (Elektrik, Su, Doğalgaz)" class="input input-bordered w-full" required />
-        <input v-model="newUtility.value" type="number" placeholder="Tüketim Miktarı" class="input input-bordered w-full" required />
-        <div class="md:col-span-3 flex justify-end gap-2">
-          <button type="submit" class="btn btn-success">{{ editMode ? 'Kaydet' : 'Ekle' }}</button>
-          <button v-if="editMode" type="button" @click="cancelEdit" class="btn btn-outline btn-warning">Vazgeç</button>
-        </div>
-      </form>
+    <div class="flex gap-4">
+      <button class="btn btn-primary" @click="showElectricityModal = true">Elektrik Girişi</button>
+      <button class="btn btn-secondary" @click="showWaterModal = true">Su Girişi</button>
     </div>
 
-    <!-- Sayaç Listesi -->
-    <div class="card bg-base-100 shadow-lg border border-base-300 p-6 rounded-xl">
-      <h3 class="text-center text-lg font-semibold mb-4">Sayaç Kayıtları</h3>
-      <div class="overflow-x-auto">
-        <table class="table table-zebra w-full text-sm">
-          <thead>
-            <tr>
-              <th class="text-center">Tarih</th>
-              <th class="text-center">Tür</th>
-              <th class="text-center">Tüketim</th>
-              <th class="text-center">İşlem</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="(u, index) in utilities" :key="index">
-              <td class="text-center">{{ u.date }}</td>
-              <td class="text-center">{{ u.type }}</td>
-              <td class="text-center">{{ u.value }}</td>
-              <td class="text-center">
-                <div class="flex justify-center gap-2">
-                  <button @click="startEdit(u)" class="btn btn-xs btn-info">Düzenle</button>
-                  <button @click="deleteUtility(u.id)" class="btn btn-xs btn-error">Sil</button>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+    <div class="overflow-x-auto mt-6">
+      <table class="table w-full border">
+        <thead>
+          <tr>
+            <th>Dönem</th>
+            <th>Kat</th>
+            <th>Şirket</th>
+            <th>Tip</th>
+            <th>Tüketim</th>
+            <th>KDV Hariç</th>
+            <th>Toplam (₺)</th>
+            <th>İşlem</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="r in readings" :key="r.id">
+            <td>{{ r.period }}</td>
+            <td>{{ r.unit }}</td>
+            <td>{{ r.tenantId === 'ortak' ? 'Ortak Alan' : r.tenantId === 'mescit' ? 'Mescit' : r.tenantName || '-' }}</td>
+            <td>{{ r.type === 'electricity' ? 'Elektrik' : 'Su' }}</td>
+            <td>{{ r.consumption ?? r.usage }}</td>
+            <td>{{ r.kdvHaric?.toFixed(2) || '-' }}</td>
+            <td>{{ r.toplamTutar?.toFixed(2) || r.amount?.toFixed(2) || '-' }}</td>
+            <td>
+              <div class="flex gap-2">
+                <button class="btn btn-xs btn-info" @click="editRecord(r)">Düzenle</button>
+                <button class="btn btn-xs btn-error" @click="deleteRecord(r.id)">Sil</button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
 
+    <ElectricityModal v-if="showElectricityModal" @close="handleClose" />
+    <WaterModal v-if="showWaterModal" @close="handleClose" />
   </section>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
 import { db } from '../firebase'
-import { collection, addDoc, getDocs, deleteDoc, doc, updateDoc } from 'firebase/firestore'
+import { collection, getDocs, deleteDoc, doc } from 'firebase/firestore'
+import ElectricityModal from './ElectricityModal.vue'
+import WaterModal from './WaterModal.vue'
 
-const utilities = ref([])
-const newUtility = ref({ date: '', type: '', value: '' })
-const editMode = ref(false)
-const selectedUtilityId = ref(null)
+const showElectricityModal = ref(false)
+const showWaterModal = ref(false)
+const readings = ref([])
 
-const fetchUtilities = async () => {
-  utilities.value = []
-  const querySnapshot = await getDocs(collection(db, 'utilities'))
-  querySnapshot.forEach(docSnapshot => {
-    utilities.value.push({
-      id: docSnapshot.id,
-      ...docSnapshot.data()
+const fetchReadings = async () => {
+  readings.value = []
+
+  const tenantsSnapshot = await getDocs(collection(db, 'tenants'))
+  const tenantMap = {}
+  tenantsSnapshot.forEach(doc => {
+    const data = doc.data()
+    tenantMap[doc.id] = data.company
+  })
+
+  const snapshot = await getDocs(collection(db, 'readings'))
+  snapshot.forEach(docSnap => {
+    const data = docSnap.data()
+    const company = data.tenantId === 'ortak'
+      ? 'Ortak Alan'
+      : data.tenantId === 'mescit'
+      ? 'Mescit'
+      : tenantMap[data.tenantId] || '-'
+
+    readings.value.push({
+      id: docSnap.id,
+      ...data,
+      tenantName: company
     })
   })
 }
 
-const saveUtility = async () => {
-  if (editMode.value && selectedUtilityId.value) {
-    const utilityRef = doc(db, 'utilities', selectedUtilityId.value)
-    await updateDoc(utilityRef, {
-      date: newUtility.value.date,
-      type: newUtility.value.type,
-      value: newUtility.value.value
-    })
-  } else {
-    await addDoc(collection(db, 'utilities'), {
-      date: newUtility.value.date,
-      type: newUtility.value.type,
-      value: newUtility.value.value
-    })
+const handleClose = () => {
+  showElectricityModal.value = false
+  showWaterModal.value = false
+  fetchReadings()
+}
+
+const deleteRecord = async (id) => {
+  if (confirm("Bu kaydı silmek istediğinizden emin misiniz?")) {
+    await deleteDoc(doc(db, 'readings', id))
+    readings.value = readings.value.filter(r => r.id !== id)
   }
-
-  newUtility.value = { date: '', type: '', value: '' }
-  editMode.value = false
-  selectedUtilityId.value = null
-  await fetchUtilities()
 }
 
-const deleteUtility = async (id) => {
-  await deleteDoc(doc(db, 'utilities', id))
-  utilities.value = utilities.value.filter(u => u.id !== id)
+const editRecord = (record) => {
+  alert(`Düzenleme işlemi için kayıt: ${record.unit} (${record.period})`)
+  // Düzenleme modalı ileride eklenecek
 }
 
-const startEdit = (utility) => {
-  newUtility.value = {
-    date: utility.date,
-    type: utility.type,
-    value: utility.value
-  }
-  selectedUtilityId.value = utility.id
-  editMode.value = true
-}
-
-const cancelEdit = () => {
-  newUtility.value = { date: '', type: '', value: '' }
-  editMode.value = false
-  selectedUtilityId.value = null
-}
-
-onMounted(fetchUtilities)
+onMounted(fetchReadings)
 </script>
