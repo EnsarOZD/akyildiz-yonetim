@@ -6,7 +6,6 @@
       <div v-if="tenant">
         <!-- Bilgi Kartları -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <!-- Kişisel Bilgiler -->
           <div class="card bg-base-100 dark:bg-gray-700 border border-base-300 p-4 space-y-2 shadow-md">
             <p><strong>👤 Ad Soyad:</strong> {{ tenant.firstName }} {{ tenant.lastName }}</p>
             <p><strong>📞 Telefon:</strong> {{ tenant.phone }}</p>
@@ -17,7 +16,6 @@
             </p>
           </div>
 
-          <!-- Finansal Bilgiler -->
           <div class="card bg-base-100 dark:bg-gray-700 border border-base-300 p-4 space-y-2 shadow-md">
             <p><strong class="text-green-500">💰 Toplam Ödeme:</strong> {{ totalPaid.toLocaleString('tr-TR') }} ₺</p>
             <p><strong class="text-red-500">📉 Toplam Borç:</strong> {{ totalDebt.toLocaleString('tr-TR') }} ₺</p>
@@ -52,7 +50,7 @@
         <!-- Gider Geçmişi -->
         <div>
           <h3 class="text-lg font-semibold mt-6 mb-2">💸 Gider Geçmişi</h3>
-          <div v-if="readings.length" class="overflow-x-auto">
+          <div v-if="allExpenses.length" class="overflow-x-auto">
             <table class="table table-sm w-full border">
               <thead>
                 <tr>
@@ -63,9 +61,9 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="(r, index) in sortedReadings" :key="index">
+                <tr v-for="(r, index) in allExpenses" :key="index">
                   <td>{{ r.period || '-' }}</td>
-                  <td>{{ r.toplamTutar != null ? r.toplamTutar.toLocaleString('tr-TR') : '-' }}</td>
+                  <td>{{ r.toplamTutar != null ? Number(r.toplamTutar).toLocaleString('tr-TR') : '-' }}</td>
                   <td>
                     <span :class="{
                       'text-yellow-400': r.type === 'electricity',
@@ -80,7 +78,7 @@
               </tbody>
             </table>
           </div>
-          <p v-else class="text-gray-400 italic">Sayaç verisi bulunmuyor.</p>
+          <p v-else class="text-gray-400 italic">Gider verisi bulunmuyor.</p>
         </div>
       </div>
 
@@ -100,20 +98,16 @@ const tenantId = route.params.id
 const tenant = ref(null)
 const payments = ref([])
 const readings = ref([])
+const aidats = ref([])
+const allExpenses = ref([])
 
 const totalPaid = ref(0)
 const totalDebt = ref(0)
 
 const balance = computed(() => totalDebt.value - totalPaid.value)
 
-// Sıralı ödeme geçmişi
 const sortedPayments = computed(() =>
   [...payments.value].sort((a, b) => new Date(a.date) - new Date(b.date))
-)
-
-// Sıralı sayaç geçmişi
-const sortedReadings = computed(() =>
-  [...readings.value].sort((a, b) => new Date(a.period) - new Date(b.period))
 )
 
 const fetchTenantData = async () => {
@@ -135,12 +129,26 @@ const fetchReadings = async () => {
   const q = query(collection(db, 'readings'), where('tenantId', '==', tenantId))
   const snapshot = await getDocs(q)
   readings.value = snapshot.docs.map(doc => doc.data())
-  totalDebt.value = readings.value.reduce((sum, r) => sum + (Number(r.toplamTutar) || 0), 0)
 }
 
-onMounted(() => {
-  fetchTenantData()
-  fetchPayments()
-  fetchReadings()
+const fetchAidats = async () => {
+  const q = query(collection(db, 'aidatRecords'), where('tenantId', '==', tenantId))
+  const snapshot = await getDocs(q)
+  aidats.value = snapshot.docs.map(doc => doc.data())
+}
+
+const computeAllExpenses = () => {
+  allExpenses.value = [...readings.value, ...aidats.value].sort((a, b) =>
+    (a.period || '').localeCompare(b.period || '')
+  )
+  totalDebt.value = allExpenses.value.reduce((sum, r) => sum + (Number(r.toplamTutar) || 0), 0)
+}
+
+onMounted(async () => {
+  await fetchTenantData()
+  await fetchPayments()
+  await fetchReadings()
+  await fetchAidats()
+  computeAllExpenses()
 })
 </script>

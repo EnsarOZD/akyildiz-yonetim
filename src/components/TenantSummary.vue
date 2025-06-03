@@ -13,16 +13,17 @@
           <p><span class="font-semibold">✉️ E-posta:</span> {{ tenant.email }}</p>
           <p>
             <span class="font-semibold">🏢 Kat:</span>
-            <span>
-              {{ Array.isArray(tenant.units) ? tenant.units.join(', ') : tenant.unit }}
-            </span>
+            <span>{{ Array.isArray(tenant.units) ? tenant.units.join(', ') : tenant.unit }}</span>
           </p>
         </div>
 
         <div class="card bg-base-100 dark:bg-gray-700 shadow-md border border-base-200 p-4 space-y-2">
-          <p><span class="font-semibold text-green-600 dark:text-green-400">💰 Toplam Ödeme:</span> {{ totalPaid.toLocaleString() }} ₺</p>
-          <p><span class="font-semibold text-red-600 dark:text-red-400">📉 Toplam Borç:</span> {{ totalDebt.toLocaleString() }} ₺</p>
-          <p><span class="font-semibold text-blue-600 dark:text-blue-400">🧾 Kalan Bakiye:</span> {{ balance.toLocaleString() }} ₺</p>
+          <p><span class="font-semibold text-green-600 dark:text-green-400">💰 Toplam Ödeme:</span>
+            {{ Number(totalPaid).toLocaleString('tr-TR') }} ₺</p>
+          <p><span class="font-semibold text-red-600 dark:text-red-400">📉 Toplam Borç:</span>
+            {{ Number(totalDebt).toLocaleString('tr-TR') }} ₺</p>
+          <p><span class="font-semibold text-blue-600 dark:text-blue-400">🧾 Kalan Bakiye:</span>
+            {{ Number(balance).toLocaleString('tr-TR') }} ₺</p>
         </div>
       </div>
 
@@ -40,7 +41,7 @@
             <tbody>
               <tr v-for="(p, index) in lastPayments" :key="index">
                 <td>{{ p.date }}</td>
-                <td>{{ p.amount.toLocaleString() }}</td>
+                <td>{{ Number(p.amount).toLocaleString('tr-TR') }}</td>
                 <td>{{ p.type }}</td>
               </tr>
             </tbody>
@@ -69,11 +70,10 @@ const props = defineProps({
 const payments = ref([])
 const expenses = ref([])
 const readings = ref([])
+const aidats = ref([])
 
 const totalPaid = ref(0)
 const totalDebt = ref(0)
-const totalReadingDebt = ref(0)
-
 const lastPayments = ref([])
 
 const fetchPaymentsAndExpenses = async () => {
@@ -83,13 +83,13 @@ const fetchPaymentsAndExpenses = async () => {
   const paymentsQuery = query(collection(db, 'payments'), where('tenantId', '==', props.tenant.id))
   const paymentsSnapshot = await getDocs(paymentsQuery)
   payments.value = paymentsSnapshot.docs.map(doc => doc.data())
+  totalPaid.value = payments.value.reduce((sum, p) => sum + (parseFloat(p.amount) || 0), 0)
 
-  totalPaid.value = payments.value.reduce((sum, p) => sum + (p.amount || 0), 0)
   lastPayments.value = payments.value
     .sort((a, b) => new Date(b.date) - new Date(a.date))
     .slice(0, 5)
 
-  // Giderler
+  // Diğer giderler
   const expensesQuery = query(collection(db, 'expenses'), where('tenantId', '==', props.tenant.id))
   const expensesSnapshot = await getDocs(expensesQuery)
   expenses.value = expensesSnapshot.docs.map(doc => doc.data())
@@ -99,10 +99,16 @@ const fetchPaymentsAndExpenses = async () => {
   const readingsSnapshot = await getDocs(readingsQuery)
   readings.value = readingsSnapshot.docs.map(doc => doc.data())
 
-  totalReadingDebt.value = readings.value.reduce((sum, r) => sum + (r.toplamTutar || 0), 0)
+  // Aidatlar
+  const aidatQuery = query(collection(db, 'aidatRecords'), where('tenantId', '==', props.tenant.id))
+  const aidatSnapshot = await getDocs(aidatQuery)
+  aidats.value = aidatSnapshot.docs.map(doc => doc.data())
 
-  // Toplam borç = gider + sayaç
-  totalDebt.value = expenses.value.reduce((sum, e) => sum + (e.amount || 0), 0) + totalReadingDebt.value
+  // Toplam borç = tüm kalemler
+  totalDebt.value = [...expenses.value, ...readings.value, ...aidats.value].reduce((sum, item) => {
+    const value = parseFloat(item.toplamTutar || item.amount || 0)
+    return sum + (isNaN(value) ? 0 : value)
+  }, 0)
 }
 
 const balance = computed(() => totalDebt.value - totalPaid.value)

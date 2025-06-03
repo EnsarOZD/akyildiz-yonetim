@@ -3,58 +3,44 @@
     <div class="modal-box max-w-6xl">
       <h3 class="font-bold text-lg">Su Sayaç Girişi</h3>
 
+      <!-- Tarih ve dönem -->
       <div class="form-control w-48 mt-4">
-        <label class="label">
-          <span class="label-text font-semibold">Dönem</span>
-        </label>
+        <label class="label font-semibold">Dönem</label>
         <input type="month" v-model="selectedPeriod" class="input input-bordered" />
       </div>
 
       <div class="flex flex-wrap gap-4 mt-2">
         <div class="form-control">
-          <label class="label">
-            <span class="label-text font-semibold">Başlangıç Tarihi</span>
-          </label>
+          <label class="label font-semibold">Başlangıç Tarihi</label>
           <input type="date" v-model="startDate" class="input input-bordered" />
         </div>
-
         <div class="form-control">
-          <label class="label">
-            <span class="label-text font-semibold">Bitiş Tarihi</span>
-          </label>
+          <label class="label font-semibold">Bitiş Tarihi</label>
           <input type="date" v-model="endDate" class="input input-bordered" />
         </div>
-
         <div class="form-control">
-          <label class="label">
-            <span class="label-text font-semibold">Son Ödeme Tarihi</span>
-          </label>
+          <label class="label font-semibold">Son Ödeme Tarihi</label>
           <input type="date" v-model="dueDate" class="input input-bordered" />
         </div>
-
         <div class="form-control">
-          <label class="label">
-            <span class="label-text font-semibold">Gün Sayısı</span>
-          </label>
+          <label class="label font-semibold">Gün Sayısı</label>
           <input type="number" :value="dayCount" disabled class="input input-bordered" />
         </div>
       </div>
 
+      <!-- Birim fiyatlar -->
       <div class="flex gap-4 mt-4">
         <div class="form-control w-60">
-          <label class="label">
-            <span class="label-text font-semibold">Su Birim Fiyatı (₺)</span>
-          </label>
+          <label class="label font-semibold">Su Birim Fiyatı (₺)</label>
           <input type="number" v-model.number="waterUnitPrice" class="input input-bordered" step="0.01" />
         </div>
         <div class="form-control w-60">
-          <label class="label">
-            <span class="label-text font-semibold">Atık Su Birim Fiyatı (₺)</span>
-          </label>
+          <label class="label font-semibold">Atık Su Birim Fiyatı (₺)</label>
           <input type="number" v-model.number="wasteUnitPrice" class="input input-bordered" step="0.01" />
         </div>
       </div>
 
+      <!-- Sayaç tablosu -->
       <div class="overflow-x-auto mt-6">
         <table class="table w-full border">
           <thead>
@@ -65,7 +51,7 @@
               <th>Yeni Sayaç</th>
               <th>Tüketim</th>
               <th>KDV Hariç</th>
-              <th>Toplam</th>
+              <th>KDV Dahil</th>
             </tr>
           </thead>
           <tbody>
@@ -73,29 +59,22 @@
               <td>{{ reading.unit }}</td>
               <td>{{ reading.name }}</td>
               <td>
-                <input
-                  type="number"
-                  class="input input-bordered w-24"
-                  v-model.number="reading.previous"
-                  @input="calculate(index)"
-                />
+
+                <input type="number" class="input input-bordered w-24" v-model.number="reading.previous" @input="calculate(index)" />
               </td>
               <td>
-                <input
-                  type="number"
-                  class="input input-bordered w-24"
-                  v-model.number="reading.current"
-                  @input="calculate(index)"
-                />
+                <input type="number" class="input input-bordered w-24" v-model.number="reading.current" @input="calculate(index)" />
               </td>
-              <td>{{ reading.usage }}</td>
-              <td>{{ reading.kdvHaric.toFixed(2) }}</td>
-              <td>{{ reading.toplamTutar.toFixed(2) }}</td>
+              <td>{{ formatDecimal(reading.usage) }}</td>
+<td>{{ formatDecimal(reading.kdvHaric) }}</td>
+<td>{{ formatDecimal(reading.kdvDahil) }}</td>
+
             </tr>
           </tbody>
         </table>
       </div>
 
+      <!-- Butonlar -->
       <div class="modal-action flex justify-between">
         <div class="space-x-2">
           <button class="btn btn-success" @click="savePartialReadings">Girilenleri Kaydet</button>
@@ -128,6 +107,11 @@ const dayCount = computed(() => {
   const diffTime = end - start
   return Math.floor(diffTime / (1000 * 60 * 60 * 24))
 })
+
+const formatDecimal = (value) => {
+  if (value === undefined || value === null || isNaN(value)) return '0.00'
+  return Number(value).toFixed(2)
+}
 
 const fetchLastReadingByUnit = async (unit) => {
   const q = query(
@@ -163,7 +147,7 @@ const fetchTenants = async () => {
       current: 0,
       usage: 0,
       kdvHaric: 0,
-      toplamTutar: 0
+      kdvDahil: 0
     })
   }
 
@@ -180,7 +164,7 @@ const fetchTenants = async () => {
           current: 0,
           usage: 0,
           kdvHaric: 0,
-          toplamTutar: 0
+          kdvDahil: 0
         })
       }
     }
@@ -190,8 +174,30 @@ const fetchTenants = async () => {
 const calculate = (index) => {
   const r = readings.value[index]
   r.usage = r.current - r.previous
-  r.kdvHaric = r.usage * (waterUnitPrice.value + wasteUnitPrice.value)
-  r.toplamTutar = r.kdvHaric * 1.11
+
+
+  const suFiyat = waterUnitPrice.value
+  const atikFiyat = wasteUnitPrice.value
+
+  const kdvHaric = r.usage * (suFiyat + atikFiyat)
+  const suKdv = r.usage * suFiyat * 0.01
+  const atikKdv = r.usage * atikFiyat * 0.10
+
+  r.kdvHaric = kdvHaric
+  r.kdvDahil = kdvHaric + suKdv + atikKdv // eksik olan bu satır
+  r.toplamTutar = r.kdvDahil              // toplamTutar da aynı değeri kullanabilir
+}
+
+  const suFiyat = waterUnitPrice.value
+  const atikFiyat = wasteUnitPrice.value
+
+  const kdvHaric = r.usage * (suFiyat + atikFiyat)
+  const suKdv = r.usage * suFiyat * 0.01
+  const atikKdv = r.usage * atikFiyat * 0.10
+
+  r.kdvHaric = kdvHaric
+  r.kdvDahil = kdvHaric + suKdv + atikKdv // eksik olan bu satır
+  r.toplamTutar = r.kdvDahil              // toplamTutar da aynı değeri kullanabilir
 }
 
 watch([waterUnitPrice, wasteUnitPrice], () => {
@@ -215,7 +221,7 @@ const saveReadings = async () => {
       currentValue: r.current,
       usage: r.usage,
       kdvHaric: r.kdvHaric,
-      toplamTutar: r.toplamTutar,
+      kdvDahil: r.kdvDahil,
       startDate: startDate.value,
       endDate: endDate.value,
       dueDate: dueDate.value,
@@ -235,8 +241,9 @@ const savePartialReadings = async () => {
     alert("Lütfen geçerli bir tarih aralığı seçin.")
     return
   }
+
   const colRef = collection(db, 'readings')
-  const filled = readings.value.filter(r => r.previous && r.current)
+  const filled = readings.value.filter(r => r.previous >= 0 && r.current > r.previous)
   for (const r of filled) {
     await addDoc(colRef, {
       tenantId: r.tenantId,
@@ -247,7 +254,7 @@ const savePartialReadings = async () => {
       currentValue: r.current,
       usage: r.usage,
       kdvHaric: r.kdvHaric,
-      toplamTutar: r.toplamTutar,
+      kdvDahil: r.kdvDahil,
       startDate: startDate.value,
       endDate: endDate.value,
       dueDate: dueDate.value,
@@ -256,6 +263,7 @@ const savePartialReadings = async () => {
       wasteUnitPrice: wasteUnitPrice.value
     })
   }
+
   alert('Girilen kayıtlar başarıyla eklendi.')
   fetchTenants()
 }
