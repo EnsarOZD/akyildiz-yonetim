@@ -2,11 +2,11 @@
   <div class="min-h-screen bg-base-200">
     <div class="max-w-6xl mx-auto bg-base-100 shadow-lg rounded-xl overflow-hidden">
 
-      <!-- Header -->
-      <Header />
+      <!-- Header sadece login dışındaki sayfalarda gösterilir -->
+      <Header v-if="!route.meta.hideLayout" />
 
-      <!-- Menü (Yeni TabMenu) -->
-      <TabMenu />
+      <!-- Menü sadece login dışındaki sayfalarda gösterilir -->
+      <TabMenu v-if="!route.meta.hideLayout" />
 
       <!-- İçerik -->
       <router-view class="p-6" />
@@ -16,6 +16,9 @@
 </template>
 
 <script setup>
+import { useRoute } from 'vue-router'
 import Header from './components/Header.vue'
 import TabMenu from './components/TabMenu.vue'
+
+const route = useRoute()
 </script>

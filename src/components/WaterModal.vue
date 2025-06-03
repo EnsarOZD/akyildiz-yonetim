@@ -27,6 +27,13 @@
 
         <div class="form-control">
           <label class="label">
+            <span class="label-text font-semibold">Son Ödeme Tarihi</span>
+          </label>
+          <input type="date" v-model="dueDate" class="input input-bordered" />
+        </div>
+
+        <div class="form-control">
+          <label class="label">
             <span class="label-text font-semibold">Gün Sayısı</span>
           </label>
           <input type="number" :value="dayCount" disabled class="input input-bordered" />
@@ -96,6 +103,7 @@ const readings = ref([])
 const selectedPeriod = ref(new Date().toISOString().slice(0, 7))
 const startDate = ref('')
 const endDate = ref('')
+const dueDate = ref('')
 const waterUnitPrice = ref(0)
 const wasteUnitPrice = ref(0)
 
@@ -192,6 +200,7 @@ const saveReadings = async () => {
       toplamTutar: r.toplamTutar,
       startDate: startDate.value,
       endDate: endDate.value,
+      dueDate: dueDate.value,
       dayCount: dayCount.value,
       waterUnitPrice: waterUnitPrice.value,
       wasteUnitPrice: wasteUnitPrice.value
@@ -223,6 +232,7 @@ const savePartialReadings = async () => {
       toplamTutar: r.toplamTutar,
       startDate: startDate.value,
       endDate: endDate.value,
+      dueDate: dueDate.value,
       dayCount: dayCount.value,
       waterUnitPrice: waterUnitPrice.value,
       wasteUnitPrice: wasteUnitPrice.value

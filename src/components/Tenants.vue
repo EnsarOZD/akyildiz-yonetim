@@ -19,24 +19,25 @@
         <table class="table table-zebra w-full text-sm">
           <thead>
             <tr>
+              <th class="text-center">Kat(lar)</th>
+              <th class="text-center">Şirket</th>
               <th class="text-center">Ad</th>
               <th class="text-center">Soyad</th>
-              <th class="text-center">Kat(lar)</th>
               <th class="text-center">Telefon</th>
-              <th class="text-center">E-posta</th>
-              <th class="text-center">Şirket</th>
+              <th class="text-center">E-posta</th>              
               <th class="text-center">Giriş Tarihi</th>
               <th class="text-center">İşlem</th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="(t, index) in filteredTenants" :key="index">
+              <td class="text-center">{{ t.units?.join(', ') }}</td>
+              <td class="text-center">{{ t.company }}</td>   
               <td class="text-center">{{ t.firstName }}</td>
               <td class="text-center">{{ t.lastName }}</td>
-              <td class="text-center">{{ t.units?.join(', ') }}</td>
               <td class="text-center whitespace-nowrap">{{ formatPhone(t.phone) }}</td>
               <td class="text-center">{{ t.email }}</td>
-              <td class="text-center">{{ t.company }}</td>
+              
               <td class="text-center">{{ t.entryDate }}</td>
               <td class="text-center">
                 <div class="dropdown dropdown-end">

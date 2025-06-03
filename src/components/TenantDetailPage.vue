@@ -1,44 +1,90 @@
 <template>
-  <div class="min-h-screen bg-base-200">
-    <div class="max-w-4xl mx-auto bg-base-100 shadow-lg rounded-xl p-6 space-y-6">
-      <h1 class="text-xl font-bold text-center">{{ tenant?.company }} - Kiracı Detayları</h1>
+  <div class="min-h-screen bg-base-200 dark:bg-gray-900 py-10">
+    <div class="max-w-4xl mx-auto bg-base-100 dark:bg-gray-800 shadow-lg rounded-xl p-6 space-y-8 text-white dark:text-gray-100">
+      <h1 class="text-2xl font-bold text-center">{{ tenant?.company }} – Kiracı Detayları</h1>
 
       <div v-if="tenant">
+        <!-- Bilgi Kartları -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div class="card bg-base-100 p-4 border border-base-300">
-            <p><strong>Ad Soyad:</strong> {{ tenant.firstName }} {{ tenant.lastName }}</p>
-            <p><strong>Telefon:</strong> {{ tenant.phone }}</p>
-            <p><strong>E-posta:</strong> {{ tenant.email }}</p>
-            <p><strong>Daire:</strong> {{ tenant.unit }}</p>
+          <!-- Kişisel Bilgiler -->
+          <div class="card bg-base-100 dark:bg-gray-700 border border-base-300 p-4 space-y-2 shadow-md">
+            <p><strong>👤 Ad Soyad:</strong> {{ tenant.firstName }} {{ tenant.lastName }}</p>
+            <p><strong>📞 Telefon:</strong> {{ tenant.phone }}</p>
+            <p><strong>✉️ E-posta:</strong> {{ tenant.email }}</p>
+            <p>
+              <strong>🏢 Kat:</strong>
+              {{ Array.isArray(tenant.units) ? tenant.units.join(', ') : tenant.unit }}
+            </p>
           </div>
 
-          <div class="card bg-base-100 p-4 border border-base-300">
-            <p><strong>Toplam Ödeme:</strong> {{ totalPaid }} ₺</p>
-            <p><strong>Toplam Borç:</strong> {{ totalDebt }} ₺</p>
-            <p><strong>Bakiye:</strong> {{ balance }} ₺</p>
+          <!-- Finansal Bilgiler -->
+          <div class="card bg-base-100 dark:bg-gray-700 border border-base-300 p-4 space-y-2 shadow-md">
+            <p><strong class="text-green-500">💰 Toplam Ödeme:</strong> {{ totalPaid.toLocaleString('tr-TR') }} ₺</p>
+            <p><strong class="text-red-500">📉 Toplam Borç:</strong> {{ totalDebt.toLocaleString('tr-TR') }} ₺</p>
+            <p><strong class="text-blue-400">🧾 Bakiye:</strong> {{ balance.toLocaleString('tr-TR') }} ₺</p>
           </div>
         </div>
 
+        <!-- Ödeme Geçmişi -->
         <div>
-          <h3 class="font-semibold mt-6 mb-2">Ödeme Geçmişi</h3>
-          <ul class="list-disc list-inside space-y-1">
-            <li v-for="(p, index) in payments" :key="index">
-              {{ p.date }} - {{ p.amount }} ₺ ({{ p.type }})
-            </li>
-          </ul>
+          <h3 class="text-lg font-semibold mt-6 mb-2">🕑 Ödeme Geçmişi</h3>
+          <div v-if="payments.length" class="overflow-x-auto">
+            <table class="table table-sm w-full border">
+              <thead>
+                <tr>
+                  <th>Dönem</th>
+                  <th>Tutar (₺)</th>
+                  <th>Tip</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(p, index) in sortedPayments" :key="index">
+                  <td>{{ p.date }}</td>
+                  <td>{{ p.amount.toLocaleString('tr-TR') }}</td>
+                  <td>{{ p.type }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p v-else class="text-gray-400 italic">Ödeme bulunmuyor.</p>
         </div>
 
+        <!-- Gider Geçmişi -->
         <div>
-          <h3 class="font-semibold mt-6 mb-2">Gider Geçmişi</h3>
-          <ul class="list-disc list-inside space-y-1">
-            <li v-for="(e, index) in expenses" :key="index">
-              {{ e.date }} - {{ e.amount }} ₺ ({{ e.type }}: {{ e.description }})
-            </li>
-          </ul>
+          <h3 class="text-lg font-semibold mt-6 mb-2">💸 Gider Geçmişi</h3>
+          <div v-if="readings.length" class="overflow-x-auto">
+            <table class="table table-sm w-full border">
+              <thead>
+                <tr>
+                  <th>Dönem</th>
+                  <th>Tutar (₺)</th>
+                  <th>Tip</th>
+                  <th>Son Ödeme</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(r, index) in sortedReadings" :key="index">
+                  <td>{{ r.period || '-' }}</td>
+                  <td>{{ r.toplamTutar != null ? r.toplamTutar.toLocaleString('tr-TR') : '-' }}</td>
+                  <td>
+                    <span :class="{
+                      'text-yellow-400': r.type === 'electricity',
+                      'text-blue-400': r.type === 'water',
+                      'text-green-400': r.type === 'aidat'
+                    }">
+                      {{ r.type === 'electricity' ? 'Elektrik' : r.type === 'water' ? 'Su' : 'Aidat' }}
+                    </span>
+                  </td>
+                  <td>{{ r.dueDate || '-' }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p v-else class="text-gray-400 italic">Sayaç verisi bulunmuyor.</p>
         </div>
-
       </div>
-      <div v-else class="text-center text-gray-500">Kiracı bilgisi yükleniyor...</div>
+
+      <div v-else class="text-center text-gray-400">Kiracı bilgisi yükleniyor...</div>
     </div>
   </div>
 </template>
@@ -53,12 +99,22 @@ const route = useRoute()
 const tenantId = route.params.id
 const tenant = ref(null)
 const payments = ref([])
-const expenses = ref([])
+const readings = ref([])
 
 const totalPaid = ref(0)
 const totalDebt = ref(0)
 
 const balance = computed(() => totalDebt.value - totalPaid.value)
+
+// Sıralı ödeme geçmişi
+const sortedPayments = computed(() =>
+  [...payments.value].sort((a, b) => new Date(a.date) - new Date(b.date))
+)
+
+// Sıralı sayaç geçmişi
+const sortedReadings = computed(() =>
+  [...readings.value].sort((a, b) => new Date(a.period) - new Date(b.period))
+)
 
 const fetchTenantData = async () => {
   const docRef = doc(db, 'tenants', tenantId)
@@ -75,16 +131,16 @@ const fetchPayments = async () => {
   totalPaid.value = payments.value.reduce((sum, p) => sum + (p.amount || 0), 0)
 }
 
-const fetchExpenses = async () => {
-  const q = query(collection(db, 'expenses'), where('tenantId', '==', tenantId))
+const fetchReadings = async () => {
+  const q = query(collection(db, 'readings'), where('tenantId', '==', tenantId))
   const snapshot = await getDocs(q)
-  expenses.value = snapshot.docs.map(doc => doc.data())
-  totalDebt.value = expenses.value.reduce((sum, e) => sum + (e.amount || 0), 0)
+  readings.value = snapshot.docs.map(doc => doc.data())
+  totalDebt.value = readings.value.reduce((sum, r) => sum + (Number(r.toplamTutar) || 0), 0)
 }
 
 onMounted(() => {
   fetchTenantData()
   fetchPayments()
-  fetchExpenses()
+  fetchReadings()
 })
 </script>

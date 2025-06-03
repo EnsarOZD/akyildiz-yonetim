@@ -25,6 +25,12 @@
         </div>
         <div class="form-control">
           <label class="label">
+            <span class="label-text font-semibold">Son Ödeme Tarihi</span>
+          </label>
+          <input type="date" v-model="dueDate" class="input input-bordered" />
+        </div>
+        <div class="form-control">
+          <label class="label">
             <span class="label-text font-semibold">Gün Sayısı</span>
           </label>
           <input type="number" :value="dayCount" disabled class="input input-bordered" />
@@ -45,16 +51,54 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="(reading, index) in readings" :key="index">
-              <td>{{ reading.unit }}</td>
-              <td>{{ reading.company }}</td>
-              <td>{{ reading.previous }}</td>
-              <td><input type="number" class="input input-bordered w-24" v-model.number="reading.current" @input="calculate(index)" /></td>
-              <td>{{ reading.usage }}</td>
-              <td><input type="number" class="input input-bordered w-28" v-model.number="reading.kdvHaric" /></td>
-              <td><input type="number" class="input input-bordered w-28" v-model.number="reading.toplamTutar" /></td>
-            </tr>
-          </tbody>
+  <tr v-for="(reading, index) in readings" :key="index">
+    <td>{{ reading.unit }}</td>
+    <td>{{ reading.company }}</td>
+
+    <!-- Önceki Sayaç (düzenlenebilir) -->
+    <td>
+      <input
+        type="number"
+        class="input input-bordered w-24"
+        v-model.number="reading.previous"
+        @input="calculate(index)"
+      />
+    </td>
+
+    <!-- Yeni Sayaç (düzenlenebilir) -->
+    <td>
+      <input
+        type="number"
+        class="input input-bordered w-24"
+        v-model.number="reading.current"
+        @input="calculate(index)"
+      />
+    </td>
+
+    <!-- Tüketim -->
+    <td>{{ reading.usage }}</td>
+
+    <!-- KDV Hariç -->
+    <td>
+      <input
+        type="number"
+        class="input input-bordered w-28"
+        v-model.number="reading.kdvHaric"
+        @input="updateTotal(index)"
+      />
+    </td>
+
+    <!-- Toplam Tutar (KDV Dahil) -->
+    <td>
+      <input
+        type="number"
+        class="input input-bordered w-28 bg-base-200"
+        :value="reading.toplamTutar"
+        disabled
+      />
+    </td>
+  </tr>
+</tbody>
         </table>
       </div>
 
@@ -78,6 +122,8 @@ const selectedPeriod = ref(new Date().toISOString().slice(0, 7))
 const readings = ref([])
 const startDate = ref('')
 const endDate = ref('')
+const dueDate = ref('')
+
 const dayCount = computed(() => {
   if (!startDate.value || !endDate.value) return 0
   const start = new Date(startDate.value)
@@ -85,6 +131,12 @@ const dayCount = computed(() => {
   const diffTime = end - start
   return Math.floor(diffTime / (1000 * 60 * 60 * 24))
 })
+
+const updateTotal = (index) => {
+  const r = readings.value[index]
+  const kdv = Number(r.kdvHaric) * 0.2
+  r.toplamTutar = +(Number(r.kdvHaric) + kdv).toFixed(2)
+}
 
 const fetchTenantsAndPrevious = async () => {
   const tenantsSnapshot = await getDocs(collection(db, 'tenants'))
@@ -151,6 +203,7 @@ const fetchLastReadingByUnit = async (unit) => {
 const calculate = (index) => {
   const r = readings.value[index]
   r.usage = r.current - r.previous
+  updateTotal(index)
 }
 
 const saveReadings = async () => {
@@ -169,6 +222,7 @@ const saveReadings = async () => {
       company: r.company,
       startDate: startDate.value,
       endDate: endDate.value,
+      dueDate: dueDate.value,
       dayCount: dayCount.value
     })
   }
@@ -194,6 +248,7 @@ const savePartialReadings = async () => {
       company: r.company,
       startDate: startDate.value,
       endDate: endDate.value,
+      dueDate: dueDate.value,
       dayCount: dayCount.value
     })
   }
