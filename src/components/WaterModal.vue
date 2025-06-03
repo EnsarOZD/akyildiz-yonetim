@@ -72,8 +72,22 @@
             <tr v-for="(reading, index) in readings" :key="index">
               <td>{{ reading.unit }}</td>
               <td>{{ reading.name }}</td>
-              <td><input type="number" class="input input-bordered w-24" v-model.number="reading.previous" /></td>
-              <td><input type="number" class="input input-bordered w-24" v-model.number="reading.current" @input="calculate(index)" /></td>
+              <td>
+                <input
+                  type="number"
+                  class="input input-bordered w-24"
+                  v-model.number="reading.previous"
+                  @input="calculate(index)"
+                />
+              </td>
+              <td>
+                <input
+                  type="number"
+                  class="input input-bordered w-24"
+                  v-model.number="reading.current"
+                  @input="calculate(index)"
+                />
+              </td>
               <td>{{ reading.usage }}</td>
               <td>{{ reading.kdvHaric.toFixed(2) }}</td>
               <td>{{ reading.toplamTutar.toFixed(2) }}</td>
@@ -94,7 +108,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { db } from '../firebase'
 import { collection, addDoc, getDocs, query, where, orderBy, limit } from 'firebase/firestore'
 
@@ -179,6 +193,10 @@ const calculate = (index) => {
   r.kdvHaric = r.usage * (waterUnitPrice.value + wasteUnitPrice.value)
   r.toplamTutar = r.kdvHaric * 1.11
 }
+
+watch([waterUnitPrice, wasteUnitPrice], () => {
+  readings.value.forEach((_, idx) => calculate(idx))
+})
 
 const saveReadings = async () => {
   if (!startDate.value || !endDate.value || dayCount.value <= 0) {
