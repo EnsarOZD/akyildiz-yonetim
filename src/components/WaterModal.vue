@@ -198,7 +198,7 @@ const calculate = (index) => {
   r.kdvHaric = kdvHaric
   r.kdvDahil = kdvHaric + suKdv + atikKdv // eksik olan bu satır
   r.toplamTutar = r.kdvDahil              // toplamTutar da aynı değeri kullanabilir
-}
+
 
 watch([waterUnitPrice, wasteUnitPrice], () => {
   readings.value.forEach((_, idx) => calculate(idx))
