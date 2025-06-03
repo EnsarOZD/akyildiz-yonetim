@@ -47,17 +47,19 @@ const handleSubmit = async () => {
     }
 
     const year = parseInt(period.value.slice(0, 4))
-    const snapshot = await getDocs(query(collection(db, 'annualDues'), where('year', '==', year)))
+    const snapshot = await getDocs(
+      query(collection(db, 'annualDues'), where('year', '==', year))
+    )
 
     const dues = []
     snapshot.forEach(doc => {
       const data = doc.data()
       if (data.amount > 0) {
-        const kdvDahil = parseFloat((data.amount * 1.2).toFixed(2))
         dues.push({
           tenantId: data.tenantId,
+          unit: data.unit,
           kdvHaric: data.amount,
-          toplamTutar: kdvDahil
+          toplamTutar: data.vatIncludedAmount
         })
       }
     })
@@ -68,13 +70,15 @@ const handleSubmit = async () => {
     }
 
     for (const due of dues) {
-      await addDoc(collection(db, 'readings'), {
+      await addDoc(collection(db, 'aidatRecords'), {
         tenantId: due.tenantId,
+        unit: due.unit,
         period: period.value,
         dueDate: dueDate.value,
         kdvHaric: due.kdvHaric,
         toplamTutar: due.toplamTutar,
-        type: 'aidat'
+        type: 'aidat',
+        createdAt: new Date()
       })
     }
 

@@ -35,6 +35,7 @@
             <th>KDV Hariç</th>
             <th>Toplam (₺)</th>
             <th>İşlem</th>
+            <th>Açıklama</th>
           </tr>
         </thead>
         <tbody>
@@ -55,9 +56,9 @@
                 {{ r.type === 'electricity' ? 'Elektrik' : r.type === 'water' ? 'Su' : 'Aidat' }}
               </span>
             </td>
-            <td>{{ r.consumption ?? r.usage ?? '-' }}</td>
+            <td>{{ formatUsage(r.consumption ?? r.usage) }}</td>
             <td>{{ formatCurrency(r.kdvHaric) }}</td>
-            <td class="text-right font-semibold text-blue-300">{{ formatCurrency(r.toplamTutar ?? r.amount) }}</td>
+            <td class="text-right font-semibold text-blue-300">{{ formatCurrency(r.toplamTutar ?? r.kdvDahil) }}</td>
             <td>
               <div class="dropdown dropdown-end">
                 <label tabindex="0" class="btn btn-xs btn-outline">İşlemler</label>
@@ -67,6 +68,7 @@
                 </ul>
               </div>
             </td>
+            <td>{{ r.description || '-' }}</td>
           </tr>
         </tbody>
       </table>
@@ -129,6 +131,11 @@ const filteredReadings = computed(() => {
   })
 })
 
+const formatUsage = (value) => {
+  if (value === undefined || value === null || isNaN(value)) return '-'
+  return Number(value).toFixed(0)
+}
+
 const formatCurrency = (value) => {
   if (value === undefined || value === null || isNaN(value)) return '-'
   return value.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' })
@@ -160,6 +167,20 @@ const distributeSharedExpense = async () => {
     alert('Lütfen dönem ve gider tipini seçiniz.')
     return
   }
+
+  // 🔒 1. Aynı dönem ve tip için dağıtım daha önce yapıldı mı kontrol et
+  const distCheckQuery = query(
+    collection(db, 'sharedDistributions'),
+    where('period', '==', selectedPeriod.value),
+    where('type', '==', selectedType.value)
+  )
+  const distCheckSnap = await getDocs(distCheckQuery)
+  if (!distCheckSnap.empty) {
+    alert("Bu dönem ve tip için ortak gider zaten paylaştırılmış.")
+    return
+  }
+
+  // 📊 2. Ortak ve mescit kayıtlarını al
   const q = query(
     collection(db, 'readings'),
     where('period', '==', selectedPeriod.value),
@@ -169,19 +190,34 @@ const distributeSharedExpense = async () => {
   const snapshot = await getDocs(q)
   let total = 0
   snapshot.forEach(doc => {
-    total += Number(doc.data().toplamTutar || 0)
+    total += Number(doc.data().kdvDahil || doc.data().toplamTutar || 0)
   })
+
+  // 👥 3. Tüm kat bazlı girişleri al
   const tenantsSnap = await getDocs(collection(db, 'tenants'))
   const entries = []
   tenantsSnap.forEach(doc => {
     const data = doc.data()
     if (data.units && Array.isArray(data.units)) {
       data.units.forEach(unit => {
-        entries.push({ tenantId: doc.id, tenantName: data.company, unit })
+        entries.push({
+          tenantId: doc.id,
+          tenantName: data.company,
+          unit
+        })
       })
     }
   })
+
+  if (entries.length === 0) {
+    alert("Hiçbir kiracıya ait kat bilgisi bulunamadı.")
+    return
+  }
+
+  // 💸 4. Payı hesapla ve kayıtları oluştur
   const amountPerUnit = total / entries.length
+  const typeLabel = selectedType.value === 'electricity' ? 'Elektrik' : 'Su'
+
   for (const e of entries) {
     await addDoc(collection(db, 'readings'), {
       tenantId: e.tenantId,
@@ -191,10 +227,21 @@ const distributeSharedExpense = async () => {
       type: selectedType.value,
       consumption: null,
       kdvHaric: null,
-      toplamTutar: amountPerUnit.toFixed(2)
+      kdvDahil: amountPerUnit,
+      toplamTutar: amountPerUnit,
+      description: `Ortak ${typeLabel} Gider Payı`
     })
   }
-  alert('Paylaştırma tamamlandı.')
+
+  // 📁 5. Dağıtım yapıldı bilgisi kaydet
+  await addDoc(collection(db, 'sharedDistributions'), {
+    period: selectedPeriod.value,
+    type: selectedType.value,
+    distributed: true,
+    distributedAt: new Date()
+  })
+
+  alert('Ortak gider başarıyla paylaştırıldı.')
   showDistributeModal.value = false
   fetchReadings()
 }
