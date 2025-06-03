@@ -59,24 +59,14 @@
               <td>{{ reading.unit }}</td>
               <td>{{ reading.name }}</td>
               <td>
-                <input
-                  type="number"
-                  class="input input-bordered w-24"
-                  v-model.number="reading.previous"
-                  @input="calculate(index)"
-                />
+                <input type="number" class="input input-bordered w-24" v-model.number="reading.previous" @input="calculate(index)" />
               </td>
               <td>
-                <input
-                  type="number"
-                  class="input input-bordered w-24"
-                  v-model.number="reading.current"
-                  @input="calculate(index)"
-                />
+                <input type="number" class="input input-bordered w-24" v-model.number="reading.current" @input="calculate(index)" />
               </td>
-              <td>{{ reading.usage }}</td>
-              <td>{{ reading.kdvHaric.toFixed(2) }}</td>
-              <td>{{ reading.toplamTutar.toFixed(2) }}</td>
+              <td>{{ formatDecimal(reading.usage) }}</td>
+<td>{{ formatDecimal(reading.kdvHaric) }}</td>
+<td>{{ formatDecimal(reading.kdvDahil) }}</td>
             </tr>
           </tbody>
         </table>
@@ -182,6 +172,21 @@ const fetchTenants = async () => {
 const calculate = (index) => {
   const r = readings.value[index]
   r.usage = r.current - r.previous
+<<<<<<< Updated upstream
+=======
+
+  const suFiyat = waterUnitPrice.value
+  const atikFiyat = wasteUnitPrice.value
+
+  const kdvHaric = r.usage * (suFiyat + atikFiyat)
+  const suKdv = r.usage * suFiyat * 0.01
+  const atikKdv = r.usage * atikFiyat * 0.10
+
+  r.kdvHaric = kdvHaric
+  r.kdvDahil = kdvHaric + suKdv + atikKdv // eksik olan bu satır
+  r.toplamTutar = r.kdvDahil              // toplamTutar da aynı değeri kullanabilir
+}
+>>>>>>> Stashed changes
 
   const suFiyat = waterUnitPrice.value
   const atikFiyat = wasteUnitPrice.value
