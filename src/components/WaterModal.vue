@@ -59,6 +59,7 @@
               <td>{{ reading.unit }}</td>
               <td>{{ reading.name }}</td>
               <td>
+
                 <input type="number" class="input input-bordered w-24" v-model.number="reading.previous" @input="calculate(index)" />
               </td>
               <td>
@@ -67,6 +68,7 @@
               <td>{{ formatDecimal(reading.usage) }}</td>
 <td>{{ formatDecimal(reading.kdvHaric) }}</td>
 <td>{{ formatDecimal(reading.kdvDahil) }}</td>
+
             </tr>
           </tbody>
         </table>
@@ -85,7 +87,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { db } from '../firebase'
 import { collection, addDoc, getDocs, query, where, orderBy, limit } from 'firebase/firestore'
 
@@ -172,8 +174,7 @@ const fetchTenants = async () => {
 const calculate = (index) => {
   const r = readings.value[index]
   r.usage = r.current - r.previous
-<<<<<<< Updated upstream
-=======
+
 
   const suFiyat = waterUnitPrice.value
   const atikFiyat = wasteUnitPrice.value
@@ -186,7 +187,6 @@ const calculate = (index) => {
   r.kdvDahil = kdvHaric + suKdv + atikKdv // eksik olan bu satır
   r.toplamTutar = r.kdvDahil              // toplamTutar da aynı değeri kullanabilir
 }
->>>>>>> Stashed changes
 
   const suFiyat = waterUnitPrice.value
   const atikFiyat = wasteUnitPrice.value
@@ -199,6 +199,10 @@ const calculate = (index) => {
   r.kdvDahil = kdvHaric + suKdv + atikKdv // eksik olan bu satır
   r.toplamTutar = r.kdvDahil              // toplamTutar da aynı değeri kullanabilir
 }
+
+watch([waterUnitPrice, wasteUnitPrice], () => {
+  readings.value.forEach((_, idx) => calculate(idx))
+})
 
 const saveReadings = async () => {
   if (!startDate.value || !endDate.value || dayCount.value <= 0) {
