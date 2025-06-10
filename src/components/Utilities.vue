@@ -34,8 +34,7 @@
             <th>Tüketim</th>
             <th>KDV Hariç</th>
             <th>Toplam (₺)</th>
-            <th>İşlem</th>
-            <th>Açıklama</th>
+            <th>İşlem</th>            
           </tr>
         </thead>
         <tbody>
@@ -55,6 +54,7 @@
               }">
                 {{ r.type === 'electricity' ? 'Elektrik' : r.type === 'water' ? 'Su' : 'Aidat' }}
               </span>
+              <span v-if="r.description?.toLowerCase().includes('ortak')" class="ml-0 badge badge-warning text-xs">Ortak</span>
             </td>
             <td>{{ formatUsage(r.consumption ?? r.usage) }}</td>
             <td>{{ formatCurrency(r.kdvHaric) }}</td>
@@ -68,17 +68,36 @@
                 </ul>
               </div>
             </td>
-            <td>{{ r.description || '-' }}</td>
           </tr>
         </tbody>
       </table>
     </div>
 
+    <!-- Modal Bileşenleri -->
     <ElectricityModal v-if="showElectricityModal" @close="handleClose" />
     <WaterModal v-if="showWaterModal" @close="handleClose" />
     <AidatModal v-if="showAidatModal" @close="() => (showAidatModal = false)" @refresh="fetchReadings" />
-    <EditElectricityModal v-if="showEditElectricityModal" :period="selectedPeriod" @close="() => (showEditElectricityModal = false)" @updated="fetchReadings" />
 
+    <EditElectricityModal
+      v-if="showEditElectricityModal"
+      :record="selectedElectricityRecord"
+      @close="() => {
+        showEditElectricityModal = false
+        selectedElectricityRecord = null
+      }"
+      @updated="fetchReadings"
+    />
+    <EditWaterModal
+      v-if="showEditWaterModal"
+      :record="selectedWaterRecord"
+      @close="() => {
+        showEditWaterModal = false
+        selectedWaterRecord = null
+      }"
+      @updated="fetchReadings"
+    />
+
+    <!-- Ortak Gider Modal -->
     <dialog id="distributeModal" class="modal" :open="showDistributeModal">
       <div class="modal-box">
         <h3 class="font-bold text-lg mb-4">Ortak Gider Paylaştır</h3>
@@ -110,17 +129,23 @@ import ElectricityModal from './ElectricityModal.vue'
 import WaterModal from './WaterModal.vue'
 import AidatModal from './AidatModal.vue'
 import EditElectricityModal from './EditElectricityModal.vue'
+import EditWaterModal from './EditWaterModal.vue'
 
 const showElectricityModal = ref(false)
 const showWaterModal = ref(false)
 const showAidatModal = ref(false)
 const showEditElectricityModal = ref(false)
+const showEditWaterModal = ref(false)
 const showDistributeModal = ref(false)
+
+const selectedElectricityRecord = ref(null)
+const selectedWaterRecord = ref(null)
 
 const readings = ref([])
 const searchTerm = ref('')
 const selectedPeriod = ref('')
 const selectedType = ref('all')
+
 
 const filteredReadings = computed(() => {
   return readings.value.filter(r => {
@@ -168,7 +193,7 @@ const distributeSharedExpense = async () => {
     return
   }
 
-  // 🔒 1. Aynı dönem ve tip için dağıtım daha önce yapıldı mı kontrol et
+  // 🔒 1. Daha önce paylaştırılmış mı kontrolü
   const distCheckQuery = query(
     collection(db, 'sharedDistributions'),
     where('period', '==', selectedPeriod.value),
@@ -180,7 +205,7 @@ const distributeSharedExpense = async () => {
     return
   }
 
-  // 📊 2. Ortak ve mescit kayıtlarını al
+  // 📊 2. Ortak + mescit toplam tutarı
   const q = query(
     collection(db, 'readings'),
     where('period', '==', selectedPeriod.value),
@@ -193,7 +218,7 @@ const distributeSharedExpense = async () => {
     total += Number(doc.data().kdvDahil || doc.data().toplamTutar || 0)
   })
 
-  // 👥 3. Tüm kat bazlı girişleri al
+  // 👥 3. Kat bazlı girişleri al ve pay bilgisini belirle
   const tenantsSnap = await getDocs(collection(db, 'tenants'))
   const entries = []
   tenantsSnap.forEach(doc => {
@@ -203,7 +228,8 @@ const distributeSharedExpense = async () => {
         entries.push({
           tenantId: doc.id,
           tenantName: data.company,
-          unit
+          unit,
+          pay: data.company === 'YİĞİT HAMDEMİR' ? 2 : 1
         })
       })
     }
@@ -214,11 +240,13 @@ const distributeSharedExpense = async () => {
     return
   }
 
-  // 💸 4. Payı hesapla ve kayıtları oluştur
-  const amountPerUnit = total / entries.length
+  // 💸 4. Pay başına düşen tutarı hesapla
+  const totalPayCount = entries.reduce((sum, e) => sum + (e.pay || 1), 0)
+  const amountPerPay = total / totalPayCount
   const typeLabel = selectedType.value === 'electricity' ? 'Elektrik' : 'Su'
 
   for (const e of entries) {
+    const totalAmount = amountPerPay * (e.pay || 1)
     await addDoc(collection(db, 'readings'), {
       tenantId: e.tenantId,
       tenantName: e.tenantName,
@@ -227,13 +255,13 @@ const distributeSharedExpense = async () => {
       type: selectedType.value,
       consumption: null,
       kdvHaric: null,
-      kdvDahil: amountPerUnit,
-      toplamTutar: amountPerUnit,
+      kdvDahil: totalAmount,
+      toplamTutar: totalAmount,
       description: `Ortak ${typeLabel} Gider Payı`
     })
   }
 
-  // 📁 5. Dağıtım yapıldı bilgisi kaydet
+  // 📁 5. Paylaştırma kaydı oluştur
   await addDoc(collection(db, 'sharedDistributions'), {
     period: selectedPeriod.value,
     type: selectedType.value,
@@ -270,7 +298,13 @@ const deleteRecord = async (id) => {
 }
 
 const editRecord = (record) => {
-  alert(`Düzenleme işlemi için kayıt: ${record.unit || '-'} (${record.period})`)
+  if (record.type === 'electricity') {
+    selectedElectricityRecord.value = record
+    showEditElectricityModal.value = true
+  } else if (record.type === 'water') {
+    selectedWaterRecord.value = record
+    showEditWaterModal.value = true
+  }
 }
 
 const openEditElectricityModal = () => {

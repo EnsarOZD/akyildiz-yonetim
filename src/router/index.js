@@ -15,13 +15,18 @@ import LoginView from '../views/LoginView.vue'
 
 const routes = [
   { path: '/', redirect: '/dashboard' },
-  { path: '/dashboard', name: 'Dashboard', component: Dashboard },
-  { path: '/tenants', name: 'Tenants', component: Tenants },
-  { path: '/payments', name: 'Payments', component: Payments },
-  { path: '/expenses', name: 'Expenses', component: Expenses },
-  { path: '/utilities', name: 'Utilities', component: Utilities },
-  { path: '/tenant/:id', name: 'TenantDetail', component: TenantDetailPage },
-  { path: '/admin', name: 'Admin', component: AdminDashboard, meta: { requiresAdmin: true } },
+
+  { path: '/dashboard', name: 'Dashboard', component: Dashboard, meta: { requiresAuth: true, roles: ['admin', 'manager'] } },
+  { path: '/tenants', name: 'Tenants', component: Tenants, meta: { requiresAuth: true, roles: ['admin', 'manager'] } },
+  { path: '/payments', name: 'Payments', component: Payments, meta: { requiresAuth: true, roles: ['admin', 'manager'] } },
+  { path: '/expenses', name: 'Expenses', component: Expenses, meta: { requiresAuth: true, roles: ['admin', 'manager'] } },
+  { path: '/utilities', name: 'Utilities', component: Utilities, meta: { requiresAuth: true, roles: ['admin', 'manager'] } },
+  { path: '/tenant/:id', name: 'TenantDetail', component: TenantDetailPage, meta: { requiresAuth: true, roles: ['admin', 'manager'] } },
+
+  { path: '/admin', name: 'Admin', component: AdminDashboard, meta: { requiresAuth: true, roles: ['admin'] } },
+
+  { path: '/profile', name: 'Profile', component: () => import('../components/TenantSummary.vue'), meta: { requiresAuth: true, roles: ['tenant'] } },
+
   { path: '/login', name: 'Login', component: LoginView, meta: { public: true, hideLayout: true } }
 ]
 
@@ -31,8 +36,8 @@ const router = createRouter({
 })
 
 router.beforeEach((to, from, next) => {
-  const requiresAuth = !to.meta.public
-  const requiresAdmin = to.meta.requiresAdmin
+  const requiresAuth = to.meta.requiresAuth
+  const allowedRoles = to.meta.roles
 
   const unsubscribe = onAuthStateChanged(getAuth(), async (user) => {
     unsubscribe()
@@ -41,13 +46,13 @@ router.beforeEach((to, from, next) => {
       return next('/login')
     }
 
-    if (requiresAdmin) {
+    if (user && allowedRoles) {
       const userDocRef = doc(db, 'users', user.uid)
       const userDocSnap = await getDoc(userDocRef)
       const role = userDocSnap.exists() ? userDocSnap.data().role : null
 
-      if (role !== 'admin') {
-        return next('/dashboard')
+      if (!allowedRoles.includes(role)) {
+        return next('/dashboard') // veya rolüne göre başka bir sayfa
       }
     }
 

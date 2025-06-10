@@ -65,14 +65,20 @@
                   <td>{{ r.period || '-' }}</td>
                   <td>{{ r.toplamTutar != null ? Number(r.toplamTutar).toLocaleString('tr-TR') : '-' }}</td>
                   <td>
-                    <span :class="{
-                      'text-yellow-400': r.type === 'electricity',
-                      'text-blue-400': r.type === 'water',
-                      'text-green-400': r.type === 'aidat'
-                    }">
-                      {{ r.type === 'electricity' ? 'Elektrik' : r.type === 'water' ? 'Su' : 'Aidat' }}
-                    </span>
-                  </td>
+  <span :class="{
+    'text-yellow-400': r.type === 'electricity',
+    'text-blue-400': r.type === 'water',
+    'text-green-400': r.type === 'aidat'
+  }">
+    {{ r.type === 'electricity' ? 'Elektrik' : r.type === 'water' ? 'Su' : 'Aidat' }}
+  </span>
+  <span
+    v-if="r.description?.toLowerCase().includes('ortak')"
+    class="ml-2 badge badge-warning text-xs"
+  >
+    Ortak
+  </span>
+</td>
                   <td>{{ r.dueDate || '-' }}</td>
                 </tr>
               </tbody>

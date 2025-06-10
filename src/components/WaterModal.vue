@@ -175,7 +175,6 @@ const calculate = (index) => {
   const r = readings.value[index]
   r.usage = r.current - r.previous
 
-
   const suFiyat = waterUnitPrice.value
   const atikFiyat = wasteUnitPrice.value
 
@@ -184,20 +183,11 @@ const calculate = (index) => {
   const atikKdv = r.usage * atikFiyat * 0.10
 
   r.kdvHaric = kdvHaric
-  r.kdvDahil = kdvHaric + suKdv + atikKdv // eksik olan bu satır
-  r.toplamTutar = r.kdvDahil              // toplamTutar da aynı değeri kullanabilir
+  r.kdvDahil = kdvHaric + suKdv + atikKdv
+  r.toplamTutar = r.kdvDahil
 }
 
-  const suFiyat = waterUnitPrice.value
-  const atikFiyat = wasteUnitPrice.value
-
-  const kdvHaric = r.usage * (suFiyat + atikFiyat)
-  const suKdv = r.usage * suFiyat * 0.01
-  const atikKdv = r.usage * atikFiyat * 0.10
-
-  r.kdvHaric = kdvHaric
-  r.kdvDahil = kdvHaric + suKdv + atikKdv // eksik olan bu satır
-  r.toplamTutar = r.kdvDahil              // toplamTutar da aynı değeri kullanabilir
+  
 
 
 watch([waterUnitPrice, wasteUnitPrice], () => {
