@@ -72,6 +72,7 @@ const expenses = ref([])
 const readings = ref([])
 const aidats = ref([])
 
+
 const totalPaid = ref(0)
 const totalDebt = ref(0)
 const lastPayments = ref([])

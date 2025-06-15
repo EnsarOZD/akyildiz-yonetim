@@ -1,5 +1,5 @@
 <template>
-  <dialog open class="modal">
+  <dialog open class="modal" v-if="record">
     <div class="modal-box max-w-2xl">
       <h3 class="font-bold text-lg mb-4">Elektrik Kaydı Düzenle</h3>
 

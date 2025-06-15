@@ -1,40 +1,7 @@
 <template>
   <section class="p-4 space-y-6 max-w-5xl mx-auto">
 
-    <!-- Ödeme Ekle/Güncelle Kartı -->
-    <div class="card bg-base-100 shadow-lg border border-base-300 p-6 rounded-xl">
-      <h2 class="text-center text-lg font-semibold mb-4">Ödeme {{ editMode ? 'Güncelle' : 'Ekle' }}</h2>
-      <form @submit.prevent="savePayment" class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <input v-model="newPayment.date" type="date" class="input input-bordered w-full" required />
-
-        <select v-model="newPayment.tenantId" class="select select-bordered w-full" required>
-          <option disabled value="">Kiracı seçin</option>
-          <option v-for="tenant in tenants" :key="tenant.id" :value="tenant.id">
-            {{ tenant.company }}
-          </option>
-        </select>
-
-        <input v-model.number="newPayment.amount" type="number" placeholder="Tutar (₺)" class="input input-bordered w-full" required />
-
-        <select v-model="newPayment.type" class="select select-bordered w-full" required>
-          <option disabled value="">Ödeme Tipi</option>
-          <option value="Aidat">Aidat</option>
-          <option value="Elektrik">Elektrik</option>
-          <option value="Su">Su</option>
-        </select>
-
-        <select v-model="newPayment.bank" class="select select-bordered w-full" required>
-          <option disabled value="">Banka Seçin</option>
-          <option v-for="b in banks" :key="b" :value="b">{{ b }}</option>
-        </select>
-
-        <div class="md:col-span-3 flex justify-end gap-2">
-          <button type="submit" class="btn btn-success">{{ editMode ? 'Kaydet' : 'Ekle' }}</button>
-          <button v-if="editMode" type="button" @click="cancelEdit" class="btn btn-outline btn-warning">Vazgeç</button>
-        </div>
-      </form>
-    </div>
-
+    <button class="btn btn-primary mb-4" @click="showModal = true">➕ Ödeme Ekle</button>
     <!-- Ödeme Listesi -->
     <div class="card bg-base-100 shadow-lg border border-base-300 p-6 rounded-xl">
       <h3 class="text-center text-lg font-semibold mb-4">Ödeme Geçmişi</h3>
@@ -69,6 +36,16 @@
       </div>
     </div>
 
+    <PaymentModal
+  :visible="showModal"
+  :payment="newPayment"
+  :tenants="tenants"
+  :banks="banks"
+  :editMode="editMode"
+  @save="savePayment"
+  @cancel="cancelEdit"
+/>
+
   </section>
 </template>
 
@@ -76,6 +53,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { db } from '../firebase'
 import { collection, addDoc, getDocs, deleteDoc, doc, updateDoc } from 'firebase/firestore'
+import PaymentModal from '../components/PaymentModal.vue'
 
 const payments = ref([])
 const tenants = ref([])
@@ -86,6 +64,7 @@ const banks = ref([
   'Yapı Kredi',
   'Halkbank'
 ])
+const showModal = ref(false)
 
 const newPayment = ref({
   date: new Date().toISOString().substring(0, 10),
@@ -143,9 +122,13 @@ const savePayment = async () => {
   editMode.value = false
   selectedPaymentId.value = null
   await fetchPayments()
+  showModal.value = false
 }
 
 const deletePayment = async (id) => {
+  const confirmed = confirm("Bu ödemeyi silmek istediğinize emin misiniz?")
+  if (!confirmed) return
+
   await deleteDoc(doc(db, "payments", id))
   payments.value = payments.value.filter(p => p.id !== id)
 }
@@ -160,6 +143,7 @@ const startEdit = (payment) => {
   }
   selectedPaymentId.value = payment.id
   editMode.value = true
+  showModal.value = true  // ✅ Modalı aç
 }
 
 const cancelEdit = () => {
@@ -172,7 +156,9 @@ const cancelEdit = () => {
   }
   editMode.value = false
   selectedPaymentId.value = null
+  showModal.value = false
 }
+
 
 onMounted(() => {
   fetchTenants()

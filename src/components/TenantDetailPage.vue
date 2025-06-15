@@ -17,16 +17,28 @@
           </div>
 
           <div class="card bg-base-100 dark:bg-gray-700 border border-base-300 p-4 space-y-2 shadow-md">
-            <p><strong class="text-green-500">💰 Toplam Ödeme:</strong> {{ totalPaid.toLocaleString('tr-TR') }} ₺</p>
-            <p><strong class="text-red-500">📉 Toplam Borç:</strong> {{ totalDebt.toLocaleString('tr-TR') }} ₺</p>
-            <p><strong class="text-blue-400">🧾 Bakiye:</strong> {{ balance.toLocaleString('tr-TR') }} ₺</p>
+            <p><strong>💰 Ödeme:</strong> {{ filteredTotalPaid.toLocaleString('tr-TR') }} ₺</p>
+            <p><strong>📉 Borç:</strong> {{ filteredTotalDebt.toLocaleString('tr-TR') }} ₺</p>
+            <p><strong>🧾 Bakiye:</strong> {{ filteredBalance.toLocaleString('tr-TR') }} ₺</p>
+            <p><strong>🕒 Son Ödeme:</strong> {{ lastPaymentDate }}</p>
           </div>
         </div>
 
+        <!-- Yıl Seçici -->
+        <div class="mb-4 flex justify-between items-center">
+          <h2 class="text-lg font-bold">🗓️ Dönem Filtresi</h2>
+          <select v-model="selectedYear" class="select select-bordered w-40">
+            <option v-for="year in availableYears" :key="year" :value="year">{{ year }}</option>
+          </select>
+        </div>
+
+        
+
         <!-- Ödeme Geçmişi -->
         <div>
-          <h3 class="text-lg font-semibold mt-6 mb-2">🕑 Ödeme Geçmişi</h3>
-          <div v-if="payments.length" class="overflow-x-auto">
+          <h3 class="text-lg font-semibold mt-6 mb-2">🕒 Ödeme Geçmişi</h3>
+
+          <div v-if="filteredPayments.length" class="overflow-x-auto">
             <table class="table table-sm w-full border">
               <thead>
                 <tr>
@@ -36,21 +48,28 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="(p, index) in sortedPayments" :key="index">
-                  <td>{{ p.date }}</td>
+                <tr v-for="(p, index) in filteredPayments" :key="index">
+                  <td>{{ new Date(p.date).toLocaleDateString('tr-TR') }}</td>
                   <td>{{ p.amount.toLocaleString('tr-TR') }}</td>
                   <td>{{ p.type }}</td>
                 </tr>
               </tbody>
+              <tfoot>
+                <tr class="font-semibold bg-base-200">
+                  <td>Toplam</td>
+                  <td>{{ filteredTotalPaid.toLocaleString('tr-TR') }} ₺</td>
+                  <td></td>
+                </tr>
+              </tfoot>
             </table>
           </div>
-          <p v-else class="text-gray-400 italic">Ödeme bulunmuyor.</p>
+          <p v-else class="text-gray-400 italic">Seçilen yıl için ödeme kaydı bulunamadı.</p>
         </div>
 
         <!-- Gider Geçmişi -->
         <div>
           <h3 class="text-lg font-semibold mt-6 mb-2">💸 Gider Geçmişi</h3>
-          <div v-if="allExpenses.length" class="overflow-x-auto">
+          <div v-if="filteredExpenses.length" class="overflow-x-auto">
             <table class="table table-sm w-full border">
               <thead>
                 <tr>
@@ -61,34 +80,37 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="(r, index) in allExpenses" :key="index">
+                <tr v-for="(r, index) in filteredExpenses" :key="index">
                   <td>{{ r.period || '-' }}</td>
                   <td>{{ r.toplamTutar != null ? Number(r.toplamTutar).toLocaleString('tr-TR') : '-' }}</td>
                   <td>
-  <span :class="{
-    'text-yellow-400': r.type === 'electricity',
-    'text-blue-400': r.type === 'water',
-    'text-green-400': r.type === 'aidat'
-  }">
-    {{ r.type === 'electricity' ? 'Elektrik' : r.type === 'water' ? 'Su' : 'Aidat' }}
-  </span>
-  <span
-    v-if="r.description?.toLowerCase().includes('ortak')"
-    class="ml-2 badge badge-warning text-xs"
-  >
-    Ortak
-  </span>
-</td>
+                    <span :class="{
+                      'text-yellow-400': r.type === 'electricity',
+                      'text-blue-400': r.type === 'water',
+                      'text-green-400': r.type === 'aidat'
+                    }">
+                      {{ r.type === 'electricity' ? 'Elektrik' : r.type === 'water' ? 'Su' : 'Aidat' }}
+                    </span>
+                    <span v-if="r.description?.toLowerCase().includes('ortak')" class="ml-2 badge badge-warning text-xs">
+                      Ortak
+                    </span>
+                  </td>
                   <td>{{ r.dueDate || '-' }}</td>
                 </tr>
               </tbody>
+              <tfoot>
+                <tr class="font-semibold bg-base-200">
+                  <td>Toplam</td>
+                  <td>{{ filteredTotalDebt.toLocaleString('tr-TR') }} ₺</td>
+                  <td></td>
+                  <td></td>
+                </tr>
+              </tfoot>
             </table>
           </div>
-          <p v-else class="text-gray-400 italic">Gider verisi bulunmuyor.</p>
+          <p v-else class="text-gray-400 italic">Seçilen yıl için gider kaydı bulunamadı.</p>
         </div>
       </div>
-
-      <div v-else class="text-center text-gray-400">Kiracı bilgisi yükleniyor...</div>
     </div>
   </div>
 </template>
@@ -106,14 +128,43 @@ const payments = ref([])
 const readings = ref([])
 const aidats = ref([])
 const allExpenses = ref([])
+const selectedYear = ref(new Date().getFullYear())
 
 const totalPaid = ref(0)
 const totalDebt = ref(0)
 
-const balance = computed(() => totalDebt.value - totalPaid.value)
+const lastPaymentDate = computed(() => {
+  const latest = [...filteredPayments.value].sort((a, b) => new Date(b.date) - new Date(a.date))[0]
+  return latest?.date ? new Date(latest.date).toLocaleDateString('tr-TR') : '-'
+})
 
-const sortedPayments = computed(() =>
-  [...payments.value].sort((a, b) => new Date(a.date) - new Date(b.date))
+const availableYears = computed(() => {
+  const years = new Set()
+  payments.value.forEach(p => years.add(new Date(p.date).getFullYear()))
+  allExpenses.value.forEach(e => {
+    if (e.period) years.add(new Date(e.period).getFullYear())
+  })
+  return Array.from(years).sort((a, b) => b - a)
+})
+
+const filteredTotalPaid = computed(() =>
+  filteredPayments.value.reduce((sum, p) => sum + (p.amount || 0), 0)
+)
+
+const filteredTotalDebt = computed(() =>
+  filteredExpenses.value.reduce((sum, r) => sum + (Number(r.toplamTutar) || 0), 0)
+)
+
+const filteredBalance = computed(() =>
+  filteredTotalDebt.value - filteredTotalPaid.value
+)
+
+const filteredPayments = computed(() =>
+  payments.value.filter(p => new Date(p.date).getFullYear() === Number(selectedYear.value))
+)
+
+const filteredExpenses = computed(() =>
+  allExpenses.value.filter(e => new Date(e.period).getFullYear() === Number(selectedYear.value))
 )
 
 const fetchTenantData = async () => {
@@ -134,20 +185,28 @@ const fetchPayments = async () => {
 const fetchReadings = async () => {
   const q = query(collection(db, 'readings'), where('tenantId', '==', tenantId))
   const snapshot = await getDocs(q)
-  readings.value = snapshot.docs.map(doc => doc.data())
+  readings.value = snapshot.docs.map(doc => ({
+    id: doc.id,
+    ...doc.data()
+  }))
 }
 
 const fetchAidats = async () => {
   const q = query(collection(db, 'aidatRecords'), where('tenantId', '==', tenantId))
   const snapshot = await getDocs(q)
-  aidats.value = snapshot.docs.map(doc => doc.data())
+  aidats.value = snapshot.docs.map(doc => ({
+    id: doc.id,
+    ...doc.data()
+  }))
 }
 
 const computeAllExpenses = () => {
-  allExpenses.value = [...readings.value, ...aidats.value].sort((a, b) =>
-    (a.period || '').localeCompare(b.period || '')
-  )
-  totalDebt.value = allExpenses.value.reduce((sum, r) => sum + (Number(r.toplamTutar) || 0), 0)
+  allExpenses.value = [...readings.value, ...aidats.value].map(e => {
+    return {
+      ...e,
+      toplamTutar: e.toplamTutar ?? e.kdvDahil ?? 0
+    }
+  }).sort((a, b) => (a.period || '').localeCompare(b.period || ''))
 }
 
 onMounted(async () => {

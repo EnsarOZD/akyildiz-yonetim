@@ -12,6 +12,7 @@ import Utilities from '../components/Utilities.vue'
 import TenantDetailPage from '../components/TenantDetailPage.vue'
 import AdminDashboard from '../components/AdminDashboard.vue'
 import LoginView from '../views/LoginView.vue'
+import Transactions from '../pages/Transactions.vue'
 
 const routes = [
   { path: '/', redirect: '/dashboard' },
@@ -27,7 +28,12 @@ const routes = [
 
   { path: '/profile', name: 'Profile', component: () => import('../components/TenantSummary.vue'), meta: { requiresAuth: true, roles: ['tenant'] } },
 
-  { path: '/login', name: 'Login', component: LoginView, meta: { public: true, hideLayout: true } }
+  { path: '/login', name: 'Login', component: LoginView, meta: { public: true, hideLayout: true } },
+  {
+  path: '/transactions',
+  name: 'Transactions',
+  component: Transactions
+}
 ]
 
 const router = createRouter({

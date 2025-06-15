@@ -97,6 +97,16 @@
       @updated="fetchReadings"
     />
 
+<EditAidatModal
+  v-if="showEditAidatModal"
+  :record="selectedAidatRecord"
+  @close="() => {
+    showEditAidatModal = false
+    selectedAidatRecord = null
+  }"
+  @updated="fetchReadings"
+/>
+
     <!-- Ortak Gider Modal -->
     <dialog id="distributeModal" class="modal" :open="showDistributeModal">
       <div class="modal-box">
@@ -130,6 +140,7 @@ import WaterModal from './WaterModal.vue'
 import AidatModal from './AidatModal.vue'
 import EditElectricityModal from './EditElectricityModal.vue'
 import EditWaterModal from './EditWaterModal.vue'
+import EditAidatModal from './EditAidatModal.vue'
 
 const showElectricityModal = ref(false)
 const showWaterModal = ref(false)
@@ -140,6 +151,8 @@ const showDistributeModal = ref(false)
 
 const selectedElectricityRecord = ref(null)
 const selectedWaterRecord = ref(null)
+const selectedAidatRecord = ref(null)
+const showEditAidatModal = ref(false)
 
 const readings = ref([])
 const searchTerm = ref('')
@@ -168,12 +181,16 @@ const formatCurrency = (value) => {
 
 const fetchReadings = async () => {
   readings.value = []
+
+  // 1. Tenants'ı getir
   const tenantsSnapshot = await getDocs(collection(db, 'tenants'))
   const tenantMap = {}
   tenantsSnapshot.forEach(doc => {
     const data = doc.data()
     tenantMap[doc.id] = data.company
   })
+
+  // 2. readings koleksiyonundaki verileri getir
   const snapshot = await getDocs(collection(db, 'readings'))
   snapshot.forEach(docSnap => {
     const data = docSnap.data()
@@ -183,9 +200,31 @@ const fetchReadings = async () => {
         : data.tenantId === 'mescit'
         ? 'Mescit'
         : tenantMap[data.tenantId] || '-'
-    readings.value.push({ id: docSnap.id, ...data, tenantName: company })
+
+    readings.value.push({
+      id: docSnap.id,
+      ...data,
+      tenantName: company
+    })
+  })
+
+  // ✅ 3. aidatRecords koleksiyonunu da oku ve ekle
+  const aidatSnap = await getDocs(collection(db, 'aidatRecords'))
+  aidatSnap.forEach(docSnap => {
+    const data = docSnap.data()
+    const company = tenantMap[data.tenantId] || '-'
+
+    readings.value.push({
+      id: docSnap.id,
+      ...data,
+      type: 'aidat',
+      tenantName: company,
+      consumption: null,
+      kdvDahil: data.toplamTutar // aidatlarda toplamTutar var
+    })
   })
 }
+
 
 const distributeSharedExpense = async () => {
   if (!selectedPeriod.value || selectedType.value === 'all') {
@@ -207,16 +246,25 @@ const distributeSharedExpense = async () => {
 
   // 📊 2. Ortak + mescit toplam tutarı
   const q = query(
-    collection(db, 'readings'),
-    where('period', '==', selectedPeriod.value),
-    where('type', '==', selectedType.value),
-    where('tenantId', 'in', ['ortak', 'mescit'])
-  )
-  const snapshot = await getDocs(q)
-  let total = 0
-  snapshot.forEach(doc => {
-    total += Number(doc.data().kdvDahil || doc.data().toplamTutar || 0)
-  })
+  collection(db, 'readings'),
+  where('period', '==', selectedPeriod.value),
+  where('type', '==', selectedType.value),
+  where('tenantId', 'in', ['ortak', 'mescit'])
+)
+const snapshot = await getDocs(q)
+
+let total = 0
+let sharedDueDate = null
+
+snapshot.forEach(doc => {
+  const data = doc.data()
+  total += Number(data.kdvDahil || data.toplamTutar || 0)
+
+  // Son ödeme tarihi varsa alalım (ilk bulduğunu alsın yeter)
+  if (!sharedDueDate && data.dueDate) {
+    sharedDueDate = data.dueDate
+  }
+})
 
   // 👥 3. Kat bazlı girişleri al ve pay bilgisini belirle
   const tenantsSnap = await getDocs(collection(db, 'tenants'))
@@ -257,6 +305,7 @@ const distributeSharedExpense = async () => {
       kdvHaric: null,
       kdvDahil: totalAmount,
       toplamTutar: totalAmount,
+      dueDate: sharedDueDate || null,
       description: `Ortak ${typeLabel} Gider Payı`
     })
   }
@@ -283,16 +332,27 @@ const handleClose = () => {
 
 const deleteByPeriod = async () => {
   if (!selectedPeriod.value) return
-  const q = query(collection(db, 'readings'), where('period', '==', selectedPeriod.value))
-  const snapshot = await getDocs(q)
-  await Promise.all(snapshot.docs.map(docSnap => deleteDoc(doc(db, 'readings', docSnap.id))))
-  alert('Kayıtlar silindi.')
+
+  // 1. readings koleksiyonundaki verileri sil
+  const readingsQuery = query(collection(db, 'readings'), where('period', '==', selectedPeriod.value))
+  const readingsSnap = await getDocs(readingsQuery)
+  await Promise.all(readingsSnap.docs.map(docSnap => deleteDoc(doc(db, 'readings', docSnap.id))))
+
+  // ✅ 2. aidatRecords koleksiyonundaki verileri de sil
+  const aidatQuery = query(collection(db, 'aidatRecords'), where('period', '==', selectedPeriod.value))
+  const aidatSnap = await getDocs(aidatQuery)
+  await Promise.all(aidatSnap.docs.map(docSnap => deleteDoc(doc(db, 'aidatRecords', docSnap.id))))
+
+  alert('Seçilen döneme ait kayıtlar silindi.')
   fetchReadings()
 }
 
 const deleteRecord = async (id) => {
   if (confirm('Bu kaydı silmek istediğinizden emin misiniz?')) {
-    await deleteDoc(doc(db, 'readings', id))
+    const record = readings.value.find(r => r.id === id)
+    const collectionName = record?.type === 'aidat' ? 'aidatRecords' : 'readings'
+
+    await deleteDoc(doc(db, collectionName, id))
     readings.value = readings.value.filter(r => r.id !== id)
   }
 }
@@ -304,6 +364,9 @@ const editRecord = (record) => {
   } else if (record.type === 'water') {
     selectedWaterRecord.value = record
     showEditWaterModal.value = true
+  } else if (record.type === 'aidat') {
+    selectedAidatRecord.value = record
+    showEditAidatModal.value = true
   }
 }
 

@@ -108,10 +108,7 @@ const dayCount = computed(() => {
   return Math.floor(diffTime / (1000 * 60 * 60 * 24))
 })
 
-const formatDecimal = (value) => {
-  if (value === undefined || value === null || isNaN(value)) return '0.00'
-  return Number(value).toFixed(2)
-}
+const formatDecimal = (val) => isNaN(val) ? '0.00' : Number(val).toFixed(2)
 
 const fetchLastReadingByUnit = async (unit) => {
   const q = query(
@@ -122,15 +119,10 @@ const fetchLastReadingByUnit = async (unit) => {
     limit(1)
   )
   const snap = await getDocs(q)
-  if (!snap.empty) {
-    const data = snap.docs[0].data()
-    return data.currentValue || 0
-  }
-  return 0
+  return !snap.empty ? snap.docs[0].data().currentValue || 0 : 0
 }
 
 const fetchTenants = async () => {
-  const snapshot = await getDocs(collection(db, 'tenants'))
   tenants.value = []
   readings.value = []
 
@@ -151,6 +143,7 @@ const fetchTenants = async () => {
     })
   }
 
+  const snapshot = await getDocs(collection(db, 'tenants'))
   snapshot.forEach(async doc => {
     const data = doc.data()
     if (data.isActive) {
@@ -171,37 +164,35 @@ const fetchTenants = async () => {
   })
 }
 
-const calculate = (index) => {
-  const r = readings.value[index]
+const calculate = (i) => {
+  const r = readings.value[i]
   r.usage = r.current - r.previous
 
-  const suFiyat = waterUnitPrice.value
-  const atikFiyat = wasteUnitPrice.value
+  const s = r.usage * (waterUnitPrice.value + wasteUnitPrice.value)
+  const suKdv = r.usage * waterUnitPrice.value * 0.01
+  const atikKdv = r.usage * wasteUnitPrice.value * 0.10
 
-  const kdvHaric = r.usage * (suFiyat + atikFiyat)
-  const suKdv = r.usage * suFiyat * 0.01
-  const atikKdv = r.usage * atikFiyat * 0.10
-
-  r.kdvHaric = kdvHaric
-  r.kdvDahil = kdvHaric + suKdv + atikKdv
+  r.kdvHaric = s
+  r.kdvDahil = s + suKdv + atikKdv
   r.toplamTutar = r.kdvDahil
 }
-
-  
-
 
 watch([waterUnitPrice, wasteUnitPrice], () => {
   readings.value.forEach((_, idx) => calculate(idx))
 })
 
-const saveReadings = async () => {
+const save = async (onlyFilled = false) => {
   if (!startDate.value || !endDate.value || dayCount.value <= 0) {
-    alert("Lütfen geçerli bir tarih aralığı seçin.")
+    alert('Lütfen geçerli bir tarih aralığı seçin.')
     return
   }
 
   const colRef = collection(db, 'readings')
-  for (const r of readings.value) {
+  const dataToSave = onlyFilled
+    ? readings.value.filter(r => r.previous >= 0 && r.current > r.previous)
+    : readings.value
+
+  for (const r of dataToSave) {
     await addDoc(colRef, {
       tenantId: r.tenantId,
       unit: r.unit,
@@ -221,42 +212,13 @@ const saveReadings = async () => {
     })
   }
 
-  alert('Tüm kayıtlar başarıyla eklendi.')
+  alert(onlyFilled ? 'Girilen kayıtlar eklendi.' : 'Tüm kayıtlar eklendi.')
   readings.value = []
   fetchTenants()
 }
 
-const savePartialReadings = async () => {
-  if (!startDate.value || !endDate.value || dayCount.value <= 0) {
-    alert("Lütfen geçerli bir tarih aralığı seçin.")
-    return
-  }
-
-  const colRef = collection(db, 'readings')
-  const filled = readings.value.filter(r => r.previous >= 0 && r.current > r.previous)
-  for (const r of filled) {
-    await addDoc(colRef, {
-      tenantId: r.tenantId,
-      unit: r.unit,
-      period: selectedPeriod.value,
-      type: 'water',
-      previousValue: r.previous,
-      currentValue: r.current,
-      usage: r.usage,
-      kdvHaric: r.kdvHaric,
-      kdvDahil: r.kdvDahil,
-      startDate: startDate.value,
-      endDate: endDate.value,
-      dueDate: dueDate.value,
-      dayCount: dayCount.value,
-      waterUnitPrice: waterUnitPrice.value,
-      wasteUnitPrice: wasteUnitPrice.value
-    })
-  }
-
-  alert('Girilen kayıtlar başarıyla eklendi.')
-  fetchTenants()
-}
+const saveReadings = () => save(false)
+const savePartialReadings = () => save(true)
 
 onMounted(fetchTenants)
 </script>
