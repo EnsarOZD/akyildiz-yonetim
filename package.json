@@ -12,6 +12,7 @@
     "@fontsource/cinzel": "^5.2.5",
     "@fontsource/cormorant-garamond": "^5.2.7",
     "firebase": "^11.8.1",
+    "pinia": "^3.0.3",
     "vue": "^3.4.27",
     "vue-router": "^4.5.1",
     "vue-the-mask": "^0.11.1",
