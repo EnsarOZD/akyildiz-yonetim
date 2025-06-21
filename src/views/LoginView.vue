@@ -117,9 +117,17 @@ const resetError = ref('')
 
 const router = useRouter()
 
-onMounted(() => {
+onMounted(async () => {
   const user = getAuth().currentUser
-  if (user) router.push('/dashboard')
+  if (user) {
+    const userDoc = await getDoc(doc(db, 'users', user.uid))
+    const role = userDoc.exists() ? userDoc.data().role : null
+
+    if (role === 'admin') router.push('/admin')
+    else if (role === 'manager') router.push('/dashboard')
+    else if (role === 'viewer') router.push('/overdue')
+    else if (role === 'tenant') router.push('/profile')
+  }
 })
 
 const togglePassword = () => {

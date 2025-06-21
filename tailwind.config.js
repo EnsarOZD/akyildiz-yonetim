@@ -1,8 +1,9 @@
 /** @type {import('tailwindcss').Config} */
-module.exports = {
+export default {
+  darkMode: 'class',
   content: [
     "./index.html",
-    "./src/**/*.{vue,js,ts,jsx,tsx}"
+    "./src/**/*.{vue,js,ts,jsx,tsx}",
   ],
   theme: {
     extend: {
@@ -13,9 +14,8 @@ module.exports = {
       },
     },
   },
-  plugins: [require('daisyui')],
+  plugins: [require("daisyui")],
   daisyui: {
-    themes: ['dark'], // sadece karanlık tema aktif
+    themes: ["light", "dark"],
   },
-  darkMode: 'class', // karanlık mod class üzerinden kontrol edilir
 }
