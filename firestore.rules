@@ -1,0 +1,42 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Sadece kimlik doğrulama yapmış kullanıcılar okuma/yazma yapabilir
+    match /{document=**} {
+      allow read, write: if request.auth != null && request.auth.uid != null;
+    }
+    
+    // Kullanıcılar sadece kendi verilerine erişebilir
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Şirket verilerine erişim kontrolü
+    match /companies/{companyId}/{document=**} {
+      allow read, write: if request.auth != null && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.companyId == companyId;
+    }
+    
+    // Kiracı verileri
+    match /tenants/{tenantId} {
+      allow read, write: if request.auth != null && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['admin', 'manager'];
+    }
+    
+    // Ödeme verileri
+    match /payments/{paymentId} {
+      allow read: if request.auth != null && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['admin', 'manager', 'viewer'];
+      allow write: if request.auth != null && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['admin', 'manager'];
+    }
+    
+    // Gider verileri
+    match /expenses/{expenseId} {
+      allow read: if request.auth != null && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['admin', 'manager', 'viewer'];
+      allow write: if request.auth != null && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['admin', 'manager'];
+    }
+  }
+}

@@ -10,11 +10,16 @@ Akyıldız Yönetim is a modern tenant and expense tracking system developed wit
 - 📊 Calculate total debt and balance per tenant
 - 🧾 View detailed tenant summary and history
 - 🌙 Light/Dark theme support
+- 🔐 Role-based access control (Admin, Manager, Viewer)
+- 🛡️ Firebase Security Rules implementation
 
 ## 🛠 Tech Stack
 
-- **Frontend**: Vue 3 (Composition API), TailwindCSS
+- **Frontend**: Vue 3 (Composition API), TailwindCSS, DaisyUI
 - **Backend**: Firebase Firestore
+- **Authentication**: Firebase Auth (Google Sign-In)
+- **State Management**: Pinia
+- **Build Tool**: Vite
 - **Routing**: Vue Router
 
 ## 📂 Project Structure
@@ -22,19 +27,25 @@ Akyıldız Yönetim is a modern tenant and expense tracking system developed wit
 ```
 src/
 ├── components/
-│   ├── Header.vue
-│   ├── TenantSummary.vue
-├── pages/
-│   ├── Dashboard.vue
-│   ├── Tenants.vue
-│   ├── Payments.vue
-│   ├── Expenses.vue
-│   ├── Utilities.vue
-│   └── TenantDetail.vue
+│   ├── common/
+│   │   ├── Header.vue
+│   │   └── LoadingSpinner.vue
+├── features/
+│   ├── dashboard/
+│   ├── expenses/
+│   ├── owners/
+│   ├── payments/
+│   └── tenants/
+├── stores/
+│   └── auth.js
+├── utils/
+│   ├── errorHandler.js
+│   └── excelUtils.js
 ├── router/
 │   └── index.js
 ├── App.vue
 ├── main.js
+└── firebase.js
 ```
 
 ## 📸 Screenshots
@@ -56,11 +67,40 @@ cd akyildiz-yonetim
 # Install dependencies
 npm install
 
+# Setup environment variables
+cp .env.example .env
+# Edit .env file with your Firebase credentials
+
 # Start development server
 npm run dev
+
+# Build for production
+npm run build
 ```
 
-> 🔐 Don’t forget to configure your Firebase credentials in `firebase.js`.
+> 🔐 **Important**: Configure your Firebase credentials in the `.env` file before running the application. Never commit the `.env` file to version control.
+
+## 🔒 Security Configuration
+
+1. **Environment Variables**: Copy `.env.example` to `.env` and add your Firebase configuration
+2. **Firebase Console**: Apply API restrictions and domain restrictions to your API keys
+3. **Deploy Security Rules**: Deploy the included `firestore.rules` and `storage.rules` to Firebase
+
+For detailed security information, see [SECURITY_IMPROVEMENTS.md](./SECURITY_IMPROVEMENTS.md)
+
+## 📋 Environment Variables
+
+Create a `.env` file in the root directory with the following variables:
+
+```env
+VITE_FIREBASE_API_KEY=your_api_key_here
+VITE_FIREBASE_AUTH_DOMAIN=your_auth_domain_here
+VITE_FIREBASE_PROJECT_ID=your_project_id_here
+VITE_FIREBASE_STORAGE_BUCKET=your_storage_bucket_here
+VITE_FIREBASE_MESSAGING_SENDER_ID=your_messaging_sender_id_here
+VITE_FIREBASE_APP_ID=your_app_id_here
+VITE_FIREBASE_MEASUREMENT_ID=your_measurement_id_here
+```
 
 ## 📝 License
 
