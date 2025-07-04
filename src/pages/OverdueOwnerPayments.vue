@@ -117,7 +117,7 @@
                 <td class="p-4">
                   <div class="flex items-center gap-2">
                     <button 
-                      @click="markAsPaid(overdue)"
+                      @click="markAsPaid(overdue.id)"
                       class="btn btn-sm btn-success"
                     >
                       Ödendi
@@ -157,46 +157,96 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
-import { db } from '../firebase'
-import { collection, getDocs, doc, updateDoc } from 'firebase/firestore'
+import apiService from '@/services/api'
 
-const ownerDues = ref([])
+const overduePayments = ref([])
 const owners = ref([])
+const loading = ref(false)
 const search = ref('')
 const overdueFilter = ref('')
 const paymentTypeFilter = ref('')
 const sortBy = ref('dueDate')
 
-const fetchOwnerDues = async () => {
-  const snapshot = await getDocs(collection(db, 'ownerAidatRecords'))
-  const dues = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
-  
-  // Mal sahibi bilgilerini ekle ve geciken ödemeleri hesapla
-  ownerDues.value = dues.map(due => {
-    const owner = owners.value.find(o => o.id === due.ownerId)
-    const dueDate = new Date(due.dueDate)
-    const now = new Date()
-    const overdueDays = Math.floor((now - dueDate) / (1000 * 60 * 60 * 24))
-    const isOverdue = dueDate < now && !due.isPaid
-    
-    return {
-      ...due,
-      ownerName: owner?.name || 'Bilinmiyor',
-      ownerEmail: owner?.email || '',
-      isOverdue,
-      overdueDays: isOverdue ? overdueDays : 0
-    }
-  })
+const formatDate = (dateStr) => {
+  if (!dateStr) return '-'
+  return new Date(dateStr).toLocaleDateString('tr-TR', { year: 'numeric', month: 'short', day: 'numeric' })
+}
+
+const formatCurrency = (value) => {
+  if (value === undefined || value === null || isNaN(value)) return '₺0.00'
+  return Number(value).toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' })
 }
 
 const fetchOwners = async () => {
-  const snapshot = await getDocs(collection(db, 'owners'))
-  owners.value = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+  try {
+    const response = await apiService.get('/owners')
+    owners.value = response || []
+  } catch (error) {
+    console.error('Mal sahipleri yüklenirken hata:', error)
+    owners.value = []
+  }
 }
 
-const overduePayments = computed(() => {
-  return ownerDues.value.filter(due => due.isOverdue)
+const fetchOverduePayments = async () => {
+  loading.value = true
+  try {
+    const response = await apiService.get('/owner-payments/overdue')
+    overduePayments.value = (response || []).map(payment => {
+      const owner = owners.value.find(o => o.id === payment.ownerId)
+      return {
+        ...payment,
+        ownerName: owner?.name || 'Bilinmiyor'
+      }
+    })
+  } catch (error) {
+    console.error('Geciken ödemeler yüklenirken hata:', error)
+    overduePayments.value = []
+  } finally {
+    loading.value = false
+  }
+}
+
+const markAsPaid = async (paymentId) => {
+  try {
+    await apiService.put(`/owner-payments/${paymentId}`, { status: 'paid' })
+    await fetchOverduePayments()
+  } catch (error) {
+    console.error('Ödeme durumu güncellenirken hata:', error)
+  }
+}
+
+const totalOverdueAmount = computed(() => {
+  return overduePayments.value.reduce((sum, payment) => sum + Number(payment.amount || 0), 0)
 })
+
+const overdueCount = computed(() => {
+  return overduePayments.value.length
+})
+
+const averageOverdue = computed(() => {
+  if (overdueCount.value === 0) return 0
+  return totalOverdueAmount.value / overdueCount.value
+})
+
+const getPaymentTypeText = (type) => {
+  const types = {
+    'aidat': 'Aidat',
+    'su': 'Su',
+    'elektrik': 'Elektrik',
+    'diger': 'Diğer'
+  }
+  return types[type] || 'Bilinmiyor'
+}
+
+const sendReminder = (overdue) => {
+  // Hatırlatma gönderme işlemi
+  alert(`${overdue.ownerName} için hatırlatma gönderildi.`)
+}
+
+const viewDetails = (overdue) => {
+  // Detay modalı veya sayfası açılabilir
+  console.log('Detaylar:', overdue)
+}
 
 const filteredOverdue = computed(() => {
   let filtered = overduePayments.value
@@ -237,67 +287,7 @@ const filteredOverdue = computed(() => {
   return filtered
 })
 
-const totalOverdue = computed(() => {
-  return overduePayments.value.reduce((sum, due) => sum + Number(due.amount || 0), 0)
-})
-
-const overdueCount = computed(() => {
-  return overduePayments.value.length
-})
-
-const averageOverdue = computed(() => {
-  if (overdueCount.value === 0) return 0
-  return totalOverdue.value / overdueCount.value
-})
-
-const formatCurrency = (value) => {
-  if (value === undefined || value === null || isNaN(value)) return '₺0.00'
-  return Number(value).toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' })
-}
-
-const formatDate = (dateStr) => {
-  if (!dateStr) return '-'
-  return new Date(dateStr).toLocaleDateString('tr-TR')
-}
-
-const getPaymentTypeText = (type) => {
-  const types = {
-    'aidat': 'Aidat',
-    'su': 'Su',
-    'elektrik': 'Elektrik',
-    'diger': 'Diğer'
-  }
-  return types[type] || 'Bilinmiyor'
-}
-
-const markAsPaid = async (overdue) => {
-  if (confirm(`${overdue.ownerName} için ${overdue.period} dönemi ödemesini ödendi olarak işaretlemek istiyor musunuz?`)) {
-    try {
-      await updateDoc(doc(db, 'ownerAidatRecords', overdue.id), {
-        isPaid: true,
-        paidDate: new Date().toISOString()
-      })
-      await fetchOwnerDues()
-      alert('Ödeme ödendi olarak işaretlendi.')
-    } catch (error) {
-      console.error('Hata:', error)
-      alert('Bir hata oluştu.')
-    }
-  }
-}
-
-const sendReminder = (overdue) => {
-  // Hatırlatma gönderme işlemi
-  alert(`${overdue.ownerName} için hatırlatma gönderildi.`)
-}
-
-const viewDetails = (overdue) => {
-  // Detay modalı veya sayfası açılabilir
-  console.log('Detaylar:', overdue)
-}
-
-onMounted(async () => {
-  await fetchOwners()
-  await fetchOwnerDues()
+onMounted(() => {
+  fetchOwners().then(() => fetchOverduePayments())
 })
 </script> 

@@ -1,8 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { doc, getDoc } from 'firebase/firestore'
-import { auth, db } from '@/firebase'
-import { onAuthStateChanged } from 'firebase/auth'
+import authService from '@/services/authService'
 
 export const useAuthStore = defineStore('auth', () => {
   const user = ref(null)
@@ -10,37 +8,90 @@ export const useAuthStore = defineStore('auth', () => {
   const companyId = ref(null)
   const fullName = ref(null)
   const email = ref(null)
-  const isInitialized = ref(false) // 🔄 Firebase tamamlandı mı?
+  const isInitialized = ref(false) // 🔄 Backend tamamlandı mı?
+  const theme = ref(
+    localStorage.getItem('theme') ||
+    (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+  )
 
-  async function fetchUserProfile(userParam) {
-    const currentUser = userParam || auth.currentUser
-    if (!currentUser) return
+  async function fetchUserProfile() {
+    // Backend API kontrolü
+    const isBackendActive = import.meta.env.VITE_API_BASE_URL && 
+                           import.meta.env.VITE_API_BASE_URL !== 'http://localhost:5000/api'
 
-    const docRef = doc(db, 'users', currentUser.uid)
-    const docSnap = await getDoc(docRef)
-
-    if (docSnap.exists()) {
-      const data = docSnap.data()
-      user.value = currentUser
-      role.value = data.role
-      companyId.value = data.companyId
-      fullName.value = `${data.firstName} ${data.lastName}`
-      email.value = data.email
+    if (isBackendActive) {
+      // Backend API ile kullanıcı profili
+      try {
+        const backendUser = await authService.checkAuthStatus()
+        if (backendUser) {
+          user.value = { id: backendUser.id, email: backendUser.email }
+          role.value = backendUser.role
+          companyId.value = backendUser.companyId
+          fullName.value = `${backendUser.firstName || ''} ${backendUser.lastName || ''}`.trim()
+          email.value = backendUser.email
+        } else {
+          clearUser()
+        }
+      } catch (error) {
+        console.error('Backend kullanıcı profili hatası:', error)
+        clearUser()
+      } finally {
+        isInitialized.value = true
+      }
+      return
     }
 
-    isInitialized.value = true
+    // Demo modu kontrolü
+    const isDemoMode = !import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_BASE_URL === 'http://localhost:5000/api'
+    
+    if (isDemoMode) {
+      // Demo kullanıcı profili
+      user.value = { uid: 'demo-user-id', email: 'demo@akyildiz.com' }
+      role.value = 'admin'
+      companyId.value = 'demo-company'
+      fullName.value = 'Demo Kullanıcı'
+      email.value = 'demo@akyildiz.com'
+      isInitialized.value = true
+      console.log('Demo mode: Admin user created', { role: role.value, isInitialized: isInitialized.value })
+      return
+    }
   }
 
   // 👇 Bu fonksiyon App.vue'de çağrılmalı
   function initAuthListener() {
-    onAuthStateChanged(auth, async (u) => {
-      if (u) {
-        await fetchUserProfile(u)
-      } else {
-        clearUser()
-        isInitialized.value = true
-      }
-    })
+    // Backend API kontrolü
+    const isBackendActive = import.meta.env.VITE_API_BASE_URL && 
+                           import.meta.env.VITE_API_BASE_URL !== 'http://localhost:5000/api'
+
+    if (isBackendActive) {
+      // Backend API ile auth listener
+      fetchUserProfile()
+      
+      // Backend auth state değişikliklerini dinle
+      authService.onAuthStateChanged((user) => {
+        if (user) {
+          fetchUserProfile()
+        } else {
+          clearUser()
+          isInitialized.value = true
+        }
+      })
+      return
+    }
+
+    // Demo modu kontrolü
+    const isDemoMode = !import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_BASE_URL === 'http://localhost:5000/api'
+    
+    if (isDemoMode) {
+      // Demo modu için mock auth listener
+      console.log('Demo mode: Initializing auth listener')
+      setTimeout(() => {
+        const demoUser = { uid: 'demo-user-id', email: 'demo@akyildiz.com' }
+        fetchUserProfile()
+        console.log('Demo mode: Auth listener completed')
+      }, 1000)
+      return
+    }
   }
 
   function clearUser() {
@@ -51,6 +102,11 @@ export const useAuthStore = defineStore('auth', () => {
     email.value = null
   }
 
+  function toggleTheme() {
+    theme.value = theme.value === 'dark' ? 'light' : 'dark'
+    localStorage.setItem('theme', theme.value)
+  }
+
   return {
     user,
     role,
@@ -58,8 +114,10 @@ export const useAuthStore = defineStore('auth', () => {
     fullName,
     email,
     isInitialized,
+    theme,
     fetchUserProfile,
     clearUser,
-    initAuthListener
+    initAuthListener,
+    toggleTheme
   }
 })

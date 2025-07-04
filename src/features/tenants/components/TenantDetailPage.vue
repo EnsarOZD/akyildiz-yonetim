@@ -132,8 +132,8 @@
                   <td>{{ item.tuketim || '-' }}</td>
                   <td class="text-right font-semibold">{{ formatCurrency(item.amount) }}</td>
                   <td>
-                    <span class="badge" :class="item.isPaid ? 'badge-success' : 'badge-error'">
-                      {{ item.isPaid ? 'Ödendi' : 'Ödenmedi' }}
+                    <span class="badge" :class="getPaymentStatusBadge(item)">
+                      {{ getPaymentStatusLabel(item) }}
                     </span>
                   </td>
                 </tr>
@@ -150,7 +150,7 @@
           <h3 class="text-xl font-bold">Detaylı Bilgiler</h3>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 pt-4">
             <div><strong>Yetkili:</strong> {{ tenant.firstName }} {{ tenant.lastName }}</div>
-            <div><strong>Daireler:</strong> {{ tenant.units.join(', ') }}</div>
+            <div><strong>Daireler:</strong> {{ (tenant.units || []).join(', ') }}</div>
             <div><strong>Telefon:</strong> <a :href="`tel:${tenant.phone}`" class="link link-primary">{{ tenant.phone }}</a></div>
             <div><strong>E-posta:</strong> <a :href="`mailto:${tenant.email}`" class="link link-primary">{{ tenant.email }}</a></div>
             <div><strong>Sözleşme Başlangıcı:</strong> {{ formatDate(tenant.contractStartDate) }}</div>
@@ -166,12 +166,16 @@
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue';
 import { useRoute } from 'vue-router';
-import { db } from '@/firebase';
-import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
+import tenantsService from '@/services/tenantsService'
+import paymentsService from '@/services/paymentsService'
+import utilityDebtsService from '@/services/utilityDebtsService'
 import { useAuthStore } from '@/stores/auth';
+import * as XLSX from 'xlsx';
+import { useErrorHandler } from '@/composables/useErrorHandler'
 
 const route = useRoute();
 const authStore = useAuthStore();
+const { handleNetworkError, handleValidationError, showSuccess } = useErrorHandler()
 
 const tenantId = ref(null);
 const tenant = ref(null);
@@ -180,6 +184,7 @@ const payments = ref([]);
 const historyItems = ref([]);
 const loading = ref(true);
 const activeTab = ref('debts');
+const totalDebt = ref(0);
 
 const safeToDate = (timestamp) => {
     if (!timestamp) return null;
@@ -212,71 +217,73 @@ const fetchTenantDetails = async () => {
   console.log(`Fetching all records for tenant ID: ${tenantId.value}`);
   
   try {
-    // 1. Fetch tenant document
-    const tenantDoc = await getDoc(doc(db, 'tenants', tenantId.value));
-    if (!tenantDoc.exists()) {
-      console.error("Tenant document not found!");
+    // 1. Fetch tenant document from backend
+    const tenantData = await tenantsService.getTenantById(tenantId.value);
+    if (!tenantData) {
+      console.error("Tenant not found in backend!");
       tenant.value = null;
       loading.value = false;
       return;
     }
-    tenant.value = { id: tenantDoc.id, ...tenantDoc.data() };
+    tenant.value = tenantData;
 
-    // 2. Fetch all related collections with simple queries
-    const aidatQuery = query(collection(db, 'aidatRecords'), where('tenantId', '==', tenantId.value));
-    const paymentsQuery = query(collection(db, 'payments'), where('tenantId', '==', tenantId.value));
-    const readingsQuery = query(collection(db, 'readings'), where('tenantId', '==', tenantId.value));
-
-    const [aidatSnap, paymentsSnap, readingsSnap] = await Promise.all([
-      getDocs(aidatQuery),
-      getDocs(paymentsQuery),
-      getDocs(readingsQuery)
+    // 2. Fetch related data from backend
+    const [paymentsData, utilityDebtsData] = await Promise.all([
+      paymentsService.getPayments({ tenantId: tenantId.value }),
+      utilityDebtsService.getUtilityDebts({ tenantId: tenantId.value })
     ]);
     
-    console.log(`Query results: aidat: ${aidatSnap.size}, payments: ${paymentsSnap.size}, readings: ${readingsSnap.size}`);
+    console.log(`Backend query results: payments: ${paymentsData.length}, utilityDebts: ${utilityDebtsData.length}`);
 
-    // 3. Process data on the client side
+    // 3. Process data for display
     
-    const allReadings = readingsSnap.docs.map(processDoc);
-    const allAidat = aidatSnap.docs.map(processDoc);
-    const allPayments = paymentsSnap.docs.map(processDoc);
-
     // --- History Items Processing ---
     const combinedHistory = [];
-    allReadings.forEach(r => combinedHistory.push({
-        ...r,
-        type: r.type,
-        description: `${r.type === 'water' ? 'Su' : 'Elektrik'} Faturası (${r.period || 'Dönem Belirtilmemiş'})`,
-        amount: r.toplamTutar || 0
-    }));
-    allAidat.forEach(a => combinedHistory.push({
-        ...a,
-        type: 'aidat',
-        description: `Aidat (${a.period || a.unit || 'Dönem Belirtilmemiş'})`,
-        amount: a.toplamTutar || 0,
-        ilkEndeks: null, sonEndeks: null, tuketim: null
+    
+    // Add utility debts to history
+    utilityDebtsData.forEach(debt => combinedHistory.push({
+        ...debt,
+        type: debt.type,
+        description: `${debt.type === 'Electricity' ? 'Elektrik' : debt.type === 'Water' ? 'Su' : 'Borç'} (${debt.period || debt.dueDate ? new Date(debt.dueDate).toLocaleDateString('tr-TR') : 'Dönem Belirtilmemiş'})`,
+        amount: debt.amount || 0,
+        toplamTutar: debt.amount || 0,
+        remainingAmount: debt.remainingAmount || debt.amount || 0,
+        isPaid: debt.status === 'Paid'
     }));
     
     historyItems.value = combinedHistory.sort((a, b) => (b.date || 0) - (a.date || 0));
 
     // --- Unpaid Items Processing ---
-    unpaidItems.value = combinedHistory
-        .filter(item => item.isPaid === false)
+    unpaidItems.value = utilityDebtsData
+        .filter(debt => {
+          const remainingAmount = Number(debt.remainingAmount || debt.amount || 0)
+          return debt.status !== 'Paid' && remainingAmount > 0
+        })
+        .map(debt => {
+          return {
+            ...debt,
+            amount: Number(debt.remainingAmount || debt.amount || 0),
+            typeLabel: debt.type === 'Electricity' ? 'Elektrik' : debt.type === 'Water' ? 'Su' : 'Borç',
+            company: tenant.value?.firstName ? `${tenant.value.firstName} ${tenant.value.lastName}` : 'Bilinmeyen',
+            floor: debt.unit || '-'
+          }
+        })
         .sort((a, b) => (a.dueDate || 0) - (b.dueDate || 0));
     
     // --- Payments Processing ---
-    payments.value = allPayments.sort((a, b) => (b.paymentDate || 0) - (a.paymentDate || 0));
+    payments.value = paymentsData.sort((a, b) => (b.paymentDate || 0) - (a.paymentDate || 0));
+
+    // --- Total Debt Calculation ---
+    let debt = unpaidItems.value.reduce((sum, item) => sum + Number(item.amount || 0), 0)
+    totalDebt.value = debt;
 
   } catch (error) {
     console.error("Error fetching tenant details:", error);
+    handleNetworkError(error, { component: 'TenantDetailPage', action: 'fetchTenantDetails' })
   } finally {
     loading.value = false;
   }
 };
-
-const totalDebt = computed(() => {
-  return unpaidItems.value.reduce((sum, item) => sum + Number(item.amount || 0), 0);
-});
 
 const formatCurrency = (value) => {
   if (value === undefined || value === null || isNaN(value)) return '₺0,00';
@@ -287,6 +294,26 @@ const formatDate = (timestamp) => {
   if (!timestamp) return '-';
   const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
   return date.toLocaleDateString('tr-TR', { year: 'numeric', month: 'long', day: 'numeric' });
+};
+
+const getPaymentStatusBadge = (item) => {
+  if (item.isPaid) {
+    return 'badge-success';
+  } else if (item.dueDate && new Date(item.dueDate) < new Date()) {
+    return 'badge-error';
+  } else {
+    return 'badge-warning';
+  }
+};
+
+const getPaymentStatusLabel = (item) => {
+  if (item.isPaid) {
+    return 'Ödendi';
+  } else if (item.dueDate && new Date(item.dueDate) < new Date()) {
+    return 'Ödenmedi';
+  } else {
+    return 'Ödenmemiş';
+  }
 };
 
 // Watch for auth changes and route params to set tenantId

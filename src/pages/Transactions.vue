@@ -134,8 +134,7 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
-import { db } from '../firebase'
-import { collection, getDocs } from 'firebase/firestore'
+import apiService from '@/services/api'
 
 const tenants = ref([])
 const payments = ref([])
@@ -157,27 +156,39 @@ const formatCurrency = (value) => {
 }
 
 const fetchTenants = async () => {
-  const snapshot = await getDocs(collection(db, 'tenants'))
-  tenants.value = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+  try {
+    const response = await apiService.get('/tenants')
+    tenants.value = response || []
+  } catch (error) {
+    console.error('Kiracılar yüklenirken hata:', error)
+    tenants.value = []
+  }
 }
 
 const fetchData = async () => {
-  const paymentSnapshot = await getDocs(collection(db, 'payments'))
-  payments.value = paymentSnapshot.docs.map(doc => {
-    const data = doc.data()
-    const tenant = tenants.value.find(t => t.id === data.tenantId)
-    return {
-      ...data,
-      type: 'income',
-      payer: tenant?.company || 'Bilinmiyor'
-    }
-  })
+  try {
+    // Ödemeleri getir
+    const paymentsResponse = await apiService.get('/payments')
+    payments.value = (paymentsResponse || []).map(payment => {
+      const tenant = tenants.value.find(t => t.id === payment.tenantId)
+      return {
+        ...payment,
+        type: 'income',
+        payer: tenant?.company || 'Bilinmiyor'
+      }
+    })
 
-  const expenseSnapshot = await getDocs(collection(db, 'expenses'))
-  expenses.value = expenseSnapshot.docs.map(doc => ({
-    ...doc.data(),
-    type: 'expense'
-  }))
+    // Giderleri getir
+    const expensesResponse = await apiService.get('/expenses')
+    expenses.value = (expensesResponse || []).map(expense => ({
+      ...expense,
+      type: 'expense'
+    }))
+  } catch (error) {
+    console.error('Veriler yüklenirken hata:', error)
+    payments.value = []
+    expenses.value = []
+  }
 }
 
 const allTransactions = computed(() => {

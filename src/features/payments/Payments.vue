@@ -48,13 +48,46 @@
             <p class="text-2xl font-bold text-gray-800 dark:text-gray-100">{{ thisMonthCount }}</p>
           </div>
         </div>
-        <div class="bg-white dark:bg-gray-800 p-5 rounded-xl shadow-md flex items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-600 hover:border-blue-500 dark:hover:border-blue-400 transition-colors duration-300" @click="showModal = true">
-           <button class="w-full h-full text-blue-500 dark:text-blue-400 flex items-center justify-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
-            <span class="font-semibold">Yeni Ödeme Ekle</span>
-          </button>
+        <div class="bg-white dark:bg-gray-800 p-5 rounded-xl shadow-md flex items-center gap-4 border border-gray-200 dark:border-gray-700">
+          <div class="bg-purple-100 dark:bg-purple-900/50 text-purple-600 dark:text-purple-400 rounded-full p-3">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" /></svg>
+          </div>
+          <div>
+            <p class="text-sm text-gray-500 dark:text-gray-400">Toplam Avans</p>
+            <p class="text-2xl font-bold text-gray-800 dark:text-gray-100">{{ formatCurrency(totalAdvance) }}</p>
+          </div>
         </div>
       </section>
+
+      <!-- Yeni Ödeme Ekle Butonu -->
+      <div class="mb-6">
+        <button @click="showModal = true" class="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-4 px-6 rounded-xl shadow-lg transition-all duration-300 flex items-center justify-center gap-3">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+          </svg>
+          <span>Yeni Ödeme Ekle</span>
+        </button>
+      </div>
+
+      <!-- Avans Hesapları Bölümü -->
+      <div v-if="advanceAccounts.length > 0" class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 mb-6">
+        <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4 flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+          </svg>
+          Avans Hesapları
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div v-for="advance in advanceAccounts" :key="advance.id" class="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg border border-purple-200 dark:border-purple-800">
+            <div class="flex items-center justify-between mb-2">
+              <span class="font-semibold text-gray-800 dark:text-gray-100">{{ getTenantCompany(advance.tenantId) }}</span>
+              <span class="badge badge-success badge-sm">Aktif</span>
+            </div>
+            <p class="text-2xl font-bold text-purple-600 dark:text-purple-400 mb-1">{{ formatCurrency(advance.amount) }}</p>
+            <p class="text-sm text-gray-600 dark:text-gray-400">{{ advance.paymentDate }}</p>
+          </div>
+        </div>
+      </div>
 
       <!-- Filtreler ve Liste Alanı -->
       <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md border border-gray-200 dark:border-gray-700">
@@ -89,7 +122,10 @@
                 {{ formatCurrency(p.amount) }}
               </div>
               <div class="md:col-span-2 text-left md:text-center text-sm text-gray-600 dark:text-gray-300">
-                <p class="font-semibold text-gray-800 dark:text-gray-100">{{ p.type }}</p>
+                <p class="font-semibold text-gray-800 dark:text-gray-100">
+                  <span v-if="p.type === 'Karma'" class="badge badge-primary badge-sm">Karma Ödeme</span>
+                  <span v-else>{{ p.type }}</span>
+                </p>
                 <p>{{ p.bank }}</p>
               </div>
               <div class="md:col-span-2 text-right">
@@ -113,23 +149,32 @@
       :tenants="tenants"
       :banks="banks"
       :editMode="editMode"
-      @save="savePayment"
-      @cancel="cancelEdit"
+      @save="handlePaymentSave"
+      @cancel="handleModalClose"
     />
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { db } from '../../firebase'
-import { collection, addDoc, getDocs, deleteDoc, doc, updateDoc } from 'firebase/firestore'
 import PaymentModal from './PaymentModal.vue'
 import FilterBar from '@/components/common/FilterBar.vue'
+import { useErrorHandler } from '@/composables/useErrorHandler'
+import { useNotification } from '@/composables/useNotification'
+import { useEventBus } from '@/composables/useEventBus'
+import paymentsService from '@/services/paymentsService'
+import tenantsService from '@/services/tenantsService'
+
+const { handleNetworkError, handleValidationError, showSuccess } = useErrorHandler()
+const { showCreateSuccess, showUpdateSuccess, showDeleteSuccess } = useNotification()
+const { emit: emitEvent } = useEventBus()
 
 const payments = ref([])
 const tenants = ref([])
+const advanceAccounts = ref([])
 const banks = ref(['Ziraat', 'İş Bankası', 'Garanti', 'Yapı Kredi', 'Halkbank'])
 const showModal = ref(false)
+const useBackend = ref(true) // Backend kullanım durumunu takip etmek için
 
 const filters = ref({
   searchTerm: '',
@@ -159,6 +204,10 @@ const thisMonthCount = computed(() => {
 
 const paymentsCount = computed(() => {
   return payments.value.length
+})
+
+const totalAdvance = computed(() => {
+  return advanceAccounts.value.reduce((sum, advance) => sum + Number(advance.amount || 0), 0)
 })
 
 const clearFilters = () => {
@@ -208,25 +257,38 @@ const editMode = ref(false)
 const selectedPaymentId = ref(null)
 
 const fetchPayments = async () => {
-  payments.value = []
-  const querySnapshot = await getDocs(collection(db, "payments"))
-  querySnapshot.forEach(docSnapshot => {
-    payments.value.push({
-      id: docSnapshot.id,
-      ...docSnapshot.data()
-    })
-  })
+  try {
+    const data = await paymentsService.getPayments();
+    payments.value = data;
+    console.log('✅ Backend API kullanılıyor - Ödemeler');
+  } catch (error) {
+    console.error('Ödemeler yüklenirken hata:', error);
+    handleNetworkError(error, { component: 'Payments', action: 'fetchPayments' })
+  }
 }
 
 const fetchTenants = async () => {
-  tenants.value = []
-  const querySnapshot = await getDocs(collection(db, "tenants"))
-  querySnapshot.forEach(docSnapshot => {
-    tenants.value.push({
-      id: docSnapshot.id,
-      ...docSnapshot.data()
-    })
-  })
+  try {
+    const data = await tenantsService.getTenants();
+    tenants.value = data;
+    console.log('✅ Backend API kullanılıyor - Kiracılar');
+  } catch (error) {
+    console.error('Kiracılar yüklenirken hata:', error);
+    handleNetworkError(error, { component: 'Payments', action: 'fetchTenants' })
+  }
+}
+
+const fetchAdvanceAccounts = async () => {
+  try {
+    const data = await paymentsService.getAdvanceAccounts();
+    const validAdvances = data.filter(advance => advance.balance > 0);
+    advanceAccounts.value = validAdvances;
+    console.log(`✅ Backend API kullanılıyor - ${validAdvances.length} adet avans hesabı`);
+  } catch (error) {
+    console.error('Avans hesapları yüklenirken hata:', error)
+    advanceAccounts.value = []
+    handleNetworkError(error, { component: 'Payments', action: 'fetchAdvanceAccounts' })
+  }
 }
 
 const getTenantCompany = (id) => {
@@ -234,14 +296,11 @@ const getTenantCompany = (id) => {
   return tenant ? (tenant.company || `${tenant.firstName} ${tenant.lastName}`) : 'Bilinmiyor'
 }
 
-const savePayment = async () => {
-  if (editMode.value && selectedPaymentId.value) {
-    const paymentRef = doc(db, "payments", selectedPaymentId.value)
-    await updateDoc(paymentRef, { ...newPayment.value })
-  } else {
-    await addDoc(collection(db, "payments"), { ...newPayment.value })
-  }
-
+const handleModalClose = () => {
+  console.log('🚪 Modal kapatılıyor...')
+  showModal.value = false
+  
+  // Formu sıfırla
   newPayment.value = {
     date: new Date().toISOString().substring(0, 10),
     tenantId: '',
@@ -251,16 +310,17 @@ const savePayment = async () => {
   }
   editMode.value = false
   selectedPaymentId.value = null
-  await fetchPayments()
-  showModal.value = false
 }
 
 const deletePayment = async (id) => {
-  const confirmed = confirm("Bu ödemeyi silmek istediğinize emin misiniz?")
-  if (!confirmed) return
-
-  await deleteDoc(doc(db, "payments", id))
-  payments.value = payments.value.filter(p => p.id !== id)
+  try {
+    await paymentsService.deletePayment(id);
+    showDeleteSuccess('Ödeme');
+    await fetchPayments();
+    await fetchAdvanceAccounts();
+  } catch (error) {
+    handleNetworkError(error, { component: 'Payments', action: 'deletePayment' })
+  }
 }
 
 const startEdit = (payment) => {
@@ -270,7 +330,18 @@ const startEdit = (payment) => {
   showModal.value = true
 }
 
-const cancelEdit = () => {
+const handleClearFilters = () => {
+  clearFilters()
+  fetchPayments()
+}
+
+const handlePaymentSave = async () => {
+  console.log('🔄 Ödeme kaydedildi, listeler güncelleniyor...')
+  
+  // Modal'ı kapat
+  showModal.value = false
+  
+  // Formu sıfırla
   newPayment.value = {
     date: new Date().toISOString().substring(0, 10),
     tenantId: '',
@@ -280,16 +351,20 @@ const cancelEdit = () => {
   }
   editMode.value = false
   selectedPaymentId.value = null
-  showModal.value = false
-}
-
-const handleClearFilters = () => {
-  clearFilters()
-  fetchPayments()
+  
+  // Listeleri güncelle
+  await Promise.all([
+    fetchPayments(),
+    fetchAdvanceAccounts()
+  ])
+  
+  showCreateSuccess('Ödeme')
+  console.log('✅ Ödeme işlemi tamamlandı')
 }
 
 onMounted(() => {
   fetchTenants()
+  fetchAdvanceAccounts()
   fetchPayments()
 })
 </script>

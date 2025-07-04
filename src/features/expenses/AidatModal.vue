@@ -102,8 +102,7 @@
 
 <script setup>
 import { ref } from 'vue'
-import { db } from '../../firebase'
-import { collection, getDocs, query, where, addDoc } from 'firebase/firestore'
+import apiService from '@/services/api.js'
 
 const emit = defineEmits(['close', 'refresh'])
 
@@ -123,77 +122,19 @@ const handleSubmit = async () => {
 
     const year = parseInt(period.value.slice(0, 4))
 
-    // 1. Kiracı Aidatlarını İşle
-    const annualDuesQuery = query(collection(db, 'annualDues'), where('year', '==', year));
-    const annualDuesSnap = await getDocs(annualDuesQuery);
+    // Backend API'ya aidat oluşturma isteği gönder
+    const result = await apiService.post('/utilitydebts/create-aidat', {
+      period: period.value,
+      dueDate: dueDate.value,
+      year: year
+    })
     
-    let tenantDuesCreated = 0;
-    for (const docSnap of annualDuesSnap.docs) {
-      const data = docSnap.data();
-      if (data.amount > 0) {
-        // Bu dönem için zaten aidat var mı?
-        const existingRecordQuery = query(collection(db, 'aidatRecords'), 
-          where('tenantId', '==', data.tenantId),
-          where('unit', '==', data.unit),
-          where('period', '==', period.value)
-        );
-        const existingRecordSnap = await getDocs(existingRecordQuery);
-
-        if (existingRecordSnap.empty) {
-          await addDoc(collection(db, 'aidatRecords'), {
-            tenantId: data.tenantId,
-            unit: data.unit,
-            period: period.value,
-            dueDate: dueDate.value,
-            kdvHaric: data.amount,
-            toplamTutar: data.vatIncludedAmount,
-            type: 'aidat',
-            isPaid: false,
-            createdAt: new Date(),
-          });
-          tenantDuesCreated++;
-        }
-      }
+    if (result.tenantDuesCreated === 0 && result.ownerDuesCreated === 0) {
+      alert(`Seçilen dönem (${period.value}) için zaten tüm aidat kayıtları oluşturulmuş veya tanımlı aidat bulunmuyor.`)
+      return
     }
 
-    // 2. Mal Sahibi Aidatlarını İşle
-    const ownerDuesQuery = query(collection(db, 'ownerDues'), where('year', '==', year));
-    const ownerDuesSnap = await getDocs(ownerDuesQuery);
-
-    let ownerDuesCreated = 0;
-    for (const docSnap of ownerDuesSnap.docs) {
-      const data = docSnap.data();
-      if (data.isActive && data.amount > 0) {
-        // Bu dönem için zaten aidat var mı?
-        const existingRecordQuery = query(collection(db, 'ownerAidatRecords'), 
-          where('unit', '==', data.unit),
-          where('period', '==', period.value)
-        );
-        const existingRecordSnap = await getDocs(existingRecordQuery);
-
-        if (existingRecordSnap.empty) {
-          await addDoc(collection(db, 'ownerAidatRecords'), {
-            ownerId: data.ownerId || 'MAL_SAHIBI',
-            unit: data.unit,
-            period: period.value,
-            dueDate: dueDate.value,
-            kdvHaric: data.amount,
-            toplamTutar: data.vatIncludedAmount,
-            type: 'aidat',
-            isPaid: false,
-            createdAt: new Date(),
-          });
-          ownerDuesCreated++;
-        }
-      }
-    }
-
-    if (tenantDuesCreated === 0 && ownerDuesCreated === 0) {
-      alert(`Seçilen dönem (${period.value}) için zaten tüm aidat kayıtları oluşturulmuş veya tanımlı aidat bulunmuyor.`);
-      return;
-    }
-
-    alert(`${tenantDuesCreated} kiracı ve ${ownerDuesCreated} mal sahibi için aidat kayıtları başarıyla oluşturuldu.`);
+    alert(`${result.tenantDuesCreated} kiracı ve ${result.ownerDuesCreated} mal sahibi için aidat kayıtları başarıyla oluşturuldu.`)
     emit('refresh')
     emit('close')
   } catch (error) {

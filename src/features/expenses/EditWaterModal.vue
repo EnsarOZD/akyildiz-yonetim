@@ -110,7 +110,7 @@
               </label>
               <input 
                 type="number" 
-                v-model.number="local.waterAmount" 
+                v-model.number="local.kdvHaric" 
                 class="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300" 
                 step="0.01"
                 min="0"
@@ -178,7 +178,7 @@
           <button 
             class="btn btn-primary btn-sm" 
             @click="save"
-            :disabled="local.previousValue < 0 || local.currentValue < 0 || local.waterAmount < 0 || local.wasteAmount < 0"
+            :disabled="local.previousValue < 0 || local.currentValue < 0 || local.kdvHaric < 0 || local.wasteAmount < 0"
           >
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
@@ -192,33 +192,49 @@
 </template>
 
 <script setup>
-import { ref, computed, watchEffect } from 'vue'
-import { doc, updateDoc } from 'firebase/firestore'
-import { db } from '../../firebase'
+import { ref, computed, watchEffect, onMounted } from 'vue'
+import { useErrorHandler } from '@/composables/useErrorHandler'
+import expensesService from '@/services/expensesService'
 
 const props = defineProps({ record: Object })
 const emit = defineEmits(['close', 'updated'])
 
+const { handleNetworkError, handleValidationError, showSuccess } = useErrorHandler()
+
 const local = ref({
   previousValue: 0,
   currentValue: 0,
-  waterAmount: 0,
-  wasteAmount: 0
+  kdvHaric: 0
 })
 
-// 🔄 Her props değişiminde formu doldur
+const validation = ref({
+  isValid: true,
+  issues: [],
+  warnings: []
+})
+
+const validateInputs = () => {
+  const newRecord = {
+    currentValue: local.value.currentValue,
+    previousValue: local.value.previousValue,
+    endDate: props.record?.endDate
+  }
+  
+  validation.value = meterManager.validateReadingEdit(props.record, newRecord)
+}
+
+// Record değiştiğinde input'lara yansıt
 watchEffect(() => {
-  const r = props.record
-  if (r) {
-    local.value.previousValue = typeof r.previousValue === 'number' ? r.previousValue : 0
-    local.value.currentValue = typeof r.currentValue === 'number' ? r.currentValue : 0
-    local.value.waterAmount = typeof r.waterAmount === 'number' ? r.waterAmount : 0
-    local.value.wasteAmount = typeof r.wasteAmount === 'number' ? r.wasteAmount : 0
+  if (props.record) {
+    local.value.previousValue = props.record.previousValue ?? 0
+    local.value.currentValue = props.record.currentValue ?? 0
+    local.value.kdvHaric = props.record.kdvHaric ?? 0
+    validateInputs()
   }
 })
 
 const totalWithVAT = computed(() => {
-  const water = local.value.waterAmount * 1.01
+  const water = local.value.kdvHaric * 1.01
   const waste = local.value.wasteAmount * 1.10
   return +(water + waste).toFixed(2)
 })
@@ -228,34 +244,61 @@ const formatCurrency = val =>
 
 const save = async () => {
   try {
-    const consumption = local.value.currentValue - local.value.previousValue
-
-    if (consumption < 0) {
-      alert('Yeni endeks, önceki endeksten küçük olamaz.')
+    // Son validasyon
+    validateInputs()
+    if (!validation.value.isValid) {
+      handleValidationError('Lütfen hataları düzeltin.', { 
+        component: 'EditWaterModal', 
+        action: 'save' 
+      })
       return
     }
 
-    const kdvHaric = +(local.value.waterAmount + local.value.wasteAmount).toFixed(2)
-    const toplam = totalWithVAT.value
+    const consumption = calculateConsumption(local.value.currentValue, local.value.previousValue)
+    const toplamTutar = calculateTotalWithVAT(local.value.kdvHaric, 0.20)
+    const refDoc = doc(db, 'readings', props.record.id)
 
-    const docRef = doc(db, 'readings', props.record.id)
-    await updateDoc(docRef, {
+    // Audit trail oluştur
+    const auditTrail = meterManager.createAuditTrail(
+      props.record, 
+      { ...props.record, ...local.value, consumption, toplamTutar },
+      authStore.user?.uid || 'unknown_user'
+    )
+
+    // Ana kaydı güncelle
+    await updateDoc(refDoc, {
       previousValue: local.value.previousValue,
       currentValue: local.value.currentValue,
-      consumption,
-      waterAmount: local.value.waterAmount,
-      wasteAmount: local.value.wasteAmount,
-      kdvHaric,
-      toplamTutar: toplam,
-      kdvDahil: toplam
+      consumption: consumption,
+      kdvHaric: local.value.kdvHaric,
+      toplamTutar: toplamTutar,
+      kdvDahil: toplamTutar,
+      // Ödeme durumu güncelleme
+      remainingAmount: toplamTutar - (props.record.paidAmount || 0),
+      isPaid: (toplamTutar - (props.record.paidAmount || 0)) <= 0,
+      lastModified: new Date(),
+      modifiedBy: authStore.user?.uid || 'unknown_user'
     })
 
-    alert('Su kaydı başarıyla güncellendi.')
+    // Audit trail'i kaydet
+    await addDoc(collection(db, 'auditTrail'), auditTrail)
+
+    // Cache'i temizle
+    meterManager.clearCacheForUnit(props.record.unit, 'water')
+
+    // Başarı mesajı
+    showSuccess('Su kaydı başarıyla güncellendi.', { 
+      component: 'EditWaterModal', 
+      action: 'save' 
+    })
+    
     emit('updated')
     emit('close')
   } catch (error) {
-    console.error('Güncelleme hatası:', error)
-    alert('Güncelleme sırasında bir hata oluştu.')
+    handleNetworkError(error, { 
+      component: 'EditWaterModal', 
+      action: 'save' 
+    })
   }
 }
 </script>
