@@ -212,9 +212,13 @@
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
-import { db } from '../../firebase'
-import { collection, addDoc, getDocs, query, where, orderBy, limit } from 'firebase/firestore'
-import { meterManager, calculateConsumption, calculateTotalWithVAT } from '../../utils/meterUtils'
+import { useErrorHandler } from '@/composables/useErrorHandler'
+import { useNotification } from '@/composables/useNotification'
+import apiService from '@/services/api.js'
+import tenantsService from '@/services/tenantsService.js'
+
+// Emit tanımı
+const emit = defineEmits(['close'])
 
 const tenants = ref([])
 const readings = ref([])
@@ -249,73 +253,99 @@ const hasAllReadings = computed(() => {
 const formatDecimal = (val) => isNaN(val) ? '0.00' : Number(val).toFixed(2)
 
 const fetchTenants = async () => {
-  tenants.value = []
-  readings.value = []
-  const processedUnits = new Set()
+  try {
+    tenants.value = []
+    readings.value = []
 
-  const staticUnits = [
-    { tenantId: 'ortak', unit: 'ORTAK ALAN', name: 'ORTAK ALAN' },
-    { tenantId: 'mescit', unit: 'MESCİT', name: 'MESCİT' }
-  ]
+    // Kiracıları getir
+    const tenantsData = await tenantsService.getTenants()
 
-  // Tüm birimleri topla
-  const allUnits = [...staticUnits.map(s => s.unit)]
-  
-  // Kiracıları getir ve birimleri ekle (aktif/pasif fark etmeksizin)
-  const snapshot = await getDocs(collection(db, 'tenants'))
-  
-  snapshot.forEach(doc => {
-    const data = doc.data()
-    // isActive kontrolünü kaldırdık - tüm kiracıları göster
-    for (const unit of data.units || []) {
-      if (!processedUnits.has(unit)) {
-        allUnits.push(unit)
-        processedUnits.add(unit)
-      }
-    }
-  })
+    // Daireleri getir
+    const flats = await apiService.get('/flats')
 
-  // Batch olarak son okumaları getir
-  const lastReadingsMap = await meterManager.getLastReadingsBatch(allUnits, 'water')
+    // Son su okumalarını getir
+    const lastReadings = await apiService.get('/utilitydebts/last-readings/water')
+    const lastReadingsMap = new Map(lastReadings.map(r => [r.flatNumber, r]))
 
-  // Static birimler için okumaları oluştur
-  for (const s of staticUnits) {
-    const lastReading = lastReadingsMap.get(s.unit)
-    readings.value.push({
-      ...s,
-      previous: lastReading ? lastReading.currentValue : 0,
-      current: 0,
-      usage: 0,
-      kdvHaric: 0,
-      kdvDahil: 0
-    })
-  }
+    // Static birimler
+    const staticUnits = [
+      { tenantId: null, ownerId: null, unit: 'ORTAK ALAN', name: 'ORTAK ALAN', isActive: true },
+      { tenantId: null, ownerId: null, unit: 'MESCİT', name: 'MESCİT', isActive: true }
+    ]
 
-  // Kiracı birimleri için okumaları oluştur (aktif/pasif fark etmeksizin)
-  snapshot.forEach(doc => {
-    const data = doc.data()
-    // isActive kontrolünü kaldırdık - tüm kiracıları göster
-    for (const unit of data.units || []) {
-      const lastReading = lastReadingsMap.get(unit)
-      const reading = {
-        tenantId: doc.id,
-        unit,
-        name: data.company,
-        isActive: data.isActive, // Aktiflik durumunu sakla
-        previous: lastReading ? lastReading.currentValue : 0,
+    // Static birimler için okumaları oluştur
+    for (const s of staticUnits) {
+      const lastReading = lastReadingsMap.get(s.unit)
+      readings.value.push({
+        ...s,
+        previous: lastReading ? lastReading.currentReading : 0,
         current: 0,
         usage: 0,
         kdvHaric: 0,
         kdvDahil: 0
-      }
-      readings.value.push(reading)
+      })
     }
-  })
+
+    // Kiracı birimleri için okumaları oluştur
+    tenantsData.forEach(tenant => {
+      if (tenant.flats && Array.isArray(tenant.flats)) {
+        tenant.flats.forEach(flatId => {
+          const flat = flats.find(f => f.id === flatId)
+          if (flat) {
+            const lastReading = lastReadingsMap.get(flat.flatNumber)
+            const reading = {
+              tenantId: tenant.id,
+              ownerId: null,
+              unit: flat.flatNumber,
+              name: tenant.company || `${tenant.firstName} ${tenant.lastName}`,
+              isActive: tenant.status === 'Active',
+              previous: lastReading ? lastReading.currentReading : 0,
+              current: 0,
+              usage: 0,
+              kdvHaric: 0,
+              kdvDahil: 0
+            }
+            readings.value.push(reading)
+          }
+        })
+      }
+    })
+
+    // Mal sahipleri için okumaları oluştur
+    const owners = await apiService.get('/owners')
+    owners.forEach(owner => {
+      if (owner.flats && Array.isArray(owner.flats)) {
+        owner.flats.forEach(flatId => {
+          const flat = flats.find(f => f.id === flatId)
+          if (flat) {
+            const lastReading = lastReadingsMap.get(flat.flatNumber)
+            const reading = {
+              tenantId: null,
+              ownerId: owner.id,
+              unit: flat.flatNumber,
+              name: owner.company || `${owner.firstName} ${owner.lastName}`,
+              isActive: true,
+              previous: lastReading ? lastReading.currentReading : 0,
+              current: 0,
+              usage: 0,
+              kdvHaric: 0,
+              kdvDahil: 0
+            }
+            readings.value.push(reading)
+          }
+        })
+      }
+    })
+
+  } catch (error) {
+    console.error('Veri yükleme hatası:', error)
+    alert('Veriler yüklenirken bir hata oluştu.')
+  }
 }
 
 const calculate = (i) => {
   const r = readings.value[i]
-  r.usage = calculateConsumption(r.current, r.previous)
+  r.usage = Math.max(0, r.current - r.previous)
 
   const s = r.usage * (waterUnitPrice.value + wasteUnitPrice.value)
   const suKdv = r.usage * waterUnitPrice.value * 0.01
@@ -336,38 +366,40 @@ const save = async (onlyFilled = false) => {
     return
   }
 
-  const colRef = collection(db, 'readings')
-  const dataToSave = onlyFilled
-    ? readings.value.filter(r => r.previous >= 0 && r.current > r.previous)
-    : readings.value
+  try {
+    const dataToSave = onlyFilled
+      ? readings.value.filter(r => r.previous >= 0 && r.current > r.previous)
+      : readings.value
 
-  for (const r of dataToSave) {
-    await addDoc(colRef, {
-      tenantId: r.tenantId,
-      unit: r.unit,
-      period: selectedPeriod.value,
-      type: 'water',
-      previousValue: r.previous,
-      currentValue: r.current,
-      usage: r.usage,
-      kdvHaric: r.kdvHaric,
-      kdvDahil: r.kdvDahil,
-      startDate: startDate.value,
-      endDate: endDate.value,
-      dueDate: dueDate.value,
-      dayCount: dayCount.value,
-      waterUnitPrice: waterUnitPrice.value,
-      wasteUnitPrice: wasteUnitPrice.value,
-      createdAt: new Date()
-    })
+    for (const r of dataToSave) {
+      const utilityDebtData = {
+        flatNumber: r.unit,
+        tenantId: r.tenantId,
+        ownerId: r.ownerId,
+        utilityType: 'Water',
+        period: selectedPeriod.value,
+        previousReading: r.previous,
+        currentReading: r.current,
+        consumption: r.usage,
+        amount: r.kdvDahil,
+        dueDate: dueDate.value,
+        startDate: startDate.value,
+        endDate: endDate.value,
+        isPaid: false,
+        paidAmount: 0,
+        waterUnitPrice: waterUnitPrice.value,
+        wasteUnitPrice: wasteUnitPrice.value
+      }
+
+      await apiService.post('/utilitydebts', utilityDebtData)
+    }
+
+    alert(onlyFilled ? 'Girilen kayıtlar eklendi.' : 'Tüm kayıtlar eklendi.')
+    emit('close')
+  } catch (error) {
+    console.error('Kaydetme hatası:', error)
+    alert('Kayıtlar kaydedilirken bir hata oluştu.')
   }
-
-  // Cache'i temizle
-  meterManager.clearCache()
-
-  alert(onlyFilled ? 'Girilen kayıtlar eklendi.' : 'Tüm kayıtlar eklendi.')
-  readings.value = []
-  fetchTenants()
 }
 
 const saveReadings = () => save(false)

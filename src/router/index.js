@@ -1,27 +1,26 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import { getAuth, onAuthStateChanged } from 'firebase/auth'
-import { db } from '../firebase'
-import { doc, getDoc } from 'firebase/firestore'
+import authService from '@/services/authService'
 
-// Sayfa bileşenleri
-import Dashboard from '../features/dashboard/Dashboard.vue'
-import Tenants from '../features/tenants/Tenants.vue'
-import Payments from '../features/payments/Payments.vue'
-import Expenses from '../features/expenses/Expenses.vue'
-import Utilities from '../features/expenses/Utilities.vue'
-import TenantDetailPage from '../features/tenants/components/TenantDetailPage.vue'
-import AdminDashboard from '../features/dashboard/AdminDashboard.vue'
-import LoginView from '../views/LoginView.vue'
-import Transactions from '../pages/Transactions.vue'
-import OwnerDuesPanel from '../features/expenses/OwnerDuesPanel.vue'
-import Owners from '../features/owners/Owners.vue'
-import OwnerDues from '../pages/OwnerDues.vue'
-import OwnerPayments from '../pages/OwnerPayments.vue'
-import OverdueOwnerPayments from '../pages/OverdueOwnerPayments.vue'
-import Overdue from '../pages/Overdue.vue'
+// Lazy loaded components for better performance
+const Dashboard = () => import('../features/dashboard/Dashboard.vue')
+const Tenants = () => import('../features/tenants/Tenants.vue')
+const Payments = () => import('../features/payments/Payments.vue')
+const Expenses = () => import('../features/expenses/Expenses.vue')
+const Utilities = () => import('../features/expenses/Utilities.vue')
+const TenantDetailPage = () => import('../features/tenants/components/TenantDetailPage.vue')
+const AdminDashboard = () => import('../features/dashboard/AdminDashboard.vue')
+const LoginView = () => import('../views/LoginView.vue')
+const LandingPage = () => import('../views/LandingPage.vue')
+const Transactions = () => import('../pages/Transactions.vue')
+const OwnerDuesPanel = () => import('../features/expenses/OwnerDuesPanel.vue')
+const Owners = () => import('../features/owners/Owners.vue')
+const OwnerDues = () => import('../pages/OwnerDues.vue')
+const OwnerPayments = () => import('../pages/OwnerPayments.vue')
+const OverdueOwnerPayments = () => import('../pages/OverdueOwnerPayments.vue')
+const Overdue = () => import('../pages/Overdue.vue')
 
 const routes = [
-  { path: '/', redirect: '/dashboard' },
+  { path: '/', name: 'Landing', component: LandingPage, meta: { public: true, hideLayout: true } },
 
   { path: '/dashboard', name: 'Dashboard', component: Dashboard, meta: { requiresAuth: true, roles: ['admin', 'manager'] } },
   { path: '/tenants', name: 'Tenants', component: Tenants, meta: { requiresAuth: true, roles: ['admin', 'manager'] } },
@@ -39,12 +38,14 @@ const routes = [
   {
     path: '/transactions',
     name: 'Transactions',
-    component: Transactions
+    component: Transactions,
+    meta: { requiresAuth: true, roles: ['admin', 'manager'] }
   },
   {
     path: '/overdue',
     name: 'Overdue',
-    component: Overdue
+    component: Overdue,
+    meta: { requiresAuth: true, roles: ['admin', 'manager'] }
   },
   { path: '/owner-dues', name: 'OwnerDues', component: OwnerDuesPanel, meta: { requiresAuth: true, roles: ['admin', 'manager'] } },
   { path: '/owners', name: 'Owners', component: Owners, meta: { requiresAuth: true, roles: ['admin', 'manager'] } },
@@ -59,34 +60,47 @@ const router = createRouter({
   routes
 })
 
-router.beforeEach((to, from, next) => {
-  const requiresAuth = to.meta.requiresAuth
-  const allowedRoles = to.meta.roles
+// Güvenlik için rate limiting
+const authAttempts = new Map()
+const MAX_AUTH_ATTEMPTS = 5
+const AUTH_TIMEOUT = 15 * 60 * 1000 // 15 dakika
 
-  const unsubscribe = onAuthStateChanged(getAuth(), async (user) => {
-    unsubscribe()
+let loginRedirectCount = 0;
 
+router.beforeEach(async (to, from, next) => {
+  const requiresAuth = to.meta.requiresAuth;
+  const isPublic = to.meta.public;
+
+  if (to.path === '/login' && (from.path === '/login' || !requiresAuth)) {
+    return next();
+  }
+  if (isPublic) {
+    return next();
+  }
+
+  const isBackendActive = import.meta.env.VITE_API_BASE_URL && 
+                         import.meta.env.VITE_API_BASE_URL !== 'http://localhost:5000/api';
+
+  if (isBackendActive) {
+    const user = await authService.checkAuthStatus();
     if (!user && requiresAuth) {
-      return next('/login')
+      if (to.path !== '/login') return next('/login');
+      return next();
     }
-
-    if (user && allowedRoles) {
-      const userDocRef = doc(db, 'users', user.uid)
-      const userDocSnap = await getDoc(userDocRef)
-      const role = userDocSnap.exists() ? userDocSnap.data().role : null
-
-      if (!allowedRoles.includes(role)) {
-        if (to.path !== '/dashboard') {
-          return next('/dashboard')
-        } else {
-          return next(false)
-        }
-      }
+    if (user && to.path === '/login') {
+      // Rolüne göre yönlendir
+      let target = '/dashboard';
+      if (user.role === 'admin') target = '/admin';
+      else if (user.role === 'manager') target = '/dashboard';
+      else if (user.role === 'viewer') target = '/overdue';
+      else if (user.role === 'tenant') target = '/profile';
+      if (to.path !== target) return next(target);
+      return next();
     }
-
-    return next()
-  })
-})
-
+    return next();
+  } else {
+    return next();
+  }
+});
 
 export default router

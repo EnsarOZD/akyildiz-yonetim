@@ -31,6 +31,19 @@
 
         <!-- Kullanıcı Menüsü ve Mobil Menü Butonu (Sağ Alan) -->
         <div class="flex items-center">
+          <!-- Tema Değiştir Butonu -->
+          <button
+            @click="authStore.toggleTheme"
+            class="ml-4 p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition"
+            :aria-label="authStore.theme === 'dark' ? 'Açık moda geç' : 'Karanlık moda geç'"
+          >
+            <svg v-if="authStore.theme === 'dark'" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m8.66-13.66l-.71.71M4.05 19.07l-.71.71M21 12h-1M4 12H3m16.66 5.66l-.71-.71M4.05 4.93l-.71-.71M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+            </svg>
+            <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21 12.79A9 9 0 1111.21 3a7 7 0 109.79 9.79z" />
+            </svg>
+          </button>
           <!-- Kullanıcı Dropdown -->
           <div v-if="userInfo" class="relative">
             <button @click="toggleUserDropdown" class="flex items-center gap-2 text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white">
@@ -106,14 +119,13 @@
 <script setup>
 import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { getAuth, signOut, onAuthStateChanged, sendPasswordResetEmail } from 'firebase/auth'
-import { doc, getDoc } from 'firebase/firestore'
-import { db } from '../../firebase'
 import { ROLES } from '@/constants/roles'
+import authService from '@/services/authService'
+import { useAuthStore } from '@/stores/auth'
+const authStore = useAuthStore()
 
 const route = useRoute()
 const router = useRouter()
-const auth = getAuth()
 
 const userInfo = ref(null)
 const tabs = ref([])
@@ -127,50 +139,92 @@ const clickOutsideHandler = (event) => {
   }
 }
 
-onMounted(() => {
-  document.addEventListener('click', clickOutsideHandler)
-
-  onAuthStateChanged(auth, async (currentUser) => {
-    if (currentUser) {
-      const userDoc = await getDoc(doc(db, 'users', currentUser.uid))
-      if (userDoc.exists()) {
-        const data = userDoc.data();
-        userInfo.value = {
-          ...data,
-          role: data.role || 'Bilinmiyor'
-        };
-
-        // Set tabs based on role
-        if (data.role === ROLES.ADMIN) {
-          tabs.value = [
-            { label: 'Özet', value: 'dashboard', route: '/dashboard' },
-            { label: 'Kiracılar', value: 'tenants', route: '/tenants' },
-            { label: 'Ödemeler', value: 'payments', route: '/payments' },
-            { label: 'Giderler', value: 'expenses', route: '/expenses' },
-            { label: 'Sayaçlar', value: 'utilities', route: '/utilities' },
-            { label: 'Yönetim', value: 'admin', route: '/admin' }
-          ]
-        } else if (data.role === ROLES.MANAGER) {
-           tabs.value = [
-            { label: 'Özet', value: 'dashboard', route: '/dashboard' },
-            { label: 'Kiracılar', value: 'tenants', route: '/tenants' },
-            { label: 'Ödemeler', value: 'payments', route: '/payments' },
-            { label: 'Giderler', value: 'expenses', route: '/expenses' },
-            { label: 'Sayaçlar', value: 'utilities', route: '/utilities' }
-          ]
-        } else if (data.role === ROLES.TENANT) {
-          tabs.value = [
-            { label: 'Profilim', value: 'profile', route: '/profile' }
-          ]
-        } else {
-            tabs.value = []
-        }
+// Backend'den kullanıcı bilgilerini yükle
+const loadUserFromBackend = async () => {
+  try {
+    const user = await authService.checkAuthStatus()
+    if (user) {
+      userInfo.value = {
+        firstName: user.firstName || user.name || 'Kullanıcı',
+        lastName: user.lastName || '',
+        role: user.role || 'Bilinmiyor'
       }
+      setTabsBasedOnRole(user.role)
     } else {
       userInfo.value = null
       tabs.value = []
     }
-  })
+  } catch (error) {
+    console.error('Backend kullanıcı kontrolü hatası:', error)
+    userInfo.value = null
+    tabs.value = []
+  }
+}
+
+// Rol bazlı tab'ları ayarla
+const setTabsBasedOnRole = (role) => {
+  const normalizedRole = (role || '').toLowerCase();
+  if (normalizedRole === ROLES.ADMIN) {
+    tabs.value = [
+      { label: 'Özet', value: 'dashboard', route: '/dashboard' },
+      { label: 'Kiracılar', value: 'tenants', route: '/tenants' },
+      { label: 'Ödemeler', value: 'payments', route: '/payments' },
+      { label: 'Giderler', value: 'expenses', route: '/expenses' },
+      { label: 'Sayaçlar', value: 'utilities', route: '/utilities' },
+      { label: 'Yönetim', value: 'admin', route: '/admin' }
+    ]
+  } else if (normalizedRole === ROLES.MANAGER) {
+     tabs.value = [
+      { label: 'Özet', value: 'dashboard', route: '/dashboard' },
+      { label: 'Kiracılar', value: 'tenants', route: '/tenants' },
+      { label: 'Ödemeler', value: 'payments', route: '/payments' },
+      { label: 'Giderler', value: 'expenses', route: '/expenses' },
+      { label: 'Sayaçlar', value: 'utilities', route: '/utilities' }
+    ]
+  } else if (normalizedRole === ROLES.TENANT) {
+    tabs.value = [
+      { label: 'Profilim', value: 'profile', route: '/profile' }
+    ]
+  } else {
+      tabs.value = []
+  }
+}
+
+onMounted(() => {
+  document.addEventListener('click', clickOutsideHandler)
+
+  // Backend API kontrolü
+  const isBackendActive = import.meta.env.VITE_API_BASE_URL && 
+                         import.meta.env.VITE_API_BASE_URL !== 'http://localhost:5000/api'
+
+  if (isBackendActive) {
+    // Backend API ile kullanıcı kontrolü
+    loadUserFromBackend()
+  } else {
+    // Demo modu kontrolü
+    const isDemoMode = !import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_BASE_URL === 'http://localhost:5000/api'
+    
+    if (isDemoMode) {
+      // Demo modu için mock kullanıcı
+      setTimeout(() => {
+        userInfo.value = {
+          firstName: 'Demo',
+          lastName: 'Kullanıcı',
+          role: 'admin'
+        }
+        
+        tabs.value = [
+          { label: 'Özet', value: 'dashboard', route: '/dashboard' },
+          { label: 'Kiracılar', value: 'tenants', route: '/tenants' },
+          { label: 'Ödemeler', value: 'payments', route: '/payments' },
+          { label: 'Giderler', value: 'expenses', route: '/expenses' },
+          { label: 'Sayaçlar', value: 'utilities', route: '/utilities' },
+          { label: 'Yönetim', value: 'admin', route: '/admin' }
+        ]
+      }, 1000)
+      return
+    }
+  }
 })
 
 onBeforeUnmount(() => {
@@ -191,21 +245,71 @@ const toggleMobileMenu = () => {
 
 const logout = async () => {
   showUserDropdown.value = false;
-  await signOut(auth);
-  router.push('/login');
+  
+  // Backend API kontrolü
+  const isBackendActive = import.meta.env.VITE_API_BASE_URL && 
+                         import.meta.env.VITE_API_BASE_URL !== 'http://localhost:5000/api'
+
+  if (isBackendActive) {
+    // Backend API ile logout
+    try {
+      await authService.logout()
+      userInfo.value = null
+      tabs.value = []
+      router.push('/login')
+    } catch (error) {
+      console.error('Backend logout error:', error)
+      // Hata olsa bile local state'i temizle
+      userInfo.value = null
+      tabs.value = []
+      router.push('/login')
+    }
+  } else {
+    // Demo modu kontrolü
+    const isDemoMode = !import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_BASE_URL === 'http://localhost:5000/api'
+    
+    if (isDemoMode) {
+      console.log('Demo: Çıkış yapılıyor...')
+      userInfo.value = null
+      tabs.value = []
+      router.push('/login')
+      return
+    }
+  }
 }
 
 const changePassword = async () => {
-  const user = auth.currentUser
-  if (user && user.email) {
+  // Backend API kontrolü
+  const isBackendActive = import.meta.env.VITE_API_BASE_URL && 
+                         import.meta.env.VITE_API_BASE_URL !== 'http://localhost:5000/api'
+
+  if (isBackendActive) {
+    // Backend API ile şifre sıfırlama
     try {
-      await sendPasswordResetEmail(auth, user.email)
-      alert('Şifre sıfırlama bağlantısı e-posta adresinize gönderildi.')
+      const user = await authService.checkAuthStatus()
+      if (user && user.email) {
+        await authService.resetPassword(user.email)
+        alert('Şifre sıfırlama bağlantısı e-posta adresinize gönderildi.')
+      } else {
+        alert('Kullanıcı bilgileri bulunamadı.')
+      }
     } catch (error) {
-      console.error("Şifre sıfırlama e-postası gönderme hatası:", error);
+      console.error("Backend şifre sıfırlama hatası:", error);
       alert("Bir hata oluştu. Lütfen tekrar deneyin.");
     }
+    showUserDropdown.value = false;
+    return
   }
+
+  // Demo modu kontrolü
+  const isDemoMode = !import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_BASE_URL === 'http://localhost:5000/api'
+  
+  if (isDemoMode) {
+    alert('Demo modu: Şifre sıfırlama bağlantısı e-posta adresinize gönderildi.')
+    showUserDropdown.value = false;
+    return
+  }
+  
   showUserDropdown.value = false;
 }
 </script>

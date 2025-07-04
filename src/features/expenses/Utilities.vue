@@ -38,7 +38,7 @@
             </span>
           </div>
           <div class="text-sm text-green-600 dark:text-green-400">
-            {{ readings.length }} kayıt
+            {{ utilityDebts.length }} kayıt
           </div>
         </div>
       </div>
@@ -99,37 +99,43 @@
 
         <!-- Fatura Kart Listesi -->
         <div class="mt-6 space-y-2">
-           <div v-if="filteredReadings.length === 0" class="text-center py-12 text-gray-500 dark:text-gray-400">
+           <div v-if="filteredUtilityDebts.length === 0" class="text-center py-12 text-gray-500 dark:text-gray-400">
             <p>Aramanızla eşleşen kayıt bulunamadı.</p>
           </div>
           <div v-else>
             <div 
-              v-for="r in filteredReadings" 
-              :key="r.id"
+              v-for="debt in filteredUtilityDebts" 
+              :key="debt.id"
               class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center p-4 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-200 border-b dark:border-gray-700/50"
             >
               <div class="md:col-span-4 flex items-center gap-4">
                 <div class="flex-shrink-0 h-12 w-12 flex items-center justify-center bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-full text-2xl">
-                  {{ getUtilityIcon(r.type) }}
+                  {{ getUtilityIcon(debt.utilityType) }}
                 </div>
                 <div>
-                  <p class="font-bold text-gray-800 dark:text-gray-100">{{ r.tenantName || '-' }}</p>
-                  <p class="text-sm text-gray-500 dark:text-gray-400">Dönem: {{ r.period }}</p>
-                  <p v-if="r.unitInfo" class="text-xs text-gray-400 dark:text-gray-500">Kat: {{ r.unitInfo }}</p>
+                  <p class="font-bold text-gray-800 dark:text-gray-100">{{ debt.tenantName || debt.ownerName || '-' }}</p>
+                  <p class="text-sm text-gray-500 dark:text-gray-400">Dönem: {{ debt.period }}</p>
+                  <p v-if="debt.flatNumber" class="text-xs text-gray-400 dark:text-gray-500">Daire: {{ debt.flatNumber }}</p>
                 </div>
               </div>
               <div class="md:col-span-3 text-left md:text-center text-lg font-semibold text-gray-700 dark:text-gray-200">
-                <span class="font-normal text-sm text-gray-500">Tüketim:</span> {{ formatUsage(r.consumption ?? r.usage, r.type === 'electricity' ? 'kWh' : (r.type === 'water' ? 'm³' : '')) }}
+                <span class="font-normal text-sm text-gray-500">Tüketim:</span> {{ formatUsage(debt.consumption, debt.utilityType === 'Electricity' ? 'kWh' : (debt.utilityType === 'Water' ? 'm³' : '')) }}
               </div>
               <div class="md:col-span-3 text-left md:text-center text-xl font-bold text-sky-600 dark:text-sky-400">
-                {{ formatCurrency(r.toplamTutar ?? r.kdvDahil) }}
+                {{ formatCurrency(debt.amount) }}
+              </div>
+              <div class="md:col-span-2 text-center">
+                <!-- Ödeme Durumu Badge -->
+                <div v-if="debt.isPaid" class="badge badge-success badge-sm">Ödendi</div>
+                <div v-else-if="debt.paidAmount && debt.paidAmount > 0" class="badge badge-warning badge-sm">Kısmi Ödeme</div>
+                <div v-else class="badge badge-error badge-sm">Ödenmedi</div>
               </div>
               <div class="md:col-span-2 text-right">
                 <div class="dropdown dropdown-end">
                   <label tabindex="0" class="btn btn-ghost btn-sm">İşlemler</label>
                   <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-200 rounded-box w-32 z-10">
-                    <li><a @click="editRecord(r)">Düzenle</a></li>
-                    <li><a @click="deleteRecord(r.id)" class="text-red-500">Sil</a></li>
+                    <li><a @click="editRecord(debt)">Düzenle</a></li>
+                    <li><a @click="deleteRecord(debt.id)" class="text-red-500">Sil</a></li>
                   </ul>
                 </div>
               </div>
@@ -142,10 +148,10 @@
     <!-- Modal Bileşenleri -->
     <ElectricityModal v-if="showElectricityModal" @close="handleClose" />
     <WaterModal v-if="showWaterModal" @close="handleClose" />
-    <AidatModal v-if="showAidatModal" @close="() => (showAidatModal = false)" @refresh="fetchReadings" />
-    <EditElectricityModal v-if="showEditElectricityModal" :record="selectedElectricityRecord" @close="() => { showEditElectricityModal = false; selectedElectricityRecord = null }" @updated="fetchReadings" />
-    <EditWaterModal v-if="showEditWaterModal" :record="selectedWaterRecord" @close="() => { showEditWaterModal = false; selectedWaterRecord = null }" @updated="fetchReadings" />
-    <EditAidatModal v-if="showEditAidatModal" :record="selectedAidatRecord" @close="() => { showEditAidatModal = false; selectedAidatRecord = null }" @updated="fetchReadings" />
+    <AidatModal v-if="showAidatModal" @close="() => (showAidatModal = false)" @refresh="fetchUtilityDebts" />
+    <EditElectricityModal v-if="showEditElectricityModal" :record="selectedElectricityRecord" @close="() => { showEditElectricityModal = false; selectedElectricityRecord = null }" @updated="fetchUtilityDebts" />
+    <EditWaterModal v-if="showEditWaterModal" :record="selectedWaterRecord" @close="() => { showEditWaterModal = false; selectedWaterRecord = null }" @updated="fetchUtilityDebts" />
+    <EditAidatModal v-if="showEditAidatModal" :record="selectedAidatRecord" @close="() => { showEditAidatModal = false; selectedAidatRecord = null }" @updated="fetchUtilityDebts" />
     <!-- Ortak Gider Modal -->
     <dialog id="distributeModal" class="modal" :open="showDistributeModal">
       <div class="modal-box">
@@ -157,8 +163,8 @@
         <div class="form-control mb-4">
           <label class="label">Gider Tipi</label>
           <select v-model="selectedType" class="select select-bordered">
-            <option value="electricity">Elektrik</option>
-            <option value="water">Su</option>
+            <option value="Electricity">Elektrik</option>
+            <option value="Water">Su</option>
           </select>
         </div>
         <div class="modal-action">
@@ -171,9 +177,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed, watch, onUnmounted } from 'vue';
-import { db } from '../../firebase';
-import { collection, getDocs, deleteDoc, doc, addDoc, query, where, writeBatch, onSnapshot } from 'firebase/firestore';
+import { ref, onMounted, computed } from 'vue';
 import ElectricityModal from './ElectricityModal.vue';
 import WaterModal from './WaterModal.vue';
 import AidatModal from './AidatModal.vue';
@@ -181,9 +185,13 @@ import EditElectricityModal from './EditElectricityModal.vue';
 import EditWaterModal from './EditWaterModal.vue';
 import EditAidatModal from './EditAidatModal.vue';
 import FilterBar from '@/components/common/FilterBar.vue';
-import { meterManager } from '../../utils/meterUtils';
+import utilityDebtsService from '@/services/utilityDebtsService'
+import tenantsService from '@/services/tenantsService'
+import { useErrorHandler } from '@/composables/useErrorHandler'
 
-const readings = ref([]);
+const { handleNetworkError, handleValidationError, showSuccess } = useErrorHandler()
+
+const utilityDebts = ref([]);
 const searchTerm = ref('');
 const selectedPeriod = ref('');
 const selectedType = ref('all');
@@ -202,44 +210,44 @@ const selectedAidatRecord = ref(null);
 
 const utilityTypeOptions = [
   { value: 'all', label: 'Tümü' },
-  { value: 'electricity', label: 'Elektrik' },
-  { value: 'water', label: 'Su' },
-  { value: 'aidat', label: 'Aidat' },
-  { value: 'ownerAidat', label: 'Mal Sahibi Aidatı' }
+  { value: 'Electricity', label: 'Elektrik' },
+  { value: 'Water', label: 'Su' },
+  { value: 'Aidat', label: 'Aidat' },
+  { value: 'OwnerAidat', label: 'Mal Sahibi Aidatı' }
 ];
 
-const filteredReadings = computed(() => {
-  return readings.value.filter(r => {
-    const tenantName = r.tenantName || '';
+const filteredUtilityDebts = computed(() => {
+  return utilityDebts.value.filter(debt => {
+    const tenantName = debt.tenantName || debt.ownerName || '';
     const matchesSearch = searchTerm.value === '' || tenantName.toLowerCase().includes(searchTerm.value.toLowerCase());
-    const matchesPeriod = !selectedPeriod.value || r.period === selectedPeriod.value;
-    const matchesType = selectedType.value === 'all' || r.type === selectedType.value;
+    const matchesPeriod = !selectedPeriod.value || debt.period === selectedPeriod.value;
+    const matchesType = selectedType.value === 'all' || debt.utilityType === selectedType.value;
     return matchesSearch && matchesPeriod && matchesType;
-  }).sort((a, b) => (b.period + b.tenantName).localeCompare(a.period + a.tenantName));
+  }).sort((a, b) => (b.period + (a.tenantName || a.ownerName)).localeCompare(a.period + (b.tenantName || b.ownerName)));
 });
 
 const thisMonthTotal = computed(() => {
   const today = new Date();
   const currentMonth = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0');
-  return filteredReadings.value
-    .filter(r => r.period === currentMonth)
-    .reduce((sum, r) => sum + Number(r.toplamTutar ?? r.kdvDahil ?? 0), 0);
+  return filteredUtilityDebts.value
+    .filter(debt => debt.period === currentMonth)
+    .reduce((sum, debt) => sum + Number(debt.amount || 0), 0);
 });
 
 const thisMonthElectricityUsage = computed(() => {
   const today = new Date();
   const currentMonth = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0');
-  return filteredReadings.value
-    .filter(r => r.period === currentMonth && r.type === 'electricity')
-    .reduce((sum, r) => sum + Number(r.consumption ?? r.usage ?? 0), 0);
+  return filteredUtilityDebts.value
+    .filter(debt => debt.period === currentMonth && debt.utilityType === 'Electricity')
+    .reduce((sum, debt) => sum + Number(debt.consumption || 0), 0);
 });
 
 const thisMonthWaterUsage = computed(() => {
   const today = new Date();
   const currentMonth = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0');
-  return filteredReadings.value
-    .filter(r => r.period === currentMonth && r.type === 'water')
-    .reduce((sum, r) => sum + Number(r.consumption ?? r.usage ?? 0), 0);
+  return filteredUtilityDebts.value
+    .filter(debt => debt.period === currentMonth && debt.utilityType === 'Water')
+    .reduce((sum, debt) => sum + Number(debt.consumption || 0), 0);
 });
 
 const formatUsage = (value, unit) => {
@@ -254,10 +262,10 @@ const formatCurrency = (value) => {
 
 const getUtilityIcon = (type) => {
     const iconMap = {
-        'electricity': '⚡️',
-        'water': '💧',
-        'aidat': '💰',
-        'ownerAidat': '🏠'
+        'Electricity': '⚡️',
+        'Water': '💧',
+        'Aidat': '💰',
+        'OwnerAidat': '🏠'
     };
     return iconMap[type] || '❓';
 }
@@ -269,190 +277,48 @@ const dataStatus = ref({
   lastUpdated: null
 });
 
-// Real-time listeners
-let readingsUnsubscribe = null
-let aidatUnsubscribe = null
-let ownerAidatUnsubscribe = null
+const tenants = ref([])
 
-const fetchReadings = async () => {
-  readings.value = [];
-  const tenantsSnapshot = await getDocs(collection(db, 'tenants'));
-  const tenantMap = {};
-  tenantsSnapshot.forEach(doc => {
-    const data = doc.data();
-    tenantMap[doc.id] = {
-      name: data.company || `${data.firstName} ${data.lastName}`,
-    };
-  });
-
-  // Real-time listener for readings
-  readingsUnsubscribe = onSnapshot(collection(db, 'readings'), (snapshot) => {
-    snapshot.docChanges().forEach((change) => {
-      const data = { id: change.doc.id, ...change.doc.data() };
-      let tenantName, unitInfo;
-      
-      if (data.tenantId === 'ortak') {
-        tenantName = 'Ortak Alan';
-        unitInfo = data.unit || '';
-      } else if (data.tenantId === 'mescit') {
-        tenantName = 'Mescit';
-        unitInfo = data.unit || '';
-      } else {
-        const tenant = tenantMap[data.tenantId];
-        tenantName = tenant?.name || 'Bilinmiyor';
-        unitInfo = data.unit || '';
-      }
-
-      const record = { ...data, tenantName, unitInfo };
-
-      if (change.type === 'added') {
-        readings.value.push(record);
-      } else if (change.type === 'modified') {
-        const index = readings.value.findIndex(r => r.id === data.id);
-        if (index !== -1) {
-          readings.value[index] = record;
-        }
-      } else if (change.type === 'removed') {
-        const index = readings.value.findIndex(r => r.id === data.id);
-        if (index !== -1) {
-          readings.value.splice(index, 1);
-        }
-      }
-    });
-  });
-
-  // Real-time listener for aidat records
-  aidatUnsubscribe = onSnapshot(collection(db, 'aidatRecords'), (snapshot) => {
-    snapshot.docChanges().forEach((change) => {
-      const data = { id: change.doc.id, ...change.doc.data() };
-      const tenant = tenantMap[data.tenantId];
-      const tenantName = tenant?.name || '-';
-      const unitInfo = data.unit || '';
-
-      const record = {
-        ...data,
-        type: 'aidat',
-        tenantName: tenantName,
-        unitInfo: unitInfo,
-        consumption: null,
-        kdvDahil: data.toplamTutar
-      };
-
-      if (change.type === 'added') {
-        readings.value.push(record);
-      } else if (change.type === 'modified') {
-        const index = readings.value.findIndex(r => r.id === data.id);
-        if (index !== -1) {
-          readings.value[index] = record;
-        }
-      } else if (change.type === 'removed') {
-        const index = readings.value.findIndex(r => r.id === data.id);
-        if (index !== -1) {
-          readings.value.splice(index, 1);
-        }
-      }
-    });
-  });
-
-  // Real-time listener for owner aidat records
-  ownerAidatUnsubscribe = onSnapshot(collection(db, 'ownerAidatRecords'), (snapshot) => {
-    snapshot.docChanges().forEach((change) => {
-      const data = { id: change.doc.id, ...change.doc.data() };
-      const tenantName = `Mal Sahibi`;
-      const unitInfo = data.unit || '';
-
-      const record = {
-        ...data,
-        type: 'ownerAidat',
-        tenantName: tenantName,
-        unitInfo: unitInfo,
-        consumption: null,
-        kdvDahil: data.toplamTutar
-      };
-
-      if (change.type === 'added') {
-        readings.value.push(record);
-      } else if (change.type === 'modified') {
-        const index = readings.value.findIndex(r => r.id === data.id);
-        if (index !== -1) {
-          readings.value[index] = record;
-        }
-      } else if (change.type === 'removed') {
-        const index = readings.value.findIndex(r => r.id === data.id);
-        if (index !== -1) {
-          readings.value.splice(index, 1);
-        }
-      }
-    });
-  });
-};
-
-// Cleanup function
-const cleanup = () => {
-  if (readingsUnsubscribe) {
-    readingsUnsubscribe();
-  }
-  if (aidatUnsubscribe) {
-    aidatUnsubscribe();
-  }
-  if (ownerAidatUnsubscribe) {
-    ownerAidatUnsubscribe();
-  }
-};
-
-// Enhanced data fetching with status tracking
-const fetchReadingsWithCache = async () => {
+const fetchUtilityDebts = async () => {
+  dataStatus.value.loading = true
   try {
-    dataStatus.value.loading = true;
-    dataStatus.value.error = null;
-    
-    // Clear cache first
-    meterManager.clearCache();
-    
-    // Fetch data
-    await fetchReadings();
-    
-    dataStatus.value.lastUpdated = new Date().toLocaleString('tr-TR');
-    console.log(`✅ ${readings.value.length} kayıt yüklendi`);
-  } catch (error) {
-    console.error('Veri yükleme hatası:', error);
-    dataStatus.value.error = 'Veriler yüklenirken bir hata oluştu.';
+    const response = await utilityDebtsService.getUtilityDebts()
+    utilityDebts.value = response || []
+    dataStatus.value.error = null
+    dataStatus.value.lastUpdated = new Date().toLocaleString('tr-TR')
+  } catch (apiError) {
+    handleNetworkError(apiError, { component: 'Utilities', action: 'fetchUtilityDebts' })
+    dataStatus.value.error = apiError.message
+    utilityDebts.value = []
   } finally {
-    dataStatus.value.loading = false;
+    dataStatus.value.loading = false
   }
-};
+}
+
+const fetchTenants = async () => {
+  try {
+    const response = await tenantsService.getTenants()
+    tenants.value = response || []
+  } catch (apiError) {
+    handleNetworkError(apiError, { component: 'Utilities', action: 'fetchTenants' })
+    tenants.value = []
+  }
+}
 
 const handleClose = (shouldRefresh) => {
     showElectricityModal.value = false;
     showWaterModal.value = false;
     if (shouldRefresh) {
-        fetchReadingsWithCache();
+        fetchUtilityDebts();
     }
 }
 
 const deleteRecord = async (id) => {
     if (confirm('Bu kaydı silmek istediğinizden emin misiniz?')) {
         try {
-            const record = readings.value.find(r => r.id === id);
-            if (!record) return;
-            
-            let collectionName;
-            if (record.type === 'aidat') {
-                collectionName = 'aidatRecords';
-            } else if (record.type === 'ownerAidat') {
-                collectionName = 'ownerAidatRecords';
-            } else {
-                collectionName = 'readings';
-            }
-            
-            await deleteDoc(doc(db, collectionName, id));
-            
-            // Cache'i temizle
-            if (record.type !== 'aidat' && record.type !== 'ownerAidat') {
-                meterManager.clearCacheForUnit(record.unit, record.type);
-            }
-            
-            console.log(`✅ ${record.type} kaydı silindi`);
+            await utilityDebtsService.deleteUtilityDebt(id);
+            showSuccess('Utility Debt');
+            await fetchUtilityDebts();
         } catch (error) {
             console.error('Silme hatası:', error);
             alert('Kayıt silinirken bir hata oluştu.');
@@ -465,32 +331,11 @@ const deleteByPeriod = async () => {
         alert('Lütfen silinecek dönemi seçin.');
         return;
     }
-    if (confirm(`${selectedPeriod.value} dönemindeki tüm kayıtları (Aidat, Mal Sahibi Aidatı ve Faturalar) silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.`)) {
+    if (confirm(`${selectedPeriod.value} dönemindeki tüm kayıtları silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.`)) {
         try {
-            const batch = writeBatch(db);
-
-            // readings koleksiyonundan sil
-            const readingsQuery = query(collection(db, "readings"), where("period", "==", selectedPeriod.value));
-            const readingsSnapshot = await getDocs(readingsQuery);
-            readingsSnapshot.forEach((doc) => batch.delete(doc.ref));
-
-            // aidatRecords koleksiyonundan sil
-            const aidatQuery = query(collection(db, "aidatRecords"), where("period", "==", selectedPeriod.value));
-            const aidatSnapshot = await getDocs(aidatQuery);
-            aidatSnapshot.forEach((doc) => batch.delete(doc.ref));
-
-            // ownerAidatRecords koleksiyonundan sil
-            const ownerAidatQuery = query(collection(db, "ownerAidatRecords"), where("period", "==", selectedPeriod.value));
-            const ownerAidatSnapshot = await getDocs(ownerAidatQuery);
-            ownerAidatSnapshot.forEach((doc) => batch.delete(doc.ref));
-
-            await batch.commit();
-            
-            // Cache'i temizle
-            meterManager.clearCache();
-            
-            console.log(`✅ ${selectedPeriod.value} dönemi kayıtları silindi`);
-            alert(`${selectedPeriod.value} dönemindeki tüm kayıtlar silindi.`);
+            await utilityDebtsService.deleteUtilityDebtsByPeriod(selectedPeriod.value);
+            showSuccess(`${selectedPeriod.value} dönemi kayıtları`);
+            await fetchUtilityDebts();
         } catch (error) {
             console.error('Toplu silme hatası:', error);
             alert('Kayıtlar silinirken bir hata oluştu.');
@@ -498,19 +343,19 @@ const deleteByPeriod = async () => {
     }
 };
 
-const editRecord = (record) => {
-    if (record.type === 'electricity') {
-        selectedElectricityRecord.value = record;
+const editRecord = (debt) => {
+    if (debt.utilityType === 'Electricity') {
+        selectedElectricityRecord.value = debt;
         showEditElectricityModal.value = true;
-    } else if (record.type === 'water') {
-        selectedWaterRecord.value = record;
+    } else if (debt.utilityType === 'Water') {
+        selectedWaterRecord.value = debt;
         showEditWaterModal.value = true;
-    } else if (record.type === 'aidat') {
-        selectedAidatRecord.value = record;
+    } else if (debt.utilityType === 'Aidat') {
+        selectedAidatRecord.value = debt;
         showEditAidatModal.value = true;
-    } else if (record.type === 'ownerAidat') {
+    } else if (debt.utilityType === 'OwnerAidat') {
         // Mal sahibi aidatları için şimdilik sadece bilgi göster
-        alert(`Mal Sahibi Aidatı - ${record.unit}\nDönem: ${record.period}\nTutar: ${formatCurrency(record.toplamTutar)}`);
+        alert(`Mal Sahibi Aidatı - ${debt.flatNumber}\nDönem: ${debt.period}\nTutar: ${formatCurrency(debt.amount)}`);
     }
 };
 
@@ -520,10 +365,9 @@ const openEditElectricityModal = async () => {
         return;
     }
     
-    const q = query(collection(db, "readings"), where("period", "==", selectedPeriod.value), where("type", "==", "electricity"));
-    const querySnapshot = await getDocs(q);
-    const records = [];
-    querySnapshot.forEach(doc => records.push({ id: doc.id, ...doc.data() }));
+    const records = utilityDebts.value.filter(debt => 
+        debt.period === selectedPeriod.value && debt.utilityType === 'Electricity'
+    );
 
     if(records.length > 0) {
         selectedElectricityRecord.value = records; // Pass all records for the period
@@ -534,98 +378,20 @@ const openEditElectricityModal = async () => {
 };
 
 const distributeSharedExpense = async () => {
-    if (!selectedPeriod.value || selectedType.value === 'all' || (selectedType.value !== 'electricity' && selectedType.value !== 'water')) {
+    if (!selectedPeriod.value || selectedType.value === 'all' || (selectedType.value !== 'Electricity' && selectedType.value !== 'Water')) {
         alert('Lütfen dönem ve gider tipi olarak Elektrik veya Su seçiniz.');
         return;
     }
 
-    // 1. Daha önce paylaştırılmış mı kontrolü
-    const distCheckQuery = query(collection(db, 'sharedDistributions'), where('period', '==', selectedPeriod.value), where('type', '==', selectedType.value));
-    const distCheckSnap = await getDocs(distCheckQuery);
-    if (!distCheckSnap.empty) {
-        alert("Bu dönem ve tip için ortak gider zaten paylaştırılmış.");
-        return;
+    try {
+        await utilityDebtsService.distributeSharedExpense(selectedPeriod.value, selectedType.value);
+        showSuccess('Ortak gider başarıyla paylaştırıldı.');
+        showDistributeModal.value = false;
+        await fetchUtilityDebts();
+    } catch (error) {
+        console.error('Paylaştırma hatası:', error);
+        alert('Ortak gider paylaştırılırken bir hata oluştu.');
     }
-
-    // 2. Ortak + mescit toplam tutarı
-    const q = query(collection(db, 'readings'), where('period', '==', selectedPeriod.value), where('type', '==', selectedType.value), where('tenantId', 'in', ['ortak', 'mescit']));
-    const snapshot = await getDocs(q);
-    let total = 0;
-    let sharedDueDate = null;
-    snapshot.forEach(doc => {
-        const data = doc.data();
-        total += Number(data.kdvDahil || data.toplamTutar || 0);
-        if (!sharedDueDate && data.dueDate) sharedDueDate = data.dueDate;
-    });
-
-    if (total === 0) {
-        alert("Paylaştırılacak ortak gider bulunamadı.");
-        return;
-    }
-
-    // 3. Kiracıları ve paylarını al
-    const tenantsSnap = await getDocs(collection(db, 'tenants'));
-    const entries = [];
-    tenantsSnap.forEach(doc => {
-        const data = doc.data();
-        if (data.units && Array.isArray(data.units) && data.status !== 'inactive') {
-            data.units.forEach(unit => {
-                entries.push({
-                    tenantId: doc.id,
-                    tenantName: data.company,
-                    unit,
-                    // Yiğit Hamdemir'e 2 pay, diğerlerine 1 pay
-                    pay: data.company === 'YİĞİT HAMDEMİR' ? 2 : 1
-                });
-            });
-        }
-    });
-
-    if (entries.length === 0) {
-        alert("Paylaştırma yapılacak aktif kiracı bulunamadı.");
-        return;
-    }
-
-    // 4. Pay başına düşen tutarı hesapla ve dağıt
-    const totalPayCount = entries.reduce((sum, e) => sum + e.pay, 0);
-    const amountPerPay = total / totalPayCount;
-    const typeLabel = selectedType.value === 'electricity' ? 'Elektrik' : 'Su';
-    
-    const batch = writeBatch(db);
-    for (const e of entries) {
-        const totalAmount = amountPerPay * e.pay;
-        const newRecordRef = doc(collection(db, 'readings'));
-        batch.set(newRecordRef, {
-            tenantId: e.tenantId,
-            tenantName: e.tenantName,
-            unit: e.unit,
-            period: selectedPeriod.value,
-            type: selectedType.value,
-            consumption: null,
-            kdvHaric: null,
-            kdvDahil: totalAmount,
-            toplamTutar: totalAmount,
-            dueDate: sharedDueDate || null,
-            description: `Ortak ${typeLabel} Gider Payı`,
-            isShared: true,
-            createdAt: new Date(),
-        });
-    }
-
-    // 5. Paylaştırma kaydı oluştur
-    const newDistRef = doc(collection(db, 'sharedDistributions'));
-    batch.set(newDistRef, {
-        period: selectedPeriod.value,
-        type: selectedType.value,
-        distributed: true,
-        distributedAt: new Date()
-    });
-
-    await batch.commit();
-
-    alert('Ortak gider başarıyla paylaştırıldı.');
-    showDistributeModal.value = false;
-    fetchReadings();
 };
 
 const handleClearFilters = () => {
@@ -636,11 +402,7 @@ const handleClearFilters = () => {
 }
 
 onMounted(() => {
-    fetchReadingsWithCache();
-});
-
-// Cleanup on component unmount
-onUnmounted(() => {
-    cleanup();
+    fetchTenants()
+    fetchUtilityDebts()
 });
 </script>

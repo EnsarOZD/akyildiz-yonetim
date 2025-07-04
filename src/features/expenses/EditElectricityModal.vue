@@ -195,15 +195,16 @@
 </template>
 
 <script setup>
-import { ref, watch, computed } from 'vue'
-import { doc, updateDoc, addDoc, collection } from 'firebase/firestore'
-import { db } from '../../firebase'
-import { meterManager, calculateConsumption, calculateTotalWithVAT } from '../../utils/meterUtils'
+import { ref, watch, computed, onMounted } from 'vue'
+import { useErrorHandler } from '@/composables/useErrorHandler'
+import expensesService from '@/services/expensesService'
 
 const props = defineProps({
   record: Object
 })
 const emit = defineEmits(['close', 'updated'])
+
+const { handleNetworkError, handleValidationError, showSuccess } = useErrorHandler()
 
 const local = ref({
   previousValue: 0,
@@ -216,6 +217,19 @@ const validation = ref({
   issues: [],
   warnings: []
 })
+
+const formatCurrency = (val) =>
+  isNaN(val) ? '-' : val.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' })
+
+const validateInputs = () => {
+  const newRecord = {
+    currentValue: local.value.currentValue,
+    previousValue: local.value.previousValue,
+    endDate: props.record?.endDate
+  }
+  
+  validation.value = expensesService.validateReadingEdit(props.record, newRecord)
+}
 
 // 👁️ record değiştiğinde input'lara yansıt
 watch(
@@ -231,62 +245,40 @@ watch(
   { immediate: true }
 )
 
-const formatCurrency = (val) =>
-  isNaN(val) ? '-' : val.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' })
-
-const validateInputs = () => {
-  const newRecord = {
-    currentValue: local.value.currentValue,
-    previousValue: local.value.previousValue,
-    endDate: props.record?.endDate
-  }
-  
-  validation.value = meterManager.validateReadingEdit(props.record, newRecord)
-}
-
 const save = async () => {
   try {
     // Son validasyon
     validateInputs()
     if (!validation.value.isValid) {
-      alert('Lütfen hataları düzeltin.')
+      handleValidationError('Lütfen hataları düzeltin.')
       return
     }
 
-    const consumption = calculateConsumption(local.value.currentValue, local.value.previousValue)
-    const toplamTutar = calculateTotalWithVAT(local.value.kdvHaric, 0.20)
-    const refDoc = doc(db, 'readings', props.record.id)
-
-    // Audit trail oluştur
-    const auditTrail = meterManager.createAuditTrail(
-      props.record, 
-      { ...props.record, ...local.value, consumption, toplamTutar },
-      'current_user' // TODO: Gerçek kullanıcı ID'si
-    )
+    const consumption = expensesService.calculateConsumption(local.value.currentValue, local.value.previousValue)
+    const toplamTutar = expensesService.calculateTotalWithVAT(local.value.kdvHaric, 0.20)
 
     // Ana kaydı güncelle
-    await updateDoc(refDoc, {
+    await expensesService.updateReading(props.record.id, {
       previousValue: local.value.previousValue,
       currentValue: local.value.currentValue,
       consumption: consumption,
       kdvHaric: local.value.kdvHaric,
       toplamTutar: toplamTutar,
       kdvDahil: toplamTutar,
-      lastModified: new Date()
+      // Ödeme durumu güncelleme
+      remainingAmount: toplamTutar - (props.record.paidAmount || 0),
+      isPaid: (toplamTutar - (props.record.paidAmount || 0)) <= 0,
+      lastModified: new Date(),
+      modifiedBy: 'unknown_user'
     })
 
-    // Audit trail'i kaydet
-    await addDoc(collection(db, 'auditTrail'), auditTrail)
-
-    // Cache'i temizle
-    meterManager.clearCacheForUnit(props.record.unit, 'electricity')
-
-    alert('Kayıt güncellendi.')
+    // Başarı mesajı
+    showSuccess('Elektrik kaydı başarıyla güncellendi.')
+    
     emit('updated')
     emit('close')
   } catch (error) {
-    console.error('Güncelleme hatası:', error)
-    alert('Güncelleme sırasında bir hata oluştu.')
+    handleNetworkError('Elektrik kaydı güncellenirken bir hata oluştu.', error)
   }
 }
 </script>

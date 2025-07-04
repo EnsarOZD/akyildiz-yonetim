@@ -13,21 +13,21 @@
             <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
           </div>
           <div class="stat-title">Toplam Kiracı</div>
-          <div class="stat-value text-primary">{{ totalTenantsCount }}</div>
+          <div class="stat-value text-primary">{{ tenantStats?.totalCount || 0 }}</div>
         </div>
         <div class="stat bg-base-100 shadow-lg rounded-box">
           <div class="stat-figure text-success">
              <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
           </div>
           <div class="stat-title">Aktif Kiracı</div>
-          <div class="stat-value text-success">{{ activeTenantsCount }}</div>
+          <div class="stat-value text-success">{{ tenantStats?.activeCount || 0 }}</div>
         </div>
         <div class="stat bg-base-100 shadow-lg rounded-box">
           <div class="stat-figure text-warning">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" /></svg>
           </div>
           <div class="stat-title">Pasif Kiracı</div>
-          <div class="stat-value text-warning">{{ passiveTenantsCount }}</div>
+          <div class="stat-value text-warning">{{ tenantStats?.passiveCount || 0 }}</div>
         </div>
         <button class="btn btn-primary btn-lg h-full" @click="createModalVisible = true">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
@@ -60,17 +60,14 @@
             <div class="flex items-start justify-between">
               <div class="flex items-center gap-4">
                 <div class="avatar placeholder">
-                  <div :class="getAvatarColor(tenant.company || tenant.firstName)" class="bg-neutral-focus text-neutral-content rounded-full w-14">
-                    <span class="text-xl font-bold">{{ getAvatarInitial(tenant.company || tenant.firstName) }}</span>
+                  <div :class="getAvatarColor(tenant.firstName)" class="bg-neutral-focus text-neutral-content rounded-full w-14">
+                    <span class="text-xl font-bold">{{ getAvatarInitial(tenant.firstName) }}</span>
                   </div>
                 </div>
                 <div>
-                  <h2 class="card-title text-base-content">{{ tenant.company || `${tenant.firstName} ${tenant.lastName}` }}</h2>
-                  <p v-if="tenant.company" class="text-sm text-base-content/70">
-                    {{ tenant.firstName }} {{ tenant.lastName }}
-                  </p>
+                  <h2 class="card-title text-base-content">{{ `${tenant.firstName} ${tenant.lastName}` }}</h2>
                   <p class="text-sm text-base-content/70">
-                    Daire: {{ tenant.units.join(', ') }}
+                    Daire: {{ tenant.apartmentNumber }}
                   </p>
                 </div>
               </div>
@@ -95,9 +92,9 @@
                 {{ tenant.isActive ? 'Aktif' : 'Pasif' }}
               </span>
               <div class="text-right">
-                <div class="font-semibold text-base-content/80">Toplam Borç</div>
-                <div class="text-lg font-bold" :class="tenant.totalDebt > 0 ? 'text-error' : 'text-success'">
-                  {{ formatCurrency(tenant.totalDebt) }}
+                <div class="font-semibold text-base-content/80">Aylık Kira</div>
+                <div class="text-lg font-bold text-success">
+                  {{ formatCurrency(tenant.monthlyRent) }}
                 </div>
               </div>
             </div>
@@ -135,18 +132,25 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { db } from '../../firebase'
-import { collection, addDoc, getDocs, deleteDoc, doc, updateDoc, query, where, getDoc } from 'firebase/firestore'
+import tenantsService from '@/services/tenantsService'
 import TenantEditModal from './components/TenantEditModal.vue'
 import TenantCreateModal from './components/TenantCreateModal.vue'
 import { UNIT_OPTIONS } from '../../constants/units'
 import ConfirmDeleteModal from './components/ConfirmDeleteModal.vue'
 import FilterBar from '@/components/common/FilterBar.vue'
+import { useErrorHandler } from '@/composables/useErrorHandler'
+import { useNotification } from '@/composables/useNotification'
+import { useEventBus } from '@/composables/useEventBus'
 
 const router = useRouter()
+const { handleNetworkError, withErrorHandling } = useErrorHandler()
+const { showCreateSuccess, showUpdateSuccess, showDeleteSuccess } = useNotification()
+const { on, off } = useEventBus()
+
 const tenants = ref([])
+const tenantStats = ref(null)
 const selectedTenant = ref(null)
 const editModalVisible = ref(false)
 const createModalVisible = ref(false)
@@ -154,35 +158,32 @@ const deleteModalVisible = ref(false)
 const tenantToDelete = ref(null)
 const statusFilter = ref("all")
 const search = ref('')
+const loading = ref(false)
 
 const fetchTenants = async () => {
-  const tenantsSnapshot = await getDocs(collection(db, "tenants"))
-  const tenantsData = tenantsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
-
-  const debtPromises = tenantsData.map(async tenant => {
-    let totalDebt = 0
+  try {
+    loading.value = true
     
-    const readingsQuery = query(collection(db, 'readings'), where('tenantId', '==', tenant.id), where('isPaid', '==', false))
-    const readingsSnapshot = await getDocs(readingsQuery)
-    readingsSnapshot.forEach(doc => {
-      totalDebt += Number(doc.data().toplamTutar) || 0
-    })
-
-    const aidatQuery = query(collection(db, 'aidatRecords'), where('tenantId', '==', tenant.id), where('isPaid', '==', false))
-    const aidatSnapshot = await getDocs(aidatQuery)
-    aidatSnapshot.forEach(doc => {
-      totalDebt += Number(doc.data().amount) || 0
-    })
+    // Filtreleri backend'e gönder
+    const apiFilters = {}
+    if (search.value) apiFilters.searchTerm = search.value
+    if (statusFilter.value === 'active') apiFilters.isActive = true
+    else if (statusFilter.value === 'passive') apiFilters.isActive = false
     
-    return { ...tenant, totalDebt }
-  })
-
-  tenants.value = await Promise.all(debtPromises)
+    const [tenantsData, statsData] = await Promise.all([
+      tenantsService.getTenants(apiFilters),
+      tenantsService.getTenantStats()
+    ])
+    
+    tenants.value = tenantsData
+    tenantStats.value = statsData
+  } catch (error) {
+    console.error('Kiracılar yüklenirken hata:', error)
+    alert('Kiracılar yüklenirken bir hata oluştu')
+  } finally {
+    loading.value = false
+  }
 }
-
-const totalTenantsCount = computed(() => tenants.value.length)
-const activeTenantsCount = computed(() => tenants.value.filter(t => t.isActive).length)
-const passiveTenantsCount = computed(() => tenants.value.filter(t => !t.isActive).length)
 
 const filteredTenants = computed(() => {
   let filtered = tenants.value
@@ -196,12 +197,12 @@ const filteredTenants = computed(() => {
   if (search.value) {
     const s = search.value.toLowerCase()
     filtered = filtered.filter(t =>
-      (t.company || '').toLowerCase().includes(s) ||
       `${t.firstName} ${t.lastName}`.toLowerCase().includes(s) ||
-      (t.units || []).join(' ').toLowerCase().includes(s)
+      (t.apartmentNumber || '').toLowerCase().includes(s) ||
+      (t.email || '').toLowerCase().includes(s)
     )
   }
-  return filtered.sort((a,b) => a.company.localeCompare(b.company))
+  return filtered.sort((a,b) => a.firstName.localeCompare(b.firstName))
 })
 
 const getAvatarInitial = (name) => (name ? name.charAt(0).toUpperCase() : '?')
@@ -222,30 +223,53 @@ const startEdit = (tenant) => {
 }
 
 const activateTenant = async (tenantId) => {
-  await updateDoc(doc(db, "tenants", tenantId), { isActive: true })
-  await fetchTenants()
+  try {
+    await tenantsService.updateTenant(tenantId, { isActive: true })
+    await fetchTenants()
+  } catch (error) {
+    console.error('Kiracı aktif edilirken hata:', error)
+    alert('Kiracı aktif edilirken bir hata oluştu')
+  }
 }
 
 const deactivateTenant = async (tenantId) => {
-  await updateDoc(doc(db, "tenants", tenantId), { isActive: false })
-  await fetchTenants()
+  try {
+    await tenantsService.updateTenant(tenantId, { isActive: false })
+    await fetchTenants()
+  } catch (error) {
+    console.error('Kiracı pasif edilirken hata:', error)
+    alert('Kiracı pasif edilirken bir hata oluştu')
+  }
 }
 
 const handleClearFilters = () => {
   search.value = ''
   statusFilter.value = 'all'
+  fetchTenants()
 }
 
 const handleTenantUpdate = async (updatedTenant) => {
-  await updateDoc(doc(db, "tenants", updatedTenant.id), updatedTenant)
-  editModalVisible.value = false
-  await fetchTenants()
+  try {
+    await tenantsService.updateTenant(updatedTenant.id, updatedTenant)
+    editModalVisible.value = false
+    await fetchTenants()
+    showUpdateSuccess('Kiracı')
+  } catch (error) {
+    console.error('Kiracı güncellenirken hata:', error)
+    alert('Kiracı güncellenirken bir hata oluştu')
+  }
 }
 
 const saveTenant = async (newTenant) => {
-  await addDoc(collection(db, "tenants"), newTenant)
-  createModalVisible.value = false
-  await fetchTenants()
+  try {
+    await tenantsService.createTenant(newTenant)
+    createModalVisible.value = false
+    await fetchTenants()
+    showCreateSuccess('Kiracı')
+  } catch (error) {
+    console.error('Kiracı oluşturulurken hata:', error)
+    alert('Kiracı oluşturulurken bir hata oluştu')
+  }
 }
 
 const askDelete = (tenant) => {
@@ -254,9 +278,15 @@ const askDelete = (tenant) => {
 }
 
 const confirmDelete = async () => {
-  await deleteDoc(doc(db, "tenants", tenantToDelete.value.id))
-  deleteModalVisible.value = false
-  await fetchTenants()
+  try {
+    await tenantsService.deleteTenant(tenantToDelete.value.id)
+    deleteModalVisible.value = false
+    await fetchTenants()
+    showDeleteSuccess('Kiracı')
+  } catch (error) {
+    console.error('Kiracı silinirken hata:', error)
+    alert('Kiracı silinirken bir hata oluştu')
+  }
 }
 
 const formatCurrency = (value) => {
@@ -264,5 +294,24 @@ const formatCurrency = (value) => {
   return Number(value).toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' })
 }
 
-onMounted(fetchTenants)
+onMounted(() => {
+  fetchTenants()
+  
+  // Ödeme yapıldığında bakiye güncellemesi için event listener
+  on('payment:created', handlePaymentCreated)
+})
+
+onUnmounted(() => {
+  // Event listener'ı temizle
+  off('payment:created', handlePaymentCreated)
+})
+
+const handlePaymentCreated = async (paymentData) => {
+  try {
+    console.log('💰 Ödeme yapıldı, kiracı bakiyeleri güncelleniyor:', paymentData)
+    await fetchTenants()
+  } catch (error) {
+    console.error('Ödeme sonrası güncelleme hatası:', error)
+  }
+}
 </script>

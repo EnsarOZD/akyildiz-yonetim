@@ -1,68 +1,104 @@
-# 🏢 Akyıldız Yönetim
+# Akyıldız Yönetim
 
-Akyıldız Yönetim is a modern tenant and expense tracking system developed with **Vue.js** and **Firebase**. This web-based application helps building managers track tenants, payments, expenses, and financial summaries easily.
+Akyıldız Yönetim is a modern tenant and expense tracking system developed with **Vue.js** and **Backend API**. This web-based application helps building managers track tenants, payments, expenses, and financial summaries easily.
 
-## 🚀 Features
+## Features
 
-- ✅ Add, update, and delete tenants
-- 💸 Record payments and track payment history
-- 📄 Manage various expenses (e.g. Rent, Electricity, Water, Other)
-- 📊 Calculate total debt and balance per tenant
-- 🧾 View detailed tenant summary and history
-- 🌙 Light/Dark theme support
+- **Tenant Management**: Add, edit, and manage tenant information
+- **Payment Tracking**: Record and track tenant payments
+- **Expense Management**: Manage building expenses and utilities
+- **Financial Reports**: Generate detailed financial reports
+- **User Authentication**: Secure login system with role-based access
+- **Responsive Design**: Works on desktop and mobile devices
 
-## 🛠 Tech Stack
+## Tech Stack
 
-- **Frontend**: Vue 3 (Composition API), TailwindCSS
-- **Backend**: Firebase Firestore
-- **Routing**: Vue Router
+- **Frontend**: Vue.js 3 with Composition API
+- **Routing**: Vue Router 4
+- **State Management**: Pinia
+- **Styling**: Tailwind CSS + DaisyUI
+- **Backend**: REST API
+- **Build Tool**: Vite
 
-## 📂 Project Structure
+## Getting Started
 
-```
-src/
-├── components/
-│   ├── Header.vue
-│   ├── TenantSummary.vue
-├── pages/
-│   ├── Dashboard.vue
-│   ├── Tenants.vue
-│   ├── Payments.vue
-│   ├── Expenses.vue
-│   ├── Utilities.vue
-│   └── TenantDetail.vue
-├── router/
-│   └── index.js
-├── App.vue
-├── main.js
-```
+### Prerequisites
 
-## 📸 Screenshots
-![image](https://github.com/user-attachments/assets/6030ade5-2292-4e8a-a166-a684d9251589)
-![image](https://github.com/user-attachments/assets/e43ccda8-0f0a-4d22-9c53-b161bf099728)
+- Node.js (v16 or higher)
+- npm or yarn
 
-![image](https://github.com/user-attachments/assets/5bf24f78-177f-43b6-8bbe-9eec71694bed)
-![image](https://github.com/user-attachments/assets/af5702a7-3adf-41e5-ad20-321772548476)
-![image](https://github.com/user-attachments/assets/7718d6a2-9ac7-4b40-b513-ebeddb7e3286)
+### Installation
 
-
-## 🔧 Setup Instructions
-
+1. Clone the repository:
 ```bash
-# Clone the repository
-git clone https://github.com/your-username/akyildiz-yonetim.git
+git clone <repository-url>
 cd akyildiz-yonetim
+```
 
-# Install dependencies
+2. Install dependencies:
+```bash
 npm install
+```
 
-# Start development server
+3. Create environment file:
+```bash
+cp env.example .env.local
+```
+
+4. Configure your environment variables in `.env.local`:
+```env
+VITE_API_BASE_URL=https://www.akyildizyonetim.com/api
+```
+
+5. Start the development server:
+```bash
 npm run dev
 ```
 
-> 🔐 Don’t forget to configure your Firebase credentials in `firebase.js`.
+6. Open your browser and navigate to `http://localhost:3000`
 
-## 📝 License
+## Environment Variables
+
+Configure the following environment variables in your `.env.local` file:
+
+```env
+# Backend API Configuration
+VITE_API_BASE_URL=https://api.akyildizyonetim.com
+```
+
+## Available Scripts
+
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run preview` - Preview production build
+- `npm run lint` - Run ESLint
+
+## Project Structure
+
+```
+src/
+├── components/          # Reusable Vue components
+├── features/           # Feature-based modules
+│   ├── dashboard/      # Dashboard components
+│   ├── tenants/        # Tenant management
+│   ├── payments/       # Payment tracking
+│   └── expenses/       # Expense management
+├── services/           # API services
+├── stores/             # Pinia stores
+├── router/             # Vue Router configuration
+├── utils/              # Utility functions
+└── views/              # Page components
+```
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests if applicable
+5. Submit a pull request
+
+## License
 
 This project is licensed under the MIT License.
 

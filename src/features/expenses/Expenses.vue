@@ -48,7 +48,7 @@
             <p class="text-2xl font-bold text-gray-800 dark:text-gray-100">{{ thisMonthCount }}</p>
           </div>
         </div>
-        <div class="bg-white dark:bg-gray-800 p-5 rounded-xl shadow-md flex items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-600 hover:border-red-500 dark:hover:border-red-400 transition-colors duration-300" @click="showModal = true">
+        <div class="bg-white dark:bg-gray-800 p-5 rounded-xl shadow-md flex items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-600 hover:border-red-500 dark:hover:border-red-400 transition-colors duration-300" @click="openNewExpenseModal">
            <button class="w-full h-full text-red-500 dark:text-red-400 flex items-center justify-center gap-2">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
             <span class="font-semibold">Yeni Gider Ekle</span>
@@ -83,8 +83,8 @@
                   {{ getExpenseIcon(e.type) }}
                 </div>
                 <div>
-                  <p class="font-bold text-gray-800 dark:text-gray-100">{{ e.description }}</p>
-                  <p class="text-sm text-gray-500 dark:text-gray-400">{{ e.date }}</p>
+                  <p class="font-bold text-gray-800 dark:text-gray-100">{{ e.title || 'Açıklama Yok' }}</p>
+                  <p class="text-sm text-gray-500 dark:text-gray-400">{{ formatDate(e.expenseDate) || 'Tarih Yok' }}</p>
                 </div>
               </div>
               <div class="md:col-span-3 text-left md:text-center text-xl font-semibold text-red-600 dark:text-red-400">
@@ -92,7 +92,7 @@
               </div>
               <div class="md:col-span-2 text-left md:text-center">
                  <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800 dark:bg-blue-900/60 dark:text-blue-200">
-                  {{ e.type }}
+                  {{ getExpenseTypeName(e.type) || 'Tip Yok' }}
                 </span>
               </div>
               <div class="md:col-span-2 text-right">
@@ -123,12 +123,19 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
-import { db } from '../../firebase'
-import { collection, getDocs, addDoc, deleteDoc, doc, updateDoc } from 'firebase/firestore'
+import expensesService from '@/services/expensesService'
+import tenantsService from '@/services/tenantsService'
 import ExpenseModal from './ExpenseModal.vue'
 import FilterBar from '@/components/common/FilterBar.vue'
+import { useErrorHandler } from '@/composables/useErrorHandler'
+
+const { handleNetworkError, handleValidationError, showSuccess } = useErrorHandler()
 
 const expenses = ref([])
+const tenants = ref([])
+const loading = ref(false)
+const error = ref(null)
+const expenseStats = ref({})
 const showModal = ref(false)
 const editMode = ref(false)
 const selectedExpenseId = ref(null)
@@ -139,10 +146,19 @@ const filters = ref({
   type: ''
 })
 
-const expenseTypes = ['Elektrik (Genel)', 'Su (Genel)', 'Maaş', 'Vergi', 'Bakım', 'Temizlik', 'Yönetici Ücreti', 'Diğer']
+// Backend enum değerlerini frontend'e uygun hale getir
+const expenseTypes = [
+  { value: 'Electricity', label: 'Elektrik (Genel)' },
+  { value: 'Water', label: 'Su (Genel)' },
+  { value: 'Gas', label: 'Gaz' },
+  { value: 'Maintenance', label: 'Bakım' },
+  { value: 'Cleaning', label: 'Temizlik' },
+  { value: 'Security', label: 'Güvenlik' },
+  { value: 'Other', label: 'Diğer' }
+]
 
 const expenseTypeOptions = computed(() => {
-  const options = expenseTypes.map(type => ({ value: type, label: type }))
+  const options = expenseTypes.map(type => ({ value: type.value, label: type.label }))
   options.unshift({ value: '', label: 'Tüm Tipler' })
   return options
 })
@@ -152,42 +168,38 @@ const formatCurrency = (value) => {
   return Number(value).toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' })
 }
 
-const totalExpense = computed(() => filteredExpenses.value.reduce((sum, e) => sum + Number(e.amount || 0), 0))
+const formatDate = (dateString) => {
+  if (!dateString) return ''
+  const date = new Date(dateString)
+  return date.toLocaleDateString('tr-TR')
+}
 
-const thisMonthExpense = computed(() => {
-  const today = new Date();
-  const currentMonth = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0');
-  return expenses.value
-    .filter(e => e.date.startsWith(currentMonth))
-    .reduce((sum, e) => sum + Number(e.amount || 0), 0)
-})
-
-const thisMonthCount = computed(() => {
-    const today = new Date();
-    const currentMonth = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0');
-    return expenses.value.filter(p => p.date.startsWith(currentMonth)).length
-})
-
-const expensesCount = computed(() => {
-  return expenses.value.length
-})
+const totalExpense = computed(() => expenseStats.value?.totalAmount || 0)
+const thisMonthExpense = computed(() => expenseStats.value?.thisMonthAmount || 0)
+const thisMonthCount = computed(() => expenseStats.value?.thisMonthCount || 0)
+const expensesCount = computed(() => expenseStats.value?.totalCount || 0)
 
 const clearFilters = () => {
   filters.value = { searchTerm: '', period: '', type: '' }
 }
 
 const getExpenseIcon = (type) => {
+  if (!type) return '❓'
   const iconMap = {
-    'Elektrik (Genel)': '⚡️',
-    'Su (Genel)': '💧',
-    'Maaş': '💰',
-    'Vergi': '🧾',
-    'Bakım': '🛠️',
-    'Temizlik': '🧹',
-    'Yönetici Ücreti': '🧑‍💼',
-    'Diğer': '📦'
+    'Electricity': '⚡️',
+    'Water': '💧',
+    'Gas': '🔥',
+    'Maintenance': '🛠️',
+    'Cleaning': '🧹',
+    'Security': '🔒',
+    'Other': '📦'
   }
   return iconMap[type] || '❓'
+}
+
+const getExpenseTypeName = (type) => {
+  const typeObj = expenseTypes.find(t => t.value === type)
+  return typeObj ? typeObj.label : type
 }
 
 const filteredExpenses = computed(() => {
@@ -195,7 +207,12 @@ const filteredExpenses = computed(() => {
   const searchTerm = filters.value.searchTerm.toLowerCase()
 
   if (filters.value.period) {
-    filtered = filtered.filter(p => p.date.startsWith(filters.value.period))
+    filtered = filtered.filter(p => {
+      const expenseDate = new Date(p.expenseDate)
+      const periodDate = new Date(filters.value.period)
+      return expenseDate.getFullYear() === periodDate.getFullYear() && 
+             expenseDate.getMonth() === periodDate.getMonth()
+    })
   }
   
   if (filters.value.type) {
@@ -204,64 +221,127 @@ const filteredExpenses = computed(() => {
 
   if (searchTerm) {
     filtered = filtered.filter(e =>
-      e.description.toLowerCase().includes(searchTerm) ||
-      e.type.toLowerCase().includes(searchTerm) ||
-      e.amount.toString().includes(searchTerm)
+      e.title && e.title.toLowerCase().includes(searchTerm) ||
+      e.description && e.description.toLowerCase().includes(searchTerm) ||
+      e.type && getExpenseTypeName(e.type).toLowerCase().includes(searchTerm) ||
+      e.amount && e.amount.toString().includes(searchTerm)
     )
   }
-  return filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
+  return filtered.sort((a, b) => new Date(b.expenseDate) - new Date(a.expenseDate))
 })
 
 const today = new Date().toISOString().substr(0, 10)
-const newExpense = ref({ date: today, description: '', amount: '', type: '' })
+const newExpense = ref({ 
+  expenseDate: today, 
+  title: '', 
+  amount: '', 
+  type: 'Other',
+  description: ''
+})
 
 const fetchExpenses = async () => {
-  expenses.value = []
-  const querySnapshot = await getDocs(collection(db, 'expenses'))
-  querySnapshot.forEach(docSnapshot => {
-    expenses.value.push({ id: docSnapshot.id, ...docSnapshot.data() })
-  })
+  loading.value = true
+  try {
+    const response = await expensesService.getExpenses()
+    expenses.value = response || []
+    // İstatistikleri de çek
+    const stats = await expensesService.getExpenseStats()
+    expenseStats.value = stats || {}
+    error.value = null
+  } catch (apiError) {
+    handleNetworkError(apiError, { component: 'Expenses', action: 'fetchExpenses' })
+    error.value = apiError.message
+    expenses.value = []
+    expenseStats.value = {}
+  } finally {
+    loading.value = false
+  }
+}
+
+const fetchTenants = async () => {
+  try {
+    const response = await tenantsService.getTenants()
+    tenants.value = response || []
+  } catch (apiError) {
+    handleNetworkError(apiError, { component: 'Expenses', action: 'fetchTenants' })
+    tenants.value = []
+  }
 }
 
 const startEdit = (expense) => {
-  newExpense.value = { ...expense }
+  newExpense.value = { 
+    ...expense,
+    expenseDate: new Date(expense.expenseDate).toISOString().substr(0, 10)
+  }
   selectedExpenseId.value = expense.id
   editMode.value = true
   showModal.value = true
 }
 
+const openNewExpenseModal = () => {
+  newExpense.value = { 
+    expenseDate: today, 
+    title: '', 
+    amount: '', 
+    type: 'Other',
+    description: ''
+  }
+  editMode.value = false
+  selectedExpenseId.value = null
+  showModal.value = true
+}
+
 const cancelEdit = () => {
-  newExpense.value = { date: today, description: '', amount: '', type: '' }
+  newExpense.value = { 
+    expenseDate: today, 
+    title: '', 
+    amount: '', 
+    type: 'Other',
+    description: ''
+  }
   editMode.value = false
   selectedExpenseId.value = null
   showModal.value = false
 }
 
 const deleteExpense = async (id) => {
-  const confirmDelete = confirm("Bu gideri silmek istediğinize emin misiniz?")
-  if (!confirmDelete) return
-
+  if (!confirm('Bu gideri silmek istediğinizden emin misiniz?')) return
+  
   try {
-    await deleteDoc(doc(db, 'expenses', id))
-    fetchExpenses()
+    await expensesService.deleteExpense(id)
+    showSuccess('Gider')
+    await fetchExpenses()
   } catch (error) {
-    console.error('Silme işlemi başarısız:', error)
+    console.error('Gider silinirken hata:', error)
+    alert('Gider silinirken bir hata oluştu')
   }
 }
 
 const saveExpense = async (expenseData) => {
   try {
-    if (editMode.value && selectedExpenseId.value) {
-      const ref = doc(db, 'expenses', selectedExpenseId.value)
-      await updateDoc(ref, { ...expenseData })
-    } else {
-      await addDoc(collection(db, 'expenses'), { ...expenseData })
+    // Backend'e uygun format
+    const data = {
+      title: expenseData.title,
+      amount: parseFloat(expenseData.amount),
+      type: expenseData.type,
+      expenseDate: new Date(expenseData.expenseDate).toISOString(),
+      description: expenseData.description
     }
-    fetchExpenses()
+    
+    console.log('🔍 Backend\'e gönderilen veri:', data)
+    
+    if (editMode.value && selectedExpenseId.value) {
+      await expensesService.updateExpense(selectedExpenseId.value, data)
+      showSuccess('Gider')
+    } else {
+      await expensesService.createExpense(data)
+      showSuccess('Gider')
+    }
+    await fetchExpenses()
     cancelEdit()
-    // alert('Gider başarıyla kaydedildi.') // Kullanıcı deneyimi için alert yerine daha modern bir bildirim düşünülebilir.
   } catch (error) {
-    console.error('Kayıt hatası:', error)
+    console.error('Gider kaydedilirken hata:', error)
+    alert('Gider kaydedilirken bir hata oluştu')
   }
 }
 
@@ -270,7 +350,10 @@ const handleClearFilters = () => {
   fetchExpenses()
 }
 
-onMounted(fetchExpenses)
+onMounted(() => {
+  fetchTenants()
+  fetchExpenses()
+})
 </script>
 
 <style scoped>

@@ -185,10 +185,12 @@
 
 <script setup>
 import { ref, onMounted, computed, reactive } from 'vue'
-import { collection, getDocs, updateDoc, doc } from 'firebase/firestore'
-import { getAuth, createUserWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth'
-import { db } from '../../firebase'
+import usersService from '@/services/usersService'
+import tenantsService from '@/services/tenantsService'
+import { useErrorHandler } from '@/composables/useErrorHandler'
 import { ROLE_LABELS, ROLES } from '@/constants/roles'
+
+const { handleNetworkError, handleValidationError, showSuccess } = useErrorHandler()
 
 const users = ref([])
 const tenants = ref([])
@@ -210,85 +212,38 @@ const notification = reactive({
 });
 
 const fetchTenants = async () => {
-  const tenantSnap = await getDocs(collection(db, 'tenants'))
-  tenants.value = tenantSnap.docs.map(doc => ({
-    id: doc.id,
-    company: doc.data().company
-  }))
+  try {
+    tenants.value = await tenantsService.getAllTenants()
+  } catch (error) {
+    handleNetworkError(error)
+  }
 }
 
 const fetchUsers = async () => {
-  const userSnap = await getDocs(collection(db, 'users'))
-  const userData = userSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }))
-
-  users.value = userData.map(user => {
-    const matchedTenant = tenants.value.find(t => t.id === user.companyId)
-    return {
-      ...user,
-      companyName: matchedTenant ? matchedTenant.company : null
-    }
-  }).sort((a,b) => a.firstName.localeCompare(b.firstName));
+  try {
+    users.value = await usersService.getAllUsers()
+  } catch (error) {
+    handleNetworkError(error)
+  }
 }
 
 const deactivateUser = async (userId) => {
-  const userToDeactivate = users.value.find(u => u.id === userId)
-  
-  if (!userToDeactivate) {
-    alert("Kullanıcı bulunamadı.");
-    return;
-  }
-
-  if (confirm(`"${userToDeactivate.firstName} ${userToDeactivate.lastName}" kullanıcısını pasif yapmak istediğinizden emin misiniz?`)) {
-    try {
-      await updateDoc(doc(db, 'users', userId), {
-        isActive: false,
-        deactivatedAt: new Date(),
-        deactivatedBy: 'admin'
-      })
-      
-      const userIndex = users.value.findIndex(u => u.id === userId)
-      if (userIndex !== -1) {
-        users.value[userIndex].isActive = false
-        users.value[userIndex].deactivatedAt = new Date()
-      }
-      
-      alert(`"${userToDeactivate.firstName} ${userToDeactivate.lastName}" kullanıcısı başarıyla pasif yapıldı.`)
-      
-    } catch (error) {
-      console.error("Kullanıcı pasif yapma hatası:", error)
-      alert("Kullanıcı pasif yapılırken bir hata oluştu.")
-    }
+  try {
+    await usersService.deactivateUser(userId)
+    await fetchUsers()
+    showSuccess('Kullanıcı başarıyla pasif yapıldı.')
+  } catch (error) {
+    handleValidationError(error)
   }
 }
 
 const activateUser = async (userId) => {
-  const userToActivate = users.value.find(u => u.id === userId)
-  
-  if (!userToActivate) {
-    alert("Kullanıcı bulunamadı.");
-    return;
-  }
-
-  if (confirm(`"${userToActivate.firstName} ${userToActivate.lastName}" kullanıcısını aktif yapmak istediğinizden emin misiniz?`)) {
-    try {
-      await updateDoc(doc(db, 'users', userId), {
-        isActive: true,
-        deactivatedAt: null,
-        deactivatedBy: null
-      })
-      
-      const userIndex = users.value.findIndex(u => u.id === userId)
-      if (userIndex !== -1) {
-        users.value[userIndex].isActive = true
-        users.value[userIndex].deactivatedAt = null
-      }
-      
-      alert(`"${userToActivate.firstName} ${userToActivate.lastName}" kullanıcısı başarıyla aktif yapıldı.`)
-      
-    } catch (error) {
-      console.error("Kullanıcı aktif yapma hatası:", error)
-      alert("Kullanıcı aktif yapılırken bir hata oluştu.")
-    }
+  try {
+    await usersService.activateUser(userId)
+    await fetchUsers()
+    showSuccess('Kullanıcı başarıyla aktif yapıldı.')
+  } catch (error) {
+    handleValidationError(error)
   }
 }
 
@@ -326,30 +281,15 @@ const createUser = async () => {
   }
 
   loading.value = true
-  const auth = getAuth()
   
   try {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
-    let tempPassword = '';
-    for (let i = 0; i < 12; i++) {
-      tempPassword += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    
-    const userCredential = await createUserWithEmailAndPassword(auth, newUser.email, tempPassword)
-    const user = userCredential.user
-
-    await updateDoc(doc(db, 'users', user.uid), {
+    await usersService.createUser({
       firstName: newUser.firstName,
       lastName: newUser.lastName,
       email: newUser.email,
       role: newUser.role,
-      companyId: newUser.role === ROLES.TENANT ? newUser.companyId : null,
-      createdAt: new Date(),
-      isActive: true,
-      requiresPasswordReset: true
+      companyId: newUser.role === ROLES.TENANT ? newUser.companyId : null
     })
-    
-    await sendPasswordResetEmail(auth, newUser.email)
     
     showNotification(
       `Kullanıcı başarıyla oluşturuldu! Şifre belirleme bağlantısı ${newUser.email} adresine gönderildi.`, 
@@ -360,17 +300,7 @@ const createUser = async () => {
     await fetchUsers()
 
   } catch (error) {
-    console.error("Kullanıcı oluşturma hatası:", error)
-    
-    let errorMessage = "Kullanıcı oluşturulurken bir hata oluştu.";
-    
-    if (error.code === 'auth/email-already-in-use') {
-      errorMessage = "Bu e-posta adresi zaten kullanımda. Lütfen farklı bir e-posta adresi deneyin.";
-    } else if (error.code === 'auth/invalid-email') {
-      errorMessage = "Geçersiz e-posta adresi. Lütfen doğru bir e-posta adresi girin.";
-    }
-    
-    showNotification(errorMessage, 'error');
+    handleValidationError(error)
   } finally {
     loading.value = false
   }

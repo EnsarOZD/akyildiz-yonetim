@@ -7,7 +7,7 @@
         <h1 class="text-3xl font-bold text-gray-800 dark:text-gray-100">Mal Sahibi Ödemeleri</h1>
         <div class="flex items-center gap-4">
           <div class="bg-orange-100 dark:bg-orange-900/50 text-orange-600 dark:text-orange-400 px-3 py-1 rounded-full text-sm">
-            Toplam: {{ formatCurrency(totalPayments) }}
+            Toplam: {{ formatCurrency(totalAmount) }}
           </div>
           <div class="bg-green-100 dark:bg-green-900/50 text-green-600 dark:text-green-400 px-3 py-1 rounded-full text-sm">
             Bu Ay: {{ formatCurrency(thisMonthPayments) }}
@@ -24,7 +24,7 @@
           <div>
             <label class="label">Arama</label>
             <input 
-              v-model="search" 
+              v-model="searchTerm" 
               type="text" 
               placeholder="Mal sahibi adı veya açıklama ara..." 
               class="input input-bordered w-full"
@@ -42,14 +42,14 @@
           </div>
           <div>
             <label class="label">Yıl</label>
-            <select v-model="yearFilter" class="select select-bordered w-full">
+            <select v-model="filterYear" class="select select-bordered w-full">
               <option value="">Tümü</option>
               <option v-for="year in availableYears" :key="year" :value="year">{{ year }}</option>
             </select>
           </div>
           <div>
             <label class="label">Ay</label>
-            <select v-model="monthFilter" class="select select-bordered w-full">
+            <select v-model="filterMonth" class="select select-bordered w-full">
               <option value="">Tümü</option>
               <option v-for="month in months" :key="month.value" :value="month.value">{{ month.label }}</option>
             </select>
@@ -136,15 +136,14 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
-import { db } from '../firebase'
-import { collection, getDocs } from 'firebase/firestore'
+import apiService from '@/services/api'
 
-const ownerPayments = ref([])
+const payments = ref([])
 const owners = ref([])
-const search = ref('')
-const paymentTypeFilter = ref('')
-const yearFilter = ref('')
-const monthFilter = ref('')
+
+const filterYear = ref('')
+const filterMonth = ref('')
+const searchTerm = ref('')
 
 const months = [
   { value: '01', label: 'Ocak' },
@@ -161,96 +160,69 @@ const months = [
   { value: '12', label: 'Aralık' }
 ]
 
-const fetchOwnerPayments = async () => {
-  const snapshot = await getDocs(collection(db, 'ownerPayments'))
-  const payments = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
-  
-  // Mal sahibi bilgilerini ekle
-  ownerPayments.value = payments.map(payment => {
-    const owner = owners.value.find(o => o.id === payment.ownerId)
-    return {
-      ...payment,
-      ownerName: owner?.name || 'Bilinmiyor',
-      ownerEmail: owner?.email || ''
-    }
-  })
+const formatDate = (dateStr) => {
+  if (!dateStr) return '-'
+  return new Date(dateStr).toLocaleDateString('tr-TR', { year: 'numeric', month: 'short', day: 'numeric' })
 }
-
-const fetchOwners = async () => {
-  const snapshot = await getDocs(collection(db, 'owners'))
-  owners.value = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
-}
-
-const availableYears = computed(() => {
-  const years = new Set(ownerPayments.value.map(payment => {
-    const date = new Date(payment.date)
-    return date.getFullYear()
-  }))
-  return Array.from(years).sort((a, b) => b - a)
-})
-
-const filteredPayments = computed(() => {
-  let filtered = ownerPayments.value
-
-  // Arama filtresi
-  if (search.value) {
-    const searchTerm = search.value.toLowerCase()
-    filtered = filtered.filter(payment => 
-      payment.ownerName.toLowerCase().includes(searchTerm) ||
-      (payment.description && payment.description.toLowerCase().includes(searchTerm))
-    )
-  }
-
-  // Ödeme türü filtresi
-  if (paymentTypeFilter.value) {
-    filtered = filtered.filter(payment => payment.type === paymentTypeFilter.value)
-  }
-
-  // Yıl filtresi
-  if (yearFilter.value) {
-    filtered = filtered.filter(payment => {
-      const date = new Date(payment.date)
-      return date.getFullYear() == yearFilter.value
-    })
-  }
-
-  // Ay filtresi
-  if (monthFilter.value) {
-    filtered = filtered.filter(payment => {
-      const date = new Date(payment.date)
-      return String(date.getMonth() + 1).padStart(2, '0') === monthFilter.value
-    })
-  }
-
-  return filtered.sort((a, b) => new Date(b.date) - new Date(a.date))
-})
-
-const totalPayments = computed(() => {
-  return ownerPayments.value.reduce((sum, payment) => sum + Number(payment.amount || 0), 0)
-})
-
-const thisMonthPayments = computed(() => {
-  const today = new Date()
-  const currentMonth = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0')
-  
-  return ownerPayments.value
-    .filter(payment => payment.date && payment.date.startsWith(currentMonth))
-    .reduce((sum, payment) => sum + Number(payment.amount || 0), 0)
-})
-
-const paymentsCount = computed(() => {
-  return ownerPayments.value.length
-})
 
 const formatCurrency = (value) => {
   if (value === undefined || value === null || isNaN(value)) return '₺0.00'
   return Number(value).toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' })
 }
 
-const formatDate = (dateStr) => {
-  if (!dateStr) return '-'
-  return new Date(dateStr).toLocaleDateString('tr-TR')
+const fetchOwners = async () => {
+  try {
+    const response = await apiService.get('/owners')
+    owners.value = response || []
+  } catch (error) {
+    console.error('Mal sahipleri yüklenirken hata:', error)
+    owners.value = []
+  }
 }
+
+const fetchPayments = async () => {
+  try {
+    const response = await apiService.get('/owner-payments')
+    payments.value = (response || []).map(payment => {
+      const owner = owners.value.find(o => o.id === payment.ownerId)
+      return {
+        ...payment,
+        ownerName: owner?.name || 'Bilinmiyor'
+      }
+    })
+  } catch (error) {
+    console.error('Ödemeler yüklenirken hata:', error)
+    payments.value = []
+  }
+}
+
+const filteredPayments = computed(() => {
+  return payments.value.filter(payment => {
+    const matchesYear = !filterYear.value || payment.date?.startsWith(filterYear.value)
+    const matchesMonth = !filterMonth.value || payment.date?.startsWith(filterMonth.value)
+    const matchesSearch = !searchTerm.value || 
+      payment.ownerName?.toLowerCase().includes(searchTerm.value.toLowerCase()) ||
+      payment.description?.toLowerCase().includes(searchTerm.value.toLowerCase())
+    return matchesYear && matchesMonth && matchesSearch
+  })
+})
+
+const totalAmount = computed(() => {
+  return filteredPayments.value.reduce((sum, payment) => sum + Number(payment.amount || 0), 0)
+})
+
+const thisMonthPayments = computed(() => {
+  const today = new Date()
+  const currentMonth = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0')
+  
+  return payments.value
+    .filter(payment => payment.date && payment.date.startsWith(currentMonth))
+    .reduce((sum, payment) => sum + Number(payment.amount || 0), 0)
+})
+
+const paymentsCount = computed(() => {
+  return payments.value.length
+})
 
 const getPaymentTypeText = (type) => {
   const types = {
@@ -272,8 +244,15 @@ const editPayment = (payment) => {
   console.log('Düzenle:', payment)
 }
 
-onMounted(async () => {
-  await fetchOwners()
-  await fetchOwnerPayments()
+const availableYears = computed(() => {
+  const years = new Set(payments.value.map(payment => {
+    const date = new Date(payment.date)
+    return date.getFullYear()
+  }))
+  return Array.from(years).sort((a, b) => b - a)
+})
+
+onMounted(() => {
+  fetchOwners().then(() => fetchPayments())
 })
 </script> 

@@ -4,8 +4,15 @@
       
       <!-- Başlık -->
       <div class="flex items-center justify-between pb-4 border-b border-gray-200 dark:border-gray-700">
-        <h3 class="text-xl font-bold text-gray-800 dark:text-gray-100">Yeni Mal Sahibi Ekle</h3>
-        <button @click="$emit('close')" class="btn btn-sm btn-ghost">✕</button>
+        <h3 class="text-xl font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2">
+          <span class="text-2xl">🏠</span>
+          Yeni Mal Sahibi Ekle
+        </h3>
+        <button @click="$emit('close')" class="btn btn-sm btn-ghost text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
       </div>
 
       <!-- Form -->
@@ -62,8 +69,18 @@
 
         <!-- Butonlar -->
         <div class="modal-action pt-4 border-t border-gray-200 dark:border-gray-700">
-          <button type="button" @click="$emit('close')" class="btn btn-outline">İptal</button>
-          <button type="submit" class="btn btn-primary" :disabled="!isFormValid">Kaydet</button>
+          <button type="button" @click="$emit('close')" class="btn btn-outline border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+            İptal
+          </button>
+          <button type="submit" class="btn btn-primary bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 border-0 text-white shadow-lg" :disabled="!isFormValid">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+            Kaydet
+          </button>
         </div>
       </form>
     </div>

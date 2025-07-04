@@ -123,13 +123,17 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue';
-import { db } from '../../firebase';
-import { collection, onSnapshot, doc, deleteDoc, addDoc, updateDoc } from 'firebase/firestore';
-import { UNIT_OPTIONS } from '../../constants/units';
+import { ref, onMounted, computed } from 'vue'
+import ownersService from '@/services/ownersService'
+import tenantsService from '@/services/tenantsService'
+import { useErrorHandler } from '@/composables/useErrorHandler'
 import ConfirmDeleteModal from '../tenants/components/ConfirmDeleteModal.vue';
 import FilterBar from '@/components/common/FilterBar.vue';
 import OwnerCreateModal from './components/OwnerCreateModal.vue';
+import { useNotification } from '@/composables/useNotification';
+
+const { handleNetworkError, handleValidationError, showSuccess } = useErrorHandler()
+const { showCreateSuccess, showUpdateSuccess, showDeleteSuccess } = useNotification();
 
 const owners = ref([]);
 const tenants = ref([]);
@@ -141,12 +145,12 @@ const ownerToDelete = ref(null);
 const search = ref('');
 
 onMounted(() => {
-  onSnapshot(collection(db, 'owners'), (snapshot) => {
-    owners.value = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-  });
-  onSnapshot(collection(db, 'tenants'), (snapshot) => {
-    tenants.value = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-  });
+  try {
+    owners.value = ownersService.getAllOwners();
+    tenants.value = tenantsService.getAllTenants();
+  } catch (error) {
+    handleNetworkError(error, { component: 'Owners', action: 'fetchOwners' });
+  }
 });
 
 // --- Computed Properties for Summary Cards ---
@@ -231,20 +235,27 @@ const askDelete = (owner) => {
 };
 
 const confirmDelete = async () => {
-  if (!ownerToDelete.value) return;
-  await deleteDoc(doc(db, "owners", ownerToDelete.value.id));
-  ownerToDelete.value = null;
-  deleteModalVisible.value = false;
+  try {
+    await ownersService.deleteOwner(ownerToDelete.value.id);
+    showDeleteSuccess('Mal Sahibi');
+    deleteModalVisible.value = false;
+  } catch (error) {
+    handleValidationError(error, { component: 'Owners', action: 'deleteOwner' });
+  }
 };
 
-const saveOwner = async (newOwner) => {
-  await addDoc(collection(db, 'owners'), newOwner);
-  createModalVisible.value = false;
+const saveOwner = async (owner) => {
+  try {
+    await ownersService.createOwner(owner);
+    showCreateSuccess('Mal Sahibi');
+    createModalVisible.value = false;
+  } catch (error) {
+    handleValidationError(error, { component: 'Owners', action: 'saveOwner' });
+  }
 };
 
 const startEdit = (owner) => {
-    selectedOwner.value = owner;
-    editModalVisible.value = true;
-    // NOTE: OwnerEditModal would need to be created and implemented.
+  selectedOwner.value = { ...owner };
+  editModalVisible.value = true;
 };
 </script> 

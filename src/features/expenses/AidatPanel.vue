@@ -135,8 +135,8 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
-import { db } from '../../firebase'
-import { collection, getDocs, addDoc, deleteDoc, doc, setDoc } from 'firebase/firestore'
+import aidatService from '@/services/aidatService'
+import tenantsService from '@/services/tenantsService'
 
 const tenants = ref([])
 const selectedTenant = ref('')
@@ -231,25 +231,13 @@ const totalFilteredAmount = computed(() => {
 })
 
 const fetchDues = async () => {
-  duesList.value = []
-  const snap = await getDocs(collection(db, 'annualDues'))
-  const dues = []
-  snap.forEach(docSnap => {
-    const data = docSnap.data()
-    const tenant = tenants.value.find(t => t.id === data.tenantId)
-    if (tenant) {
-      dues.push({
-        id: docSnap.id,
-        year: data.year,
-        amount: data.amount,
-        vatIncludedAmount: data.vatIncludedAmount,
-        unit: data.unit,
-        company: tenant.company,
-        tenantId: data.tenantId
-      })
-    }
-  })
-  duesList.value = dues
+  try {
+    const response = await aidatService.getAidatDefinitions()
+    duesList.value = response || []
+  } catch (error) {
+    console.error('Aidat tanımları çekilirken hata oluştu:', error)
+    duesList.value = []
+  }
 }
 
 const resetForm = () => {
@@ -263,7 +251,7 @@ const resetForm = () => {
 const deleteDues = async (id) => {
   if (confirm('Bu aidat tanımını silmek istiyor musunuz? Bu işlem geri alınamaz.')) {
     try {
-      await deleteDoc(doc(db, 'annualDues', id))
+      await aidatService.deleteAidatDefinition(id)
       await fetchDues()
     } catch (error) {
       console.error("Aidat silme hatası:", error)
@@ -299,8 +287,7 @@ const handleSubmit = async () => {
 
   try {
     if (selectedId.value) {
-      const refDoc = doc(db, 'annualDues', selectedId.value)
-      await setDoc(refDoc, { ...data, updatedAt: new Date() }, { merge: true })
+      await aidatService.updateAidatDefinition(selectedId.value, data)
       alert('Aidat güncellendi.')
     } else {
       const exists = duesList.value.find(
@@ -311,7 +298,7 @@ const handleSubmit = async () => {
         return
       }
 
-      await addDoc(collection(db, 'annualDues'), { ...data, createdAt: new Date() })
+      await aidatService.createAidatDefinition(data)
       alert('Aidat kaydı eklendi.')
     }
   } catch (error) {
@@ -324,11 +311,13 @@ const handleSubmit = async () => {
 }
 
 onMounted(async () => {
-  const tenantSnap = await getDocs(collection(db, 'tenants'))
-  tenants.value = tenantSnap.docs.map(doc => ({
-    id: doc.id,
-    ...doc.data()
-  }))
-  await fetchDues()
+  try {
+    const response = await tenantsService.getTenants()
+    tenants.value = response || []
+    await fetchDues()
+  } catch (error) {
+    console.error('Kiracılar çekilirken hata oluştu:', error)
+    tenants.value = []
+  }
 })
 </script>

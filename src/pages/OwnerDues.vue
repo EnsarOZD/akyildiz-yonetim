@@ -82,14 +82,14 @@
                 <td class="p-4 text-gray-800 dark:text-gray-100">{{ due.unit }}</td>
                 <td class="p-4 text-gray-800 dark:text-gray-100">{{ due.period }}</td>
                 <td class="p-4">
-                  <span class="font-semibold text-gray-800 dark:text-gray-100">{{ formatCurrency(due.toplamTutar) }}</span>
+                  <span class="font-semibold text-gray-800 dark:text-gray-100">{{ formatCurrency(due.amount) }}</span>
                 </td>
                 <td class="p-4 text-gray-800 dark:text-gray-100">{{ formatDate(due.dueDate) }}</td>
                 <td class="p-4">
                   <span 
                     :class="{
-                      'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-400': due.isPaid,
-                      'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-400': !due.isPaid && !due.isOverdue,
+                      'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-400': due.status === 'paid',
+                      'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-400': due.status !== 'paid' && !due.isOverdue,
                       'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-400': due.isOverdue
                     }"
                     class="px-2 py-1 rounded-full text-xs font-medium"
@@ -100,8 +100,8 @@
                 <td class="p-4">
                   <div class="flex items-center gap-2">
                     <button 
-                      v-if="!due.isPaid"
-                      @click="markAsPaid(due)"
+                      v-if="due.status !== 'paid'"
+                      @click="markAsPaid(due.id)"
                       class="btn btn-sm btn-success"
                     >
                       Ödendi
@@ -135,8 +135,7 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
-import { db } from '../firebase'
-import { collection, getDocs, doc, updateDoc } from 'firebase/firestore'
+import apiService from '@/services/api'
 
 const ownerDues = ref([])
 const owners = ref([])
@@ -144,6 +143,7 @@ const search = ref('')
 const statusFilter = ref('')
 const yearFilter = ref('')
 const monthFilter = ref('')
+const loading = ref(false)
 
 const months = [
   { value: '01', label: 'Ocak' },
@@ -160,29 +160,49 @@ const months = [
   { value: '12', label: 'Aralık' }
 ]
 
-const fetchOwnerDues = async () => {
-  const snapshot = await getDocs(collection(db, 'ownerAidatRecords'))
-  const dues = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
-  
-  // Mal sahibi bilgilerini ekle
-  ownerDues.value = dues.map(due => {
-    const owner = owners.value.find(o => o.id === due.ownerId)
-    const dueDate = new Date(due.dueDate)
-    const now = new Date()
-    const isOverdue = dueDate < now && !due.isPaid
-    
-    return {
-      ...due,
-      ownerName: owner?.name || 'Mal Sahibi',
-      ownerEmail: owner?.email || '',
-      isOverdue
-    }
-  })
+const formatDate = (dateStr) => {
+  if (!dateStr) return '-'
+  return new Date(dateStr).toLocaleDateString('tr-TR', { year: 'numeric', month: 'short', day: 'numeric' })
+}
+
+const formatCurrency = (value) => {
+  if (value === undefined || value === null || isNaN(value)) return '₺0.00'
+  return Number(value).toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' })
 }
 
 const fetchOwners = async () => {
-  const snapshot = await getDocs(collection(db, 'owners'))
-  owners.value = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+  try {
+    const response = await apiService.get('/owners')
+    owners.value = response || []
+  } catch (error) {
+    console.error('Mal sahipleri yüklenirken hata:', error)
+    owners.value = []
+  }
+}
+
+const fetchOwnerDues = async () => {
+  loading.value = true
+  try {
+    const response = await apiService.get('/owner-dues')
+    ownerDues.value = (response || []).map(due => {
+      const owner = owners.value.find(o => o.id === due.ownerId)
+      const dueDate = new Date(due.dueDate)
+      const now = new Date()
+      const isOverdue = dueDate < now && !due.status === 'paid'
+      
+      return {
+        ...due,
+        ownerName: owner?.name || 'Bilinmiyor',
+        ownerEmail: owner?.email || '',
+        isOverdue
+      }
+    })
+  } catch (error) {
+    console.error('Mal sahibi aidatları yüklenirken hata:', error)
+    ownerDues.value = []
+  } finally {
+    loading.value = false
+  }
 }
 
 const availableYears = computed(() => {
@@ -205,9 +225,9 @@ const filteredDues = computed(() => {
   // Durum filtresi
   if (statusFilter.value) {
     if (statusFilter.value === 'paid') {
-      filtered = filtered.filter(due => due.isPaid)
+      filtered = filtered.filter(due => due.status === 'paid')
     } else if (statusFilter.value === 'unpaid') {
-      filtered = filtered.filter(due => !due.isPaid && !due.isOverdue)
+      filtered = filtered.filter(due => due.status !== 'paid' && !due.isOverdue)
     } else if (statusFilter.value === 'overdue') {
       filtered = filtered.filter(due => due.isOverdue)
     }
@@ -227,50 +247,31 @@ const filteredDues = computed(() => {
 })
 
 const totalDues = computed(() => {
-  return ownerDues.value.reduce((sum, due) => sum + Number(due.toplamTutar || 0), 0)
+  return ownerDues.value.reduce((sum, due) => sum + Number(due.amount || 0), 0)
 })
 
 const paidDues = computed(() => {
-  return ownerDues.value
-    .filter(due => due.isPaid)
-    .reduce((sum, due) => sum + Number(due.toplamTutar || 0), 0)
+  return ownerDues.value.filter(due => due.status === 'paid')
 })
 
 const overdueDues = computed(() => {
   return ownerDues.value
     .filter(due => due.isOverdue)
-    .reduce((sum, due) => sum + Number(due.toplamTutar || 0), 0)
+    .reduce((sum, due) => sum + Number(due.amount || 0), 0)
 })
 
-const formatCurrency = (value) => {
-  if (value === undefined || value === null || isNaN(value)) return '₺0.00'
-  return Number(value).toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' })
-}
-
-const formatDate = (dateStr) => {
-  if (!dateStr) return '-'
-  return new Date(dateStr).toLocaleDateString('tr-TR')
-}
-
 const getStatusText = (due) => {
-  if (due.isPaid) return 'Ödendi'
+  if (due.status === 'paid') return 'Ödendi'
   if (due.isOverdue) return 'Geciken'
   return 'Bekliyor'
 }
 
-const markAsPaid = async (due) => {
-  if (confirm(`${due.ownerName} için ${due.period} dönemi aidatını ödendi olarak işaretlemek istiyor musunuz?`)) {
-    try {
-      await updateDoc(doc(db, 'ownerAidatRecords', due.id), {
-        isPaid: true,
-        paidDate: new Date().toISOString()
-      })
-      await fetchOwnerDues()
-      alert('Aidat ödendi olarak işaretlendi.')
-    } catch (error) {
-      console.error('Hata:', error)
-      alert('Bir hata oluştu.')
-    }
+const markAsPaid = async (dueId) => {
+  try {
+    await apiService.put(`/owner-dues/${dueId}`, { status: 'paid' })
+    await fetchOwnerDues()
+  } catch (error) {
+    console.error('Aidat durumu güncellenirken hata:', error)
   }
 }
 
@@ -279,8 +280,7 @@ const viewDetails = (due) => {
   console.log('Detaylar:', due)
 }
 
-onMounted(async () => {
-  await fetchOwners()
-  await fetchOwnerDues()
+onMounted(() => {
+  fetchOwners().then(() => fetchOwnerDues())
 })
 </script> 

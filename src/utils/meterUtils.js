@@ -1,6 +1,3 @@
-import { db } from '../firebase'
-import { collection, getDocs, query, where, orderBy, limit, writeBatch, doc } from 'firebase/firestore'
-
 /**
  * Akıllı Sayaç Yönetimi Sistemi
  * - Veri tutarlılığını sağlar

@@ -133,38 +133,40 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
-import { doc, updateDoc } from 'firebase/firestore'
-import { db } from '../../firebase'
+import { ref, onMounted } from 'vue'
+import aidatService from '@/services/aidatService'
+import { useErrorHandler } from '@/composables/useErrorHandler'
 
 const props = defineProps({ record: Object })
 const emit = defineEmits(['close', 'updated'])
+
+const { handleNetworkError, handleValidationError, showSuccess } = useErrorHandler()
 
 const local = ref({
   kdvHaric: 0,
   toplamTutar: 0
 })
 
-watch(() => props.record, (newVal) => {
-  if (newVal) {
-    local.value.kdvHaric = newVal.kdvHaric ?? 0
-    local.value.toplamTutar = newVal.toplamTutar ?? 0
+onMounted(() => {
+  if (props.record) {
+    local.value.kdvHaric = props.record.kdvHaric ?? 0
+    local.value.toplamTutar = props.record.toplamTutar ?? 0
   }
-}, { immediate: true })
+})
 
 const save = async () => {
   try {
-    const refDoc = doc(db, 'aidatRecords', props.record.id)
-    await updateDoc(refDoc, {
+    await aidatService.updateAidat(props.record.id, {
       kdvHaric: local.value.kdvHaric,
-      toplamTutar: local.value.toplamTutar
+      kdvDahil: local.value.toplamTutar,
+      remainingAmount: local.value.toplamTutar - (props.record.paidAmount || 0),
+      isPaid: (local.value.toplamTutar - (props.record.paidAmount || 0)) <= 0
     })
-    alert('Aidat kaydı güncellendi.')
+    showSuccess('Aidat kaydı güncellendi.')
     emit('updated')
     emit('close')
   } catch (error) {
-    console.error('Güncelleme hatası:', error)
-    alert('Güncelleme sırasında bir hata oluştu.')
+    handleValidationError(error)
   }
 }
 </script>

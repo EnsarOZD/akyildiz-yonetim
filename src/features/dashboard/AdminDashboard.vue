@@ -67,13 +67,15 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
-import { db } from '../../firebase'
-import { collection, getDocs, query, where } from 'firebase/firestore'
+import { ref, onMounted } from 'vue'
 import AidatPanel from '../expenses/AidatPanel.vue'
 import UserManagement from './UserManagement.vue'
 import OwnerDuesPanel from '../expenses/OwnerDuesPanel.vue'
 import Owners from '../owners/Owners.vue'
+import tenantsService from '@/services/tenantsService'
+// Eğer varsa ownersService ve usersService de eklenmeli
+// import ownersService from '@/services/ownersService'
+// import usersService from '@/services/usersService'
 
 const activeTab = ref('dues')
 const tabs = [
@@ -89,17 +91,17 @@ const totalUsers = ref(0)
 
 const fetchStats = async () => {
   try {
-    const tenantsSnap = await getDocs(query(collection(db, 'tenants'), where('status', '==', 'active')))
-    totalTenants.value = tenantsSnap.size
+    // Kiracı istatistikleri
+    const tenantStats = await tenantsService.getTenantStats()
+    totalTenants.value = tenantStats?.activeCount || tenantStats?.totalCount || 0
 
-    const ownersSnap = await getDocs(collection(db, 'owners'))
-    totalOwners.value = ownersSnap.size
-    
-    const usersSnap = await getDocs(collection(db, 'users'))
-    totalUsers.value = usersSnap.size
-
+    // Mal sahibi ve kullanıcı istatistikleri için benzer şekilde eklenebilir
+    // const ownerStats = await ownersService.getOwnerStats()
+    // totalOwners.value = ownerStats?.totalCount || 0
+    // const userStats = await usersService.getUserStats()
+    // totalUsers.value = userStats?.totalCount || 0
   } catch (error) {
-    console.error("İstatistikleri çekerken hata oluştu:", error);
+    console.error('İstatistikleri çekerken hata oluştu:', error)
   }
 }
 

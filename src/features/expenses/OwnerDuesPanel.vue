@@ -138,9 +138,11 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
-import { db } from '../../firebase'
-import { collection, getDocs, addDoc, deleteDoc, doc, setDoc, writeBatch } from 'firebase/firestore'
+import ownerDuesService from '@/services/ownerDuesService'
+import { useErrorHandler } from '@/composables/useErrorHandler'
 import { UNIT_OPTIONS } from '../../constants/units'
+
+const { handleNetworkError, handleValidationError, showSuccess } = useErrorHandler()
 
 const year = ref(new Date().getFullYear())
 const selectedUnit = ref('')

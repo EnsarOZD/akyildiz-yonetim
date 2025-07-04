@@ -196,10 +196,14 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
-import { db } from '../../firebase'
-import { collection, addDoc, getDocs, query, where, orderBy, limit } from 'firebase/firestore'
-import { meterManager, calculateConsumption, calculateTotalWithVAT } from '../../utils/meterUtils'
+import { ref, onMounted, computed, watch } from 'vue'
+import { useErrorHandler } from '@/composables/useErrorHandler'
+import { useNotification } from '@/composables/useNotification'
+import apiService from '@/services/api.js'
+import tenantsService from '@/services/tenantsService.js'
+
+// Emit tanımı
+const emit = defineEmits(['close'])
 
 const selectedPeriod = ref(new Date().toISOString().slice(0, 7))
 const readings = ref([])
@@ -230,133 +234,164 @@ const updateTotal = (index) => {
   r.toplamTutar = +(Number(r.kdvHaric) + kdv).toFixed(2)
 }
 
+const calculate = (index) => {
+  const r = readings.value[index]
+  r.usage = Math.max(0, r.current - r.previous)
+  updateTotal(index)
+}
+
 const fetchTenantsAndPrevious = async () => {
-  const tenantsSnapshot = await getDocs(collection(db, 'tenants'))
-  readings.value = []
-  const processedUnits = new Set()
+  try {
+    // Kiracıları getir
+    const tenants = await tenantsService.getTenants()
 
-  const staticUnits = [
-    { tenantId: 'mescit', unit: 'MESCİT', company: 'MESCİT' },
-    { tenantId: 'ortak', unit: 'ORTAK ALAN', company: 'ORTAK ALAN' }
-  ]
+    // Daireleri getir
+    const flats = await apiService.get('/flats')
 
-  // Tüm birimleri topla
-  const allUnits = [...staticUnits.map(s => s.unit)]
-  
-  // Kiracıları getir ve birimleri ekle (aktif/pasif fark etmeksizin)
-  tenantsSnapshot.forEach(doc => {
-    const data = doc.data()
-    // isActive kontrolünü kaldırdık - tüm kiracıları göster
-    for (const unit of data.units || []) {
-      if (!processedUnits.has(unit)) {
-        allUnits.push(unit)
-        processedUnits.add(unit)
-      }
-    }
-  })
+    // Son elektrik okumalarını getir
+    const lastReadings = await apiService.get('/utilitydebts/last-readings/electricity')
+    const lastReadingsMap = new Map(lastReadings.map(r => [r.flatNumber, r]))
 
-  // Batch olarak son okumaları getir
-  const lastReadingsMap = await meterManager.getLastReadingsBatch(allUnits, 'electricity')
+    readings.value = []
 
-  // Static birimler için okumaları oluştur
-  for (const s of staticUnits) {
-    const lastReading = lastReadingsMap.get(s.unit)
-    readings.value.push({
-      ...s,
-      previous: lastReading ? lastReading.currentValue : 0,
-      current: 0,
-      usage: 0,
-      kdvHaric: 0,
-      toplamTutar: 0
-    })
-  }
+    // Static birimler
+    const staticUnits = [
+      { tenantId: null, ownerId: null, unit: 'MESCİT', company: 'MESCİT', isActive: true },
+      { tenantId: null, ownerId: null, unit: 'ORTAK ALAN', company: 'ORTAK ALAN', isActive: true }
+    ]
 
-  // Kiracı birimleri için okumaları oluştur (aktif/pasif fark etmeksizin)
-  tenantsSnapshot.forEach(doc => {
-    const data = doc.data()
-    // isActive kontrolünü kaldırdık - tüm kiracıları göster
-    for (const unit of data.units || []) {
-      const lastReading = lastReadingsMap.get(unit)
-      const reading = {
-        tenantId: doc.id,
-        unit,
-        company: data.company,
-        isActive: data.isActive, // Aktiflik durumunu sakla
-        previous: lastReading ? lastReading.currentValue : 0,
+    // Static birimler için okumaları oluştur
+    for (const s of staticUnits) {
+      const lastReading = lastReadingsMap.get(s.unit)
+      readings.value.push({
+        ...s,
+        previous: lastReading ? lastReading.currentReading : 0,
         current: 0,
         usage: 0,
         kdvHaric: 0,
         toplamTutar: 0
-      }
-      readings.value.push(reading)
+      })
     }
-  })
-}
 
-const calculate = (index) => {
-  const r = readings.value[index]
-  r.usage = calculateConsumption(r.current, r.previous)
-  updateTotal(index)
+    // Kiracı birimleri için okumaları oluştur
+    tenants.forEach(tenant => {
+      if (tenant.flats && Array.isArray(tenant.flats)) {
+        tenant.flats.forEach(flatId => {
+          const flat = flats.find(f => f.id === flatId)
+          if (flat) {
+            const lastReading = lastReadingsMap.get(flat.flatNumber)
+            const reading = {
+              tenantId: tenant.id,
+              ownerId: null,
+              unit: flat.flatNumber,
+              company: tenant.company || `${tenant.firstName} ${tenant.lastName}`,
+              isActive: tenant.status === 'Active',
+              previous: lastReading ? lastReading.currentReading : 0,
+              current: 0,
+              usage: 0,
+              kdvHaric: 0,
+              toplamTutar: 0
+            }
+            readings.value.push(reading)
+          }
+        })
+      }
+    })
+
+    // Mal sahipleri için okumaları oluştur
+    const owners = await apiService.get('/owners')
+    owners.forEach(owner => {
+      if (owner.flats && Array.isArray(owner.flats)) {
+        owner.flats.forEach(flatId => {
+          const flat = flats.find(f => f.id === flatId)
+          if (flat) {
+            const lastReading = lastReadingsMap.get(flat.flatNumber)
+            const reading = {
+              tenantId: null,
+              ownerId: owner.id,
+              unit: flat.flatNumber,
+              company: owner.company || `${owner.firstName} ${owner.lastName}`,
+              isActive: true,
+              previous: lastReading ? lastReading.currentReading : 0,
+              current: 0,
+              usage: 0,
+              kdvHaric: 0,
+              toplamTutar: 0
+            }
+            readings.value.push(reading)
+          }
+        })
+      }
+    })
+
+  } catch (error) {
+    console.error('Veri yükleme hatası:', error)
+    alert('Veriler yüklenirken bir hata oluştu.')
+  }
 }
 
 const saveReadings = async () => {
-  const colRef = collection(db, 'readings')
-  for (const r of readings.value) {
-    await addDoc(colRef, {
-      tenantId: r.tenantId,
-      unit: r.unit,
-      period: selectedPeriod.value,
-      type: 'electricity',
-      previousValue: r.previous,
-      currentValue: r.current,
-      consumption: r.usage,
-      kdvHaric: r.kdvHaric,
-      toplamTutar: r.toplamTutar,
-      company: r.company,
-      startDate: startDate.value,
-      endDate: endDate.value,
-      dueDate: dueDate.value,
-      dayCount: dayCount.value,
-      createdAt: new Date()
-    })
+  try {
+    const filledReadings = readings.value.filter(r => r.current > 0)
+    
+    for (const r of filledReadings) {
+      const utilityDebtData = {
+        flatNumber: r.unit,
+        tenantId: r.tenantId,
+        ownerId: r.ownerId,
+        utilityType: 'Electricity',
+        period: selectedPeriod.value,
+        previousReading: r.previous,
+        currentReading: r.current,
+        consumption: r.usage,
+        amount: r.toplamTutar,
+        dueDate: dueDate.value,
+        startDate: startDate.value,
+        endDate: endDate.value,
+        isPaid: false,
+        paidAmount: 0
+      }
+
+      await apiService.post('/utilitydebts', utilityDebtData)
+    }
+
+    emit('close')
+  } catch (error) {
+    console.error('Kaydetme hatası:', error)
+    alert('Kayıtlar kaydedilirken bir hata oluştu.')
   }
-  
-  // Cache'i temizle
-  meterManager.clearCache()
-  
-  alert('Tüm elektrik sayaç kayıtları eklendi.')
-  readings.value = []
-  fetchTenantsAndPrevious()
 }
 
 const savePartialReadings = async () => {
-  const colRef = collection(db, 'readings')
-  const filled = readings.value.filter(r => r.current > 0)
-  for (const r of filled) {
-    await addDoc(colRef, {
-      tenantId: r.tenantId,
-      unit: r.unit,
-      period: selectedPeriod.value,
-      type: 'electricity',
-      previousValue: r.previous,
-      currentValue: r.current,
-      consumption: r.usage,
-      kdvHaric: r.kdvHaric,
-      toplamTutar: r.toplamTutar,
-      company: r.company,
-      startDate: startDate.value,
-      endDate: endDate.value,
-      dueDate: dueDate.value,
-      dayCount: dayCount.value,
-      createdAt: new Date()
-    })
+  try {
+    const filledReadings = readings.value.filter(r => r.current > 0)
+    
+    for (const r of filledReadings) {
+      const utilityDebtData = {
+        flatNumber: r.unit,
+        tenantId: r.tenantId,
+        ownerId: r.ownerId,
+        utilityType: 'Electricity',
+        period: selectedPeriod.value,
+        previousReading: r.previous,
+        currentReading: r.current,
+        consumption: r.usage,
+        amount: r.toplamTutar,
+        dueDate: dueDate.value,
+        startDate: startDate.value,
+        endDate: endDate.value,
+        isPaid: false,
+        paidAmount: 0
+      }
+
+      await apiService.post('/utilitydebts', utilityDebtData)
+    }
+
+    emit('close')
+  } catch (error) {
+    console.error('Kaydetme hatası:', error)
+    alert('Kayıtlar kaydedilirken bir hata oluştu.')
   }
-  
-  // Cache'i temizle
-  meterManager.clearCache()
-  
-  alert('Girilen elektrik kayıtları başarıyla eklendi.')
-  fetchTenantsAndPrevious()
 }
 
 onMounted(fetchTenantsAndPrevious)
