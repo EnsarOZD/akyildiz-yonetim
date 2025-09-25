@@ -1,317 +1,392 @@
 <template>
-  <!-- Ana Sayfa Konteyneri -->
-  <div class="p-4 sm:p-6 bg-base-200 min-h-screen">
-    <div class="max-w-7xl mx-auto">
-
-      <!-- Başlık -->
-      <h1 class="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-6">Kiracılar</h1>
-
-      <!-- Özet Kartlar ve Yeni Kiracı Butonu -->
-      <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <div class="stat bg-base-100 shadow-lg rounded-box">
-          <div class="stat-figure text-primary">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
-          </div>
-          <div class="stat-title">Toplam Kiracı</div>
-          <div class="stat-value text-primary">{{ tenantStats?.totalCount || 0 }}</div>
+  <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 p-6">
+    <!-- Header -->
+    <div class="mb-8">
+      <div class="flex items-center justify-between">
+        <div>
+          <h1 class="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-2 flex items-center gap-3">
+            <span class="text-4xl">🏢</span>
+            İş Hanı Kiracıları
+          </h1>
+          <p class="text-gray-600 dark:text-gray-400">İş hanındaki tüm kiracıları yönetin</p>
         </div>
-        <div class="stat bg-base-100 shadow-lg rounded-box">
-          <div class="stat-figure text-success">
-             <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-          </div>
-          <div class="stat-title">Aktif Kiracı</div>
-          <div class="stat-value text-success">{{ tenantStats?.activeCount || 0 }}</div>
-        </div>
-        <div class="stat bg-base-100 shadow-lg rounded-box">
-          <div class="stat-figure text-warning">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" /></svg>
-          </div>
-          <div class="stat-title">Pasif Kiracı</div>
-          <div class="stat-value text-warning">{{ tenantStats?.passiveCount || 0 }}</div>
-        </div>
-        <button class="btn btn-primary btn-lg h-full" @click="createModalVisible = true">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
+        <button @click="showCreateModal = true" class="btn btn-success bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 border-0 text-white shadow-lg">
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+          </svg>
           Yeni Kiracı Ekle
         </button>
-      </section>
+      </div>
+    </div>
 
-      <!-- Filtreler ve Arama -->
-      <div class="card bg-base-100 shadow-xl mb-6">
-        <div class="card-body">
-          <FilterBar
-            :search="search" @update:search="val => search = val"
-            :status="statusFilter" @update:status="val => statusFilter = val"
-            search-placeholder="Şirket, kişi veya daire ara..."
-            :status-options="[
-              { value: 'all', label: 'Tümü' },
-              { value: 'active', label: 'Aktif' },
-              { value: 'passive', label: 'Pasif' }
-            ]"
-            @clear-filters="handleClearFilters"
-          />
+    <!-- Filtreler -->
+    <div class="card bg-white dark:bg-gray-800 shadow-lg mb-6">
+      <div class="card-body">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <!-- Arama -->
+          <div class="form-control">
+            <label class="label"><span class="label-text font-semibold text-gray-700 dark:text-gray-300">Arama</span></label>
+            <input v-model="filters.searchTerm" @input="handleSearch" class="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400" placeholder="Şirket, kişi, kimlik no..." />
+          </div>
+
+          <!-- Durum -->
+          <div class="form-control">
+            <label class="label"><span class="label-text font-semibold text-gray-700 dark:text-gray-300">Durum</span></label>
+            <select v-model="filters.isActive" @change="handleSearch" class="select select-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200">
+              <option value="">Tümü</option>
+              <option value="true">Aktif</option>
+              <option value="false">Pasif</option>
+            </select>
+          </div>
+
+          <!-- Kat -->
+          <div class="form-control">
+            <label class="label"><span class="label-text font-semibold text-gray-700 dark:text-gray-300">Kat</span></label>
+            <select v-model="filters.floorNumber" @change="handleSearch" class="select select-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200">
+              <option value="">Tüm Katlar</option>
+              <option v-for="floor in availableFloors" :key="floor" :value="floor">{{ floor }}. Kat</option>
+            </select>
+          </div>
+
+          <!-- İş Türü (client-side) -->
+          <div class="form-control">
+            <label class="label"><span class="label-text font-semibold text-gray-700 dark:text-gray-300">İş Türü</span></label>
+            <select v-model="filters.businessType" @change="handleSearch" class="select select-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200">
+              <option value="">Tümü</option>
+              <option value="Ticaret">Ticaret</option>
+              <option value="Hizmet">Hizmet</option>
+              <option value="Üretim">Üretim</option>
+              <option value="Ofis">Ofis</option>
+              <option value="Depo">Depo</option>
+              <option value="Diğer">Diğer</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="flex justify-between items-center mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+          <div class="flex gap-2">
+            <button @click="clearFilters" class="btn btn-outline btn-sm border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300">
+              <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+              </svg>
+              Filtreleri Temizle
+            </button>
+          </div>
+          <div class="text-sm text-gray-500 dark:text-gray-400">
+            {{ filteredTenants.length }} kiracı bulundu
+          </div>
         </div>
       </div>
+    </div>
 
-      <!-- Kiracı Kart Listesi -->
-      <div v-if="filteredTenants.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div v-for="tenant in filteredTenants" :key="tenant.id" 
-             class="card bg-base-100 shadow-lg hover:shadow-2xl transition-shadow duration-300 transform hover:-translate-y-1">
-          <div class="card-body">
-            <div class="flex items-start justify-between">
-              <div class="flex items-center gap-4">
-                <div class="avatar placeholder">
-                  <div :class="getAvatarColor(tenant.firstName)" class="bg-neutral-focus text-neutral-content rounded-full w-14">
-                    <span class="text-xl font-bold">{{ getAvatarInitial(tenant.firstName) }}</span>
-                  </div>
-                </div>
-                <div>
-                  <h2 class="card-title text-base-content">{{ `${tenant.firstName} ${tenant.lastName}` }}</h2>
-                  <p class="text-sm text-base-content/70">
-                    Daire: {{ tenant.apartmentNumber }}
-                  </p>
-                </div>
-              </div>
-              <div class="dropdown dropdown-end">
-                <label tabindex="0" class="btn btn-ghost btn-sm btn-circle">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" /></svg>
-                </label>
-                <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-200 rounded-box w-40 z-10">
-                  <li><a @click="viewTenantDetail(tenant.id)">Detayları Gör</a></li>
-                  <li><a @click="startEdit(tenant)">Düzenle</a></li>
-                  <li v-if="!tenant.isActive"><a @click="activateTenant(tenant.id)">Aktif Et</a></li>
-                  <li v-else><a @click="deactivateTenant(tenant.id)">Pasif Et</a></li>
-                  <li><a @click="askDelete(tenant)" class="text-error">Sil</a></li>
-                </ul>
-              </div>
+    <!-- Kartlar -->
+    <div v-if="filteredTenants.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div v-for="tenant in paginatedTenants" :key="tenant.id" class="relative group bg-white dark:bg-gray-800 rounded-2xl shadow-lg transition-transform duration-200 hover:scale-105 hover:shadow-2xl p-6 flex flex-col">
+        <!-- Menü -->
+        <div class="absolute top-4 right-4 z-10">
+          <div class="dropdown dropdown-end">
+            <button tabindex="0" class="btn btn-ghost btn-circle btn-sm">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/><circle cx="5" cy="12" r="1.5"/></svg>
+            </button>
+            <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-200 rounded-box w-40 z-10">
+              <li><a @click="viewTenant(tenant)">Detayları Gör</a></li>
+              <li><a @click="editTenant(tenant)">Düzenle</a></li>
+              <li><a @click="openDeleteModal(tenant)" class="text-error">Sil</a></li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Baş -->
+        <div class="flex items-center gap-4 mb-4">
+          <div :class="getAvatarColor(tenant.contactPersonName) + ' flex items-center justify-center rounded-full w-16 h-16 text-2xl font-bold text-white shadow-lg'">
+            {{ getAvatarInitial(tenant.companyName) }}
+          </div>
+          <div>
+            <div class="flex items-center gap-2 mb-1">
+              <span class="text-lg font-bold text-gray-800 dark:text-gray-100">{{ tenant.companyName }}</span>
+              <span v-if="tenant.flats?.length" class="badge badge-info text-xs">
+                Ünite {{ tenant.flats[0].code }}
+              </span>
             </div>
-
-            <div class="divider my-3"></div>
-            
-            <div class="flex justify-between items-center text-sm">
+            <div class="flex items-center gap-2">
               <span :class="['badge font-semibold', tenant.isActive ? 'badge-success' : 'badge-ghost']">
                 {{ tenant.isActive ? 'Aktif' : 'Pasif' }}
               </span>
-              <div class="text-right">
-                <div class="font-semibold text-base-content/80">Aylık Kira</div>
-                <div class="text-lg font-bold text-success">
-                  {{ formatCurrency(tenant.monthlyRent) }}
-                </div>
-              </div>
             </div>
           </div>
         </div>
-      </div>
-      <div v-else class="text-center py-16">
-        <p class="text-xl text-base-content/60">Aramanızla eşleşen kiracı bulunamadı.</p>
+
+        <!-- Tarih + iletişim -->
+        <div class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+          <span>Giriş: {{ formatDate(tenant.contractStartDate) }}</span>
+        </div>
+        <div v-if="tenant.contactPersonEmail" class="text-xs text-gray-400 truncate mb-1">{{ tenant.contactPersonEmail }}</div>
+        <div v-if="tenant.contactPersonPhone" class="text-xs text-gray-400 truncate">{{ tenant.contactPersonPhone }}</div>
       </div>
     </div>
-    
+
+    <!-- Sayfalama -->
+    <div class="card-body border-t border-gray-200 dark:border-gray-700">
+      <div class="flex items-center justify-between">
+        <div class="text-sm text-gray-600 dark:text-gray-400">
+          {{ (currentPage - 1) * pageSize + 1 }}-{{ Math.min(currentPage * pageSize, filteredTenants.length) }} / {{ filteredTenants.length }} kiracı
+        </div>
+        <div class="join">
+          <button @click="currentPage--" :disabled="currentPage === 1" class="join-item btn btn-sm">«</button>
+          <button class="join-item btn btn-sm">{{ currentPage }}</button>
+          <button @click="currentPage++" :disabled="currentPage >= totalPages" class="join-item btn btn-sm">»</button>
+        </div>
+      </div>
+    </div>
+
     <!-- Modallar -->
-    <TenantEditModal
-      :tenant="selectedTenant"
-      :visible="editModalVisible"
-      :unit-options="UNIT_OPTIONS"
-      :all-tenants="tenants"
-      @save="handleTenantUpdate"
-      @close="editModalVisible = false"
-    />
     <TenantCreateModal
-      :visible="createModalVisible"
-      :unit-options="UNIT_OPTIONS"
-      :all-tenants="tenants"
-      @save="saveTenant"
-      @close="createModalVisible = false"
+      :visible="showCreateModal"
+      @save="handleCreateTenant"
+      @close="showCreateModal = false"
     />
+
     <ConfirmDeleteModal
-      :visible="deleteModalVisible"
+      :visible="showDeleteModal"
       :tenant="tenantToDelete"
+      :title="deleteModalTitle"
+      :message="deleteModalMessage"
+      confirm-label="Evet, Sil"
+      cancel-label="İptal"
+      :loading="deleteLoading"
       @confirm="confirmDelete"
-      @cancel="deleteModalVisible = false"
+      @cancel="closeDeleteModal"
+    />
+
+    <TenantEditModal
+      v-if="editingTenant"
+      :visible="showEditModal"
+      :tenant="editingTenant"
+      @save="handleUpdateTenant"
+      @close="closeEditModal"
     />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, computed, onUnmounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import tenantsService from '@/services/tenantsService'
 import TenantEditModal from './components/TenantEditModal.vue'
 import TenantCreateModal from './components/TenantCreateModal.vue'
-import { UNIT_OPTIONS } from '../../constants/units'
+import tenantsService from '@/features/tenants/services/tenantsService.js'
+import { errorHandler } from '@/utils/errorHandler'
 import ConfirmDeleteModal from './components/ConfirmDeleteModal.vue'
-import FilterBar from '@/components/common/FilterBar.vue'
-import { useErrorHandler } from '@/composables/useErrorHandler'
-import { useNotification } from '@/composables/useNotification'
 import { useEventBus } from '@/composables/useEventBus'
 
 const router = useRouter()
-const { handleNetworkError, withErrorHandling } = useErrorHandler()
-const { showCreateSuccess, showUpdateSuccess, showDeleteSuccess } = useNotification()
-const { on, off } = useEventBus()
+const { emit: emitEvent } = useEventBus()
 
-const tenants = ref([])
-const tenantStats = ref(null)
-const selectedTenant = ref(null)
-const editModalVisible = ref(false)
-const createModalVisible = ref(false)
-const deleteModalVisible = ref(false)
+// Delete modal state
+const showDeleteModal = ref(false)
+const deleteLoading = ref(false)
 const tenantToDelete = ref(null)
-const statusFilter = ref("all")
-const search = ref('')
-const loading = ref(false)
+const deleteModalTitle = computed(() =>
+  tenantToDelete.value ? `${tenantToDelete.value.companyName} silinsin mi?` : 'Silinsin mi?'
+)
+const deleteModalMessage = computed(() =>
+  tenantToDelete.value ? `${tenantToDelete.value.companyName} kiracısını silerseniz ilgili ünite boşaltılacaktır.` : ''
+)
+const openDeleteModal = (tenant) => { tenantToDelete.value = tenant; showDeleteModal.value = true }
+const closeDeleteModal = () => { showDeleteModal.value = false; tenantToDelete.value = null }
 
+// Page state
+const tenants = ref([])
+const loading = ref(false)
+const showCreateModal = ref(false)
+const showEditModal = ref(false)
+const editingTenant = ref(null)
+const currentPage = ref(1)
+const pageSize = 10
+
+// Filters
+const filters = ref({
+  searchTerm: '',
+  isActive: '',
+  floorNumber: '',
+  businessType: '' // client-side filter
+})
+
+// Computeds
+const filteredTenants = computed(() => {
+  let list = tenants.value
+
+  if (filters.value.searchTerm) {
+    const s = String(filters.value.searchTerm).toLowerCase()
+    list = list.filter(t =>
+      String(t.companyName || '').toLowerCase().includes(s) ||
+      String(t.contactPersonName || '').toLowerCase().includes(s) ||
+      String(t.identityNumber || '').includes(s) ||
+      String(t.contactPersonEmail || '').toLowerCase().includes(s) ||
+      String(t.contactPersonPhone || '').includes(s)
+    )
+  }
+
+  if (filters.value.isActive !== '') {
+    const wanted = (filters.value.isActive === 'true')
+    list = list.filter(t => t.isActive === wanted)
+  }
+
+  if (filters.value.floorNumber !== '') {
+    const f = parseInt(filters.value.floorNumber, 10)
+    list = list.filter(t => t.flats?.some(fl => fl.floorNumber === f))
+  }
+
+  if (filters.value.businessType) {
+    list = list.filter(t => t.businessType === filters.value.businessType)
+  }
+
+  return list
+})
+
+const paginatedTenants = computed(() => {
+  const start = (currentPage.value - 1) * pageSize
+  return filteredTenants.value.slice(start, start + pageSize)
+})
+
+const totalPages = computed(() => Math.ceil(filteredTenants.value.length / pageSize))
+
+const availableFloors = computed(() => {
+  const set = new Set()
+  tenants.value.forEach(t => t.flats?.forEach(fl => {
+    if (fl.floorNumber !== null && fl.floorNumber !== undefined) set.add(fl.floorNumber)
+  }))
+  return Array.from(set).sort((a, b) => a - b)
+})
+
+// Methods
 const fetchTenants = async () => {
+  loading.value = true
   try {
-    loading.value = true
-    
-    // Filtreleri backend'e gönder
-    const apiFilters = {}
-    if (search.value) apiFilters.searchTerm = search.value
-    if (statusFilter.value === 'active') apiFilters.isActive = true
-    else if (statusFilter.value === 'passive') apiFilters.isActive = false
-    
-    const [tenantsData, statsData] = await Promise.all([
-      tenantsService.getTenants(apiFilters),
-      tenantsService.getTenantStats()
-    ])
-    
-    tenants.value = tenantsData
-    tenantStats.value = statsData
-  } catch (error) {
-    console.error('Kiracılar yüklenirken hata:', error)
-    alert('Kiracılar yüklenirken bir hata oluştu')
+    const response = await tenantsService.getTenants({
+      isActive: filters.value.isActive !== '' ? filters.value.isActive : undefined,
+      searchTerm: filters.value.searchTerm || undefined,
+      // Server tarafında 'floor' bekleniyor (controller FromQuery floor -> FloorNumber mapliyor)
+      floor: filters.value.floorNumber !== '' ? filters.value.floorNumber : undefined
+    })
+    tenants.value = response
+  } catch (err) {
+    console.error('Kiracılar yüklenirken hata:', err)
+    errorHandler.logError(err, { component: 'Tenants', action: 'fetch' })
   } finally {
     loading.value = false
   }
 }
 
-const filteredTenants = computed(() => {
-  let filtered = tenants.value
+const leaseableFlats = computed(() =>
+  flats.value.filter(f => f.isActive && !f.isOccupied) // tip filtresi YOK
+)
 
-  if (statusFilter.value === "active") {
-    filtered = filtered.filter(t => t.isActive)
-  } else if (statusFilter.value === "passive") {
-    filtered = filtered.filter(t => !t.isActive)
-  }
+const leaseableIdSet = computed(() =>
+  new Set(leaseableFlats.value.map(f => f.id))
+)
 
-  if (search.value) {
-    const s = search.value.toLowerCase()
-    filtered = filtered.filter(t =>
-      `${t.firstName} ${t.lastName}`.toLowerCase().includes(s) ||
-      (t.apartmentNumber || '').toLowerCase().includes(s) ||
-      (t.email || '').toLowerCase().includes(s)
-    )
-  }
-  return filtered.sort((a,b) => a.firstName.localeCompare(b.firstName))
-})
-
-const getAvatarInitial = (name) => (name ? name.charAt(0).toUpperCase() : '?')
-const getAvatarColor = (name) => {
-  if (!name) return 'bg-gray-500'
-  const colors = ['bg-primary', 'bg-secondary', 'bg-accent', 'bg-info', 'bg-success', 'bg-warning', 'bg-error']
-  const charCodeSum = name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)
-  return colors[charCodeSum % colors.length]
+const handleSearch = () => { currentPage.value = 1 }
+const clearFilters = () => {
+  filters.value = { searchTerm: '', isActive: '', floorNumber: '', businessType: '' }
+  currentPage.value = 1
 }
 
-const viewTenantDetail = (tenantId) => {
-  router.push({ name: 'TenantDetailPage', params: { id: tenantId } })
-}
-
-const startEdit = (tenant) => {
-  selectedTenant.value = { ...tenant }
-  editModalVisible.value = true
-}
-
-const activateTenant = async (tenantId) => {
+const handleCreateTenant = async (data) => {
   try {
-    await tenantsService.updateTenant(tenantId, { isActive: true })
+    await tenantsService.createTenant(data)
+    errorHandler.logSuccess('success', 'Kiracı başarıyla eklendi', { component: 'Tenants', action: 'create' })
+    showCreateModal.value = false
     await fetchTenants()
-  } catch (error) {
-    console.error('Kiracı aktif edilirken hata:', error)
-    alert('Kiracı aktif edilirken bir hata oluştu')
+  } catch (err) {
+    // Sunucu mesajını yakala
+    const serverText = err?.serverMessage || err?.message || ''
+    const isActiveExists = /aktif.*kiracı.*var/i.test(serverText)
+    const selectedIds = (data.flatIds && data.flatIds.length) ? data.flatIds
+                       : (data.flatId ? [data.flatId] : [])
+
+    if (isActiveExists && selectedIds.length) {
+      try {
+        // Aynı kimlik no ile mevcut aktif kiracıyı bul
+        const candidates = await tenantsService.getTenants({
+          searchTerm: data.identityNumber,
+          isActive: true
+        })
+        const existing = Array.isArray(candidates) ? candidates[0] : null
+
+        if (existing) {
+          const ok = window.confirm(
+            `Bu kimlik numarasıyla zaten aktif bir kiracı var: "${existing.companyName}". ` +
+            `Seçili ${selectedIds.length} üniteyi bu kiracıya bağlayalım mı?`
+          )
+          if (ok) {
+            // BE hazır olduğunda çalışır
+            await tenantsService.assignFlats(existing.id, {
+              flatIds: selectedIds,
+              contractStartDate: data.contractStartDate || null
+            })
+            errorHandler.logSuccess('success', 'Üniteler mevcut kiracıya atandı.', { component: 'Tenants', action: 'assign-flats' })
+            showCreateModal.value = false
+            await fetchTenants()
+            return
+          }
+        }
+      } catch (e) {
+        console.warn('Mevcut kiracıya atama akışı başarısız:', e)
+      }
+    }
+
+    console.error('Kiracı eklenirken hata:', err)
+    errorHandler.logError(err, { component: 'Tenants', action: 'create' })
   }
 }
 
-const deactivateTenant = async (tenantId) => {
+const handleUpdateTenant = async (data) => {
   try {
-    await tenantsService.updateTenant(tenantId, { isActive: false })
+    await tenantsService.updateTenant(editingTenant.value.id, data)
+    errorHandler.logSuccess('success', 'Kiracı başarıyla güncellendi', { component: 'Tenants', action: 'update' })
+    closeEditModal()
     await fetchTenants()
-  } catch (error) {
-    console.error('Kiracı pasif edilirken hata:', error)
-    alert('Kiracı pasif edilirken bir hata oluştu')
+  } catch (err) {
+    console.error('Kiracı güncellenirken hata:', err)
+    errorHandler.logError(err, { component: 'Tenants', action: 'update' })
   }
 }
 
-const handleClearFilters = () => {
-  search.value = ''
-  statusFilter.value = 'all'
-  fetchTenants()
-}
+const editTenant = (t) => { editingTenant.value = t; showEditModal.value = true }
+const closeEditModal = () => { editingTenant.value = null; showEditModal.value = false }
+const viewTenant = (t) => { router.push(`/tenants/${t.id}`) }
 
-const handleTenantUpdate = async (updatedTenant) => {
-  try {
-    await tenantsService.updateTenant(updatedTenant.id, updatedTenant)
-    editModalVisible.value = false
-    await fetchTenants()
-    showUpdateSuccess('Kiracı')
-  } catch (error) {
-    console.error('Kiracı güncellenirken hata:', error)
-    alert('Kiracı güncellenirken bir hata oluştu')
-  }
-}
-
-const saveTenant = async (newTenant) => {
-  try {
-    await tenantsService.createTenant(newTenant)
-    createModalVisible.value = false
-    await fetchTenants()
-    showCreateSuccess('Kiracı')
-  } catch (error) {
-    console.error('Kiracı oluşturulurken hata:', error)
-    alert('Kiracı oluşturulurken bir hata oluştu')
-  }
-}
-
-const askDelete = (tenant) => {
-  tenantToDelete.value = tenant
-  deleteModalVisible.value = true
-}
-
+// Silme onayı
 const confirmDelete = async () => {
+  if (!tenantToDelete.value) return
+  deleteLoading.value = true
   try {
     await tenantsService.deleteTenant(tenantToDelete.value.id)
-    deleteModalVisible.value = false
+    // Not: BE tarafında DeleteTenant kiracının bağlı olduğu ünitede IsOccupied=false ve TenantId=null yapmalı.
+    // FE’den ayrıca /flats PUT ile boşaltma göndermiyoruz (UpdateFlat tam DTO ister, kısmi patch değil).
+    errorHandler.logSuccess('success', 'Kiracı silindi', { component: 'Tenants', action: 'delete' })
+    emitEvent('tenant:deleted')
     await fetchTenants()
-    showDeleteSuccess('Kiracı')
-  } catch (error) {
-    console.error('Kiracı silinirken hata:', error)
-    alert('Kiracı silinirken bir hata oluştu')
+  } catch (err) {
+    console.error('Kiracı silme hatası:', err)
+    errorHandler.logError(err, { component: 'Tenants', action: 'delete' })
+  } finally {
+    deleteLoading.value = false
+    closeDeleteModal()
   }
 }
 
-const formatCurrency = (value) => {
-  if (value === undefined || value === null || isNaN(value)) return '₺0,00'
-  return Number(value).toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' })
+// Utils
+const formatDate = (d) => d ? new Date(d).toLocaleDateString('tr-TR') : '-'
+const getAvatarColor = (name) => {
+  const colors = ['bg-red-500','bg-blue-500','bg-green-500','bg-yellow-500','bg-purple-500']
+  const hash = String(name || '').split('').reduce((a,c)=>a+c.charCodeAt(0),0)
+  return colors[hash % colors.length]
 }
+const getAvatarInitial = (companyName) => (companyName ? companyName.substring(0,3).toUpperCase() : '?')
 
-onMounted(() => {
-  fetchTenants()
-  
-  // Ödeme yapıldığında bakiye güncellemesi için event listener
-  on('payment:created', handlePaymentCreated)
-})
-
-onUnmounted(() => {
-  // Event listener'ı temizle
-  off('payment:created', handlePaymentCreated)
-})
-
-const handlePaymentCreated = async (paymentData) => {
-  try {
-    console.log('💰 Ödeme yapıldı, kiracı bakiyeleri güncelleniyor:', paymentData)
-    await fetchTenants()
-  } catch (error) {
-    console.error('Ödeme sonrası güncelleme hatası:', error)
-  }
-}
+// Lifecycle
+onMounted(fetchTenants)
+watch(filters, handleSearch, { deep: true })
 </script>

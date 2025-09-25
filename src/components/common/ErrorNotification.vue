@@ -133,7 +133,7 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
-import { errorHandler } from '@/utils/errorHandler'
+import { errorHandler, ERROR_MESSAGES } from '@/utils/errorHandler'
 
 const errors = ref([])
 const selectedError = ref(null)
@@ -215,27 +215,32 @@ const formatDate = (timestamp) => {
 }
 
 // Error handler listener
-const errorListener = (error) => {
-  // Sadece error tipindeki mesajları göster
-  if (error.type === 'error') {
-    const displayMessage = error.getDisplayMessage()
-    addError({
-      ...displayMessage,
-      type: error.type,
-      timestamp: error.timestamp,
-      context: error.context,
-      originalError: error.originalError
-    })
+const errorListener = (payload) => {
+  // success/info/warning = SuccessNotification gösterir; burada geçme
+  const isSuccessLike = ['success', 'info', 'warning'].includes(payload.type)
+  if (isSuccessLike) return
+
+  // Hata mesajını oluştur (logError payload’ında getDisplayMessage yok)
+  const defaults = ERROR_MESSAGES[payload.type] || {
+    title: 'Hata',
+    message: 'Beklenmeyen bir hata oluştu.',
+    action: 'Tekrar Dene'
   }
+
+  addError({
+    title: payload.title || defaults.title,
+    message: payload.message || defaults.message,
+    action: payload.action || defaults.action,
+    type: 'error',
+    timestamp: payload.timestamp,
+    context: payload.context,
+    originalError: payload.originalError
+  })
 }
 
-onMounted(() => {
-  errorHandler.addListener(errorListener)
-})
+onMounted(() => errorHandler.addListener(errorListener))
+onUnmounted(() => errorHandler.removeListener(errorListener))
 
-onUnmounted(() => {
-  // Listener'ı kaldır (eğer gerekirse)
-})
 </script>
 
 <style scoped>

@@ -2,6 +2,11 @@ import { errorHandler } from '@/utils/errorHandler'
 
 export function useNotification() {
   
+  // Hata mesajı göster
+  const showError = (message, context = {}) => {
+    errorHandler.logError('error', message, context)
+  }
+  
   // Başarı mesajı göster
   const showSuccess = (message, context = {}) => {
     errorHandler.logSuccess('success', message, context)
@@ -43,6 +48,7 @@ export function useNotification() {
   }
 
   return {
+    showError,
     showSuccess,
     showInfo,
     showWarning,

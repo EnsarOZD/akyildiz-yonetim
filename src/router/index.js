@@ -18,16 +18,18 @@ const OwnerDues = () => import('../pages/OwnerDues.vue')
 const OwnerPayments = () => import('../pages/OwnerPayments.vue')
 const OverdueOwnerPayments = () => import('../pages/OverdueOwnerPayments.vue')
 const Overdue = () => import('../pages/Overdue.vue')
+const Flats = () => import('../features/flats/Flats.vue')
 
 const routes = [
   { path: '/', name: 'Landing', component: LandingPage, meta: { public: true, hideLayout: true } },
 
-  { path: '/dashboard', name: 'Dashboard', component: Dashboard, meta: { requiresAuth: true, roles: ['admin', 'manager'] } },
+  { path: '/dashboard', name: 'Dashboard', component: Dashboard, meta: { requiresAuth: true, roles: ['admin', 'manager', 'viewer', 'tenant'] } },
   { path: '/tenants', name: 'Tenants', component: Tenants, meta: { requiresAuth: true, roles: ['admin', 'manager'] } },
   { path: '/tenants/:id', name: 'TenantDetailPage', component: TenantDetailPage, meta: { requiresAuth: true, roles: ['admin', 'manager'] } },
   { path: '/payments', name: 'Payments', component: Payments, meta: { requiresAuth: true, roles: ['admin', 'manager'] } },
   { path: '/expenses', name: 'Expenses', component: Expenses, meta: { requiresAuth: true, roles: ['admin', 'manager'] } },
   { path: '/utilities', name: 'Utilities', component: Utilities, meta: { requiresAuth: true, roles: ['admin', 'manager'] } },
+  { path: '/flats', name: 'Flats', component: Flats, meta: { requiresAuth: true, roles: ['admin', 'manager'] } },
 
   { path: '/admin', name: 'Admin', component: AdminDashboard, meta: { requiresAuth: true, roles: ['admin'] } },
 
