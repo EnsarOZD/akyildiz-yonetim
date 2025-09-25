@@ -1,11 +1,11 @@
 <template>
   <dialog id="createTenantModal" class="modal" :open="visible">
-    <div class="modal-box max-w-2xl bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 border border-gray-200 dark:border-gray-700 shadow-2xl">
+    <div class="modal-box max-w-4xl bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 border border-gray-200 dark:border-gray-700 shadow-2xl">
       <!-- Başlık -->
       <div class="flex items-center justify-between pb-4 border-b border-gray-200 dark:border-gray-700 mb-6">
         <h3 class="text-xl font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2">
-          <span class="text-2xl">👤</span>
-          Yeni Kiracı Ekle
+          <span class="text-2xl">🏢</span>
+          Yeni İş Yeri Kiracısı Ekle
         </h3>
         <button @click="$emit('close')" class="btn btn-sm btn-ghost text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -17,85 +17,156 @@
       <!-- Scroll edilebilir form -->
       <div class="overflow-y-auto max-h-[70vh] pr-2">
         <form @submit.prevent="handleSave" id="tenantForm" class="space-y-6">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <!-- Ad Soyad -->
-            <div class="form-control">
-              <label class="label">
-                <span class="label-text font-semibold text-gray-700 dark:text-gray-300">Ad</span>
-              </label>
-              <input v-model="tenant.firstName" class="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400" required />
-            </div>
-            <div class="form-control">
-              <label class="label">
-                <span class="label-text font-semibold text-gray-700 dark:text-gray-300">Soyad</span>
-              </label>
-              <input v-model="tenant.lastName" class="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400" required />
-            </div>
+          <!-- İş Yeri Bilgileri -->
+          <div class="card bg-base-200 p-4">
+            <h4 class="text-lg font-semibold mb-4 text-gray-700 dark:text-gray-300">🏢 İş Yeri Bilgileri</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="form-control">
+                <label class="label">
+                  <span class="label-text font-semibold text-gray-700 dark:text-gray-300">Şirket Adı *</span>
+                </label>
+                <input v-model="tenant.companyName" class="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400" placeholder="ABC Ticaret Ltd. Şti." required />
+              </div>
 
-            <!-- Telefon E-posta -->
-            <div class="form-control">
-              <label class="label">
-                <span class="label-text font-semibold text-gray-700 dark:text-gray-300">Telefon</span>
-              </label>
-              <input v-mask="'+90 (###) ### ## ##'" v-model="tenant.phone" class="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400" required />
-            </div>
-            <div class="form-control">
-              <label class="label">
-                <span class="label-text font-semibold text-gray-700 dark:text-gray-300">E-posta</span>
-              </label>
-              <input type="email" v-model="tenant.email" class="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400" />
-            </div>
+              <div class="form-control">
+                <label class="label">
+                  <span class="label-text font-semibold text-gray-700 dark:text-gray-300">Firma Türü *</span>
+                </label>
+                <select v-model="tenant.companyType" class="select select-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400" required>
+                  <option value="">Firma türü seçin</option>
+                  <option v-for="type in COMPANY_TYPES" :key="type.value" :value="type.value">
+                    {{ type.label }}
+                  </option>
+                </select>
+              </div>
 
-            <!-- Şirket Unvanı -->
-            <div class="form-control md:col-span-2">
-              <label class="label">
-                <span class="label-text font-semibold text-gray-700 dark:text-gray-300">Şirket Unvanı</span>
-              </label>
-              <input v-model="tenant.company" class="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400" required />
-            </div>
+              <div class="form-control">
+                <label class="label">
+                  <span class="label-text font-semibold text-gray-700 dark:text-gray-300">İş Türü *</span>
+                </label>
+                <select v-model="tenant.businessType" class="select select-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400" required>
+                  <option value="">İş türü seçin</option>
+                  <option value="Ticaret">Ticaret</option>
+                  <option value="Hizmet">Hizmet</option>
+                  <option value="Üretim">Üretim</option>
+                  <option value="Ofis">Ofis</option>
+                  <option value="Depo">Depo</option>
+                  <option value="Diğer">Diğer</option>
+                </select>
+              </div>
 
-            <!-- Katlar -->
-            <div class="form-control md:col-span-2">
-              <label class="label">
-                <span class="label-text font-semibold text-gray-700 dark:text-gray-300">Katlar</span>
-              </label>
-              <div class="p-4 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 max-h-48 overflow-y-auto">
-                <div class="grid grid-cols-3 sm:grid-cols-4 gap-3">
-                  <label
-                    v-for="unit in unitOptions"
-                    :key="unit"
-                    class="flex items-center gap-2 p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors cursor-pointer"
-                  >
-                    <input
-                      type="checkbox"
-                      :value="unit"
-                      v-model="tenant.units"
-                      :disabled="isUnitTaken(unit)"
-                      class="checkbox checkbox-primary"
-                    />
-                    <span :class="isUnitTaken(unit) ? 'text-gray-400 line-through' : 'text-gray-700 dark:text-gray-300'">
-                      {{ unit }}
-                    </span>
-                  </label>
-                </div>
+              <div class="form-control">
+                <label class="label">
+                  <span class="label-text font-semibold text-gray-700 dark:text-gray-300">{{ companyTypeLabel }} *</span>
+                </label>
+                <input
+                  v-model="tenant.identityNumber"
+                  :class="['input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400', identityNumberError ? 'input-error' : '']"
+                  :placeholder="companyTypePlaceholder"
+                  :required="!!tenant.companyType"
+                  :maxlength="tenant.companyType === 'Individual' ? 11 : 10"
+                  :pattern="tenant.companyType === 'Individual' ? '[0-9]{11}' : '[0-9]{10}'"
+                  type="text"
+                  inputmode="numeric"
+                />
+                <label v-if="identityNumberError" class="label">
+                  <span class="label-text-alt text-error">{{ identityNumberError }}</span>
+                </label>
               </div>
             </div>
+          </div>
 
-            <!-- Giriş Tarihi -->
-            <div class="form-control md:col-span-2">
-              <label class="label">
-                <span class="label-text font-semibold text-gray-700 dark:text-gray-300">Giriş Tarihi</span>
-              </label>
-              <input type="date" v-model="tenant.entryDate" class="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400" required />
+          <!-- İletişim Kişisi Bilgileri -->
+          <div class="card bg-base-200 p-4">
+            <h4 class="text-lg font-semibold mb-4 text-gray-700 dark:text-gray-300">👤 İletişim Kişisi Bilgileri</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="form-control">
+                <label class="label"><span class="label-text font-semibold text-gray-700 dark:text-gray-300">İletişim Kişisi *</span></label>
+                <input v-model="tenant.contactPersonName" class="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400" placeholder="Ahmet Yılmaz" required />
+              </div>
+              <div class="form-control">
+                <label class="label"><span class="label-text font-semibold text-gray-700 dark:text-gray-300">Telefon *</span></label>
+                <input v-model="tenant.contactPersonPhone" class="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400" placeholder="+90 (5XX) XXX XX XX" required />
+              </div>
+              <div class="form-control">
+                <label class="label"><span class="label-text font-semibold text-gray-700 dark:text-gray-300">E-posta</span></label>
+                <input type="email" v-model="tenant.contactPersonEmail" class="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400" placeholder="ornek@email.com" />
+              </div>
             </div>
+          </div>
 
-            <!-- Aktiflik -->
-            <div class="form-control md:col-span-2">
-              <label class="label cursor-pointer">
-                <span class="label-text font-semibold text-gray-700 dark:text-gray-300">Aktif</span>
-                <input type="checkbox" v-model="tenant.isActive" class="toggle toggle-success" />
-              </label>
+          <!-- Ünite Seçimi -->
+          <div class="card bg-base-200 p-4">
+            <h4 class="text-lg font-semibold mb-4 text-gray-700 dark:text-gray-300">📍 Ünite Seçimi</h4>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+              <!-- Kat filtresi -->
+              <div class="form-control">
+                <label class="label"><span class="label-text font-semibold text-gray-700 dark:text-gray-300">Kat Filtresi</span></label>
+                <div class="flex gap-2">
+                  <select
+                    v-model="tenant.floorNumber"
+                    @change="onFloorChange"
+                    class="select select-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400">
+                    <option :value="null">Tüm katlar</option>
+                    <option v-for="floor in availableFloors" :key="floor" :value="floor">
+                      {{ floor }}. Kat
+                    </option>
+                  </select>
+                  <button type="button" class="btn btn-ghost btn-sm" @click="resetFloorFilter">
+                    Temizle
+                  </button>
+                </div>
+              </div>
+
+              <!-- Ünite seçimi (ÇOKLU) -->
+              <div class="form-control md:col-span-2">
+                <label class="label"><span class="label-text font-semibold text-gray-700 dark:text-gray-300">Ünite Seçin (çoklu)</span></label>
+                <select
+                  multiple
+                  v-model="tenant.selectedFlatIds"
+                  :size="multiSelectSize"
+                  class="select select-bordered w-full h-56 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400">
+                  <option
+                    v-for="flat in availableFlatsForTenant"
+                    :key="flat.id"
+                    :value="flat.id">
+                    {{ flatOptionLabel(flat) }}
+                  </option>
+                </select>
+
+                <label class="label">
+                  <span class="label-text-alt text-blue-600">
+                    💡 Ünite seçmezseniz yalnızca kat seçimiyle o kattaki ilk uygun ünite atanır.
+                  </span>
+                </label>
+              </div>
             </div>
+          </div>
+
+          <!-- Aidat -->
+          <div class="card bg-base-200 p-4">
+            <h4 class="text-lg font-semibold mb-4 text-gray-700 dark:text-gray-300">💰 Aidat Bilgisi</h4>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div class="form-control">
+                <label class="label"><span class="label-text font-semibold text-gray-700 dark:text-gray-300">Aylık Aidat (₺) *</span></label>
+                <input type="number" v-model.number="tenant.monthlyAidat" class="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400" placeholder="500" min="0" step="0.01" required />
+              </div>
+            </div>
+          </div>
+
+          <!-- Aktiflik -->
+          <div class="form-control">
+            <label class="label cursor-pointer">
+              <span class="label-text font-semibold text-gray-700 dark:text-gray-300">Aktif Kiracı</span>
+              <input type="checkbox" v-model="tenant.isActive" class="toggle toggle-success" />
+            </label>
+          </div>
+
+          <!-- Giriş Tarihi -->
+          <div class="form-control">
+            <label class="label"><span class="label-text font-semibold text-gray-700 dark:text-gray-300">Giriş Tarihi *</span></label>
+            <input type="date" v-model="tenant.entryDate" class="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400" required />
           </div>
         </form>
       </div>
@@ -120,44 +191,185 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch, onMounted, computed } from 'vue'
+import tenantsService from '@/features/tenants/services/tenantsService.js'
+import { COMPANY_TYPES } from '@/constants/units'
+import { useEventBus } from '@/composables/useEventBus'
 
-const props = defineProps({
-  visible: Boolean,
-  unitOptions: Array,
-  allTenants: Array
-})
-
+const props = defineProps({ visible: Boolean })
 const emit = defineEmits(['save', 'close'])
+const { on: onEvent } = useEventBus()
 
-const emptyTenant = () => ({
-  firstName: '',
-  lastName: '',
-  phone: '',
-  email: '',
-  company: '',
-  units: [],
-  entryDate: new Date().toISOString().slice(0, 10),
-  isActive: true
-})
+// --- Helpers
+const UNIT_TYPE = {
+  0: 'Kat',
+  1: 'Giriş',
+  2: 'Otopark'
+}
+const typeLabel = (t) => UNIT_TYPE[t] ?? 'Bilinmiyor'
+const flatOptionLabel = (f) => {
+  const base = `${f.code} — ${Number(f.unitArea || 0)}m²`
+  if (f.floorNumber !== null && f.floorNumber !== undefined) {
+    return `${base} (${f.floorNumber}. Kat)`
+  }
+  // Katı olmayanlar (ör. Otopark)
+  return `${base} (${typeLabel(f.type)})`
+}
 
+// --- State
+const availableFlats = ref([])
 const tenant = ref(emptyTenant())
 
-watch(() => props.visible, (newVal) => {
-  if (newVal) {
+function emptyTenant () {
+  return {
+    companyName: '',
+    companyType: '',
+    businessType: '',
+    identityNumber: '',
+    contactPersonName: '',
+    contactPersonPhone: '',
+    contactPersonEmail: '',
+    flatId: '',              // geri uyumluluk (tek seçim)
+    selectedFlatIds: [],     // çoklu seçim
+    floorNumber: undefined,
+    monthlyAidat: 0,
+    isActive: true,
+    entryDate: ''
+  }
+}
+
+// --- Computed: Firma türüne göre kimlik alanı
+const companyTypeLabel = computed(() =>
+  tenant.value.companyType === 'Individual' ? 'TC Kimlik Numarası'
+  : tenant.value.companyType === 'Corporate' ? 'Vergi Numarası'
+  : 'Kimlik/Vergi Numarası'
+)
+
+const companyTypePlaceholder = computed(() =>
+  tenant.value.companyType === 'Individual' ? '12345678901'
+  : tenant.value.companyType === 'Corporate' ? '1234567890'
+  : 'Numara girin'
+)
+
+const identityNumberError = computed(() => {
+  const t = tenant.value
+  if (!t.companyType || !t.identityNumber) return ''
+  if (t.companyType === 'Individual') {
+    if (t.identityNumber.length !== 11) return 'TC Kimlik Numarası 11 hane olmalıdır'
+    if (!/^\d{11}$/.test(t.identityNumber)) return 'TC Kimlik Numarası sadece rakam içermelidir'
+  } else if (t.companyType === 'Corporate') {
+    if (t.identityNumber.length !== 10) return 'Vergi Numarası 10 hane olmalıdır'
+    if (!/^\d{10}$/.test(t.identityNumber)) return 'Vergi Numarası sadece rakam içermelidir'
+  }
+  return ''
+})
+
+// --- Flats (list + filtre)
+const availableFloors = computed(() => {
+  const set = new Set((availableFlats.value || [])
+    .map(f => f.floorNumber ?? f.floor)
+    .filter(f => f !== null && f !== undefined))
+  return Array.from(set).sort((a,b) => a - b)
+})
+
+const availableFlatsForTenant = computed(() => {
+  const floor = tenant.value.floorNumber
+  const list = availableFlats.value || []
+  if (floor === undefined || floor === null) return list
+  return list.filter(f => (f.floorNumber ?? f.floor) === floor)
+})
+
+const multiSelectSize = computed(() => {
+  const len = availableFlatsForTenant.value?.length || 0
+  return Math.min(8, len || 4)
+})
+
+async function fetchAvailableFlats (floorFilter) {
+  try {
+    const list = await tenantsService.getAvailableFlats(
+      floorFilter != null ? { floor: floorFilter } : {}
+    )
+
+    // Normalize (tip bilgisi dahil)
+    availableFlats.value = Array.isArray(list)
+      ? list.map(f => ({
+          id: f.id,
+          code: f.code ?? f.unitNumber ?? '',
+          unitArea: f.unitArea ?? 0,
+          floorNumber: f.floorNumber ?? f.floor ?? null,
+          type: f.type, // 0:Kat,1:Giriş,2:Otopark
+          isOccupied: !!f.isOccupied,
+        }))
+      : []
+  } catch (e) {
+    console.error('Boş üniteler yüklenirken hata:', e)
+    availableFlats.value = []
+  }
+}
+
+function onFloorChange () {
+  tenant.value.flatId = ''
+  tenant.value.selectedFlatIds = [] // mevcut seçimi sıfırla (isteğe bağlı)
+
+  if (tenant.value.floorNumber === null || tenant.value.floorNumber === undefined) {
+    fetchAvailableFlats() // tüm katlar
+  } else {
+    fetchAvailableFlats(tenant.value.floorNumber) // kat bazlı
+  }
+}
+
+function resetFloorFilter () {
+  tenant.value.floorNumber = null
+  onFloorChange()
+}
+
+// --- Lifecycle & watchers
+watch(() => props.visible, (v) => {
+  if (v) {
     tenant.value = emptyTenant()
+    fetchAvailableFlats()
   }
 })
 
-const isUnitTaken = (unit) => {
-  return props.allTenants.some(t =>
-    t.isActive &&
-    t.units?.includes(unit)
-  )
-}
+onMounted(() => {
+  if (props.visible) fetchAvailableFlats()
+  onEvent('tenant:deleted', () => fetchAvailableFlats(tenant.value.floorNumber))
+})
 
-const handleSave = () => {
-  emit('save', tenant.value)
+// --- Submit
+function handleSave () {
+  if (!tenant.value.companyName || !tenant.value.companyType || !tenant.value.businessType) return
+  if (identityNumberError.value) return
+
+  const ids = (tenant.value.selectedFlatIds || []).filter(Boolean)
+
+  // Kullanıcı ne ünite ne de kat seçmişse, backend'e boş istek göndermeyelim:
+  if (ids.length === 0 && (tenant.value.floorNumber === undefined || tenant.value.floorNumber === null)) {
+    alert('Lütfen en az bir ünite seçin veya kat filtresi belirleyin.')
+    return
+  }
+
+  const payload = {
+    companyName: tenant.value.companyName.trim(),
+    companyType: tenant.value.companyType,
+    businessType: tenant.value.businessType,
+    identityNumber: tenant.value.identityNumber.trim(),
+    contactPersonName: tenant.value.contactPersonName.trim(),
+    contactPersonPhone: tenant.value.contactPersonPhone.trim(),
+    contactPersonEmail: tenant.value.contactPersonEmail?.trim() || null,
+
+    // Çoklu/tek seçim
+    flatIds: ids.length > 1 ? ids : undefined,
+    flatId: ids.length === 1 ? ids[0] : (tenant.value.flatId || null),
+
+    floorNumber: tenant.value.floorNumber ?? null,
+    monthlyAidat: Number(tenant.value.monthlyAidat || 0),
+    isActive: !!tenant.value.isActive,
+    contractStartDate: tenant.value.entryDate ? new Date(tenant.value.entryDate).toISOString() : null,
+    contractEndDate: null
+  }
+
+  emit('save', payload)
   tenant.value = emptyTenant()
 }
 </script>

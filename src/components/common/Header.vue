@@ -171,6 +171,7 @@ const setTabsBasedOnRole = (role) => {
       { label: 'Ödemeler', value: 'payments', route: '/payments' },
       { label: 'Giderler', value: 'expenses', route: '/expenses' },
       { label: 'Sayaçlar', value: 'utilities', route: '/utilities' },
+      { label: 'Üniteler', value: 'flats', route: '/flats' },
       { label: 'Yönetim', value: 'admin', route: '/admin' }
     ]
   } else if (normalizedRole === ROLES.MANAGER) {
@@ -179,7 +180,8 @@ const setTabsBasedOnRole = (role) => {
       { label: 'Kiracılar', value: 'tenants', route: '/tenants' },
       { label: 'Ödemeler', value: 'payments', route: '/payments' },
       { label: 'Giderler', value: 'expenses', route: '/expenses' },
-      { label: 'Sayaçlar', value: 'utilities', route: '/utilities' }
+      { label: 'Sayaçlar', value: 'utilities', route: '/utilities' },
+      { label: 'Üniteler', value: 'flats', route: '/flats' }
     ]
   } else if (normalizedRole === ROLES.TENANT) {
     tabs.value = [
@@ -219,6 +221,7 @@ onMounted(() => {
           { label: 'Ödemeler', value: 'payments', route: '/payments' },
           { label: 'Giderler', value: 'expenses', route: '/expenses' },
           { label: 'Sayaçlar', value: 'utilities', route: '/utilities' },
+          { label: 'Üniteler', value: 'flats', route: '/flats' },
           { label: 'Yönetim', value: 'admin', route: '/admin' }
         ]
       }, 1000)

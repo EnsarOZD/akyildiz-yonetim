@@ -59,7 +59,9 @@
       :value="selectType"
       @change="$emit('update:selectType', $event.target.value)"
     >
-      <option v-for="opt in selectTypeOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+      <option v-for="opt in selectTypeOptions" :key="opt.value" :value="opt.value">
+        {{ opt.icon ? opt.icon + ' ' : '' }}{{ opt.label }}
+      </option>
     </select>
 
     <!-- Dönem (Ay/Yıl) Seçici -->

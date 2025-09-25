@@ -1,188 +1,106 @@
 <template>
-  <dialog open class="modal">
+  <dialog class="modal" :open="open">
     <div class="modal-box max-w-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-      
-      <!-- Modal Header -->
+      <!-- Header -->
       <div class="flex items-center justify-between mb-6 pb-4 border-b border-gray-200 dark:border-gray-700">
         <div class="flex items-center gap-3">
-          <div class="bg-yellow-100 dark:bg-yellow-900/50 text-yellow-600 dark:text-yellow-400 rounded-full p-2">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-            </svg>
+          <div class="bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 rounded-full p-2">
+            💧
           </div>
-          <h3 class="text-xl font-bold text-gray-800 dark:text-gray-100">Su Kaydı Düzenle</h3>
+          <h3 class="text-xl font-bold text-gray-800 dark:text-gray-100">
+            Su — Toplu Düzenleme
+          </h3>
         </div>
-        <button @click="$emit('close')" class="btn btn-ghost btn-sm">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
+        <button @click="$emit('close')" class="btn btn-ghost btn-sm">Kapat</button>
       </div>
 
-      <!-- Form Content -->
-      <div class="space-y-6">
-        
-        <!-- Bilgi Alanları -->
-        <div class="bg-gray-50 dark:bg-gray-900 rounded-lg p-4 space-y-4">
-          <h4 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-3">Kayıt Bilgileri</h4>
-          
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="form-control">
-              <label class="label">
-                <span class="label-text font-semibold text-gray-700 dark:text-gray-300">Kat</span>
-              </label>
-              <input 
-                type="text" 
-                class="input input-bordered w-full bg-gray-100 dark:bg-gray-600 border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400" 
-                :value="record.unit" 
-                disabled 
-              />
-            </div>
+      <div v-if="loading" class="mb-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
+        Veriler yükleniyor...
+      </div>
 
-            <div class="form-control">
-              <label class="label">
-                <span class="label-text font-semibold text-gray-700 dark:text-gray-300">Şirket</span>
-              </label>
-              <input 
-                type="text" 
-                class="input input-bordered w-full bg-gray-100 dark:bg-gray-600 border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400" 
-                :value="record.tenantName || '-'" 
-                disabled 
-              />
-            </div>
+      <div v-else class="space-y-6">
+        <!-- Özet -->
+        <div class="bg-gray-50 dark:bg-gray-900 rounded-lg p-4">
+          <div class="flex flex-wrap gap-3 text-sm text-gray-600 dark:text-gray-300">
+            <span>Dönem: <b>{{ period || '-' }}</b></span>
+            <span>Tip: <b>Su</b></span>
+            <span>Seçili kayıt: <b>{{ records.length }}</b></span>
           </div>
+          <p v-if="records.length === 0" class="mt-2 text-red-600 dark:text-red-400">
+            Bu dönem için Su kaydı bulunamadı.
+          </p>
         </div>
 
-        <!-- Sayaç Okumaları -->
+        <!-- Form -->
         <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 space-y-4">
-          <h4 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-3">Sayaç Okumaları</h4>
-          
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div class="form-control">
               <label class="label">
-                <span class="label-text font-semibold text-gray-700 dark:text-gray-300">Önceki Endeks (m³)</span>
+                <span class="label-text font-semibold">Önceki Endeks (m³)</span>
                 <span class="label-text-alt text-red-500">*</span>
               </label>
-              <input 
-                type="number" 
-                v-model.number="local.previousValue" 
-                class="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300" 
-                min="0"
-                step="0.01"
-              />
+              <input type="number" v-model.number="local.previousValue" class="input input-bordered w-full bg-white dark:bg-gray-700"
+                     min="0" step="0.01" @input="validateInputs" />
             </div>
 
             <div class="form-control">
               <label class="label">
-                <span class="label-text font-semibold text-gray-700 dark:text-gray-300">Yeni Endeks (m³)</span>
+                <span class="label-text font-semibold">Yeni Endeks (m³)</span>
                 <span class="label-text-alt text-red-500">*</span>
               </label>
-              <input 
-                type="number" 
-                v-model.number="local.currentValue" 
-                class="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300" 
-                min="0"
-                step="0.01"
-              />
+              <input type="number" v-model.number="local.currentValue" class="input input-bordered w-full bg-white dark:bg-gray-700"
+                     min="0" step="0.01" @input="validateInputs" />
             </div>
           </div>
 
-          <!-- Hesaplama Sonuçları -->
-          <div class="bg-white dark:bg-gray-700 rounded-lg p-4 border border-blue-200 dark:border-blue-800">
-            <div class="text-center">
-              <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Tüketim</p>
-              <p class="text-lg font-bold text-blue-600 dark:text-blue-400">
-                {{ local.currentValue - local.previousValue }} m³
-              </p>
-            </div>
+          <div class="bg-white dark:bg-gray-700 rounded-lg p-4 border border-blue-200 dark:border-blue-800 text-center">
+            <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Tüketim</p>
+            <p class="text-lg font-bold text-blue-600 dark:text-blue-400">{{ consumption.toFixed(2) }} m³</p>
           </div>
         </div>
 
-        <!-- Tutar Bilgileri -->
+        <!-- Tutarlar -->
         <div class="bg-green-50 dark:bg-green-900/20 rounded-lg p-4 space-y-4">
-          <h4 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-3">Tutar Bilgileri</h4>
-          
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div class="form-control">
-              <label class="label">
-                <span class="label-text font-semibold text-gray-700 dark:text-gray-300">Su Tutarı (₺)</span>
-                <span class="label-text-alt text-red-500">*</span>
-              </label>
-              <input 
-                type="number" 
-                v-model.number="local.kdvHaric" 
-                class="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300" 
-                step="0.01"
-                min="0"
-              />
-              <label class="label">
-                <span class="label-text-alt text-gray-500 dark:text-gray-400">KDV hariç su tutarı (%1 KDV)</span>
-              </label>
+              <label class="label"><span class="label-text font-semibold">Su Tutarı (₺)</span><span class="label-text-alt text-red-500">*</span></label>
+              <input type="number" v-model.number="local.kdvHaric" class="input input-bordered w-full bg-white dark:bg-gray-700" step="0.01" min="0" />
+              <label class="label"><span class="label-text-alt text-gray-500 dark:text-gray-400">%1 KDV uygulanır</span></label>
             </div>
-
             <div class="form-control">
-              <label class="label">
-                <span class="label-text font-semibold text-gray-700 dark:text-gray-300">Atık Su Tutarı (₺)</span>
-                <span class="label-text-alt text-red-500">*</span>
-              </label>
-              <input 
-                type="number" 
-                v-model.number="local.wasteAmount" 
-                class="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300" 
-                step="0.01"
-                min="0"
-              />
-              <label class="label">
-                <span class="label-text-alt text-gray-500 dark:text-gray-400">KDV hariç atık su tutarı (%10 KDV)</span>
-              </label>
+              <label class="label"><span class="label-text font-semibold">Atık Su Tutarı (₺)</span><span class="label-text-alt text-red-500">*</span></label>
+              <input type="number" v-model.number="local.wasteAmount" class="input input-bordered w-full bg-white dark:bg-gray-700" step="0.01" min="0" />
+              <label class="label"><span class="label-text-alt text-gray-500 dark:text-gray-400">%10 KDV uygulanır</span></label>
             </div>
           </div>
 
-          <!-- Toplam Hesaplama -->
-          <div class="bg-white dark:bg-gray-700 rounded-lg p-4 border border-green-200 dark:border-green-800">
-            <div class="text-center">
-              <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Toplam (KDV Dahil)</p>
-              <p class="text-lg font-bold text-green-600 dark:text-green-400">
-                {{ formatCurrency(totalWithVAT) }}
-              </p>
-            </div>
+          <div class="bg-white dark:bg-gray-700 rounded-lg p-4 border border-green-200 dark:border-green-800 text-center">
+            <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Toplam (KDV Dahil)</p>
+            <p class="text-lg font-bold text-green-600 dark:text-green-400">{{ formatCurrency(totalWithVAT) }}</p>
           </div>
         </div>
 
-        <!-- Uyarı Kutusu -->
-        <div class="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-4 border border-yellow-200 dark:border-yellow-800">
-          <div class="flex items-start gap-3">
-            <div class="bg-yellow-100 dark:bg-yellow-900/50 text-yellow-600 dark:text-yellow-400 rounded-full p-1 mt-0.5">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-              </svg>
-            </div>
-            <div class="text-sm text-gray-700 dark:text-gray-300">
-              <p class="font-medium mb-1">Dikkat</p>
-              <p>Bu değişiklik su kaydını kalıcı olarak güncelleyecektir. Tüketim ve toplam tutar otomatik olarak hesaplanacaktır.</p>
-            </div>
+        <!-- Validasyon -->
+        <div v-if="validation.issues.length || validation.warnings.length" class="space-y-3">
+          <div v-if="validation.issues.length" class="bg-red-50 dark:bg-red-900/20 rounded-lg p-4 border border-red-200 dark:border-red-800">
+            <p class="font-medium mb-1 text-red-600 dark:text-red-400">Hatalar</p>
+            <ul class="list-disc list-inside space-y-1">
+              <li v-for="issue in validation.issues" :key="issue" class="text-red-600 dark:text-red-400">{{ issue }}</li>
+            </ul>
+          </div>
+          <div v-if="validation.warnings.length" class="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-4 border border-yellow-200 dark:border-yellow-800">
+            <p class="font-medium mb-1">Uyarılar</p>
+            <ul class="list-disc list-inside space-y-1">
+              <li v-for="warning in validation.warnings" :key="warning">{{ warning }}</li>
+            </ul>
           </div>
         </div>
 
-        <!-- Modal Actions -->
+        <!-- Actions -->
         <div class="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
-          <button 
-            class="btn btn-outline btn-sm" 
-            @click="$emit('close')"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-            İptal
-          </button>
-          <button 
-            class="btn btn-primary btn-sm" 
-            @click="save"
-            :disabled="local.previousValue < 0 || local.currentValue < 0 || local.kdvHaric < 0 || local.wasteAmount < 0"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-            </svg>
+          <button class="btn btn-outline btn-sm" @click="$emit('close')">İptal</button>
+          <button class="btn btn-primary btn-sm" @click="save" :disabled="!validation.isValid || records.length === 0 || saving">
+            <span v-if="saving" class="loading loading-spinner loading-xs mr-1"></span>
             Kaydet
           </button>
         </div>
@@ -192,113 +110,138 @@
 </template>
 
 <script setup>
-import { ref, computed, watchEffect, onMounted } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { useErrorHandler } from '@/composables/useErrorHandler'
-import expensesService from '@/services/expensesService'
+import meterSvc from '@/services/meterReadingsService'
 
-const props = defineProps({ record: Object })
+const props = defineProps({
+  period: { type: String, required: true }, // "YYYY-MM"
+  open:   { type: Boolean, default: false }
+})
 const emit = defineEmits(['close', 'updated'])
 
 const { handleNetworkError, handleValidationError, showSuccess } = useErrorHandler()
 
-const local = ref({
-  previousValue: 0,
-  currentValue: 0,
-  kdvHaric: 0
+const loading = ref(false)
+const saving  = ref(false)
+const records = ref([])
+
+// Form
+const local = ref({ previousValue: 0, currentValue: 0, kdvHaric: 0, wasteAmount: 0 })
+
+// Dönem
+const ym = computed(() => {
+  const [y, m] = (props.period || '').split('-').map(n => parseInt(n, 10))
+  return { year: y, month: m }
 })
 
-const validation = ref({
-  isValid: true,
-  issues: [],
-  warnings: []
+// Görsel hesaplar
+const consumption = computed(() => {
+  const cur = Number(local.value.currentValue ?? 0)
+  const prev = Number(local.value.previousValue ?? 0)
+  const diff = cur - prev
+  return Number.isFinite(diff) && diff >= 0 ? diff : 0
 })
-
-const validateInputs = () => {
-  const newRecord = {
-    currentValue: local.value.currentValue,
-    previousValue: local.value.previousValue,
-    endDate: props.record?.endDate
-  }
-  
-  validation.value = meterManager.validateReadingEdit(props.record, newRecord)
+const totalWithVAT = computed(() => {
+  const water = Number(local.value.kdvHaric ?? 0)   * 1.01   // %1 KDV
+  const waste = Number(local.value.wasteAmount ?? 0) * 1.10   // %10 KDV
+  const t = water + waste
+  return Number.isFinite(t) ? Number(t.toFixed(2)) : 0
+})
+const formatCurrency = (val) => {
+  const n = Number(val)
+  return Number.isFinite(n) ? n.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' }) : '-'
 }
 
-// Record değiştiğinde input'lara yansıt
-watchEffect(() => {
-  if (props.record) {
-    local.value.previousValue = props.record.previousValue ?? 0
-    local.value.currentValue = props.record.currentValue ?? 0
-    local.value.kdvHaric = props.record.kdvHaric ?? 0
-    validateInputs()
-  }
-})
+// Validasyon
+const validation = ref({ isValid: true, issues: [], warnings: [] })
+const validateInputs = () => {
+  const issues = []
+  const cur = Number(local.value.currentValue)
+  const prev = Number(local.value.previousValue)
+  const w1  = Number(local.value.kdvHaric)
+  const w2  = Number(local.value.wasteAmount)
 
-const totalWithVAT = computed(() => {
-  const water = local.value.kdvHaric * 1.01
-  const waste = local.value.wasteAmount * 1.10
-  return +(water + waste).toFixed(2)
-})
+  if (!Number.isFinite(prev) || prev < 0) issues.push('Önceki endeks negatif olamaz.')
+  if (!Number.isFinite(cur)  || cur  < 0) issues.push('Yeni endeks negatif olamaz.')
+  if (Number.isFinite(prev) && Number.isFinite(cur) && cur < prev) issues.push('Yeni endeks, önceki endeksten küçük olamaz.')
+  if (!Number.isFinite(w1) || w1 < 0 || !Number.isFinite(w2) || w2 < 0) issues.push('Tutarlar negatif olamaz.')
 
-const formatCurrency = val =>
-  isNaN(val) ? '-' : val.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' })
+  validation.value = { isValid: issues.length === 0, issues, warnings: [] }
+}
 
-const save = async () => {
+// Kayıtları çek
+const fetchRecords = async () => {
+  loading.value = true
   try {
-    // Son validasyon
-    validateInputs()
-    if (!validation.value.isValid) {
-      handleValidationError('Lütfen hataları düzeltin.', { 
-        component: 'EditWaterModal', 
-        action: 'save' 
-      })
+    const { year, month } = ym.value
+    if (!year || !month) {
+      validation.value = { isValid: false, issues: ['Geçersiz dönem formatı (YYYY-MM).'], warnings: [] }
+      records.value = []
       return
     }
 
-    const consumption = calculateConsumption(local.value.currentValue, local.value.previousValue)
-    const toplamTutar = calculateTotalWithVAT(local.value.kdvHaric, 0.20)
-    const refDoc = doc(db, 'readings', props.record.id)
+    const list = await meterSvc.getMeterReadingsByPeriod(year, month, 'Water')
+    records.value = Array.isArray(list) ? list : []
 
-    // Audit trail oluştur
-    const auditTrail = meterManager.createAuditTrail(
-      props.record, 
-      { ...props.record, ...local.value, consumption, toplamTutar },
-      authStore.user?.uid || 'unknown_user'
-    )
+    const r = records.value[0]
+    local.value.previousValue = r?.previousValue ?? 0
+    local.value.currentValue  = r?.currentValue  ?? 0
+    local.value.kdvHaric      = r?.kdvHaric      ?? 0
+    local.value.wasteAmount   = r?.wasteAmount   ?? 0
 
-    // Ana kaydı güncelle
-    await updateDoc(refDoc, {
-      previousValue: local.value.previousValue,
-      currentValue: local.value.currentValue,
-      consumption: consumption,
-      kdvHaric: local.value.kdvHaric,
-      toplamTutar: toplamTutar,
-      kdvDahil: toplamTutar,
-      // Ödeme durumu güncelleme
-      remainingAmount: toplamTutar - (props.record.paidAmount || 0),
-      isPaid: (toplamTutar - (props.record.paidAmount || 0)) <= 0,
-      lastModified: new Date(),
-      modifiedBy: authStore.user?.uid || 'unknown_user'
-    })
+    validateInputs()
+  } catch (err) {
+    handleNetworkError(err, { component: 'EditWaterModal', action: 'fetchRecords' })
+    records.value = []
+  } finally {
+    loading.value = false
+  }
+}
 
-    // Audit trail'i kaydet
-    await addDoc(collection(db, 'auditTrail'), auditTrail)
+watch(() => props.open,  v => { if (v) fetchRecords() })
+watch(() => props.period, () => { if (props.open) fetchRecords() })
+onMounted(() => { if (props.open) fetchRecords() })
 
-    // Cache'i temizle
-    meterManager.clearCacheForUnit(props.record.unit, 'water')
+// Kaydet (TOPLU UPSERT)
+const save = async () => {
+  validateInputs()
+  if (!validation.value.isValid) {
+    handleValidationError('Lütfen hataları düzeltin.', { component: 'EditWaterModal', action: 'save' })
+    return
+  }
+  if (records.value.length === 0) {
+    handleValidationError('Bu dönem için güncellenecek kayıt bulunamadı.', { component: 'EditWaterModal', action: 'save' })
+    return
+  }
 
-    // Başarı mesajı
-    showSuccess('Su kaydı başarıyla güncellendi.', { 
-      component: 'EditWaterModal', 
-      action: 'save' 
-    })
-    
+  saving.value = true
+  try {
+    const { year, month } = ym.value
+    const rows = records.value.map(r => ({
+      id: r.id,
+      flatId: r.flatId,
+      type: 'Water',
+      periodYear: year,
+      periodMonth: month,
+      previousValue: Number(local.value.previousValue),
+      currentValue:  Number(local.value.currentValue),
+      kdvHaric:      Number(local.value.kdvHaric),
+      wasteAmount:   Number(local.value.wasteAmount)
+      // Backend toplam bekliyorsa ekleyebilirsin:
+      // totalWithVat: totalWithVAT.value
+    }))
+
+    await meterSvc.upsertMeterReadings(rows, { preferBatch: true })
+
+    showSuccess(`${records.value.length} su kaydı kaydedildi.`, { component: 'EditWaterModal', action: 'save' })
     emit('updated')
     emit('close')
   } catch (error) {
-    handleNetworkError(error, { 
-      component: 'EditWaterModal', 
-      action: 'save' 
-    })
+    handleNetworkError(error, { component: 'EditWaterModal', action: 'save' })
+  } finally {
+    saving.value = false
   }
 }
 </script>
+

@@ -1,5 +1,7 @@
 // API servis katmanı - Backend ile iletişim için
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api'
+const API_BASE_URL = import.meta.env.DEV 
+  ? 'http://localhost:5000'  // Development için /api prefix'i yok
+  : (import.meta.env.VITE_API_BASE_URL || 'https://api.akyildizyonetim.com/api')
 
 class ApiService {
   constructor() {
@@ -46,16 +48,36 @@ class ApiService {
       
       if (!response.ok) {
         // Hata mesajını almaya çalış
-        let errorMessage = `HTTP error! status: ${response.status}`
+        let errorMessage = `Bir hata oluştu. (HTTP ${response.status})`
         try {
           const errorData = await response.text()
           console.log('❌ API Error Response:', errorData)
           if (errorData) {
-            errorMessage += ` - ${errorData}`
+            // JSON ise parse et, değilse düz metin olarak ekle
+            try {
+              const parsed = JSON.parse(errorData)
+              if (parsed && parsed.message) {
+                errorMessage = parsed.message
+              } else if (parsed && parsed.errorMessage) {
+                errorMessage = parsed.errorMessage
+              } else if (parsed && parsed.errors) {
+                errorMessage = Object.values(parsed.errors).join(' ')
+              } else {
+                errorMessage += ` - ${errorData}`
+              }
+            } catch {
+              errorMessage += ` - ${errorData}`
+            }
           }
         } catch (e) {
           // Error response'u parse edemezse sadece status code'u göster
         }
+        // Türkçeleştirme
+        if (response.status === 400) errorMessage = 'Geçersiz istek veya eksik bilgi. Lütfen formu kontrol edin.'
+        if (response.status === 401) errorMessage = 'Yetkisiz işlem. Lütfen tekrar giriş yapın.'
+        if (response.status === 403) errorMessage = 'Bu işlemi yapmaya yetkiniz yok.'
+        if (response.status === 404) errorMessage = 'İstenilen veri bulunamadı.'
+        if (response.status === 500) errorMessage = 'Sunucu hatası. Lütfen daha sonra tekrar deneyin.'
         throw new Error(errorMessage)
       }
       

@@ -139,6 +139,7 @@ export function useErrorHandler() {
     handleAuthError,
     handleGenericError,
     showSuccess,
+    showError,
     withErrorHandling,
     validateForm
   }
