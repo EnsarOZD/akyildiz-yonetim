@@ -137,7 +137,9 @@
 import { ref, onMounted, computed } from 'vue'
 import aidatService from '@/services/aidatService'
 import tenantsService from '@/services/tenantsService'
+import { watch } from 'vue'
 
+const emit = defineEmits(['stats']) // üst karta toplamı gönderebilmek için (AdminDashboard dinliyor)
 const tenants = ref([])
 const selectedTenant = ref('')
 const selectedUnit = ref('')
@@ -232,8 +234,32 @@ const totalFilteredAmount = computed(() => {
 
 const fetchDues = async () => {
   try {
-    const response = await aidatService.getAidatDefinitions()
-    duesList.value = response || []
+    const response = await aidatService.getAidatDefinitions() || []
+    // Farklı backend alan adlarını tek tipe indir
+    duesList.value = response.map(d => {
+      const amount = Number(d.amount ?? d.kdvHaric ?? 0)
+      const year   = Number(d.year ?? d.periodYear ?? new Date().getFullYear())
+      const unit   = d.unit ?? d.flatCode ?? d.flat?.code ?? '-'
+     const tenantId = d.tenantId ?? d.tenant?.id ?? null
+      const company =
+       d.company ??
+        d.companyName ??
+        d.tenantCompanyName ??
+        (tenants.value.find(t => t.id === tenantId)?.company) ??
+        '-'
+
+      return {
+        id: d.id,
+        year,
+        tenantId,
+        company,
+        unit,
+        amount,
+        vatIncludedAmount: Number(d.vatIncludedAmount ?? d.kdvDahil ?? (amount * 1.2))
+      }
+    })
+    // üst karta istatistik gönder (AdminDashboard @stats yakalıyor)
+    emit('stats', { dues: duesList.value.length })
   } catch (error) {
     console.error('Aidat tanımları çekilirken hata oluştu:', error)
     duesList.value = []
@@ -310,10 +336,17 @@ const handleSubmit = async () => {
   await fetchDues()
 }
 
+watch(selectedTenant, () => { selectedUnit.value = '' })
+
 onMounted(async () => {
   try {
-    const response = await tenantsService.getTenants()
-    tenants.value = response || []
+    const response = await tenantsService.getTenants() || []
+    // /tenants -> companyName + flats[].code
+    tenants.value = response.map(t => ({
+      id: t.id,
+      company: t.companyName,                    // 👈 template bu ismi bekliyor
+      units: (t.flats || []).map(f => f.code).filter(Boolean) // 👈 “Kat” listesini buradan doldur
+    }))
     await fetchDues()
   } catch (error) {
     console.error('Kiracılar çekilirken hata oluştu:', error)

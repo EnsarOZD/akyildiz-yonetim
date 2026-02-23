@@ -28,17 +28,6 @@
                 <input v-model="tenant.companyName" class="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400" placeholder="ABC Ticaret Ltd. Şti." required />
               </div>
 
-              <div class="form-control">
-                <label class="label">
-                  <span class="label-text font-semibold text-gray-700 dark:text-gray-300">Firma Türü *</span>
-                </label>
-                <select v-model="tenant.companyType" class="select select-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400" required>
-                  <option value="">Firma türü seçin</option>
-                  <option v-for="type in COMPANY_TYPES" :key="type.value" :value="type.value">
-                    {{ type.label }}
-                  </option>
-                </select>
-              </div>
 
               <div class="form-control">
                 <label class="label">
@@ -57,21 +46,16 @@
 
               <div class="form-control">
                 <label class="label">
-                  <span class="label-text font-semibold text-gray-700 dark:text-gray-300">{{ companyTypeLabel }} *</span>
+                  <span class="label-text font-semibold text-gray-700 dark:text-gray-300">Kimlik/Vergi Numarası *</span>
                 </label>
                 <input
                   v-model="tenant.identityNumber"
-                  :class="['input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400', identityNumberError ? 'input-error' : '']"
-                  :placeholder="companyTypePlaceholder"
-                  :required="!!tenant.companyType"
-                  :maxlength="tenant.companyType === 'Individual' ? 11 : 10"
-                  :pattern="tenant.companyType === 'Individual' ? '[0-9]{11}' : '[0-9]{10}'"
+                  class="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400"
+                  placeholder="TC veya Vergi No"
+                  required
                   type="text"
                   inputmode="numeric"
                 />
-                <label v-if="identityNumberError" class="label">
-                  <span class="label-text-alt text-error">{{ identityNumberError }}</span>
-                </label>
               </div>
             </div>
           </div>
@@ -163,11 +147,6 @@
             </label>
           </div>
 
-          <!-- Giriş Tarihi -->
-          <div class="form-control">
-            <label class="label"><span class="label-text font-semibold text-gray-700 dark:text-gray-300">Giriş Tarihi *</span></label>
-            <input type="date" v-model="tenant.entryDate" class="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400" required />
-          </div>
         </form>
       </div>
 
@@ -223,7 +202,6 @@ const tenant = ref(emptyTenant())
 function emptyTenant () {
   return {
     companyName: '',
-    companyType: '',
     businessType: '',
     identityNumber: '',
     contactPersonName: '',
@@ -233,36 +211,10 @@ function emptyTenant () {
     selectedFlatIds: [],     // çoklu seçim
     floorNumber: undefined,
     monthlyAidat: 0,
-    isActive: true,
-    entryDate: ''
+    isActive: true
   }
 }
 
-// --- Computed: Firma türüne göre kimlik alanı
-const companyTypeLabel = computed(() =>
-  tenant.value.companyType === 'Individual' ? 'TC Kimlik Numarası'
-  : tenant.value.companyType === 'Corporate' ? 'Vergi Numarası'
-  : 'Kimlik/Vergi Numarası'
-)
-
-const companyTypePlaceholder = computed(() =>
-  tenant.value.companyType === 'Individual' ? '12345678901'
-  : tenant.value.companyType === 'Corporate' ? '1234567890'
-  : 'Numara girin'
-)
-
-const identityNumberError = computed(() => {
-  const t = tenant.value
-  if (!t.companyType || !t.identityNumber) return ''
-  if (t.companyType === 'Individual') {
-    if (t.identityNumber.length !== 11) return 'TC Kimlik Numarası 11 hane olmalıdır'
-    if (!/^\d{11}$/.test(t.identityNumber)) return 'TC Kimlik Numarası sadece rakam içermelidir'
-  } else if (t.companyType === 'Corporate') {
-    if (t.identityNumber.length !== 10) return 'Vergi Numarası 10 hane olmalıdır'
-    if (!/^\d{10}$/.test(t.identityNumber)) return 'Vergi Numarası sadece rakam içermelidir'
-  }
-  return ''
-})
 
 // --- Flats (list + filtre)
 const availableFloors = computed(() => {
@@ -338,8 +290,7 @@ onMounted(() => {
 
 // --- Submit
 function handleSave () {
-  if (!tenant.value.companyName || !tenant.value.companyType || !tenant.value.businessType) return
-  if (identityNumberError.value) return
+  if (!tenant.value.companyName || !tenant.value.businessType || !tenant.value.identityNumber) return
 
   const ids = (tenant.value.selectedFlatIds || []).filter(Boolean)
 
@@ -351,7 +302,6 @@ function handleSave () {
 
   const payload = {
     companyName: tenant.value.companyName.trim(),
-    companyType: tenant.value.companyType,
     businessType: tenant.value.businessType,
     identityNumber: tenant.value.identityNumber.trim(),
     contactPersonName: tenant.value.contactPersonName.trim(),
@@ -364,9 +314,7 @@ function handleSave () {
 
     floorNumber: tenant.value.floorNumber ?? null,
     monthlyAidat: Number(tenant.value.monthlyAidat || 0),
-    isActive: !!tenant.value.isActive,
-    contractStartDate: tenant.value.entryDate ? new Date(tenant.value.entryDate).toISOString() : null,
-    contractEndDate: null
+    isActive: !!tenant.value.isActive
   }
 
   emit('save', payload)

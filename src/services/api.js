@@ -1,7 +1,20 @@
-// API servis katmanı - Backend ile iletişim için
-const API_BASE_URL = import.meta.env.DEV 
-  ? 'http://localhost:5000'  // Development için /api prefix'i yok
-  : (import.meta.env.VITE_API_BASE_URL || 'https://api.akyildizyonetim.com/api')
+const getBaseUrl = () => {
+  const envUrl = import.meta.env.VITE_API_BASE_URL;
+  if (import.meta.env.DEV) return 'http://localhost:5000/api';
+
+  // Eğer envUrl varsa onu kullan, yoksa fallback kullan
+  let base = envUrl || 'https://api.akyildizyonetim.com/api';
+
+  // URL'in sonunda /api olduğundan emin ol (Eğer kullanıcı unutursa otomatik ekle)
+  if (base && !base.endsWith('/api') && !base.endsWith('/api/')) {
+    base = base.endsWith('/') ? `${base}api` : `${base}/api`;
+  }
+
+  return base;
+};
+
+const API_BASE_URL = getBaseUrl();
+console.log('🚀 Final API Base URL:', API_BASE_URL);
 
 class ApiService {
   constructor() {
@@ -16,18 +29,18 @@ class ApiService {
   // Generic HTTP metodları
   async request(endpoint, options = {}) {
     const url = `${this.baseURL}${endpoint}`
-    
+
     // Authentication token'ını ekle
     const headers = {
       'Content-Type': 'application/json',
       ...options.headers
     }
-    
+
     const token = this.getAuthToken()
     if (token) {
       headers['Authorization'] = `Bearer ${token}`
     }
-    
+
     const config = {
       headers,
       // JWT için credentials gerekli değil, Authorization header kullanılıyor
@@ -38,67 +51,61 @@ class ApiService {
       console.log('🌐 API Request:', { url, method: config.method, headers: config.headers })
       const response = await fetch(url, config)
       console.log('📡 API Response Status:', response.status, response.statusText)
-      
+
       // 401 Unauthorized durumunda token'ı temizle
       if (response.status === 401) {
         localStorage.removeItem('authToken')
         window.location.href = '/login'
         throw new Error('Oturum süresi doldu. Lütfen tekrar giriş yapın.')
       }
-      
+
       if (!response.ok) {
-        // Hata mesajını almaya çalış
-        let errorMessage = `Bir hata oluştu. (HTTP ${response.status})`
+        let errorData = null;
+        let errorMessage = `Bir hata oluştu. (HTTP ${response.status})`;
+
         try {
-          const errorData = await response.text()
-          console.log('❌ API Error Response:', errorData)
-          if (errorData) {
-            // JSON ise parse et, değilse düz metin olarak ekle
+          const text = await response.text();
+          if (text) {
             try {
-              const parsed = JSON.parse(errorData)
-              if (parsed && parsed.message) {
-                errorMessage = parsed.message
-              } else if (parsed && parsed.errorMessage) {
-                errorMessage = parsed.errorMessage
-              } else if (parsed && parsed.errors) {
-                errorMessage = Object.values(parsed.errors).join(' ')
-              } else {
-                errorMessage += ` - ${errorData}`
-              }
+              errorData = JSON.parse(text);
+              errorMessage = errorData.errorMessage || errorData.message || errorMessage;
             } catch {
-              errorMessage += ` - ${errorData}`
+              errorData = text;
             }
           }
         } catch (e) {
-          // Error response'u parse edemezse sadece status code'u göster
+          console.error('Error parsing response:', e);
         }
-        // Türkçeleştirme
-        if (response.status === 400) errorMessage = 'Geçersiz istek veya eksik bilgi. Lütfen formu kontrol edin.'
-        if (response.status === 401) errorMessage = 'Yetkisiz işlem. Lütfen tekrar giriş yapın.'
-        if (response.status === 403) errorMessage = 'Bu işlemi yapmaya yetkiniz yok.'
-        if (response.status === 404) errorMessage = 'İstenilen veri bulunamadı.'
-        if (response.status === 500) errorMessage = 'Sunucu hatası. Lütfen daha sonra tekrar deneyin.'
-        throw new Error(errorMessage)
+
+        const error = new Error(errorMessage);
+        error.status = response.status;
+        error.response = { status: response.status, data: errorData };
+        error.apiError = {
+          status: response.status,
+          data: errorData,
+          message: errorMessage
+        };
+
+        // Oturum süresi doldu kontrolü
+        if (response.status === 401) {
+          localStorage.removeItem('authToken');
+          window.location.href = '/login';
+        }
+
+        throw error;
       }
-      
-      // Response'un boş olup olmadığını kontrol et
-      const responseText = await response.text()
-      console.log('API Response Text:', responseText)
-      
-      if (!responseText) {
-        return null // Boş response için null döndür
-      }
-      
+
+      const responseText = await response.text();
+      if (!responseText) return null;
+
       try {
-        return JSON.parse(responseText)
+        return JSON.parse(responseText);
       } catch (parseError) {
-        console.error('JSON parse error:', parseError)
-        console.error('Response text:', responseText)
-        throw new Error('Geçersiz JSON yanıtı')
+        throw new Error('Geçersiz JSON yanıtı');
       }
     } catch (error) {
-      console.error('API request failed:', error)
-      throw error
+      console.error('API request failed:', error);
+      throw error;
     }
   }
 
@@ -125,6 +132,14 @@ class ApiService {
     })
   }
 
+  // PATCH isteği
+  async patch(endpoint, data) {
+    return this.request(endpoint, {
+      method: 'PATCH',
+      body: JSON.stringify(data)
+    })
+  }
+
   // DELETE isteği
   async delete(endpoint) {
     return this.request(endpoint, { method: 'DELETE' })
@@ -134,13 +149,13 @@ class ApiService {
   async uploadFile(endpoint, file, onProgress = null) {
     const formData = new FormData()
     formData.append('file', file)
-    
+
     const headers = {}
     const token = this.getAuthToken()
     if (token) {
       headers['Authorization'] = `Bearer ${token}`
     }
-    
+
     return this.request(endpoint, {
       method: 'POST',
       headers,

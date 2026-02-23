@@ -72,54 +72,20 @@
                 <input type="number" v-model.number="flat.unitArea" min="1" step="0.01" class="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400" required />
               </div>
 
-              <!-- Grup Stratejisi (0:None, 1:SplitIfMultiple) -->
-              <div class="form-control" v-if="flat.type !== 2">
-                <label class="label"><span class="label-text font-semibold text-gray-700 dark:text-gray-300">Grup Stratejisi</span></label>
-                <select v-model.number="flat.groupStrategy" class="select select-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400">
-                  <option :value="0">Normal</option>
-                  <option :value="1">Bölünmüş (A/B)</option>
-                </select>
-              </div>
-
-              <!-- GroupKey & Section -->
-              <div class="form-control" v-if="showGroupFields">
-                <label class="label"><span class="label-text font-semibold text-gray-700 dark:text-gray-300">Grup Anahtarı (GroupKey)</span></label>
-                <input v-model.trim="flat.groupKey" class="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400" placeholder="Örn: 3 veya G" />
-              </div>
-              <div class="form-control" v-if="showGroupFields">
-                <label class="label"><span class="label-text font-semibold text-gray-700 dark:text-gray-300">Bölüm (Section)</span></label>
-                <select v-model="flat.section" class="select select-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400">
-                  <option :value="null">Seçin</option>
-                  <option value="A">A</option>
-                  <option value="B">B</option>
-                </select>
-              </div>
 
               <!-- Mal Sahibi (Owner) -->
               <div class="md:col-span-2">
                 <div class="form-control">
                   <label class="label"><span class="label-text font-semibold text-gray-700 dark:text-gray-300">Mal Sahibi (opsiyonel)</span></label>
 
-                  <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
-                    <input
-                      v-model.trim="ownerSearch"
-                      @input="debouncedOwnerQuery"
-                      class="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200"
-                      placeholder="Mal sahibi ara (ad, tel, e-posta)"
-                    />
-                    <select
-                      v-model="flat.ownerId"
-                      class="select select-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200">
-                      <option :value="null">— Seçilmedi —</option>
-                      <option v-for="o in owners" :key="o.id" :value="o.id">
-                        {{ ownerLabel(o) }}
-                      </option>
-                    </select>
-                  </div>
-
-                  <small class="text-xs text-gray-500">
-                    Listedekiler mevcut mal sahipleridir. Gerekirse <b>Mal Sahipleri</b> ekranından yeni kişi ekleyin.
-                  </small>
+                  <select
+                    v-model="flat.ownerId"
+                    class="select select-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400">
+                    <option :value="null">— Seçilmedi —</option>
+                    <option v-for="o in owners" :key="o.id" :value="o.id">
+                      {{ ownerLabel(o) }}
+                    </option>
+                  </select>
                 </div>
               </div>
 
@@ -127,10 +93,6 @@
               <div class="form-control">
                 <label class="label"><span class="label-text font-semibold text-gray-700 dark:text-gray-300">Aylık Kira</span></label>
                 <input type="number" v-model.number="flat.monthlyRent" min="0" step="0.01" class="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200" />
-              </div>
-              <div class="form-control">
-                <label class="label"><span class="label-text font-semibold text-gray-700 dark:text-gray-300">Hisse (ShareCount)</span></label>
-                <input type="number" v-model.number="flat.shareCount" min="0" step="0.01" class="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200" />
               </div>
 
               <!-- Durum -->
@@ -180,13 +142,9 @@ const emptyFlat = () => ({
   code: '',
   type: 0,            // 0: Floor, 1: Entry, 2: Parking
   floorNumber: null,
-  section: null,      // 'A' | 'B' | null
-  groupKey: null,     // '3' | 'G' | null
-  groupStrategy: 0,   // 0: None, 1: SplitIfMultiple
   unitArea: 0,
   ownerId: null,
   monthlyRent: 0,
-  shareCount: 1,
   isActive: true,
   description: ''
 })
@@ -194,8 +152,6 @@ const flat = ref(emptyFlat())
 
 // ---- Owner listesi
 const owners = ref([])
-const ownerSearch = ref('')
-let ownerSearchTimer = null
 
 const fetchOwners = async (q = '') => {
   try {
@@ -212,8 +168,7 @@ const ownerLabel = (o) => {
   return info ? `${name} (${info})` : name
 }
 const debouncedOwnerQuery = () => {
-  clearTimeout(ownerSearchTimer)
-  ownerSearchTimer = setTimeout(() => fetchOwners(ownerSearch.value), 300)
+  fetchOwners()
 }
 
 // ---- Görünürlük
@@ -225,21 +180,13 @@ watch(() => props.visible, v => {
   }
 })
 
-// ---- Grup alanlarını ne zaman gösterelim?
-const showGroupFields = computed(() => flat.value.type === 1 || flat.value.groupStrategy === 1)
 
 // ---- Type değişince bağlı alanları senkronla
 watch(() => flat.value.type, (t) => {
   if (t === 2) {           // Parking
     flat.value.floorNumber = null
-    flat.value.groupStrategy = 0
-    flat.value.section = null
-    flat.value.groupKey = null
   } else if (t === 1) {    // Entry
     flat.value.floorNumber = 0
-    flat.value.groupStrategy = 1
-    flat.value.section = flat.value.section ?? 'A'
-    flat.value.groupKey = flat.value.groupKey ?? 'G'
   }
 })
 
@@ -254,9 +201,6 @@ function onCodeInput () {
   if (raw.startsWith('OTOPARK') || raw === 'P' || raw === 'PARK') {
     flat.value.type = 2
     flat.value.floorNumber = null
-    flat.value.groupStrategy = 0
-    flat.value.groupKey = null
-    flat.value.section = null
     return
   }
 
@@ -265,9 +209,6 @@ function onCodeInput () {
   if (mEntry) {
     flat.value.type = 1
     flat.value.floorNumber = 0
-    flat.value.groupStrategy = 1
-    flat.value.groupKey = 'G'
-    flat.value.section = mEntry[1]
     return
   }
 
@@ -276,23 +217,16 @@ function onCodeInput () {
   if (mFloorSect) {
     flat.value.type = 0
     flat.value.floorNumber = parseInt(mFloorSect[1], 10)
-    flat.value.groupStrategy = 1
-    flat.value.groupKey = String(flat.value.floorNumber)
-    flat.value.section = mFloorSect[2]
     return
   }
 
   // 4) "A-201" gibi
   const mA201 = raw.match(/^([A-Z])[- ]?(\d{3,})$/)
   if (mA201) {
-    const section = mA201[1]
     const num = parseInt(mA201[2], 10)
     const floor = Math.floor(num / 100)
     flat.value.type = 0
     flat.value.floorNumber = isFinite(floor) ? floor : null
-    flat.value.groupStrategy = 1
-    flat.value.groupKey = flat.value.floorNumber != null ? String(flat.value.floorNumber) : null
-    flat.value.section = section
     return
   }
 
@@ -302,9 +236,6 @@ function onCodeInput () {
     const num = parseInt(mDigits[1], 10)
     flat.value.type = 0
     flat.value.floorNumber = Math.floor(num / 100)
-    flat.value.groupStrategy = 0
-    flat.value.groupKey = flat.value.floorNumber != null ? String(flat.value.floorNumber) : null
-    flat.value.section = null
   }
 }
 
@@ -332,14 +263,8 @@ async function handleSave () {
       type: Number(flat.value.type),                     // 0/1/2
       floorNumber: flat.value.type === 1 ? 0 : (flat.value.type === 2 ? null : flat.value.floorNumber),
       unitArea: Number(flat.value.unitArea || 0),
-
-      groupStrategy: Number(flat.value.groupStrategy),   // 0/1
-      groupKey: flat.value.groupStrategy === 1 ? (flat.value.groupKey || null) : null,
-      section: flat.value.groupStrategy === 1 ? (flat.value.section || null) : null,
-
       ownerId: flat.value.ownerId || null,
       monthlyRent: flat.value.monthlyRent ? Number(flat.value.monthlyRent) : null,
-      shareCount: flat.value.shareCount ? Number(flat.value.shareCount) : null,
       isActive: !!flat.value.isActive,
       description: (flat.value.description?.trim() || `Oluşturan: UI (${new Date().toLocaleString('tr-TR')})`)
     }

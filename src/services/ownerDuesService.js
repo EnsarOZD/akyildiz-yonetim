@@ -23,7 +23,7 @@ class OwnerDuesService {
   async getOwnerDues(filters = {}) {
     try {
       if (this.backendAvailable) {
-        return await apiService.get('/owner-dues', filters)
+        return await apiService.get('/owners/dues', filters)
       }
     } catch (error) {
       console.log('⚠️ Owner dues backend endpoint\'i mevcut değil, fallback modu kullanılıyor')
@@ -38,7 +38,7 @@ class OwnerDuesService {
   async getOwnerDueById(id) {
     try {
       if (this.backendAvailable) {
-        return await apiService.get(`/owner-dues/${id}`)
+        return await apiService.get(`/owners/dues/${id}`)
       }
     } catch (error) {
       console.log('⚠️ Owner dues backend endpoint\'i mevcut değil, fallback modu kullanılıyor')
@@ -53,7 +53,7 @@ class OwnerDuesService {
   async createOwnerDue(data) {
     try {
       if (this.backendAvailable) {
-        return await apiService.post('/owner-dues', data)
+        return await apiService.post('/owners/dues', data)
       }
     } catch (error) {
       console.log('⚠️ Owner dues backend endpoint\'i mevcut değil, fallback modu kullanılıyor')
@@ -69,7 +69,7 @@ class OwnerDuesService {
   async updateOwnerDue(id, data) {
     try {
       if (this.backendAvailable) {
-        return await apiService.put(`/owner-dues/${id}`, data)
+        return await apiService.put(`/owners/dues/${id}`, data)
       }
     } catch (error) {
       console.log('⚠️ Owner dues backend endpoint\'i mevcut değil, fallback modu kullanılıyor')
@@ -85,7 +85,7 @@ class OwnerDuesService {
   async deleteOwnerDue(id) {
     try {
       if (this.backendAvailable) {
-        return await apiService.delete(`/owner-dues/${id}`)
+        return await apiService.delete(`/owners/dues/${id}`)
       }
     } catch (error) {
       console.log('⚠️ Owner dues backend endpoint\'i mevcut değil, fallback modu kullanılıyor')

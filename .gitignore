@@ -403,3 +403,10 @@ FodyWeavers.xsd
 .env.development
 .env.production
 .env.staging
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/

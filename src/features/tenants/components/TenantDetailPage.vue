@@ -32,9 +32,12 @@
 
           <div class="flex items-center gap-4">
             <div class="text-right">
-              <div class="text-sm text-base-content/70">Güncel Bakiye</div>
-              <div class="text-2xl font-bold" :class="totalDebt > 0 ? 'text-error' : 'text-success'">
-                {{ formatCurrency(totalDebt) }}
+            <div class="text-sm text-base-content/70">Güncel Bakiye</div>
+              <div class="text-2xl font-bold" :class="tenant.totalBalance > 0 ? 'text-error' : 'text-success'">
+                {{ formatCurrency(tenant.totalBalance) }}
+              </div>
+              <div v-if="tenant.advanceBalance > 0" class="text-xs text-success font-semibold">
+                (Avans: {{ formatCurrency(tenant.advanceBalance) }})
               </div>
             </div>
             <span :class="['badge badge-lg font-semibold', tenant.isActive ? 'badge-success' : 'badge-ghost']">
@@ -46,16 +49,62 @@
     </div>
 
     <!-- Sekmeler -->
-    <div class="tabs tabs-boxed">
-      <a class="tab" :class="{'tab-active': activeTab === 'debts'}" @click="activeTab = 'debts'">Ödenmemiş Borçlar</a>
-      <a class="tab" :class="{'tab-active': activeTab === 'payments'}" @click="activeTab = 'payments'">Yapılan Ödemeler</a>
-      <a class="tab" :class="{'tab-active': activeTab === 'history'}" @click="activeTab = 'history'">Sayaç ve Aidat Kayıtları</a>
-      <a class="tab" :class="{'tab-active': activeTab === 'info'}" @click="activeTab = 'info'">İş Yeri Bilgileri</a>
+    <div class="tabs tabs-boxed bg-base-200 p-1 mb-6">
+      <a class="tab transition-all" :class="{'tab-active !bg-primary !text-white !rounded-lg shadow-md': activeTab === 'timeline'}" @click="activeTab = 'timeline'">Finansal Akış (Timeline)</a>
+      <a class="tab transition-all" :class="{'tab-active !bg-primary !text-white !rounded-lg shadow-md': activeTab === 'debts'}" @click="activeTab = 'debts'">Ödenmemiş Borçlar</a>
+      <a class="tab transition-all" :class="{'tab-active !bg-primary !text-white !rounded-lg shadow-md': activeTab === 'payments'}" @click="activeTab = 'payments'">Yapılan Ödemeler</a>
+      <a class="tab transition-all" :class="{'tab-active !bg-primary !text-white !rounded-lg shadow-md': activeTab === 'info'}" @click="activeTab = 'info'">İş Yeri Bilgileri</a>
     </div>
 
     <!-- Sekme İçerikleri -->
-    <div class="card bg-base-100 shadow-xl min-h-[300px]">
+    <div class="card bg-base-100 shadow-xl min-h-[400px]">
       <div class="card-body">
+        <!-- Timeline Görünümü -->
+        <div v-if="activeTab === 'timeline'" class="space-y-4">
+          <div class="flex justify-between items-center mb-6">
+            <h3 class="text-xl font-bold">Finansal İşlem Geçmişi</h3>
+            <div class="p-2 bg-gray-50 dark:bg-gray-800 rounded-lg text-sm">
+              <span class="inline-block w-3 h-3 bg-error rounded-full mr-1"></span> Borç
+              <span class="inline-block w-3 h-3 bg-success rounded-full ml-3 mr-1"></span> Ödeme
+            </div>
+          </div>
+          
+          <ul class="timeline timeline-vertical timeline-compact">
+            <li v-for="(item, idx) in timelineItems" :key="idx">
+              <hr v-if="idx > 0" :class="item.isPayment ? 'bg-success/30' : 'bg-error/30'" />
+              <div class="timeline-middle">
+                <div :class="['w-10 h-10 rounded-full flex items-center justify-center shadow-lg text-white', item.isPayment ? 'bg-success' : 'bg-error']">
+                  <span v-if="item.isPayment">💸</span>
+                  <span v-else>📄</span>
+                </div>
+              </div>
+              <div class="timeline-start mb-10 md:text-end pr-4">
+                <time class="font-mono italic text-sm text-gray-500">{{ formatDate(item.date) }}</time>
+                <div class="text-xs uppercase text-gray-400 font-bold tracking-widest mt-1">{{ item.isPayment ? 'Tahsilat' : 'Tahakkuk' }}</div>
+              </div>
+              <div class="timeline-end timeline-box !bg-base-100 border-gray-200 shadow-sm p-4 w-full md:w-auto min-w-[300px]">
+                <div class="flex flex-col gap-1">
+                  <div class="flex justify-between items-center gap-4">
+                    <span class="font-bold text-gray-800 dark:text-gray-200">{{ item.description }}</span>
+                    <span :class="['font-bold text-lg', item.isPayment ? 'text-success' : 'text-error']">
+                      {{ item.isPayment ? '+' : '-' }}{{ formatCurrency(item.amount) }}
+                    </span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-xs text-gray-500">{{ item.typeLabel }}</span>
+                    <span v-if="!item.isPayment" class="badge badge-sm" :class="item.isPaid ? 'badge-success' : 'badge-error'">
+                      {{ item.isPaid ? 'Ödendi' : 'Ödenmedi' }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <hr :class="item.isPayment ? 'bg-success/30' : 'bg-error/30'" />
+            </li>
+            <li v-if="timelineItems.length === 0" class="py-12 text-center text-gray-500 italic">
+              Henüz finansal işlem kaydı bulunmuyor.
+            </li>
+          </ul>
+        </div>
         <!-- Ödenmemiş Borçlar -->
         <div v-if="activeTab === 'debts'">
           <h3 class="text-xl font-bold mb-4">Ödenmemiş Faturalar ve Aidatlar</h3>
@@ -66,13 +115,20 @@
                   <th>Açıklama</th>
                   <th>Son Ödeme Tarihi</th>
                   <th class="text-right">Tutar</th>
+                  <th class="text-center">İşlemler</th>
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="item in unpaidItems" :key="item.id" class="hover">
+                <tr v-for="item in unpaidItems" :key="item.id" class="hover group">
                   <td>{{ item.description || `Aidat (${item.period || item.unit})` }}</td>
                   <td>{{ formatDate(item.dueDate) }}</td>
-                  <td class="text-right font-semibold">{{ formatCurrency(item.amount ?? item.toplamTutar) }}</td>
+                  <td class="text-right font-semibold text-error">{{ formatCurrency(item.amount ?? item.toplamTutar) }}</td>
+                  <td class="text-center">
+                    <div class="flex justify-center gap-2">
+                      <button @click="router.push(`/payments?tenantId=${tenant.id}&debtId=${item.id}`)" class="btn btn-xs btn-primary font-bold shadow-sm" title="Nakit/Kart Ödeme">Öde</button>
+                      <button @click="openAdvanceModal(item)" class="btn btn-xs btn-outline btn-info font-bold" title="Avans Kullan">Avans</button>
+                    </div>
+                  </td>
                 </tr>
                 <tr v-if="unpaidItems.length === 0">
                   <td colspan="3" class="text-center py-8 text-base-content/60">Ödenmemiş borç bulunmamaktadır.</td>
@@ -108,7 +164,7 @@
           </div>
         </div>
 
-        <!-- Sayaç ve Aidat Kayıtları -->
+        <!-- Aidat ve Gider Kayıtları -->
         <div v-else-if="activeTab === 'history'">
           <h3 class="text-xl font-bold mb-4">Geçmiş Kayıtlar</h3>
           <div class="overflow-x-auto">
@@ -118,9 +174,6 @@
                   <th>Tarih</th>
                   <th>Tür</th>
                   <th>Açıklama</th>
-                  <th>İlk Endeks</th>
-                  <th>Son Endeks</th>
-                  <th>Tüketim</th>
                   <th class="text-right">Tutar</th>
                   <th>Durum</th>
                 </tr>
@@ -135,9 +188,6 @@
                     </span>
                   </td>
                   <td>{{ item.description }}</td>
-                  <td>{{ item.ilkEndeks ?? '-' }}</td>
-                  <td>{{ item.sonEndeks ?? '-' }}</td>
-                  <td>{{ item.tuketim ?? '-' }}</td>
                   <td class="text-right font-semibold">{{ formatCurrency(item.amount) }}</td>
                   <td>
                     <span class="badge" :class="getPaymentStatusBadge(item)">
@@ -146,7 +196,7 @@
                   </td>
                 </tr>
                 <tr v-if="historyItems.length === 0">
-                  <td colspan="8" class="text-center py-8 text-base-content/60">Kayıtlı sayaç veya aidat bulunmamaktadır.</td>
+                  <td colspan="5" class="text-center py-8 text-base-content/60">Kayıtlı borç bulunmamaktadır.</td>
                 </tr>
               </tbody>
             </table>
@@ -162,9 +212,8 @@
             <h4 class="text-lg font-semibold mb-4 text-gray-700 dark:text-gray-300">🏢 İş Yeri Bilgileri</h4>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
               <div><strong>Şirket Adı:</strong> {{ tenant.companyName }}</div>
-              <div><strong>Firma Türü:</strong> {{ getCompanyTypeLabel(tenant) }}</div>
               <div><strong>İş Türü:</strong> {{ tenant.businessType }}</div>
-              <div><strong>{{ getIdentityLabel(tenant) }}:</strong> {{ getIdentityNumber(tenant) }}</div>
+              <div><strong>Kimlik/Vergi No:</strong> {{ tenant.identityNumber || 'Belirtilmemiş' }}</div>
             </div>
           </div>
 
@@ -203,35 +252,49 @@
             </div>
           </div>
 
-          <!-- Sözleşme -->
           <div class="card bg-base-200 p-4">
-            <h4 class="text-lg font-semibold mb-4 text-gray-700 dark:text-gray-300">📋 Sözleşme Bilgileri</h4>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
-              <div v-if="tenant.contractStartDate"><strong>Sözleşme Başlangıcı:</strong> {{ formatDate(tenant.contractStartDate) }}</div>
-              <div v-if="tenant.contractEndDate"><strong>Sözleşme Bitişi:</strong> {{ formatDate(tenant.contractEndDate) }}</div>
               <div><strong>Durum:</strong> <span :class="['badge', tenant.isActive ? 'badge-success' : 'badge-ghost']">{{ tenant.isActive ? 'Aktif' : 'Pasif' }}</span></div>
-              <div><strong>Kayıt Tarihi:</strong> {{ formatDate(tenant.createdAt) }}</div>
-              <div v-if="tenant.updatedAt"><strong>Son Güncelleme:</strong> {{ formatDate(tenant.updatedAt) }}</div>
             </div>
           </div>
         </div>
       </div>
     </div>
+    <!-- Avans Modal -->
+    <div class="modal" :class="{'modal-open': showAdvanceModal}">
+      <div class="modal-box max-w-2xl bg-base-100 p-0 overflow-hidden border border-base-300">
+        <div class="p-6 border-b border-base-200 flex justify-between items-center bg-base-200/50">
+          <h3 class="font-bold text-lg">Avans Hesabı Kullan</h3>
+          <button @click="showAdvanceModal = false" class="btn btn-ghost btn-sm btn-circle">✕</button>
+        </div>
+        <div class="p-6 max-h-[70vh] overflow-y-auto">
+          <AdvanceAccountManager 
+            v-if="showAdvanceModal"
+            :tenant-id="tenantId"
+            @success="handleAdvanceSuccess"
+          />
+        </div>
+        <div class="p-4 border-t border-base-200 flex justify-end">
+          <button @click="showAdvanceModal = false" class="btn btn-ghost">Kapat</button>
+        </div>
+      </div>
+      <div class="modal-backdrop" @click="showAdvanceModal = false"></div>
+    </div>
   </div>
-
 </template>
 
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
+import AdvanceAccountManager from '@/components/AdvanceAccountManager.vue'
 import tenantsService from '@/features/tenants/services/tenantsService.js'
 import paymentsService from '@/services/paymentsService'
 import utilityDebtsService from '@/services/utilityDebtsService'
-import meterReadingsService from '@/services/meterReadingsService'
 import { useAuthStore } from '@/stores/auth'
 import { useErrorHandler } from '@/composables/useErrorHandler'
 
 const route = useRoute()
+const router = useRouter()
 const authStore = useAuthStore()
 const { handleNetworkError } = useErrorHandler()
 
@@ -241,8 +304,48 @@ const unpaidItems = ref([])
 const payments = ref([])
 const historyItems = ref([])
 const loading = ref(true)
-const activeTab = ref('debts')
+const activeTab = ref('timeline')
 const totalDebt = ref(0)
+const showAdvanceModal = ref(false)
+
+const openAdvanceModal = (item) => {
+  showAdvanceModal.value = true
+}
+
+const handleAdvanceSuccess = () => {
+  showAdvanceModal.value = false
+  fetchTenantDetails()
+}
+
+const timelineItems = computed(() => {
+  const items = []
+  
+  // Borçları ekle
+  historyItems.value.forEach(h => {
+    items.push({
+      date: h.date,
+      description: h.description,
+      amount: h.amount,
+      isPayment: false,
+      isPaid: h.isPaid,
+      typeLabel: h.type === 'Water' ? 'Su' : h.type === 'Electricity' ? 'Elektrik' : 'Aidat'
+    })
+  })
+  
+  // Ödemeleri ekle
+  payments.value.forEach(p => {
+    items.push({
+      date: p.paymentDate,
+      description: p.description || 'Tahsilat',
+      amount: p.amount,
+      isPayment: true,
+      typeLabel: 'Ödeme'
+    })
+  })
+  
+  // Tarihe göre sırala (Yeni en üstte)
+  return items.sort((a, b) => new Date(b.date) - new Date(a.date))
+})
 
 const formatCurrency = (value) =>
   Number(value ?? 0).toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' })
@@ -258,30 +361,6 @@ const formatDate = (ts) => {
   return d ? d.toLocaleDateString('tr-TR', { year: 'numeric', month: 'long', day: 'numeric' }) : '-'
 }
 
-// Consumption amount calculation (same as Utilities.vue)
-const calculateConsumptionAmount = (consumption, type) => {
-  if (!consumption || consumption <= 0) return 0;
-  
-  // Tarife fiyatları (TL biriminde)
-  const rates = {
-    0: { // Electricity
-      unitPrice: 2.5, // kWh başına TL
-      kdvRate: 20 // %20 KDV
-    },
-    1: { // Water
-      unitPrice: 15, // m³ başına TL
-      kdvRate: 20 // %20 KDV
-    }
-  };
-  
-  const rate = rates[type] || rates[0]; // Default to electricity if type not found
-  
-  const baseAmount = consumption * rate.unitPrice;
-  const kdvAmount = baseAmount * (rate.kdvRate / 100);
-  const totalAmount = baseAmount + kdvAmount;
-  
-  return totalAmount;
-};
 
 // Tip bazlı ödeme durumu hesaplama
 const getPaymentStatusByType = (item, payments) => {
@@ -335,17 +414,6 @@ const getPaymentStatusLabel = (item) => {
 
 const getAvatarInitial = (name) => (name ? name.charAt(0).toUpperCase() : '?')
 
-// Backend uyumluluğu
-const getCompanyTypeLabel = (t) =>
-  t.companyType === 'Individual' ? 'Şahıs Firması' :
-  t.companyType === 'Corporate' ? 'Tüzel Kişi' : 'Belirtilmemiş'
-
-const getIdentityLabel = (t) =>
-  t.companyType === 'Individual' ? 'TC Kimlik Numarası' :
-  t.companyType === 'Corporate' ? 'Vergi Numarası' : 'Kimlik/Vergi Numarası'
-
-const getIdentityNumber = (t) => t.identityNumber || t.taxNumber || 'Belirtilmemiş'
-
 // Veri çekimi
 const fetchTenantDetails = async () => {
   if (!tenantId.value) { loading.value = false; return }
@@ -359,17 +427,12 @@ const fetchTenantDetails = async () => {
     // Tenant'ın flat ID'lerini al
     const tenantFlatIds = tenant.value.flats?.map(flat => flat.id) || []
     
-    const [paymentsData, utilityDebtsData, meterReadingsData] = await Promise.all([
+    const [paymentsData, utilityDebtsData] = await Promise.all([
       paymentsService.getPayments({ tenantId: tenantId.value }),
-      utilityDebtsService.getUtilityDebts({ tenantId: tenantId.value }),
-      // Tenant'ın flat'larına ait sayaç okumalarını çek
-      tenantFlatIds.length > 0 ? 
-        Promise.all(tenantFlatIds.map(flatId => meterReadingsService.getMeterReadings({ flatId })))
-          .then(results => results.flat()) : 
-        Promise.resolve([])
+      utilityDebtsService.getUtilityDebts({ tenantId: tenantId.value })
     ])
 
-    // history - Utility debts ve meter readings'i birleştir
+    // history - Utility debts
     const combinedHistory = []
     
     // Utility debts ekle
@@ -382,30 +445,7 @@ const fetchTenantDetails = async () => {
         amount: Number(debt.amount ?? 0),
         toplamTutar: Number(debt.amount ?? 0),
         remainingAmount: Number(debt.remainingAmount ?? debt.amount ?? 0),
-        isPaid: debt.status === 'Paid',
-        ilkEndeks: '-', // Utility debts'te endeks bilgisi yok
-        sonEndeks: '-',
-        tuketim: '-'
-      })
-    })
-    
-    // Meter readings ekle
-    ;(meterReadingsData || []).forEach(reading => {
-      // Önceki okumayı bul (basit hesaplama)
-      const previousReading = reading.readingValue - (reading.consumption || 0)
-      
-      combinedHistory.push({
-        ...reading,
-        type: reading.type === 0 ? 'Electricity' : reading.type === 1 ? 'Water' : 'Unknown',
-        date: reading.readingDate,
-        description: `${reading.type === 0 ? 'Elektrik' : reading.type === 1 ? 'Su' : 'Sayaç'} Okuması (${reading.periodYear}/${reading.periodMonth.toString().padStart(2, '0')})`,
-        amount: calculateConsumptionAmount(reading.consumption, reading.type),
-        toplamTutar: calculateConsumptionAmount(reading.consumption, reading.type),
-        remainingAmount: 0, // Sayaç okuması borç değil
-        isPaid: true, // Sayaç okuması otomatik ödenmiş sayılır
-        ilkEndeks: previousReading,
-        sonEndeks: reading.readingValue,
-        tuketim: reading.consumption
+        isPaid: debt.status === 'Paid'
       })
     })
     
@@ -446,7 +486,7 @@ const fetchTenantDetails = async () => {
     payments.value = (paymentsData || []).sort((a, b) => (toDate(b.paymentDate)?.getTime() ?? 0) - (toDate(a.paymentDate)?.getTime() ?? 0))
 
     // total
-    totalDebt.value = unpaidItems.value.reduce((sum, i) => sum + Number(i.amount ?? 0), 0)
+    totalDebt.value = tenant.value.totalBalance
   } catch (err) {
     console.error('Error fetching tenant details:', err)
     handleNetworkError(err, { component: 'TenantDetailPage', action: 'fetchTenantDetails' })

@@ -38,26 +38,6 @@
                   <small v-if="local.type === 'Entry'" class="text-xs text-gray-500">Giriş için kat = 0 kabul edilir.</small>
                 </div>
   
-                <div class="form-control" v-if="local.type !== 'Parking'">
-                  <label class="label"><span class="label-text font-semibold text-gray-700 dark:text-gray-300">Grup Stratejisi</span></label>
-                  <select v-model="local.groupStrategy" class="select select-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400">
-                    <option value="None">Normal</option>
-                    <option value="SplitIfMultiple">Bölünmüş (A/B)</option>
-                  </select>
-                </div>
-  
-                <div class="form-control" v-if="showGroupFields">
-                  <label class="label"><span class="label-text font-semibold text-gray-700 dark:text-gray-300">Grup Anahtarı (GroupKey)</span></label>
-                  <input v-model.trim="local.groupKey" class="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400" />
-                </div>
-                <div class="form-control" v-if="showGroupFields">
-                  <label class="label"><span class="label-text font-semibold text-gray-700 dark:text-gray-300">Bölüm (Section)</span></label>
-                  <select v-model="local.section" class="select select-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400">
-                    <option :value="null">Seçin</option>
-                    <option value="A">A</option>
-                    <option value="B">B</option>
-                  </select>
-                </div>
   
                 <div class="form-control">
                   <label class="label"><span class="label-text font-semibold text-gray-700 dark:text-gray-300">Alan (m²) *</span></label>
@@ -69,11 +49,19 @@
                   <input type="number" v-model.number="local.monthlyRent" min="0" step="0.01" class="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400" />
                 </div>
   
-                <div class="form-control">
-                  <label class="label"><span class="label-text font-semibold text-gray-700 dark:text-gray-300">Hisse (ShareCount)</span></label>
-                  <input type="number" v-model.number="local.shareCount" min="0" step="0.01" class="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400" />
-                </div>
   
+                <div class="form-control md:col-span-2">
+                  <label class="label"><span class="label-text font-semibold text-gray-700 dark:text-gray-300">Mal Sahibi</span></label>
+                  <select
+                    v-model="local.ownerId"
+                    class="select select-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400">
+                    <option :value="null">— Seçilmedi —</option>
+                    <option v-for="o in owners" :key="o.id" :value="o.id">
+                      {{ ownerLabel(o) }}
+                    </option>
+                  </select>
+                </div>
+
                 <div class="form-control">
                   <label class="label cursor-pointer"><span class="label-text font-semibold text-gray-700 dark:text-gray-300">Aktif Ünite</span>
                     <input type="checkbox" v-model="local.isActive" class="toggle toggle-success" />
@@ -98,29 +86,41 @@
   </template>
   
   <script setup>
-  import { ref, watch, computed } from 'vue'
+  import { ref, watch, onMounted } from 'vue'
+  import ownersService from '../../owners/services/ownersService'
   
   const props = defineProps({ flat: Object, visible: Boolean })
   const emit = defineEmits(['save', 'close'])
   
   const local = ref(null)
+  const owners = ref([])
+  
+  const fetchOwners = async () => {
+    try {
+      const list = await ownersService.getOwners({ isActive: true })
+      owners.value = Array.isArray(list) ? list : []
+    } catch (e) {
+      console.warn('Mal sahipleri yüklenemedi:', e)
+    }
+  }
+  
+  const ownerLabel = (o) => {
+    const name = o.fullName || [o.firstName, o.lastName].filter(Boolean).join(' ') || 'Mal Sahibi'
+    const info = o.phone || o.email || ''
+    return info ? `${name} (${info})` : name
+  }
   
   watch(() => props.flat, (f) => { if (f) local.value = { ...f } }, { immediate: true })
+  watch(() => props.visible, (v) => { if (v) fetchOwners() })
   
-  const showGroupFields = computed(() => local.value && (local.value.type === 'Entry' || local.value.groupStrategy === 'SplitIfMultiple'))
+  onMounted(fetchOwners)
   
   watch(() => local.value?.type, (t) => {
     if (!local.value) return
     if (t === 'Parking') {
       local.value.floorNumber = null
-      local.value.groupStrategy = 'None'
-      local.value.section = null
-      local.value.groupKey = null
     } else if (t === 'Entry') {
       local.value.floorNumber = 0
-      local.value.groupStrategy = 'SplitIfMultiple'
-      local.value.section = local.value.section ?? 'A'
-      local.value.groupKey = local.value.groupKey ?? 'G'
     }
   })
   

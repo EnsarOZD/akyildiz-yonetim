@@ -1,20 +1,19 @@
-<template>
+﻿<template>
   <!-- Ana Sayfa Konteyneri -->
   <div class="p-4 sm:p-6 bg-gray-50 min-h-screen font-sans dark:bg-gray-900">
     <div class="max-w-7xl mx-auto">
-      
       <!-- Başlık -->
-      <h1 class="text-3xl font-bold text-gray-800 mb-6 dark:text-gray-100">Sayaç Okumaları</h1>
+      <h1 class="text-3xl font-bold text-gray-800 my-6 dark:text-gray-100">Gider ve Aidat Yönetimi</h1>
 
       <!-- Data Status Indicator -->
-      <div v-if="dataStatus.loading" class="mb-6 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+      <div v-if="dataStatus.loading" class="my-6 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
         <div class="flex items-center gap-3">
           <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
           <span class="text-blue-700 dark:text-blue-300">Veriler yükleniyor...</span>
         </div>
       </div>
 
-      <div v-if="dataStatus.error" class="mb-6 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+      <div v-if="dataStatus.error" class="my-6 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
         <div class="flex items-center gap-3">
           <div class="bg-red-100 dark:bg-red-900/50 text-red-600 dark:text-red-400 rounded-full p-1">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -25,7 +24,7 @@
         </div>
       </div>
 
-      <div v-if="dataStatus.lastUpdated" class="mb-6 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
+      <div v-if="dataStatus.lastUpdated" class="my-6 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-3">
             <div class="bg-green-100 dark:bg-green-900/50 text-green-600 dark:text-green-400 rounded-full p-1">
@@ -33,360 +32,401 @@
                 <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <span class="text-green-700 dark:text-green-300">
+            <span class="text-green-700 dark:text-blue-300">
               Son güncelleme: {{ dataStatus.lastUpdated }}
             </span>
           </div>
           <div class="text-sm text-green-600 dark:text-green-400">
-            {{ meterReadings.length }} sayaç okuması
+            {{ dues.length }} aidat kaydı
           </div>
         </div>
       </div>
 
-
-      <!-- Sayaç Okumaları -->
-        <!-- Özet Bilgi Kartları -->
-        <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div class="bg-white dark:bg-gray-800 p-5 rounded-xl shadow-md flex items-center gap-4 border border-gray-200 dark:border-gray-700">
-            <div class="bg-cyan-100 dark:bg-cyan-900/50 text-cyan-600 dark:text-cyan-400 rounded-full p-3">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-            </div>
-            <div>
-              <p class="text-sm text-gray-500 dark:text-gray-400">Toplam Sayaç Okuması</p>
-              <p class="text-2xl font-bold text-gray-800 dark:text-gray-100">{{ meterReadings.length }}</p>
-            </div>
+      <!-- Özetsel Bilgi Kartları -->
+      <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 my-8">
+        <div class="bg-white dark:bg-gray-800 p-5 rounded-xl shadow-md flex items-center gap-4 border border-gray-200 dark:border-gray-700">
+          <div class="bg-cyan-100 dark:bg-cyan-900/50 text-cyan-600 dark:text-cyan-400 rounded-full p-3">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12h6m6 4h6m-7 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
           </div>
-          <div class="bg-white dark:bg-gray-800 p-5 rounded-xl shadow-md flex items-center gap-4 border border-gray-200 dark:border-gray-700">
-            <div class="bg-amber-100 dark:bg-amber-900/50 text-amber-600 dark:text-amber-400 rounded-full p-3">
-             <span class="text-2xl">⚡️</span>
-            </div>
-            <div>
-              <p class="text-sm text-gray-500 dark:text-gray-400">Elektrik Tüketimi</p>
-              <p class="text-2xl font-bold text-gray-800 dark:text-gray-100">{{ formatUsage(meterStats.electricityConsumption, 'kWh') }}</p>
-            </div>
+          <div>
+            <p class="text-sm text-gray-500 dark:text-gray-400">Toplam Kayıt</p>
+            <p class="text-2xl font-bold text-gray-800 dark:text-gray-100">{{ dues.length }}</p>
           </div>
-          <div class="bg-white dark:bg-gray-800 p-5 rounded-xl shadow-md flex items-center gap-4 border border-gray-200 dark:border-gray-700">
-            <div class="bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 rounded-full p-3">
-              <span class="text-2xl">💧</span>
-            </div>
-            <div>
-              <p class="text-sm text-gray-500 dark:text-gray-400">Su Tüketimi</p>
-              <p class="text-2xl font-bold text-gray-800 dark:text-gray-100">{{ formatUsage(meterStats.waterConsumption, 'm³') }}</p>
-            </div>
+        </div>
+        
+        <div v-if="authStore.role === ROLES.ADMIN || authStore.role === ROLES.MANAGER" class="lg:col-span-3 bg-white dark:bg-gray-800 p-5 rounded-xl shadow-md flex items-center justify-between border-2 border-dashed border-gray-300 dark:border-gray-600">
+          <div>
+             <p class="text-sm text-gray-500 dark:text-gray-400">Aidat ve Gider Yönetimi</p>
+             <p class="text-xs text-gray-400 italic">Dönemsel aidat oluşturabilir veya giderleri takip edebilirsiniz.</p>
           </div>
-          <div class="bg-white dark:bg-gray-800 p-5 rounded-xl shadow-md flex items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-600">
-           <div class="flex flex-col gap-2 w-full">
-            <div class="flex flex-col gap-2 w-full">
-  <!-- Ortak Dağılım Butonu -->
-  <button @click="showSharedConsumptionModal = true" class="btn btn-info btn-sm w-full">
-    🧪 Ortak Tüketim 
-  </button>
-  
-  <!-- Elektrik -->
-  <div class="dropdown dropdown-end w-full">
-    <label tabindex="0" class="btn btn-primary btn-sm w-full">⚡ Elektrik</label>
-    <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-200 rounded-box w-52 z-10">
-      <li><a @click="showElectricityModal = true">Yeni Okuma</a></li>
-    </ul>
-  </div>
-
-  <!-- Su -->
-  <div class="dropdown dropdown-end w-full">
-    <label tabindex="0" class="btn btn-secondary btn-sm w-full">💧 Su</label>
-    <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-200 rounded-box w-52 z-10">
-      <li><a @click="showWaterModal = true">Yeni Okuma</a></li>
-    </ul>
-  </div>
-</div>
-           </div>
+          <div class="flex flex-wrap gap-2">
+            <button @click="openManualDebt(0)" class="btn btn-success btn-md text-white">
+              <span class="mr-1">📋</span> Aidat Ekle
+            </button>
+            <button @click="openManualDebt(1)" class="btn btn-warning btn-md text-white">
+              <span class="mr-1">⚡</span> Elektrik Borcu Ekle
+            </button>
+            <button @click="openManualDebt(2)" class="btn btn-info btn-md text-white">
+              <span class="mr-1">💧</span> Su Borcu Ekle
+            </button>
           </div>
-        </section>
+        </div>
+      </section>
 
-        <!-- Sayaç Okumaları Listesi -->
-        <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md border border-gray-200 dark:border-gray-700">
-          <FilterBar
-              v-model:search="searchTerm"
-              search-placeholder="Daire ara..."
-              v-model:period="selectedPeriod"
-              v-model:select-type="selectedMeterType"
-              :select-type-options="meterTypeOptions"
-              @clear-filters="handleClearFilters"
-          />
+      <!-- Filtre + Liste Kartı -->
+      <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md border border-gray-200 dark:border-gray-700">
+        <FilterBar
+          v-model:search="searchTerm"
+          v-model:period="selectedPeriod"
+          v-model:select-type="selectedType"
+          :select-type-options="typeOptions"
+          @clear-filters="handleClearFilters"
+        />
+      </div>
 
-          <!-- Sayaç Okumaları Tablosu -->
-          <div class="mt-6 space-y-2">
-             <div v-if="filteredMeterReadings.length === 0" class="text-center py-12 text-gray-500 dark:text-gray-400">
-              <p>Aramanızla eşleşen sayaç okuması bulunamadı.</p>
+      <!-- Aidat Kayıtları -->
+      <div class="bg-white dark:bg-gray-800 mt-6 p-6 rounded-xl shadow-md border border-gray-200 dark:border-gray-700">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Borç Listesi</h2>
+          <div class="text-sm text-gray-500 dark:text-gray-400">
+            {{ filteredDues.length }} kayıt
+          </div>
+        </div>
+
+        <div v-if="filteredDues.length === 0" class="text-center py-10 text-gray-500 dark:text-gray-400">
+          Bu filtrelerle aidat kaydı bulunamadı.
+        </div>
+
+        <div v-else class="space-y-2">
+          <div
+            v-for="d in duesPaged"
+            :key="d.id || (d.flatId + '-' + d.periodYear + '-' + d.periodMonth)"
+            class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center p-4 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-200 border-b dark:border-gray-700/50"
+          >
+            <div class="md:col-span-3">
+              <p class="font-bold text-gray-800 dark:text-gray-100">
+                {{ d.tenantCompany || d.flatNumber || '-' }}
+              </p>
+              <p class="text-xs text-gray-400 dark:text-gray-500">
+                Son ödeme: {{ formatDate(d.dueDate) }}
+              </p>
+              <div class="flex items-center gap-2 mt-1">
+                <span :class="[
+                  'badge badge-xs font-semibold',
+                  d.type === 0 ? 'badge-neutral' : (d.type === 1 ? 'badge-warning' : 'badge-info')
+                ]">
+                  {{ typeLabel(d.type) }}
+                </span>
+              </div>
             </div>
-            <div v-else>
-              <div 
-                v-for="reading in filteredMeterReadings" 
-                :key="reading.id"
-                class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center p-4 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-200 border-b dark:border-gray-700/50"
-              >
-                <div class="md:col-span-3 flex items-center gap-4">
-                  <div class="flex-shrink-0 h-12 w-12 flex items-center justify-center bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-full text-2xl">
-                    {{ getMeterIcon(reading.type) }}
-                  </div>
-                  <div>
-                    <p class="font-bold text-gray-800 dark:text-gray-100">{{ reading.flatNumber }}</p>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ (reading.type === 'Electricity' || reading.type === 0) ? 'Elektrik' : 'Su' }}</p>
-                    <p class="text-xs text-gray-400 dark:text-gray-500">{{ formatDate(reading.readingDate) }}</p>
-                  </div>
-                </div>
-                <div class="md:col-span-2 text-center">
-                  <span class="text-sm text-gray-500">Dönem:</span>
-                  <p class="font-semibold">{{ reading.periodYear }}/{{ reading.periodMonth.toString().padStart(2, '0') }}</p>
-                </div>
-                <div class="md:col-span-2 text-center">
-                  <span class="text-sm text-gray-500">Sayaç Değeri:</span>
-                  <p class="font-semibold text-lg">{{ formatNumber(reading.readingValue) }}</p>
-                </div>
-                <div class="md:col-span-2 text-center">
-                  <span class="text-sm text-gray-500">Tüketim:</span>
-                  <p class="font-semibold text-lg text-sky-600 dark:text-sky-400">
-                    {{ formatUsage(reading.consumption, (reading.type === 'Electricity' || reading.type === 0) ? 'kWh' : 'm³') }}
-                  </p>
-                </div>
-                <div class="md:col-span-2 text-center">
-                  <p v-if="reading.note" class="text-sm text-gray-600 dark:text-gray-400 truncate" :title="reading.note">
-                    {{ reading.note }}
-                  </p>
-                  <p v-else class="text-sm text-gray-400">Not yok</p>
-                </div>
-                <div class="md:col-span-1 text-right">
-                  <div class="dropdown dropdown-end">
-                    <label tabindex="0" class="btn btn-ghost btn-sm">İşlemler</label>
-                    <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-200 rounded-box w-32 z-10">
-                      <li><a @click="editMeterReading(reading)">Düzenle</a></li>
-                      <li><a @click="deleteMeterReading(reading.id)" class="text-red-500">Sil</a></li>
-                    </ul>
-                  </div>
-                </div>
+
+            <div class="md:col-span-2 text-center">
+              <span class="text-sm text-gray-500">Dönem</span>
+              <p class="font-semibold">{{ d.periodYear }}/{{ String(d.periodMonth).padStart(2,'0') }}</p>
+            </div>
+
+            <div class="md:col-span-2 text-center">
+              <span class="text-sm text-gray-500">Tutar</span>
+              <p class="font-semibold text-lg">{{ formatNumber(d.amount) }} ₺</p>
+            </div>
+
+            <div class="md:col-span-3 text-center">
+              <span class="text-sm text-gray-500">Durum</span>
+              <p class="font-medium">
+                <span
+                  :class="[
+                    'px-2 py-1 rounded-full text-xs',
+                    d.status === 'paid'
+                      ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300'
+                      : d.status === 'partial'
+                        ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300'
+                        : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300'
+                  ]"
+                >
+                  {{ d.status === 'paid' ? 'Ödendi' : d.status === 'partial' ? 'Kısmi' : 'Bekliyor' }}
+                </span>
+              </p>
+            </div>
+
+            <div v-if="authStore.role === ROLES.ADMIN || authStore.role === ROLES.MANAGER" class="md:col-span-2 text-right">
+              <div class="dropdown dropdown-end">
+                <label tabindex="0" class="btn btn-ghost btn-sm">İşlem</label>
+                <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-200 rounded-box w-40 z-10">
+                  <li><a @click="editDebt(d)">Düzenle</a></li>
+                  <li v-if="authStore.role === ROLES.ADMIN"><a class="text-red-500" @click="openAidatDelete(d)">Sil</a></li>
+                </ul>
               </div>
             </div>
           </div>
         </div>
+
+        <!-- Aidat: Pagination -->
+        <div class="mt-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div class="text-sm text-gray-600 dark:text-gray-300">
+            Gösterilen
+            {{ duesTotal ? ( (duesPage-1)*pageSize + 1 ) : 0 }}
+            –
+            {{ Math.min(duesPage*pageSize, duesTotal) }}
+            / {{ duesTotal }}
+          </div>
+          <div class="flex items-center gap-2">
+            <button class="btn btn-sm" :disabled="duesPage===1" @click="duesPage=1">« İlk</button>
+            <button class="btn btn-sm" :disabled="duesPage===1" @click="duesPage--">‹ Geri</button>
+            <span class="mx-2 text-sm">Sayfa {{ duesPage }} / {{ Math.max(1, Math.ceil(duesTotal / pageSize)) }}</span>
+            <button class="btn btn-sm" :disabled="duesPage>=Math.ceil(duesTotal/pageSize)" @click="duesPage++">İleri ›</button>
+            <button class="btn btn-sm" :disabled="duesPage>=Math.ceil(duesTotal/pageSize)" @click="duesPage=Math.ceil(duesTotal/pageSize)">Son »</button>
+          </div>
+        </div>
       </div>
-    
+    </div>
+
     <!-- Modal Bileşenleri -->
-    <MeterReadingModal v-if="showMeterReadingModal" :reading="selectedMeterReading" @close="handleClose" />
-    <ElectricityModal v-if="showElectricityModal" @close="handleClose" />
-    <WaterModal v-if="showWaterModal" @close="handleClose" />
-    <SharedConsumptionModal v-if="showSharedConsumptionModal" :isVisible="showSharedConsumptionModal" @close="handleClose" @success="handleSuccess" />
+    <AidatEditModal
+      v-if="showAidatEditModal && selectedDue"
+      :record="selectedDue"
+      @close="handleClose"
+      @updated="refreshAll"
+    />
+    <AidatDeleteModal
+      v-if="showAidatDeleteModal && selectedDue"
+      :record="selectedDue"
+      @close="handleClose"
+      @deleted="refreshAll"
+    />
+
+    <!-- Manuel Borç Modalı -->
+    <ManualDebtModal
+      v-if="showManualModal"
+      :type="manualType"
+      :initial-data="selectedDue"
+      @close="handleClose"
+      @refresh="refreshAll"
+    />
+
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue';
-import ElectricityModal from './ElectricityModal.vue';
-import WaterModal from './WaterModal.vue';
-import MeterReadingModal from './MeterReadingModal.vue';
-import SharedConsumptionModal from '@/components/SharedConsumptionModal.vue';
-import FilterBar from '@/components/common/FilterBar.vue';
-import meterReadingsService from '@/services/meterReadingsService'
+import { ref, computed, watch, onMounted } from 'vue'
+import { ROLES } from '@/constants/roles'
+import { useAuthStore } from '@/stores/auth'
+import FilterBar from '@/components/common/FilterBar.vue'
 import { useErrorHandler } from '@/composables/useErrorHandler'
 import api from '@/services/api'
+import AidatEditModal from './EditAidatModal.vue'
+import AidatDeleteModal from './AidatDeleteModal.vue'
+import ManualDebtModal from './ManualDebtModal.vue'
 
 const { handleNetworkError, showSuccess } = useErrorHandler()
+const authStore = useAuthStore()
 
-// Meter readings state
-const meterReadings = ref([]);
-const searchTerm = ref('');
-const selectedPeriod = ref('');
-const selectedMeterType = ref('all');
-const showMeterReadingModal = ref(false);
-const selectedMeterReading = ref(null);
+/* ---------- Helpers (period) ---------- */
+function getYearMonth(o) {
+  const safe = String(o?.period ?? '')
+  const [py, pm] = safe && safe.includes('-') ? safe.split('-') : [null, null]
+  const y = Number(o?.periodYear ?? py) || null
+  const m = Number(o?.periodMonth ?? pm) || null
+  return { y, m }
+}
+function periodKeyOf(o) {
+  const { y, m } = getYearMonth(o)
+  return y && m ? `${y}-${String(m).padStart(2, '0')}` : ''
+}
 
-// Modal states
-const showElectricityModal = ref(false);
-const showWaterModal = ref(false);
-const showSharedConsumptionModal = ref(false);
+/* ---------- State ---------- */
+const dues = ref([])
 
-// Meter stats
-const meterStats = ref({
-  totalReadings: 0,
-  electricityConsumption: 0,
-  waterConsumption: 0
-});
+const searchTerm = ref('')
+const selectedPeriod = ref('')          // YYYY-MM
+const selectedType = ref('all')
+const selectedDue = ref(null)
+const showAidatEditModal = ref(false)
+const showAidatDeleteModal = ref(false)
+const showManualModal = ref(false)
+const manualType = ref(1)
 
-const meterTypeOptions = [
-  { value: 'all', label: 'Tümü' },
-  { value: 'Electricity', label: 'Elektrik' },
-  { value: 'Water', label: 'Su' }
-];
+const typeOptions = [
+  { value: 'all', label: 'Tüm Borçlar' },
+  { value: '0', label: 'Aidat', icon: '📋' },
+  { value: '1', label: 'Elektrik', icon: '⚡' },
+  { value: '2', label: 'Su', icon: '💧' }
+]
 
-// Computed properties for meter readings
-const filteredMeterReadings = computed(() => {
-  return meterReadings.value.filter(reading => {
-    const flatNumber = reading.flatNumber || '';
-    const matchesSearch = searchTerm.value === '' || flatNumber.toLowerCase().includes(searchTerm.value.toLowerCase());
-    const matchesPeriod = !selectedPeriod.value || `${reading.periodYear}-${reading.periodMonth.toString().padStart(2, '0')}` === selectedPeriod.value;
-    
-    // Type matching - hem numeric hem string değerleri destekle
-    let matchesType = true;
-    if (selectedMeterType.value !== 'all') {
-      if (selectedMeterType.value === 'Electricity') {
-        matchesType = reading.type === 'Electricity' || reading.type === 0;
-      } else if (selectedMeterType.value === 'Water') {
-        matchesType = reading.type === 'Water' || reading.type === 1;
-      }
-    }
-    
-    return matchesSearch && matchesPeriod && matchesType;
-  }).sort((a, b) => new Date(b.readingDate) - new Date(a.readingDate));
-});
+// Pagination
+const PAGE_SIZE_DEFAULT = 10
+const duesPage = ref(1)
+const pageSize = ref(PAGE_SIZE_DEFAULT)
 
-// Data status tracking
-const dataStatus = ref({
-  loading: false,
-  error: null,
-  lastUpdated: null
-});
 
-const inFlight = ref(0);
+/* ---------- Computed (filters) ---------- */
+
+const duesTotal = computed(() => filteredDues.value.length)
+const duesPaged = computed(() => {
+  const start = (duesPage.value - 1) * pageSize.value
+  return filteredDues.value.slice(start, start + pageSize.value)
+})
+
+const filteredDues = computed(() => {
+  return dues.value
+    .filter(d => {
+      const search = searchTerm.value.toLowerCase()
+      const matchesSearch =
+        !search ||
+        (d.flatNumber || '').toLowerCase().includes(search) ||
+        (d.tenantCompany || '').toLowerCase().includes(search) ||
+        (d.description || '').toLowerCase().includes(search)
+
+      const matchesType = selectedType.value === 'all' || String(d.type) === selectedType.value
+
+      const periodKey = periodKeyOf(d)
+      const matchesPeriod = !selectedPeriod.value || periodKey === selectedPeriod.value
+
+      return matchesSearch && matchesType && matchesPeriod
+    })
+    .sort((a,b) =>
+      (b.periodYear ?? 0) - (a.periodYear ?? 0) ||
+      (b.periodMonth ?? 0) - (a.periodMonth ?? 0)
+    )
+})
+
+/* ---------- Data Status ---------- */
+const dataStatus = ref({ loading: false, error: null, lastUpdated: null })
+const inFlight = ref(0)
 const setLoading = (inc) => {
-  inFlight.value += inc ? 1 : -1;
-  dataStatus.value.loading = inFlight.value > 0;
-};
+  inFlight.value += inc ? 1 : -1
+  dataStatus.value.loading = inFlight.value > 0
+}
 
-// Flat bilgilerini al
+/* ---------- API ---------- */
 const fetchFlats = async () => {
   try {
-    const response = await api.get('/flats');
-    return response || [];
+    const response = await api.get('/flats')
+    return response || []
   } catch (error) {
-    console.error('Flat bilgileri alınırken hata:', error);
-    return [];
+    console.error('Flat bilgileri alınırken hata:', error)
+    return []
   }
-};
+}
 
-// Fetch meter readings
-const fetchMeterReadings = async () => {
-  setLoading(true);
+const openAidatDelete = (d) => {
+  selectedDue.value = d
+  showAidatDeleteModal.value = true
+}
+
+const openManualDebt = (type) => {
+  manualType.value = type
+  selectedDue.value = null
+  showManualModal.value = true
+}
+
+const editDebt = (d) => {
+  selectedDue.value = d
+  if (d.type === 0) {
+    showAidatEditModal.value = true
+  } else {
+    manualType.value = d.type
+    showManualModal.value = true
+  }
+}
+
+
+const fetchDues = async () => {
   try {
-    // Meter readings ve flat bilgilerini paralel olarak al
-    const [meterReadingsResponse, flatsData] = await Promise.all([
-      meterReadingsService.getMeterReadings(),
-      fetchFlats()
-    ]);
-    
-    // Backend'den gelen verileri düzelt ve flat bilgilerini ekle
-    meterReadings.value = (meterReadingsResponse || []).map(reading => {
-      // Flat bilgisini bul
-      const flat = flatsData.find(f => f.id === reading.flatId);
-      
-      // Eğer ortak tüketim kaydı ise ve note'da MeterType:1 yazıyorsa type'ı 1 yap
-      if (reading.note && reading.note.includes('Ortak Alan Tüketimi') && reading.note.includes('MeterType:1')) {
-        return { 
-          ...reading, 
-          type: 1,
-          flatNumber: flat?.code || 'Bilinmiyor',
-          floorNumber: flat?.floorNumber || null
-        };
-      }
-      
-      return {
-        ...reading,
-        flatNumber: flat?.code || 'Bilinmiyor',
-        floorNumber: flat?.floorNumber || null
-      };
-    });
-    
-    dataStatus.value.error = null;
-    dataStatus.value.lastUpdated = new Date().toLocaleString('tr-TR');
-    
-    // Update stats
-    updateMeterStats();
-  } catch (apiError) {
-    handleNetworkError(apiError, { component: 'Utilities', action: 'fetchMeterReadings' });
-    dataStatus.value.error = apiError?.message || 'Veri çekilirken bir sorun oluştu.';
-    meterReadings.value = [];
-  } finally {
-    setLoading(false);
-  }
-};
+    const [duesRes, flatsRes, tenantsRes] = await Promise.all([
+      api.get('/utilitydebts', { params: { period: selectedPeriod.value || undefined } }),
+      api.get('/flats'),
+      api.get('/tenants'),
+    ])
 
-// Update meter statistics
-const updateMeterStats = () => {
-  const electricityReadings = meterReadings.value.filter(r => r.type === 0 || r.type === 'Electricity');
-  const waterReadings = meterReadings.value.filter(r => r.type === 1 || r.type === 'Water');
-  
-  meterStats.value = {
-    totalReadings: meterReadings.value.length,
-    electricityConsumption: electricityReadings.reduce((sum, r) => sum + (r.consumption || 0), 0),
-    waterConsumption: waterReadings.reduce((sum, r) => sum + (r.consumption || 0), 0)
-  };
-};
+    const flatById = new Map((flatsRes || []).map(f => [f.id, f]))
+    const tenantById = new Map((tenantsRes || []).map(t => [t.id, t]))
+
+    const normStatus = (s) => {
+      if (typeof s === 'number') { // 0:Unpaid 1:Partial 2:Paid
+        return s === 2 ? 'paid' : (s === 1 ? 'partial' : 'unpaid')
+      }
+      return String(s || '').toLowerCase()
+    }
+
+    dues.value = (duesRes || []).map(d => {
+      const flat   = flatById.get(d.flatId)
+      const tenant = tenantById.get(d.tenantId)
+      const { y, m } = getYearMonth(d)
+
+      return {
+        id: d.id,
+        flatId: d.flatId,
+        type: d.type ?? 0,
+        flatNumber: d.flatNumber ?? d.flat_code ?? d.FlatCode ?? flat?.code ?? '-',
+        tenantCompany: d.tenantName ?? d.TenantCompanyName ?? tenant?.companyName ?? tenant?.company ?? tenant?.fullName ?? flat?.tenantCompanyName ?? null,
+        periodYear: y,
+        periodMonth: m,
+        amount: Number(d.amount ?? d.value ?? d.total ?? 0),
+        dueDate: (() => {
+  const raw = d.dueDate ?? d.DueDate ?? d.due_date ?? null
+  // 0001-01-01 / 1899-12-30 gibi anlamsız tarihleri boş say
+  if (!raw) return null
+  const t = new Date(raw)
+  return (isNaN(t) || t.getFullYear() < 1900) ? null : raw
+})(),
+        status: normStatus(d.status),
+        remainingAmount: Number(d.remainingAmount ?? d.RemainingAmount ?? 0),
+      }
+    })
+  } catch (e) {
+    console.error('Aidatlar alınırken hata:', e)
+    dues.value = []
+  }
+}
+
+/* ---------- Helpers ---------- */
 
 const handleClose = (shouldRefresh) => {
-    showElectricityModal.value = false;
-    showWaterModal.value = false;
-    showMeterReadingModal.value = false;
-    showSharedConsumptionModal.value = false;
-    selectedMeterReading.value = null;
-    if (shouldRefresh) {
-        fetchMeterReadings();
-    }
+  showAidatEditModal.value = false
+  showAidatDeleteModal.value = false
+  showManualModal.value = false
+  selectedDue.value = null
+  if (shouldRefresh) {
+    refreshAll()
+  }
 }
 
-const handleSuccess = (result) => {
-    console.log('Ortak tüketim başarıyla uygulandı:', result);
-    showSharedConsumptionModal.value = false;
-    fetchMeterReadings(); // Tabloyu yenile
-    showSuccess('Ortak tüketim dağıtımı');
-}
+const refreshAll = () => fetchDues()
 
-// Meter reading operations
-const editMeterReading = (reading) => {
-    selectedMeterReading.value = reading;
-    showMeterReadingModal.value = true;
-}
-
-const deleteMeterReading = async (id) => {
-    if (confirm('Bu sayaç okumasını silmek istediğinizden emin misiniz?')) {
-        try {
-            await meterReadingsService.deleteMeterReading(id);
-            showSuccess('Sayaç okuması');
-            await fetchMeterReadings();
-        } catch (error) {
-            console.error('Silme hatası:', error);
-            alert('Sayaç okuması silinirken bir hata oluştu.');
-        }
-    }
-}
 
 const handleClearFilters = () => {
   searchTerm.value = ''
   selectedPeriod.value = ''
-  selectedMeterType.value = 'all'
-  console.log('✅ Tüm filtreler temizlendi')
+  selectedType.value = 'all'
+  duesPage.value = 1
+  console.log('⚡️ Tüm filtreler temizlendi')
 }
 
-// Utility functions
-const formatUsage = (v, unit) => (v ?? '') === '' || isNaN(v) ? '-' : `${Number(v).toFixed(2)} ${unit}`;
-
-const formatNumber = (value) => {
-  if (value === undefined || value === null || isNaN(value)) return '-';
-  return Number(value).toLocaleString('tr-TR');
+/* ---------- Formatters ---------- */
+const formatNumber = (value) => (value === undefined || value === null || isNaN(value) ? '-' : Number(value).toLocaleString('tr-TR'))
+const formatDate = (val) => {
+  if (!val) return '-'
+  const dt = new Date(val)
+  if (isNaN(dt)) return '-'
+  if (dt.getFullYear() < 1900) return '-'
+  return dt.toLocaleDateString('tr-TR')
 }
 
-const formatDate = (date) => {
-  if (!date) return '-';
-  return new Date(date).toLocaleDateString('tr-TR');
+const typeLabel = (t) => {
+  const map = { 0: 'Aidat', 1: 'Elektrik', 2: 'Su' }
+  return map[t] ?? 'Diğer'
 }
 
-const getMeterIcon = (type) => {
-    const iconMap = {
-        'Electricity': '⚡️',
-        'Water': '💧',
-        0: '⚡️', // Electricity
-        1: '💧'  // Water
-    };
-    return iconMap[type] || '❓';
-}
 
+/* ---------- Watchers ---------- */
+watch([searchTerm, selectedPeriod, selectedType], () => {
+  duesPage.value = 1
+})
+watch(pageSize, () => { duesPage.value = 1 })
+watch(selectedPeriod, () => { fetchDues() })
+
+/* ---------- Mount ---------- */
 onMounted(() => {
-    fetchMeterReadings()
-});
+  refreshAll()
+})
 </script>

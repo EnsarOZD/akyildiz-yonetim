@@ -22,7 +22,7 @@
             <a href="#about" class="text-gray-300 hover:text-white transition-colors duration-200">Hakkımızda</a>
             <a href="#contact" class="text-gray-300 hover:text-white transition-colors duration-200">İletişim</a>
             <router-link 
-              to="/login" 
+              :to="{ name: 'Login' }" 
               class="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 py-2 rounded-xl font-medium transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl"
             >
               Sisteme Giriş
@@ -46,7 +46,7 @@
             <a href="#about" class="text-gray-300 hover:text-white transition-colors duration-200">Hakkımızda</a>
             <a href="#contact" class="text-gray-300 hover:text-white transition-colors duration-200">İletişim</a>
             <router-link 
-              to="/login" 
+              :to="{ name: 'Login' }" 
               class="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 py-2 rounded-xl font-medium transition-all duration-200 text-center"
             >
               Sisteme Giriş
@@ -72,7 +72,7 @@
           </p>
           <div class="flex flex-col sm:flex-row gap-4 justify-center">
             <router-link 
-              to="/login" 
+              :to="{ name: 'Login' }" 
               class="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl"
             >
               Sisteme Giriş

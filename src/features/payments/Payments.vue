@@ -90,7 +90,7 @@
       </section>
 
       <!-- Yeni Ödeme Ekle Butonu -->
-      <div class="mb-6">
+      <div v-if="authStore.role === ROLES.ADMIN || authStore.role === ROLES.MANAGER" class="mb-6">
         <button @click="showModal = true" class="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-4 px-6 rounded-xl shadow-lg transition-all duration-300 flex items-center justify-center gap-3">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -100,7 +100,7 @@
       </div>
 
       <!-- Yeni Özellikler Butonları -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+      <div v-if="authStore.role === ROLES.ADMIN || authStore.role === ROLES.MANAGER" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <button @click="showAdvanceManager = true" class="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-semibold py-3 px-4 rounded-xl shadow-lg transition-all duration-300 flex items-center justify-center gap-2">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
@@ -115,7 +115,7 @@
           <span>Finansal Raporlar</span>
         </button>
         
-        <button @click="showAuditLogs = true" class="bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 text-white font-semibold py-3 px-4 rounded-xl shadow-lg transition-all duration-300 flex items-center justify-center gap-2">
+        <button v-if="authStore.role === ROLES.ADMIN" @click="showAuditLogs = true" class="bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 text-white font-semibold py-3 px-4 rounded-xl shadow-lg transition-all duration-300 flex items-center justify-center gap-2">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
           </svg>
@@ -191,7 +191,7 @@
                 </p>
                 <p>{{ p.bank }}</p>
               </div>
-              <div class="md:col-span-2 text-right">
+              <div v-if="authStore.role === ROLES.ADMIN || authStore.role === ROLES.MANAGER" class="md:col-span-2 text-right">
                 <div class="dropdown dropdown-end">
                   <label tabindex="0" class="btn btn-ghost btn-sm">İşlemler</label>
                   <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-200 rounded-box w-32 z-10">
@@ -259,6 +259,8 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { ROLES } from '@/constants/roles'
+import { useAuthStore } from '@/stores/auth'
 import PaymentModal from './PaymentModal.vue'
 import CustomFilterBar from '@/components/common/CustomFilterBar.vue'
 import AdvanceAccountManager from '@/components/AdvanceAccountManager.vue'
@@ -267,41 +269,44 @@ import AuditLogs from '@/components/AuditLogs.vue'
 import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
 import { useErrorHandler } from '@/composables/useErrorHandler'
 import { useNotification } from '@/composables/useNotification'
-import paymentsService from '@/services/paymentsService'
-import tenantsService from '@/services/tenantsService'
-import { paymentTypes, getPaymentTypeLabel } from '@/constants/enums'   // ✅ mevcut enumlar
-
+import { usePaymentsStore } from '@/stores/payments.js'
+import { useTenantsStore } from '@/stores/tenants.js'
+import { paymentTypes, getPaymentTypeLabel } from '@/constants/enums'
 import { safeFormatDate } from '@/utils/dateUtils'
+import { formatCurrency, getAvatarColor, getAvatarInitial } from '@/utils/uiHelpers'
 
 const { handleNetworkError } = useErrorHandler()
 const { showCreateSuccess, showUpdateSuccess, showDeleteSuccess, showSuccess } = useNotification()
 
-const formatDate = (d) => (d ? safeFormatDate(d, 'dd MMM yyyy') : '')
+const authStore = useAuthStore()
 
-const payments = ref([])
-const tenants = ref([])
-const advanceAccounts = ref([])
+const paymentsStore = usePaymentsStore()
+const tenantsStore = useTenantsStore()
+
+const formatDate = (d) => safeFormatDate(d, 'dd MMM yyyy')
+
+const payments = computed(() => paymentsStore.payments)
+const tenants = computed(() => tenantsStore.tenants)
+const advanceAccounts = computed(() => paymentsStore.advanceAccounts)
 const banks = ref(['Ziraat', 'İş Bankası', 'Garanti', 'Yapı Kredi', 'Halkbank'])
 
 const showModal = ref(false)
 const showAdvanceManager = ref(false)
 const showFinancialReports = ref(false)
 const showAuditLogs = ref(false)
-const loading = ref(false)
+const loading = computed(() => paymentsStore.loading || tenantsStore.loading)
 
 const filters = ref({
   searchTerm: '',
   period: '',
-  type: '' // number | '' | string number | label desteklenecek (normalize ile)
+  type: ''
 })
 
-/* ---- Tip yardımcıları (bileşen içi) ---- */
+/* ---- Tip yardımcıları ---- */
 const normalizePaymentType = (t) => {
   if (typeof t === 'number') return t
   if (t === '' || t === null || t === undefined) return ''
-  // "2" -> 2
   if (!Number.isNaN(Number(t))) return Number(t)
-  // "Aidat" -> 0 vb.
   const entry = Object.entries(paymentTypes).find(([, lbl]) => lbl === t)
   return entry ? Number(entry[0]) : ''
 }
@@ -326,12 +331,6 @@ const paymentTypeFilterOptions = computed(() => [
   { value: '', label: 'Tüm Tipler', icon: '📦' },
   ...paymentTypeOptions.value
 ])
-
-/* ---- Para formatı ---- */
-const formatCurrency = (value) =>
-  value === undefined || value === null || isNaN(value)
-    ? '₺0.00'
-    : Number(value).toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' })
 
 const getPaymentDate = (p) => p?.date || p?.paymentDate || p?.createdAt || ''
 
@@ -365,19 +364,10 @@ const clearFilters = () => {
   filters.value = { searchTerm: '', period: '', type: '' }
 }
 
-const getAvatarInitial = (name) => (!name || name === 'Bilinmiyor' ? '?' : name.charAt(0).toUpperCase())
-
-const getAvatarColor = (name) => {
-  if (!name) return 'bg-gray-500'
-  const colors = ['bg-blue-500', 'bg-purple-500', 'bg-amber-500', 'bg-emerald-500', 'bg-red-500', 'bg-pink-500', 'bg-indigo-500', 'bg-teal-500']
-  const code = (name || '').split('').reduce((acc, ch) => acc + ch.charCodeAt(0), 0)
-  return colors[code % colors.length]
-}
-
 /* ---- Kiracı adı ---- */
 const getTenantCompany = (id) => {
   if (!id) return 'Mal Sahibi Ödemesi'
-  const t = tenants.value.find(x => x.id === id)
+  const t = tenantsStore.getTenantById(id)
   return (
     t?.companyName ||
     t?.company ||
@@ -436,48 +426,6 @@ const newPayment = ref({
 const editMode = ref(false)
 const selectedPaymentId = ref(null)
 
-/* ---- API ---- */
-const fetchPayments = async () => {
-  loading.value = true
-  try {
-    const data = await paymentsService.getPayments()
-    payments.value = data || []
-  } catch (error) {
-    handleNetworkError(error, { component: 'Payments', action: 'fetchPayments' })
-  } finally {
-    loading.value = false
-  }
-}
-
-const fetchTenants = async () => {
-  loading.value = true
-  try {
-    const data = await tenantsService.getTenants()
-    tenants.value = data || []
-  } catch (error) {
-    handleNetworkError(error, { component: 'Payments', action: 'fetchTenants' })
-  } finally {
-    loading.value = false
-  }
-}
-
-const fetchAdvanceAccounts = async () => {
-  loading.value = true
-  try {
-    const raw = await paymentsService.getAdvanceAccounts()
-    const list = Array.isArray(raw) ? raw : (raw?.items || [])
-    advanceAccounts.value = list
-      .map(a => ({ ...a, balance: Number(a.balance ?? 0) }))
-      .filter(a => a.balance > 0)
-  } catch (error) {
-    console.error('Avans hesapları yüklenirken hata:', error)
-    advanceAccounts.value = []
-    handleNetworkError(error, { component: 'Payments', action: 'fetchAdvanceAccounts' })
-  } finally {
-    loading.value = false
-  }
-}
-
 /* ---- Handlers ---- */
 const handleModalClose = () => {
   showModal.value = false
@@ -496,10 +444,8 @@ const handleModalClose = () => {
 
 const deletePayment = async (id) => {
   try {
-    await paymentsService.deletePayment(id)
+    await paymentsStore.deletePayment(id)
     showDeleteSuccess('Ödeme')
-    await fetchPayments()
-    await fetchAdvanceAccounts()
   } catch (error) {
     handleNetworkError(error, { component: 'Payments', action: 'deletePayment' })
   }
@@ -522,7 +468,7 @@ const startEdit = (payment) => {
 
 const handleClearFilters = () => {
   clearFilters()
-  fetchPayments()
+  paymentsStore.fetchPayments(true)
 }
 
 const handlePaymentSave = async () => {
@@ -540,7 +486,10 @@ const handlePaymentSave = async () => {
   editMode.value = false
   selectedPaymentId.value = null
 
-  await Promise.all([fetchPayments(), fetchAdvanceAccounts()])
+  await Promise.all([
+    paymentsStore.fetchPayments(true), 
+    paymentsStore.fetchAdvanceAccounts()
+  ])
 
   if (wasEdit) showUpdateSuccess('Ödeme')
   else showCreateSuccess('Ödeme')
@@ -548,7 +497,7 @@ const handlePaymentSave = async () => {
 
 const handleAdvanceSuccess = () => {
   showAdvanceManager.value = false
-  fetchAdvanceAccounts()
+  paymentsStore.fetchAdvanceAccounts()
   showSuccess('Avans hesabı işlemi başarıyla tamamlandı')
 }
 
@@ -591,8 +540,8 @@ const paymentTypeStats = computed(() => {
 })
 
 onMounted(() => {
-  fetchTenants()
-  fetchAdvanceAccounts()
-  fetchPayments()
+  tenantsStore.fetchTenants()
+  paymentsStore.fetchAdvanceAccounts()
+  paymentsStore.fetchPayments()
 })
 </script>

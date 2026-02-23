@@ -11,38 +11,38 @@ class AuthService {
     try {
       const response = await apiService.post('/auth/login', { email, password })
       console.log('Backend login response:', response)
-      
+
       // Backend yanıt formatını kontrol et
       if (response) {
         // JWT Token kontrolü - ASP.NET Core formatı
         const token = response.token || response.accessToken || response.access_token || response.jwt
-        
+
         if (token) {
           // JWT Token'ı localStorage'a kaydet
           localStorage.setItem('authToken', token)
           console.log('✅ JWT Token kaydedildi')
-          
+
           // Kullanıcı bilgilerini güncelle
           this.currentUser = response.user || response.data || response
-          
+
           // Auth state değişikliğini bildir
           this.notifyAuthListeners(this.currentUser)
-          
+
           return response
         } else {
           // JWT Token yoksa geçici olarak kullanıcı bilgilerini kullan
           console.log('⚠️ JWT Token bulunamadı, geçici auth kullanılıyor')
-          
+
           // Kullanıcı bilgilerini güncelle
           this.currentUser = response.user || response.data || response
-          
+
           // Geçici bir session token oluştur
           const tempToken = btoa(JSON.stringify(this.currentUser))
           localStorage.setItem('authToken', tempToken)
-          
+
           // Auth state değişikliğini bildir
           this.notifyAuthListeners(this.currentUser)
-          
+
           return response
         }
       } else {
@@ -64,7 +64,7 @@ class AuthService {
       // Local storage'ı temizle
       localStorage.removeItem('authToken')
       this.currentUser = null
-      
+
       // Auth state değişikliğini bildir
       this.notifyAuthListeners(null)
     }
@@ -74,13 +74,13 @@ class AuthService {
   async register(userData) {
     try {
       const response = await apiService.post('/auth/register', userData)
-      
+
       if (response.token) {
         localStorage.setItem('authToken', response.token)
         this.currentUser = response.user
         this.notifyAuthListeners(this.currentUser)
       }
-      
+
       return response
     } catch (error) {
       console.error('Register error:', error)
@@ -100,7 +100,7 @@ class AuthService {
       console.log('🔍 Auth status kontrol ediliyor...')
       const token = localStorage.getItem('authToken')
       console.log('🎫 Token var mı:', !!token)
-      
+
       if (!token) {
         console.log('❌ Token yok, kullanıcı null')
         this.currentUser = null
@@ -111,7 +111,7 @@ class AuthService {
       // JWT Token'ın geçerliliğini kontrol et
       if (!this.isTokenValid(token)) {
         console.log('⚠️ JWT Token geçersiz, geçici token kontrol ediliyor...')
-        
+
         // Geçici token kontrolü
         try {
           const tempUser = JSON.parse(atob(token))
@@ -124,7 +124,7 @@ class AuthService {
         } catch (tempError) {
           console.log('❌ Geçici token da geçersiz:', tempError.message)
         }
-        
+
         console.log('🗑️ Token temizleniyor')
         localStorage.removeItem('authToken')
         this.currentUser = null
@@ -142,7 +142,7 @@ class AuthService {
         return this.currentUser
       } catch (apiError) {
         console.error('❌ API auth check failed:', apiError)
-        
+
         // API hatası durumunda JWT'den kullanıcı bilgilerini çıkar
         const decodedToken = this.decodeJWT(token)
         if (decodedToken && decodedToken.sub) {
@@ -157,7 +157,7 @@ class AuthService {
           this.notifyAuthListeners(this.currentUser)
           return this.currentUser
         }
-        
+
         // Hiçbir şekilde kullanıcı bilgisi alınamazsa temizle
         console.log('🗑️ Hiçbir kullanıcı bilgisi alınamadı, temizleniyor')
         localStorage.removeItem('authToken')
@@ -174,28 +174,37 @@ class AuthService {
     }
   }
 
-  // Şifre sıfırlama
+  // Şifre sıfırlama (Token talebi)
   async resetPassword(email) {
-    return apiService.post('/auth/reset-password', { email })
+    return apiService.post('/auth/reset-password-request', { email })
   }
 
-  // Şifre değiştirme
+  // Yeni şifre belirleme (Token ile)
+  async setPassword(email, token, newPassword) {
+    return apiService.post('/auth/reset-password', {
+      email,
+      token,
+      newPassword
+    })
+  }
+
+  // Şifre değiştirme (Profil içinden)
   async changePassword(currentPassword, newPassword) {
-    return apiService.post('/auth/change-password', { 
-      currentPassword, 
-      newPassword 
+    return apiService.post('/auth/change-password', {
+      currentPassword,
+      newPassword
     })
   }
 
   // Auth state listener ekle
   onAuthStateChanged(callback) {
     this.authListeners.push(callback)
-    
+
     // Mevcut kullanıcıyı hemen callback'e gönder
     if (this.currentUser) {
       callback(this.currentUser)
     }
-    
+
     // Cleanup fonksiyonu döndür
     return () => {
       const index = this.authListeners.indexOf(callback)
@@ -236,7 +245,7 @@ class AuthService {
     try {
       const base64Url = token.split('.')[1]
       const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/')
-      const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+      const jsonPayload = decodeURIComponent(atob(base64).split('').map(function (c) {
         return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
       }).join(''))
       return JSON.parse(jsonPayload)
@@ -249,18 +258,18 @@ class AuthService {
   // JWT Token'ın geçerliliğini kontrol et
   isTokenValid(token) {
     if (!token) return false
-    
+
     try {
       const decoded = this.decodeJWT(token)
       if (!decoded) return false
-      
+
       // Token'ın süresi dolmuş mu kontrol et
       const currentTime = Date.now() / 1000
       if (decoded.exp && decoded.exp < currentTime) {
         console.log('JWT Token süresi dolmuş')
         return false
       }
-      
+
       return true
     } catch (error) {
       console.error('Token validation error:', error)

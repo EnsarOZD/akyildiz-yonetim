@@ -63,7 +63,10 @@
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" /></svg>
                 </label>
                 <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-36">
-                  <li><a>Düzenle</a></li>
+                  <li><a @click="editUser(user)">Düzenle</a></li>
+                  <li>
+                    <a @click="triggerPasswordReset(user)" class="text-warning">Şifre Sıfırla</a>
+                  </li>
                   <li v-if="user.isActive !== false">
                     <a @click="deactivateUser(user.id)" class="text-error">Pasif Yap</a>
                   </li>
@@ -213,7 +216,7 @@ const notification = reactive({
 
 const fetchTenants = async () => {
   try {
-    tenants.value = await tenantsService.getAllTenants()
+    tenants.value = await tenantsService.getTenants()
   } catch (error) {
     handleNetworkError(error)
   }
@@ -221,7 +224,7 @@ const fetchTenants = async () => {
 
 const fetchUsers = async () => {
   try {
-    users.value = await usersService.getAllUsers()
+    users.value = await usersService.getUsers()
   } catch (error) {
     handleNetworkError(error)
   }
@@ -229,7 +232,7 @@ const fetchUsers = async () => {
 
 const deactivateUser = async (userId) => {
   try {
-    await usersService.deactivateUser(userId)
+    await usersService.updateUser(userId, { isActive: false })
     await fetchUsers()
     showSuccess('Kullanıcı başarıyla pasif yapıldı.')
   } catch (error) {
@@ -239,7 +242,7 @@ const deactivateUser = async (userId) => {
 
 const activateUser = async (userId) => {
   try {
-    await usersService.activateUser(userId)
+    await usersService.updateUser(userId, { isActive: true })
     await fetchUsers()
     showSuccess('Kullanıcı başarıyla aktif yapıldı.')
   } catch (error) {
@@ -250,6 +253,25 @@ const activateUser = async (userId) => {
 const closeModal = () => {
   showAddUserModal.value = false
   resetForm()
+}
+
+const triggerPasswordReset = async (user) => {
+  if (confirm(`${user.firstName} ${user.lastName} kullanıcısının şifresini sıfırlamak ve yeni şifreyi e-posta ile göndermek istediğinize emin misiniz?`)) {
+    try {
+      loading.value = true
+      await usersService.resetPassword(user.id)
+      showSuccess('Şifre sıfırlama e-postası gönderildi.')
+    } catch (error) {
+      handleValidationError(error)
+    } finally {
+      loading.value = false
+    }
+  }
+}
+
+const editUser = (user) => {
+  // Düzenleme mantığı buraya eklenebilir
+  console.log('Düzenle:', user)
 }
 
 const resetForm = () => {
@@ -291,16 +313,17 @@ const createUser = async () => {
       companyId: newUser.role === ROLES.TENANT ? newUser.companyId : null
     })
     
-    showNotification(
-      `Kullanıcı başarıyla oluşturuldu! Şifre belirleme bağlantısı ${newUser.email} adresine gönderildi.`, 
-      'success'
-    );
+    showSuccess(`Kullanıcı başarıyla oluşturuldu! Şifre belirleme bağlantısı ${newUser.email} adresine gönderildi.`)
     
     closeModal()
     await fetchUsers()
 
   } catch (error) {
-    handleValidationError(error)
+    if (error.response && error.response.data) {
+      showNotification(error.response.data, 'error');
+    } else {
+      handleValidationError(error)
+    }
   } finally {
     loading.value = false
   }
