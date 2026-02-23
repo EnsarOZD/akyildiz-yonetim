@@ -112,6 +112,10 @@ class UsersService {
     console.log('📝 Fallback: Şifre sıfırlandı (backend mevcut değil)', id)
     return { success: true, message: 'Şifre sıfırlandı (backend mevcut değil)' }
   }
+
+  async getRoles() {
+    return await apiService.get('/users/roles')
+  }
 }
 
-export default new UsersService() 
+export default new UsersService()

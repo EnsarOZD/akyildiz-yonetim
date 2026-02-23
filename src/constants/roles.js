@@ -3,15 +3,17 @@
 export const ROLES = {
   ADMIN: 'admin',
   MANAGER: 'manager',
-  DATA_ENTRY: 'dataEntry',
-  VIEWER: 'viewer',
+  OWNER: 'owner',
   TENANT: 'tenant',
+  OBSERVER: 'observer',
+  DATA_ENTRY: 'dataentry'
 }
 
 export const ROLE_LABELS = {
-  [ROLES.ADMIN]: 'Admin',
-  [ROLES.MANAGER]: 'Yönetici',
-  [ROLES.DATA_ENTRY]: 'Veri Giriş Sorumlusu',
-  [ROLES.VIEWER]: 'Gözlemci (Avukat / Mal Sahibi)',
+  [ROLES.ADMIN]: 'Sistem Yöneticisi',
+  [ROLES.MANAGER]: 'Yönetici (Müdür)',
+  [ROLES.OWNER]: 'Mal Sahibi',
   [ROLES.TENANT]: 'Kiracı',
+  [ROLES.OBSERVER]: 'Gözlemci (Avukat vb.)',
+  [ROLES.DATA_ENTRY]: 'Veri Giriş Sorumlusu'
 }

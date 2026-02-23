@@ -171,7 +171,7 @@ const loadUserFromBackend = async () => {
 // Rol bazlı tab'ları ayarla
 const setTabsBasedOnRole = (role) => {
   const normalizedRole = (role || '').toLowerCase();
-  if (normalizedRole === ROLES.ADMIN || normalizedRole === ROLES.MANAGER) {
+  if (normalizedRole === ROLES.ADMIN || normalizedRole === ROLES.MANAGER || normalizedRole === ROLES.DATA_ENTRY) {
     tabs.value = [
       { label: 'Özet', value: 'dashboard', route: '/dashboard' },
       { label: 'Kiracılar', value: 'tenants', route: '/tenants' },
@@ -192,9 +192,10 @@ const setTabsBasedOnRole = (role) => {
       { label: 'Özet', value: 'dashboard', route: '/dashboard' },
       { label: 'Mülklerim', value: 'my-properties', route: '/my-properties' }
     ]
-  } else if (normalizedRole === 'viewer') {
+  } else if (normalizedRole === ROLES.OBSERVER) {
     tabs.value = [
       { label: 'Özet', value: 'dashboard', route: '/dashboard' },
+      { label: 'Ödemeler', value: 'payments', route: '/payments' },
       { label: 'Raporlar', value: 'reports', route: '/reports' }
     ]
   } else {
