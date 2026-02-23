@@ -39,6 +39,8 @@ const routes = [
 
   { path: '/login', name: 'Login', component: LoginView, meta: { public: true, hideLayout: true } },
   { path: '/set-password', name: 'SetPassword', component: () => import('../views/SetPasswordView.vue'), meta: { public: true, hideLayout: true } },
+  { path: '/reset-password', name: 'ResetPassword', component: () => import('../views/SetPasswordView.vue'), meta: { public: true, hideLayout: true } },
+  { path: '/invite', name: 'Invite', component: () => import('../views/SetPasswordView.vue'), meta: { public: true, hideLayout: true } },
   { path: '/:pathMatch(.*)*', name: 'NotFound', component: () => import('../views/NotFound.vue') },
   {
     path: '/transactions',
