@@ -300,6 +300,11 @@
         </div>
       </section>
 
+      <!-- Borç Özet Tablosu (Yeni) -->
+      <section v-if="userRole !== 'tenant'" class="mb-8">
+        <DebtsTable :debts="debtsSummary" :loading="loading" />
+      </section>
+
       <!-- Aylık Gelir/Gider Grafiği -->
       <section class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 mb-8">
         <div class="flex items-center justify-between mb-4">
@@ -471,7 +476,9 @@ import tenantsService from '@/services/tenantsService'
 import ownerDuesService from '@/services/ownerDuesService'
 import ownersService from '@/services/ownersService'
 import utilityDebtsService from '@/services/utilityDebtsService'
+import dashboardService from '@/services/dashboardService'
 import ManualDebtModal from '../expenses/ManualDebtModal.vue'
+import DebtsTable from './components/DebtsTable.vue'
 
 // Reactive data
 const payments = ref([])
@@ -481,6 +488,7 @@ const ownerAidats = ref([])
 const ownerPayments = ref([])
 const owners = ref([])
 const debts = ref([])
+const debtsSummary = ref([])
 const dashboardType = ref('')
 const dateFilter = ref('all')
 const loading = ref(true)
@@ -858,6 +866,14 @@ const loadExpenses = async () => {
     // Expenses için backend enum değerleri: "Electricity", "Water", "Gas", "Maintenance", "Cleaning", "Security", "Other"
     const response = await expensesService.getExpenses(filters)
     expenses.value = response || []
+    // Verileri işle
+    processActivities()
+    
+    // Borç özetini yükle
+    if (userRole.value !== 'tenant') {
+      const summaryResult = await dashboardService.getDebtsSummary()
+      debtsSummary.value = summaryResult || []
+    }
   } catch (err) {
     console.error('Giderler yüklenirken hata:', err)
     expenses.value = []
