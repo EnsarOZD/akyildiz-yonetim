@@ -24,16 +24,16 @@ const Reports = () => import('../features/reports/ReportsView.vue')
 const routes = [
   { path: '/', name: 'Landing', component: LandingPage, meta: { public: true, hideLayout: true } },
 
-  { path: '/dashboard', name: 'Dashboard', component: Dashboard, meta: { requiresAuth: true, roles: ['admin', 'manager', 'viewer', 'tenant'] } },
-  { path: '/tenants', name: 'Tenants', component: Tenants, meta: { requiresAuth: true, roles: ['admin', 'manager'] } },
-  { path: '/tenants/:id', name: 'TenantDetailPage', component: TenantDetailPage, meta: { requiresAuth: true, roles: ['admin', 'manager'] } },
-  { path: '/payments', name: 'Payments', component: Payments, meta: { requiresAuth: true, roles: ['admin', 'manager'] } },
-  { path: '/expenses', name: 'Expenses', component: Expenses, meta: { requiresAuth: true, roles: ['admin', 'manager'] } },
-  { path: '/utilities', name: 'Utilities', component: Utilities, meta: { requiresAuth: true, roles: ['admin', 'manager'] } },
-  { path: '/flats', name: 'Flats', component: Flats, meta: { requiresAuth: true, roles: ['admin', 'manager'] } },
-  { path: '/reports', name: 'Reports', component: Reports, meta: { requiresAuth: true, roles: ['admin', 'manager'] } },
+  { path: '/dashboard', name: 'Dashboard', component: Dashboard, meta: { requiresAuth: true, roles: ['admin', 'manager', 'viewer', 'tenant', 'observer', 'dataentry'] } },
+  { path: '/tenants', name: 'Tenants', component: Tenants, meta: { requiresAuth: true, roles: ['admin', 'manager', 'dataentry'] } },
+  { path: '/tenants/:id', name: 'TenantDetailPage', component: TenantDetailPage, meta: { requiresAuth: true, roles: ['admin', 'manager', 'dataentry'] } },
+  { path: '/payments', name: 'Payments', component: Payments, meta: { requiresAuth: true, roles: ['admin', 'manager', 'dataentry', 'observer'] } },
+  { path: '/expenses', name: 'Expenses', component: Expenses, meta: { requiresAuth: true, roles: ['admin', 'manager', 'dataentry'] } },
+  { path: '/utilities', name: 'Utilities', component: Utilities, meta: { requiresAuth: true, roles: ['admin', 'manager', 'dataentry'] } },
+  { path: '/flats', name: 'Flats', component: Flats, meta: { requiresAuth: true, roles: ['admin', 'manager', 'dataentry'] } },
+  { path: '/reports', name: 'Reports', component: Reports, meta: { requiresAuth: true, roles: ['admin', 'manager', 'observer'] } },
 
-  { path: '/admin', name: 'Admin', component: AdminDashboard, meta: { requiresAuth: true, roles: ['admin'] } },
+  { path: '/admin', name: 'Admin', component: AdminDashboard, meta: { requiresAuth: true, roles: ['admin', 'manager'] } },
 
   { path: '/profile', name: 'Profile', component: TenantDetailPage, meta: { requiresAuth: true, roles: ['tenant'] } },
 
@@ -46,20 +46,20 @@ const routes = [
     path: '/transactions',
     name: 'Transactions',
     component: Transactions,
-    meta: { requiresAuth: true, roles: ['admin', 'manager'] }
+    meta: { requiresAuth: true, roles: ['admin', 'manager', 'dataentry'] }
   },
   {
     path: '/overdue',
     name: 'Overdue',
     component: Overdue,
-    meta: { requiresAuth: true, roles: ['admin', 'manager'] }
+    meta: { requiresAuth: true, roles: ['admin', 'manager', 'dataentry', 'observer'] }
   },
-  { path: '/owner-dues', name: 'OwnerDues', component: OwnerDuesPanel, meta: { requiresAuth: true, roles: ['admin', 'manager'] } },
-  { path: '/owners', name: 'Owners', component: Owners, meta: { requiresAuth: true, roles: ['admin', 'manager'] } },
-  { path: '/owner-dues-list', name: 'OwnerDuesList', component: OwnerDues, meta: { requiresAuth: true, roles: ['admin', 'manager'] } },
-  { path: '/OwnerDues', name: 'OwnerDuesPage', component: OwnerDues, meta: { requiresAuth: true, roles: ['admin', 'manager'] } },
-  { path: '/owner-payments', name: 'OwnerPayments', component: OwnerPayments, meta: { requiresAuth: true, roles: ['admin', 'manager'] } },
-  { path: '/overdue-owner-payments', name: 'OverdueOwnerPayments', component: OverdueOwnerPayments, meta: { requiresAuth: true, roles: ['admin', 'manager'] } },
+  { path: '/owner-dues', name: 'OwnerDues', component: OwnerDuesPanel, meta: { requiresAuth: true, roles: ['admin', 'manager', 'dataentry'] } },
+  { path: '/owners', name: 'Owners', component: Owners, meta: { requiresAuth: true, roles: ['admin', 'manager', 'dataentry'] } },
+  { path: '/owner-dues-list', name: 'OwnerDuesList', component: OwnerDues, meta: { requiresAuth: true, roles: ['admin', 'manager', 'dataentry'] } },
+  { path: '/OwnerDues', name: 'OwnerDuesPage', component: OwnerDues, meta: { requiresAuth: true, roles: ['admin', 'manager', 'dataentry'] } },
+  { path: '/owner-payments', name: 'OwnerPayments', component: OwnerPayments, meta: { requiresAuth: true, roles: ['admin', 'manager', 'dataentry'] } },
+  { path: '/overdue-owner-payments', name: 'OverdueOwnerPayments', component: OverdueOwnerPayments, meta: { requiresAuth: true, roles: ['admin', 'manager', 'dataentry'] } },
 ]
 
 const router = createRouter({

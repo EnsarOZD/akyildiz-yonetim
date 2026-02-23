@@ -80,7 +80,7 @@
             <div class="flex items-center justify-between text-xs">
               <div class="flex gap-2">
                 <span :class="getRoleClass(user.role)" class="badge badge-sm font-semibold">
-                  {{ ROLE_LABELS[user.role] || user.role }}
+                  {{ user.roleLabel || ROLE_LABELS[user.role] || user.role }}
                 </span>
                 <span v-if="user.isActive === false" class="badge badge-error badge-sm">
                   Pasif
@@ -144,8 +144,8 @@
               </label>
               <select v-model="newUser.role" class="select select-bordered w-full" required>
                 <option disabled value="">Rol Seçiniz</option>
-                <option v-for="(label, key) in ROLE_LABELS" :key="key" :value="key">
-                  {{ label }}
+                <option v-for="role in availableRoles" :key="role.code" :value="role.code">
+                  {{ role.label }}
                 </option>
               </select>
             </div>
@@ -157,7 +157,7 @@
               <select v-model="newUser.companyId" class="select select-bordered w-full" required>
                 <option disabled value="">Firma Seçiniz</option>
                 <option v-for="tenant in tenants" :key="tenant.id" :value="tenant.id">
-                  {{ tenant.company }}
+                  {{ tenant.companyName }}
                 </option>
               </select>
             </div>
@@ -200,6 +200,7 @@ const tenants = ref([])
 const search = ref('')
 const showAddUserModal = ref(false)
 const loading = ref(false)
+const availableRoles = ref([])
 
 const newUser = reactive({
   firstName: '',
@@ -319,13 +320,27 @@ const createUser = async () => {
     await fetchUsers()
 
   } catch (error) {
+    console.error('Kullanıcı oluşturma hatası:', error)
     if (error.response && error.response.data) {
-      showNotification(error.response.data, 'error');
+      if (typeof error.response.data === 'string') {
+        showNotification(error.response.data, 'error');
+      } else {
+        handleValidationError(error)
+      }
     } else {
       handleValidationError(error)
     }
   } finally {
     loading.value = false
+  }
+}
+
+const fetchRoles = async () => {
+  try {
+    availableRoles.value = await usersService.getRoles()
+  } catch (error) {
+    console.error('Roller yüklenirken hata oluştu:', error)
+    // Fallback? availableRoles.value can be populated from constants if API fails
   }
 }
 
@@ -346,14 +361,17 @@ const getRoleClass = (role) => {
     case 'admin': return 'badge-primary';
     case 'manager': return 'badge-secondary';
     case 'tenant': return 'badge-accent';
-    default: return 'badge-ghost';
+    case 'observer': return 'badge-warning';
+    case 'dataentry': return 'badge-info';
+    default: return 'badge-neutral';
   }
 }
 
 onMounted(async () => {
   await Promise.all([
     fetchTenants(),
-    fetchUsers()
+    fetchUsers(),
+    fetchRoles()
   ])
 })
 </script> 
