@@ -228,6 +228,20 @@ export class ErrorHandler {
     return appError;
   }
 
+  logSuccess(type, message, context = {}) {
+    const payload = {
+      id: Math.random().toString(36).substr(2, 9),
+      type,
+      message,
+      context,
+      timestamp: new Date().toISOString()
+    };
+
+    console.log(`Success Notification (${type}):`, message);
+    this.notifyListeners(payload);
+    return payload;
+  }
+
   addListener(callback) {
     if (typeof callback === 'function') this.errorListeners.push(callback);
   }
