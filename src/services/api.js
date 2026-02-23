@@ -52,13 +52,6 @@ class ApiService {
       const response = await fetch(url, config)
       console.log('📡 API Response Status:', response.status, response.statusText)
 
-      // 401 Unauthorized durumunda token'ı temizle
-      if (response.status === 401) {
-        localStorage.removeItem('authToken')
-        window.location.href = '/login'
-        throw new Error('Oturum süresi doldu. Lütfen tekrar giriş yapın.')
-      }
-
       if (!response.ok) {
         let errorData = null;
         let errorMessage = `Bir hata oluştu. (HTTP ${response.status})`;
@@ -86,8 +79,11 @@ class ApiService {
           message: errorMessage
         };
 
-        // Oturum süresi doldu kontrolü
-        if (response.status === 401) {
+        // Oturum süresi doldu kontrolü (Login isteği değilse ve login sayfasında değilsek)
+        const isLoginRequest = endpoint.includes('/auth/login');
+        const isLoginPage = window.location.pathname === '/login' || window.location.hash.includes('/login');
+
+        if (response.status === 401 && !isLoginRequest && !isLoginPage) {
           localStorage.removeItem('authToken');
           window.location.href = '/login';
         }
