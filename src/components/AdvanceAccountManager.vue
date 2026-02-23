@@ -166,12 +166,16 @@ import { getDebtTypeLabel } from '@/constants/enums'
 import { safeFormatDate } from '@/utils/dateUtils'
 // import { errorHandler } from '@/utils/errorHandler' // istersen merkezi error’la
 
+const props = defineProps({
+  tenantId: { type: String, default: '' }
+})
+
 const emit = defineEmits(['success'])
 
 /* state */
 const loading = ref(false)
 const tenants = ref([])
-const selectedTenantId = ref('')
+const selectedTenantId = ref(props.tenantId || '')
 const advanceAccount = ref(null)
 const unpaidDebts = ref([])
 const selectedDebts = ref([])
@@ -225,10 +229,17 @@ const canSelectDebt = (debt) =>
 const maxAllocatableForDebt = (debt) => {
   const remaining = safeRemaining(debt)
   const currentId = debt.id || debt._id
-  // diğer seçili borçlara ayrılmış toplam
+  
+  // diğer seçili borçlara ayrılmış toplam tutarı ham değerler üzerinden hesapla (sonsuz döngüyü kırmak için)
   const others = selectedDebts.value
     .filter(id => id !== currentId)
-    .reduce((s, id) => s + clampedAmountFor(id), 0)
+    .reduce((s, id) => {
+      const val = Number(paymentAmounts.value[id] || 0)
+      const d = unpaidDebts.value.find(x => (x.id || x._id) === id)
+      const rem = d ? safeRemaining(d) : Infinity
+      return s + Math.min(val, rem)
+    }, 0)
+    
   const balanceLeft = Math.max(0, advanceBalance.value - others)
   return Math.max(0, Math.min(remaining, balanceLeft))
 }

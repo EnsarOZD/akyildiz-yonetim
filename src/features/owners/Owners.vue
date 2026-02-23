@@ -39,7 +39,7 @@
           </div>
         </div>
         <!-- Yeni Mal Sahibi Ekle Butonu -->
-        <div class="bg-white dark:bg-gray-800 p-5 rounded-xl shadow-md flex items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-600 hover:border-blue-500 dark:hover:border-blue-400 transition-colors duration-300" @click="createModalVisible = true">
+        <div v-if="authStore.role === ROLES.ADMIN || authStore.role === ROLES.MANAGER" class="bg-white dark:bg-gray-800 p-5 rounded-xl shadow-md flex items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-600 hover:border-blue-500 dark:hover:border-blue-400 transition-colors duration-300" @click="createModalVisible = true">
            <button class="w-full h-full text-blue-500 dark:text-blue-400 flex items-center justify-center gap-2">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
             <span class="font-semibold">Yeni Mal Sahibi Ekle</span>
@@ -58,19 +58,19 @@
         
         <!-- Mal Sahibi Kart Listesi -->
         <div class="mt-6 space-y-2">
-          <div v-if="filteredOwnersWithVacantUnits.length === 0" class="text-center py-12 text-gray-500">
-            <p>Boşta katı olan mal sahibi bulunamadı.</p>
+          <div v-if="filteredOwnersWithUnits.length === 0" class="text-center py-12 text-gray-500">
+            <p>Mal sahibi bulunamadı.</p>
           </div>
           <div v-else>
             <!-- Liste Başlıkları (Sadece büyük ekranlar için) -->
             <div class="hidden sm:grid grid-cols-12 gap-4 px-4 py-2 text-sm font-semibold text-gray-500 dark:text-gray-400 border-b dark:border-gray-700">
               <div class="col-span-5">Mal Sahibi</div>
-              <div class="col-span-4">Sahip Olduğu Boş Katlar</div>
-              <div class="col-span-3 text-center">İşlemler</div>
+              <div class="col-span-4">Sahip Olduğu Katlar</div>
+              <div v-if="authStore.role === ROLES.ADMIN || authStore.role === ROLES.MANAGER" class="col-span-3 text-center">İşlemler</div>
             </div>
             <!-- Mal Sahibi Kartı Döngüsü -->
             <div 
-              v-for="owner in filteredOwnersWithVacantUnits" 
+              v-for="owner in filteredOwnersWithUnits" 
               :key="owner.id" 
               class="grid grid-cols-12 gap-4 items-center p-4 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-200 border-b dark:border-gray-700/50"
             >
@@ -84,12 +84,23 @@
                 </div>
               </div>
               <div class="col-span-12 sm:col-span-4 text-sm text-gray-600 dark:text-gray-300">
-                <span class="sm:hidden font-semibold text-gray-500">Boş Katlar: </span>
-                <span v-if="owner.vacantUnits.length > 0" class="font-semibold text-gray-800 dark:text-gray-100">
-                  {{ owner.vacantUnits.join(', ') }}
-                </span>
+                <span class="sm:hidden font-semibold text-gray-500">Katlar: </span>
+                <div v-if="owner.allUnits && owner.allUnits.length > 0" class="flex flex-wrap gap-1">
+                  <span 
+                    v-for="unit in owner.allUnits" 
+                    :key="unit"
+                    :class="[
+                      'px-2 py-0.5 rounded text-xs font-medium',
+                      owner.vacantUnits.includes(unit) 
+                        ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300' 
+                        : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'
+                    ]"
+                  >
+                    {{ unit }}
+                  </span>
+                </div>
               </div>
-              <div class="col-span-12 sm:col-span-3 flex justify-end items-center">
+              <div v-if="authStore.role === ROLES.ADMIN || authStore.role === ROLES.MANAGER" class="col-span-12 sm:col-span-3 flex justify-end items-center">
                 <div class="dropdown dropdown-end">
                   <label tabindex="0" class="btn btn-ghost btn-sm m-1">İşlemler</label>
                   <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
@@ -118,22 +129,33 @@
       @confirm="confirmDelete"
       @cancel="deleteModalVisible = false"
     />
-     <!-- Edit Modal will be needed here -->
+    <OwnerEditModal
+      :visible="editModalVisible"
+      :initial-data="selectedOwner"
+      :available-units="availableUnitsForCreation"
+      @save="updateOwner"
+      @close="editModalVisible = false"
+    />
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
+import { useAuthStore } from '@/stores/auth'
+import { ROLES } from '@/constants/roles'
 import ownersService from '@/services/ownersService'
 import tenantsService from '@/services/tenantsService'
 import { useErrorHandler } from '@/composables/useErrorHandler'
 import ConfirmDeleteModal from '../tenants/components/ConfirmDeleteModal.vue';
 import FilterBar from '@/components/common/FilterBar.vue';
 import OwnerCreateModal from './components/OwnerCreateModal.vue';
+import OwnerEditModal from './components/OwnerEditModal.vue';
 import { useNotification } from '@/composables/useNotification';
+import { UNIT_OPTIONS } from '@/constants/units';
 
 const { handleNetworkError, handleValidationError, showSuccess } = useErrorHandler()
 const { showCreateSuccess, showUpdateSuccess, showDeleteSuccess } = useNotification();
+const authStore = useAuthStore()
 
 const owners = ref([]);
 const tenants = ref([]);
@@ -144,29 +166,36 @@ const deleteModalVisible = ref(false);
 const ownerToDelete = ref(null);
 const search = ref('');
 
-onMounted(() => {
+const fetchOwners = async () => {
   try {
-    owners.value = ownersService.getAllOwners();
-    tenants.value = tenantsService.getAllTenants();
+    owners.value = await ownersService.getOwners();
+    tenants.value = await tenantsService.getTenants();
   } catch (error) {
     handleNetworkError(error, { component: 'Owners', action: 'fetchOwners' });
   }
+};
+
+onMounted(() => {
+  fetchOwners();
 });
 
 // --- Computed Properties for Summary Cards ---
 const totalOwnersCount = computed(() => owners.value.length);
 
-const allOwnedUnits = computed(() => owners.value.flatMap(owner => owner.units || []));
+const allOwnedUnits = computed(() => owners.value.flatMap(owner => owner.flats || []));
 
-const totalOwnedUnitsCount = computed(() => new Set(allOwnedUnits.value).size);
+const totalOwnedUnitsCount = computed(() => {
+  const units = allOwnedUnits.value;
+  return new Set(units.map(u => typeof u === 'object' ? u.id : u)).size;
+});
 
 const occupiedUnits = computed(() => {
   const units = new Set();
   tenants.value.forEach(tenant => {
-    if (tenant.isActive && tenant.units) {
-      tenant.units.forEach(unit => {
-        const unitId = typeof unit === 'object' && unit.id ? unit.id : unit;
-        units.add(unitId);
+    if (tenant.isActive && tenant.flats) {
+      tenant.flats.forEach(flat => {
+        const flatId = typeof flat === 'object' && flat.id ? flat.id : flat;
+        units.add(flatId);
       });
     }
   });
@@ -174,34 +203,46 @@ const occupiedUnits = computed(() => {
 });
 
 const vacantUnitsCount = computed(() => {
-  const allOwnedUnitsSet = new Set(allOwnedUnits.value);
+  const allOwnedUnitsSet = new Set(allOwnedUnits.value.map(u => typeof u === 'object' ? u.id : u));
   return [...allOwnedUnitsSet].filter(unit => !occupiedUnits.value.has(unit)).length;
 });
 
 // --- Computed Properties for Filtering and Display ---
 const filteredOwners = computed(() => {
-  if (!search.value) {
-    return owners.value;
-  }
-  const searchTerm = search.value.toLowerCase();
-  return owners.value.filter(owner => {
-    const nameMatch = owner.name && owner.name.toLowerCase().includes(searchTerm);
+  const searchTerm = search.value?.toLowerCase() || '';
+  
+  return owners.value.map(o => ({
+    ...o,
+    name: `${o.firstName} ${o.lastName}`.trim() || o.email || 'İsimsiz Mal Sahibi'
+  })).filter(owner => {
+    if (!searchTerm) return true;
+    
+    const nameMatch = owner.name.toLowerCase().includes(searchTerm);
     const emailMatch = owner.email && owner.email.toLowerCase().includes(searchTerm);
-    const unitMatch = owner.units && owner.units.some(u => String(u).toLowerCase().includes(searchTerm));
-    return nameMatch || emailMatch || unitMatch;
+    const flatMatch = owner.flats && owner.flats.some(f => {
+      const flatCode = typeof f === 'object' ? f.code : f;
+      return String(flatCode).toLowerCase().includes(searchTerm);
+    });
+    
+    return nameMatch || emailMatch || flatMatch;
   });
 });
 
-const filteredOwnersWithVacantUnits = computed(() => {
-  return filteredOwners.value
-    .map(owner => {
-      const vacantUnits = owner.units ? owner.units.filter(unit => !occupiedUnits.value.has(unit)) : [];
-      return {
-        ...owner,
-        vacantUnits
-      };
-    })
-    .filter(owner => owner.vacantUnits.length > 0);
+const filteredOwnersWithUnits = computed(() => {
+  return filteredOwners.value.map(owner => {
+    const flats = owner.flats || [];
+    // Kat nesne ise code'u, değilse kendisini al
+    const flatCodes = flats.map(f => typeof f === 'object' ? f.code : f);
+    const flatIds = flats.map(f => typeof f === 'object' ? f.id : f);
+    
+    const vacantUnits = flatCodes.filter((code, index) => !occupiedUnits.value.has(flatIds[index]));
+    
+    return {
+      ...owner,
+      allUnits: flatCodes,
+      vacantUnits: vacantUnits
+    };
+  });
 });
 
 const availableUnitsForCreation = computed(() => {
@@ -215,7 +256,11 @@ const handleClearFilters = () => {
 };
 
 const getAvatarInitial = (name) => {
-  if (!name) return '?';
+  if (!name || name === 'İsimsiz Mal Sahibi') return '?';
+  const parts = name.split(' ').filter(p => p.length > 0);
+  if (parts.length > 1) {
+    return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
+  }
   return name.charAt(0).toUpperCase();
 };
 
@@ -239,6 +284,7 @@ const confirmDelete = async () => {
     await ownersService.deleteOwner(ownerToDelete.value.id);
     showDeleteSuccess('Mal Sahibi');
     deleteModalVisible.value = false;
+    await fetchOwners();
   } catch (error) {
     handleValidationError(error, { component: 'Owners', action: 'deleteOwner' });
   }
@@ -249,8 +295,20 @@ const saveOwner = async (owner) => {
     await ownersService.createOwner(owner);
     showCreateSuccess('Mal Sahibi');
     createModalVisible.value = false;
+    await fetchOwners();
   } catch (error) {
     handleValidationError(error, { component: 'Owners', action: 'saveOwner' });
+  }
+};
+
+const updateOwner = async (owner) => {
+  try {
+    await ownersService.updateOwner(owner.id, owner);
+    showUpdateSuccess('Mal Sahibi');
+    editModalVisible.value = false;
+    await fetchOwners();
+  } catch (error) {
+    handleValidationError(error, { component: 'Owners', action: 'updateOwner' });
   }
 };
 

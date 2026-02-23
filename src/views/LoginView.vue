@@ -48,6 +48,7 @@
               <input
                 v-model="email"
                 id="email"
+                data-testid="email"
                 type="email"
                 placeholder="ornek@email.com"
                 class="block w-full pl-10 pr-3 py-3 border border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-700 text-white placeholder-gray-400"
@@ -71,12 +72,14 @@
                 v-model="password"
                 :type="showPassword ? 'text' : 'password'"
                 id="password"
+                data-testid="password"
                 placeholder="••••••••"
                 class="block w-full pl-10 pr-12 py-3 border border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-700 text-white placeholder-gray-400"
                 required
               />
               <button 
                 type="button" 
+                data-testid="sidebar"
                 class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-300 transition-colors duration-200"
                 @click="togglePasswordVisibility"
               >
@@ -131,6 +134,7 @@
           <!-- Login Button -->
           <button
             type="submit"
+            data-testid="login-btn"
             class="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-3 px-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-800 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
           >
             <span class="flex items-center justify-center space-x-2">

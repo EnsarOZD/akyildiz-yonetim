@@ -67,222 +67,179 @@
       <div v-else>
 
       <!-- Özet Kartları -->
-      <section v-if="userRole !== 'viewer'" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-        <router-link to="/transactions" class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all duration-200 cursor-pointer">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-sm text-gray-500 dark:text-gray-400">Kasa Bakiyesi</p>
-              <p class="text-2xl font-bold text-green-600 dark:text-green-400">{{ formatCurrency(balance) }}</p>
-            </div>
-            <div class="bg-green-100 dark:bg-green-900/50 text-green-600 dark:text-green-400 rounded-full p-3">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
-              </svg>
-            </div>
-          </div>
-        </router-link>
-
-        <router-link to="/payments" class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all duration-200 cursor-pointer">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-sm text-gray-500 dark:text-gray-400">Toplam Gelir</p>
-              <p class="text-2xl font-bold text-blue-600 dark:text-blue-400">{{ formatCurrency(totalIncome) }}</p>
-              <div class="flex items-center gap-4 mt-1">
-                <p class="text-xs text-gray-500 dark:text-gray-400">{{ tenantPaymentsCount }} kiracı ödemesi</p>
-                <p class="text-xs text-blue-600 dark:text-blue-400">Bu ay: {{ formatCurrency(thisMonthTenantPayments) }}</p>
-              </div>
-            </div>
-            <div class="bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 rounded-full p-3">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
-              </svg>
-            </div>
-          </div>
-        </router-link>
-
-        <router-link to="/expenses" class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all duration-200 cursor-pointer">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-sm text-gray-500 dark:text-gray-400">Toplam Gider</p>
-              <p class="text-2xl font-bold text-red-600 dark:text-red-400">{{ formatCurrency(totalExpense) }}</p>
-            </div>
-            <div class="bg-red-100 dark:bg-red-900/50 text-red-600 dark:text-red-400 rounded-full p-3">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-              </svg>
-            </div>
-          </div>
-        </router-link>
-
-        <router-link to="/tenants" class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all duration-200 cursor-pointer">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-sm text-gray-500 dark:text-gray-400">Toplam Kiracı</p>
-              <p class="text-2xl font-bold text-indigo-600 dark:text-indigo-400">{{ tenantsCount }}</p>
-              <div class="flex items-center gap-4 mt-1">
-                <p class="text-xs text-gray-500 dark:text-gray-400">{{ activeTenantsCount }} aktif</p>
-                <p class="text-xs text-indigo-600 dark:text-indigo-400">{{ inactiveTenantsCount }} pasif</p>
-              </div>
-            </div>
-            <div class="bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 rounded-full p-3">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-              </svg>
-            </div>
-          </div>
-        </router-link>
-      </section>
-
-      <!-- Mal Sahibi Özet Kartları -->
-      <section v-if="userRole !== 'viewer' && userRole !== 'tenant'" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-        <router-link to="/owner-dues-list" class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all duration-200 cursor-pointer">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-sm text-gray-500 dark:text-gray-400">Mal Sahibi Aidat Geliri</p>
-              <p class="text-2xl font-bold text-purple-600 dark:text-purple-400">{{ formatCurrency(ownerDuesIncome) }}</p>
-              <div class="flex items-center gap-4 mt-1">
-                <p class="text-xs text-gray-500 dark:text-gray-400">{{ ownerDuesCount }} aidat kaydı</p>
-                <p class="text-xs text-purple-600 dark:text-purple-400">Bu ay: {{ formatCurrency(thisMonthOwnerDues) }}</p>
-              </div>
-            </div>
-            <div class="bg-purple-100 dark:bg-purple-900/50 text-purple-600 dark:text-purple-400 rounded-full p-3">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-              </svg>
-            </div>
-          </div>
-        </router-link>
-
-        <router-link to="/owner-payments" class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all duration-200 cursor-pointer">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-sm text-gray-500 dark:text-gray-400">Mal Sahibi Ödemeleri</p>
-              <p class="text-2xl font-bold text-orange-600 dark:text-orange-400">{{ formatCurrency(ownerPaymentsTotal) }}</p>
-              <div class="flex items-center gap-4 mt-1">
-                <p class="text-xs text-gray-500 dark:text-gray-400">{{ ownerPaymentsCount }} ödeme</p>
-                <p class="text-xs text-orange-600 dark:text-orange-400">Bu ay: {{ formatCurrency(thisMonthOwnerPayments) }}</p>
-              </div>
-            </div>
-            <div class="bg-orange-100 dark:bg-orange-900/50 text-orange-600 dark:text-orange-400 rounded-full p-3">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-              </svg>
-            </div>
-          </div>
-        </router-link>
-
-        <router-link to="/overdue-owner-payments" class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all duration-200 cursor-pointer">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-sm text-gray-500 dark:text-gray-400">Geciken Mal Sahibi Ödemeleri</p>
-              <p class="text-2xl font-bold text-red-600 dark:text-red-400">{{ overdueOwnerPaymentsCount }}</p>
-              <div class="flex items-center gap-4 mt-1">
-                <p class="text-xs text-gray-500 dark:text-gray-400">Toplam tutar</p>
-                <p class="text-xs text-red-600 dark:text-red-400">{{ formatCurrency(overdueOwnerPaymentsTotal) }}</p>
-              </div>
-            </div>
-            <div class="bg-red-100 dark:bg-red-900/50 text-red-600 dark:text-red-400 rounded-full p-3">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-          </div>
-        </router-link>
-
-        <router-link to="/owners" class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all duration-200 cursor-pointer">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-sm text-gray-500 dark:text-gray-400">Toplam Mal Sahibi</p>
-              <p class="text-2xl font-bold text-teal-600 dark:text-teal-400">{{ ownersCount }}</p>
-              <div class="flex items-center gap-4 mt-1">
-                <p class="text-xs text-gray-500 dark:text-gray-400">Aktif aidat</p>
-                <p class="text-xs text-teal-600 dark:text-teal-400">{{ activeOwnerDuesCount }} kayıt</p>
-              </div>
-            </div>
-            <div class="bg-teal-100 dark:bg-teal-900/50 text-teal-600 dark:text-teal-400 rounded-full p-3">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-              </svg>
-            </div>
-          </div>
-        </router-link>
-
-        <router-link to="/utilities" class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all duration-200 cursor-pointer">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-sm text-gray-500 dark:text-gray-400">Utility Borçları</p>
-              <p class="text-2xl font-bold text-yellow-600 dark:text-yellow-400">{{ formatCurrency(totalUtilityDebts) }}</p>
-              <div class="flex items-center gap-4 mt-1">
-                <p class="text-xs text-gray-500 dark:text-gray-400">{{ utilityDebtsCount }} borç</p>
-                <p class="text-xs text-yellow-600 dark:text-yellow-400">{{ overdueUtilityDebtsCount }} geciken</p>
-              </div>
-            </div>
-            <div class="bg-yellow-100 dark:bg-yellow-900/50 text-yellow-600 dark:text-yellow-400 rounded-full p-3">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg>
-            </div>
-          </div>
-        </router-link>
-
-        <router-link to="/utilities" class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all duration-200 cursor-pointer">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-sm text-gray-500 dark:text-gray-400">Aylık Ortalama</p>
-              <p class="text-2xl font-bold text-cyan-600 dark:text-cyan-400">{{ formatCurrency(monthlyAverage) }}</p>
-              <div class="flex items-center gap-4 mt-1">
-                <p class="text-xs text-gray-500 dark:text-gray-400">Gelir ort.</p>
-                <p class="text-xs text-cyan-600 dark:text-cyan-400">{{ formatCurrency(monthlyIncomeAverage) }}</p>
-              </div>
-            </div>
-            <div class="bg-cyan-100 dark:bg-cyan-900/50 text-cyan-600 dark:text-cyan-400 rounded-full p-3">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-              </svg>
-            </div>
-          </div>
-        </router-link>
-      </section>
-
-      <!-- Hızlı İşlemler -->
-      <section class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 mb-8">
-        <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-4">Hızlı İşlemler</h2>
+      <!-- Finansal Durum & Özet -->
+      <section v-if="userRole !== 'viewer'" class="grid grid-cols-1 md:grid-cols-12 gap-6 mb-8">
         
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          <router-link to="/payments" class="flex flex-col items-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800 hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors duration-200">
-            <div class="bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 rounded-full p-3 mb-2">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-              </svg>
+        <!-- Sol Kolon: Finansal Özet (Bakiye, Gelir, Gider) -->
+        <div class="md:col-span-8 grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <!-- Kasa Bakiyesi -->
+          <router-link to="/transactions" class="bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-800/50 p-5 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md hover:border-green-200 dark:hover:border-green-800 transition-all cursor-pointer group">
+            <div class="flex flex-col h-full justify-between">
+              <div class="flex items-start justify-between mb-2">
+                <div class="p-2 bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 rounded-lg group-hover:scale-110 transition-transform">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                  </svg>
+                </div>
+                <span class="text-xs font-medium px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 rounded-full">Güncel</span>
+              </div>
+              <div>
+                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Kasa Bakiyesi</p>
+                <h3 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mt-1">{{ formatCurrency(balance) }}</h3>
+              </div>
             </div>
-            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Yeni Ödeme</span>
           </router-link>
-          
-          <router-link to="/expenses" class="flex flex-col items-center p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800 hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors duration-200">
-            <div class="bg-red-100 dark:bg-red-900/50 text-red-600 dark:text-red-400 rounded-full p-3 mb-2">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-              </svg>
+
+          <!-- Toplam Gelir -->
+          <router-link to="/payments" class="bg-white dark:bg-gray-800 p-5 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md hover:border-blue-200 dark:hover:border-blue-800 transition-all cursor-pointer group">
+            <div class="flex flex-col h-full justify-between">
+              <div class="flex items-start justify-between mb-2">
+                <div class="p-2 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg group-hover:scale-110 transition-transform">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
+                  </svg>
+                </div>
+              </div>
+              <div>
+                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Toplam Gelir</p>
+                <h3 class="text-2xl font-bold text-blue-600 dark:text-blue-400 mt-1">{{ formatCurrency(totalIncome) }}</h3>
+                <p class="text-xs text-blue-500 mt-1">+{{ formatCurrency(thisMonthTenantPayments) }} bu ay</p>
+              </div>
             </div>
-            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Yeni Gider</span>
           </router-link>
-          
-          <router-link to="/tenants" class="flex flex-col items-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800 hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors duration-200">
-            <div class="bg-green-100 dark:bg-green-900/50 text-green-600 dark:text-green-400 rounded-full p-3 mb-2">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-              </svg>
+
+          <!-- Toplam Gider -->
+          <router-link to="/expenses" class="bg-white dark:bg-gray-800 p-5 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md hover:border-red-200 dark:hover:border-red-800 transition-all cursor-pointer group">
+            <div class="flex flex-col h-full justify-between">
+              <div class="flex items-start justify-between mb-2">
+                <div class="p-2 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg group-hover:scale-110 transition-transform">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                  </svg>
+                </div>
+              </div>
+              <div>
+                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Toplam Gider</p>
+                <h3 class="text-2xl font-bold text-red-600 dark:text-red-400 mt-1">{{ formatCurrency(totalExpense) }}</h3>
+                <p class="text-xs text-gray-400 mt-1">{{ expenses.length }} kalem işlem</p>
+              </div>
             </div>
-            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Yeni Kiracı</span>
           </router-link>
-          
-          <router-link to="/owner-dues-list" class="flex flex-col items-center p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800 hover:bg-purple-100 dark:hover:bg-purple-900/30 transition-colors duration-200">
-            <div class="bg-purple-100 dark:bg-purple-900/50 text-purple-600 dark:text-purple-400 rounded-full p-3 mb-2">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+        </div>
+
+        <!-- Sağ Kolon: İstatistikler & Aidat Durumu -->
+        <div class="md:col-span-4 grid grid-cols-1 gap-4">
+          <!-- Borç/Alacak Özeti (Yeni Bileşen) -->
+          <router-link to="/utilities" class="bg-white dark:bg-gray-800 p-5 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-all cursor-pointer relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-3 opacity-10">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-24 w-24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
               </svg>
             </div>
-            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Yeni Aidat</span>
+            
+            <h4 class="text-base font-semibold text-gray-800 dark:text-gray-100 mb-3 flex items-center gap-2">
+              <span class="w-2 h-6 bg-orange-500 rounded-full"></span>
+              Bekleyen Alacaklar
+            </h4>
+            
+            <div class="space-y-3">
+              <!-- Aidat -->
+              <div class="flex items-center justify-between">
+                <span class="text-sm text-gray-600 dark:text-gray-300 flex items-center gap-2">
+                  <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Aidat
+                </span>
+                <span class="font-bold text-gray-800 dark:text-gray-100">{{ formatCurrency(totalAidatDebt) }}</span>
+              </div>
+              <!-- Elektrik -->
+              <div class="flex items-center justify-between">
+                <span class="text-sm text-gray-600 dark:text-gray-300 flex items-center gap-2">
+                   <span class="w-2 h-2 rounded-full bg-amber-500"></span> Elektrik
+                </span>
+                <span class="font-bold text-gray-800 dark:text-gray-100">{{ formatCurrency(totalElectricityDebt) }}</span>
+              </div>
+              <!-- Su -->
+              <div class="flex items-center justify-between">
+                <span class="text-sm text-gray-600 dark:text-gray-300 flex items-center gap-2">
+                   <span class="w-2 h-2 rounded-full bg-blue-500"></span> Su
+                </span>
+                <span class="font-bold text-gray-800 dark:text-gray-100">{{ formatCurrency(totalWaterDebt) }}</span>
+              </div>
+              
+              <div class="h-px bg-gray-100 dark:bg-gray-700 my-2"></div>
+              
+              <div class="flex items-center justify-between">
+                <span class="text-sm font-medium text-gray-500">Toplam</span>
+                <span class="text-lg font-bold text-orange-600">{{ formatCurrency(totalUtilityDebts) }}</span>
+              </div>
+            </div>
+          </router-link>
+        </div>
+      </section>
+
+      <!-- Hızlı İşlemler (Yeni Tasarım) -->
+      <section class="mb-8">
+        <h2 class="text-lg font-bold text-gray-800 dark:text-gray-100 mb-4 px-1">Hızlı İşlemler</h2>
+        <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-4">
+          <!-- Borç Ekle (Dropdown) -->
+          <div class="dropdown dropdown-end sm:dropdown-bottom">
+            <div tabindex="0" role="button" class="flex flex-col items-center justify-center p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-all group h-full w-full cursor-pointer">
+              <div class="p-3 bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded-full mb-2 group-hover:scale-110 transition-transform">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                </svg>
+              </div>
+              <span class="text-sm font-semibold text-gray-700 dark:text-gray-200">Borç Ekle</span>
+              <span class="text-[10px] text-gray-400 mt-0.5">Seçenekler ▼</span>
+            </div>
+            <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow-lg bg-base-100 rounded-box w-52 mt-2 dark:bg-gray-800 border dark:border-gray-700">
+              <li><a @click="openManualDebtModal(0)" class="dark:text-gray-200"><span class="text-lg mr-2">📋</span> Aidat Ekle</a></li>
+              <li><a @click="openManualDebtModal(1)" class="dark:text-gray-200"><span class="text-lg mr-2">⚡</span> Elektrik Ekle</a></li>
+              <li><a @click="openManualDebtModal(2)" class="dark:text-gray-200"><span class="text-lg mr-2">💧</span> Su Ekle</a></li>
+            </ul>
+          </div>
+
+          <!-- Tahsilat Al (Yeni) -->
+          <router-link to="/payments" class="flex flex-col items-center justify-center p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-all group">
+            <div class="p-3 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded-full mb-2 group-hover:scale-110 transition-transform">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
+            </div>
+            <span class="text-sm font-semibold text-gray-700 dark:text-gray-200">Tahsilat Al</span>
+            <span class="text-[10px] text-gray-400 mt-0.5">Ödeme girişi</span>
+          </router-link>
+
+          <!-- Yeni Gider -->
+          <router-link to="/expenses" class="flex flex-col items-center justify-center p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-all group">
+            <div class="p-3 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-full mb-2 group-hover:scale-110 transition-transform">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <span class="text-sm font-semibold text-gray-700 dark:text-gray-200">Gider Ekle</span>
+            <span class="text-[10px] text-gray-400 mt-0.5">Fatura, fiş vb.</span>
+          </router-link>
+
+          <!-- Kiracı Listesi -->
+          <router-link to="/tenants" class="flex flex-col items-center justify-center p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-all group">
+            <div class="p-3 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-full mb-2 group-hover:scale-110 transition-transform">
+               <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+              </svg>
+            </div>
+            <span class="text-sm font-semibold text-gray-700 dark:text-gray-200">Kiracılar</span>
+            <span class="text-[10px] text-gray-400 mt-0.5">{{ activeTenantsCount }} aktif kiracı</span>
+          </router-link>
+
+           <!-- Raporlar -->
+           <router-link to="/utilities" class="flex flex-col items-center justify-center p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-all group">
+            <div class="p-3 bg-cyan-100 dark:bg-cyan-900/30 text-cyan-600 dark:text-cyan-400 rounded-full mb-2 group-hover:scale-110 transition-transform">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+            </div>
+            <span class="text-sm font-semibold text-gray-700 dark:text-gray-200">Raporlar</span>
+            <span class="text-[10px] text-gray-400 mt-0.5">Detaylı analiz</span>
           </router-link>
         </div>
       </section>
@@ -393,6 +350,7 @@
               <option value="">Tümü</option>
               <option value="income">Gelir</option>
               <option value="expense">Gider</option>
+              <option value="debt">Borç</option>
             </select>
           </div>
         </div>
@@ -407,33 +365,41 @@
               <div 
                 :class="{
                   'bg-green-100 dark:bg-green-900/50 text-green-600 dark:text-green-400': activity.type === 'income',
-                  'bg-red-100 dark:bg-red-900/50 text-red-600 dark:text-red-400': activity.type === 'expense'
+                  'bg-red-100 dark:bg-red-900/50 text-red-600 dark:text-red-400': activity.type === 'expense',
+                  'bg-orange-100 dark:bg-orange-900/50 text-orange-600 dark:text-orange-400': activity.type === 'debt'
                 }"
                 class="rounded-full p-2"
               >
                 <svg v-if="activity.type === 'income'" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
                 </svg>
-                <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <svg v-else-if="activity.type === 'expense'" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                </svg>
+                <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
               <div>
                 <p class="font-medium text-gray-800 dark:text-gray-100">
-                  {{ activity.payer || activity.description || 'İşlem' }}
+                  {{ activity.type === 'debt' ? (activity.company || 'Borç') : (activity.payer || activity.description || 'İşlem') }}
+                  <span v-if="activity.type === 'debt'" class="text-xs font-normal text-gray-400 ml-1">
+                    ({{ activity.typeLabel }})
+                  </span>
                 </p>
-                <p class="text-sm text-gray-500 dark:text-gray-400">{{ formatDate(activity.paymentDate || activity.expenseDate || activity.date) }}</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">{{ formatDate(activity.paymentDate || activity.expenseDate || activity.dueDate || activity.date) }}</p>
               </div>
             </div>
             <div class="text-right">
               <p 
                 :class="{
                   'text-green-600 dark:text-green-400': activity.type === 'income',
-                  'text-red-600 dark:text-red-400': activity.type === 'expense'
+                  'text-red-600 dark:text-red-400': activity.type === 'expense',
+                  'text-orange-600 dark:text-orange-400': activity.type === 'debt'
                 }"
                 class="font-semibold"
               >
-                {{ activity.type === 'income' ? '+' : '-' }}{{ formatCurrency(activity.amount) }}
+                {{ activity.type === 'income' ? '+' : '-' }}{{ formatCurrency(activity.type === 'debt' ? activity.totalAmount : activity.amount) }}
               </p>
             </div>
           </div>
@@ -462,6 +428,14 @@
       </section>
 
       </div> <!-- Dashboard içeriği kapanışı -->
+
+      <!-- Manuel Borç Modalı -->
+      <ManualDebtModal
+        v-if="showManualDebtModal"
+        :type="selectedDebtType"
+        @close="showManualDebtModal = false"
+        @refresh="loadDashboardData"
+      />
 
     </div>
   </div>
@@ -497,6 +471,7 @@ import tenantsService from '@/services/tenantsService'
 import ownerDuesService from '@/services/ownerDuesService'
 import ownersService from '@/services/ownersService'
 import utilityDebtsService from '@/services/utilityDebtsService'
+import ManualDebtModal from '../expenses/ManualDebtModal.vue'
 
 // Reactive data
 const payments = ref([])
@@ -510,6 +485,13 @@ const dashboardType = ref('')
 const dateFilter = ref('all')
 const loading = ref(true)
 const error = ref(null)
+const showManualDebtModal = ref(false)
+const selectedDebtType = ref(0) // Default Aidat
+
+const openManualDebtModal = (type = 0) => {
+    selectedDebtType.value = type
+    showManualDebtModal.value = true
+}
 
 // Store
 const authStore = useAuthStore()
@@ -619,6 +601,24 @@ const overdueUtilityDebtsCount = computed(() => {
   }).length
 })
 
+const totalAidatDebt = computed(() => {
+  return debts.value
+    .filter(d => d.type === 0 || d.type === 'Aidat')
+    .reduce((sum, d) => sum + Number(d.remainingAmount || 0), 0)
+})
+
+const totalElectricityDebt = computed(() => {
+  return debts.value
+    .filter(d => d.type === 1 || d.type === 'Electricity')
+    .reduce((sum, d) => sum + Number(d.remainingAmount || 0), 0)
+})
+
+const totalWaterDebt = computed(() => {
+  return debts.value
+    .filter(d => d.type === 2 || d.type === 'Water')
+    .reduce((sum, d) => sum + Number(d.remainingAmount || 0), 0)
+})
+
 const monthlyAverage = computed(() => {
   const totalIncome = payments.value.reduce((sum, p) => sum + Number(p.amount || 0), 0)
   const totalExpense = expenses.value.reduce((sum, e) => sum + Number(e.amount || 0), 0)
@@ -721,7 +721,7 @@ const overdueItems = computed(() => {
       
       return {
         ...debt,
-        company: tenant?.companyName || tenant?.company || 'Bilinmiyor',
+        company: debt.tenantName || tenant?.companyName || tenant?.company || debt.description || 'Bilinmiyor',
         floor: debt.unit || '-',
         amount: Number(debt.remainingAmount || 0),
         totalAmount: Number(debt.amount || 0),
@@ -742,7 +742,19 @@ const overdueItems = computed(() => {
 const recentActivities = computed(() => {
   const items = [
     ...payments.value.map(p => ({ ...p, type: 'income' })),
-    ...expenses.value.map(e => ({ ...e, type: 'expense' }))
+    ...expenses.value.map(e => ({ ...e, type: 'expense' })),
+    ...debts.value.map(d => {
+      const tenant = tenants.value.find(t => t.id === d.tenantId)
+      return { 
+        ...d, 
+        type: 'debt',
+        // Debts için company bilgisi overdueItems hesaplamasında ekleniyor ama raw debt verisinde yok.
+        // Burada tenant listesinden bulup ekleyelim.
+        company: d.tenantName || tenant?.companyName || tenant?.company || tenant?.fullName || d.description || 'Bilinmiyor',
+        typeLabel: d.type === 0 || d.type === 'Aidat' ? 'Aidat' : (d.type === 1 || d.type === 'Electricity' ? 'Elektrik' : 'Su'),
+        totalAmount: Number(d.amount || 0)
+      }
+    })
   ]
 
   const filteredByTenant = userRole.value === 'tenant'
@@ -756,12 +768,12 @@ const recentActivities = computed(() => {
 
   return filtered
     .filter(item => {
-      const itemDate = item.paymentDate || item.expenseDate || item.date
+      const itemDate = item.paymentDate || item.expenseDate || item.dueDate || item.date || item.createdAt
       return itemDate
     })
     .sort((a, b) => {
-      const dateA = a.paymentDate || a.expenseDate || a.date
-      const dateB = b.paymentDate || b.expenseDate || b.date
+      const dateA = a.paymentDate || a.expenseDate || a.dueDate || a.date || a.createdAt
+      const dateB = b.paymentDate || b.expenseDate || b.dueDate || b.date || b.createdAt
       return new Date(dateB) - new Date(dateA)
     })
     .slice(0, 5)
@@ -886,7 +898,7 @@ const loadOwnerPayments = async () => {
   try {
     // Mal sahibi ödemeleri için backend'de ownerId filtresi kullan
     const filters = {
-      ownerId: 'any' // Tüm mal sahibi ödemelerini getir
+      ownerId: null // Tüm ödemeleri getir, aşağıda mal sahibi olanları filtreleyeceğiz
     }
     
     // Tarih filtresi ekle

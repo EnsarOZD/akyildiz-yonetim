@@ -69,12 +69,18 @@ export class AppError extends Error {
     this.context = context;
     this.timestamp = new Date().toISOString();
   }
+
   getDisplayMessage() {
-    const fallback = { title: 'Hata', message: 'Beklenmeyen bir hata oluştu.', action: 'Tekrar Dene' };
+    const fallback = {
+      title: 'Hata',
+      message: 'Beklenmeyen bir hata oluştu.',
+      action: 'Tekrar Dene'
+    };
+
     const meta = ERROR_MESSAGES[this.type] || fallback;
+
     return {
       title: meta.title,
-      // Sunucudan/JS’ten gelen detaylı mesaj varsa onu göster; yoksa tipin varsayılan mesajını kullan
       message: this.message || meta.message,
       action: meta.action
     };
@@ -93,159 +99,143 @@ export function createError(type, message, originalError = null, context = {}) {
   };
 }
 
-// Hata mesajını al
+// ================================
+// MESAJ PARSER (Backend uyumlu)
+// ================================
 export function getErrorMessage(error) {
 
-   // 1) API hata mesajı varsa onu tercih et
-  try {
-      const data = error?.response?.data
-      if (data) {
-        if (typeof data === 'string' && data.trim()) return data
-        if (typeof data?.message === 'string' && data.message.trim()) return data.message
-        if (typeof data?.title === 'string' && data.title.trim()) return data.title
-        // ModelState / validation errors
-        if (data?.errors && typeof data.errors === 'object') {
-          const firstKey = Object.keys(data.errors)[0]
-          const firstMsg = Array.isArray(data.errors[firstKey]) ? data.errors[firstKey][0] : data.errors[firstKey]
-          if (firstMsg) return String(firstMsg)
-        }
-      }
-    } catch (_) {}
-  
-    // 2) Sunucu mesajı yoksa HTTP map'e düş
-    if (error?.response?.status && HTTP_ERROR_MESSAGES[error.response.status]) {
-      return HTTP_ERROR_MESSAGES[error.response.status];
+  const stringifyErrors = (errs) => {
+    if (!errs) return null;
+
+    // Result formatı: errors: ["msg1", "msg2"]
+    if (Array.isArray(errs) && errs.length) {
+      return errs.join("\n"); // İstersen " • " yapabilirsin
     }
 
-  // Genel hata mesajları
-  if (error?.message) {
+    // ModelState formatı: errors: { field: ["msg"], ... }
+    if (typeof errs === "object") {
+      const flat = [];
+      for (const key of Object.keys(errs)) {
+        const v = errs[key];
+        if (Array.isArray(v)) flat.push(...v.filter(Boolean));
+        else if (typeof v === "string" && v.trim()) flat.push(v);
+      }
+      if (flat.length) return flat.join("\n");
+    }
+
+    return null;
+  };
+
+  try {
+    // 1️⃣ Yeni fetch apiError yapısı
+    const apiData = error?.apiError?.data;
+    if (apiData) {
+      const errs = stringifyErrors(apiData.errors);
+      if (errs) return errs;
+
+      if (typeof apiData.errorMessage === "string" && apiData.errorMessage.trim()) {
+        return apiData.errorMessage;
+      }
+
+      if (typeof apiData === "string" && apiData.trim()) return apiData;
+      if (typeof apiData.message === "string" && apiData.message.trim()) return apiData.message;
+      if (typeof apiData.title === "string" && apiData.title.trim()) return apiData.title;
+    }
+
+    // 2️⃣ Axios fallback
+    const data = error?.response?.data;
+    if (data) {
+      if (typeof data === "string" && data.trim()) return data;
+
+      const errs = stringifyErrors(data.errors);
+      if (errs) return errs;
+
+      if (typeof data.errorMessage === "string" && data.errorMessage.trim()) return data.errorMessage;
+      if (typeof data.message === "string" && data.message.trim()) return data.message;
+      if (typeof data.title === "string" && data.title.trim()) return data.title;
+    }
+
+  } catch (_) { }
+
+  // 3️⃣ HTTP fallback
+  const status = error?.apiError?.status || error?.status || error?.response?.status;
+  if (status && HTTP_ERROR_MESSAGES[status]) {
+    return HTTP_ERROR_MESSAGES[status];
+  }
+
+  // 4️⃣ Final fallback
+  if (typeof error?.message === "string" && error.message.trim()) {
     return error.message;
   }
 
   return 'Beklenmeyen bir hata oluştu.';
 }
 
-// Hata türünü belirle
+// ================================
+// HATA TÜRÜ BELİRLEME
+// ================================
 export function getErrorType(error) {
-  if (error?.response?.status) {
-    const status = error.response.status;
+  const status = error?.apiError?.status || error?.status || error?.response?.status;
 
+  if (status) {
     if (status === 401) return ERROR_TYPES.AUTH;
     if (status === 403) return ERROR_TYPES.PERMISSION;
     if (status === 404) return ERROR_TYPES.NOT_FOUND;
-    if (status === 422) return ERROR_TYPES.VALIDATION;
+    if (status === 400 || status === 422) return ERROR_TYPES.VALIDATION;
     if (status >= 500) return ERROR_TYPES.SYSTEM;
     if (status >= 400) return ERROR_TYPES.VALIDATION;
+  }
+
+  if (
+    error?.message?.toLowerCase().includes('network') ||
+    error?.message?.toLowerCase().includes('fetch')
+  ) {
+    return ERROR_TYPES.NETWORK;
   }
 
   return ERROR_TYPES.SYSTEM;
 }
 
-// Hata işleyici
+// ================================
+// GLOBAL ERROR HANDLER
+// ================================
 export class ErrorHandler {
   constructor() {
     this.errorListeners = [];
     this.errorHistory = [];
   }
 
-  // Hata kaydet
   logError(error, context = {}) {
     const appError = error instanceof AppError
       ? error
       : new AppError(
-          this.determineErrorType(error),
-          this.getErrorMessage(error),
-          error,
-          context
-        );
+        getErrorType(error),
+        getErrorMessage(error),
+        error,
+        context
+      );
 
-    // Konsola log
     console.error('Application Error:', {
       type: appError.type,
       message: appError.message,
       context: appError.context,
-      timestamp: appError.timestamp,
-      originalError: appError.originalError
-        ? {
-            name: appError.originalError.name,
-            message: appError.originalError.message,
-            code: appError.originalError.code,
-            stack: appError.originalError.stack
-          }
-        : null
+      timestamp: appError.timestamp
     });
 
-    // Hata geçmişine ekle
     this.errorHistory.push(appError);
-
-    // Listener'lara bildir
     this.notifyListeners(appError);
 
     return appError;
   }
 
-  // Başarı / bilgi / uyarı mesajı kaydet
-  logSuccess(type, message, context = {}) {
-    const successData = {
-      type, // 'success', 'info', 'warning'
-      message,
-      context,
-      timestamp: new Date().toISOString(),
-      getDisplayMessage: () => ({
-        title: type === 'success' ? 'Başarılı' : type === 'info' ? 'Bilgi' : 'Uyarı',
-        message,
-        action: null
-      })
-    };
-
-    // Konsola log
-    console.log('Application Success:', {
-      type: successData.type,
-      message: successData.message,
-      context: successData.context,
-      timestamp: successData.timestamp
-    });
-
-    // Listener'lara bildir
-    this.notifyListeners(successData);
-
-    return successData;
-  }
-
-  // Hata mesajını al
-  getErrorMessage(error) {
-    return getErrorMessage(error);
-  }
-
-  // Hata tipini belirle
-  determineErrorType(error) {
-    if (error?.code) {
-      if (String(error.code).startsWith('auth/')) return ERROR_TYPES.AUTH;
-      if (error.code === 'permission-denied') return ERROR_TYPES.PERMISSION;
-      if (error.code === 'not-found') return ERROR_TYPES.NOT_FOUND;
-      if (error.code === 'unavailable') return ERROR_TYPES.NETWORK;
-    }
-
-    if (error?.message) {
-      const message = String(error.message).toLowerCase();
-      if (message.includes('network') || message.includes('fetch')) return ERROR_TYPES.NETWORK;
-      if (message.includes('permission') || message.includes('access')) return ERROR_TYPES.PERMISSION;
-      if (message.includes('validation') || message.includes('invalid')) return ERROR_TYPES.VALIDATION;
-      if (message.includes('not found') || message.includes('bulunamadı')) return ERROR_TYPES.NOT_FOUND;
-    }
-
-    return ERROR_TYPES.SYSTEM;
-  }
-
-  // Listener ekle/çıkar
   addListener(callback) {
     if (typeof callback === 'function') this.errorListeners.push(callback);
   }
+
   removeListener(cb) {
     this.errorListeners = this.errorListeners.filter(x => x !== cb);
   }
 
-  // Listener'ları bildir
   notifyListeners(payload) {
     this.errorListeners.forEach(callback => {
       try {
@@ -256,19 +246,19 @@ export class ErrorHandler {
     });
   }
 
-  // Hata geçmişi
   getErrorHistory() {
     return this.errorHistory;
   }
+
   clearErrorHistory() {
     this.errorHistory = [];
   }
 }
 
-// Global hata işleyici instance
+// Global instance
 export const errorHandler = new ErrorHandler();
 
-// Global hata yakalama
+// Global JS hataları
 window.addEventListener('error', event => {
   errorHandler.logError(event.error, {
     filename: event.filename,
@@ -283,23 +273,7 @@ window.addEventListener('unhandledrejection', event => {
   });
 });
 
-// Utility fonksiyonlar
+// Utility
 export function handleError(error, context = {}) {
   return errorHandler.logError(error, context);
-}
-
-export function isNetworkError(error) {
-  return (
-    error?.type === ERROR_TYPES.NETWORK ||
-    error?.message?.toLowerCase().includes('network') ||
-    error?.message?.toLowerCase().includes('fetch')
-  );
-}
-
-export function isAuthError(error) {
-  return error?.type === ERROR_TYPES.AUTH || String(error?.code || '').startsWith('auth/');
-}
-
-export function isPermissionError(error) {
-  return error?.type === ERROR_TYPES.PERMISSION || error?.code === 'permission-denied';
 }

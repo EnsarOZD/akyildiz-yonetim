@@ -96,6 +96,22 @@ class UsersService {
     console.log('📝 Fallback: User silindi (backend mevcut değil)', id)
     return { success: true, message: 'User silindi (backend mevcut değil)' }
   }
+
+  // Şifre sıfırla
+  async resetPassword(id) {
+    try {
+      if (this.backendAvailable) {
+        return await apiService.post(`/users/${id}/reset-password`, {})
+      }
+    } catch (error) {
+      console.log('⚠️ Users backend endpoint\'i mevcut değil, fallback modu kullanılıyor')
+      this.backendAvailable = false
+    }
+
+    // Fallback: Başarılı gibi davran
+    console.log('📝 Fallback: Şifre sıfırlandı (backend mevcut değil)', id)
+    return { success: true, message: 'Şifre sıfırlandı (backend mevcut değil)' }
+  }
 }
 
 export default new UsersService() 

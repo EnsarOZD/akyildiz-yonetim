@@ -117,7 +117,24 @@ const submitForm = () => {
     }
     return;
   }
-  emit('save', { ...owner.value });
+
+  //İsim parçalama
+  const nameParts = owner.value.name.trim().split(' ');
+  const firstName = nameParts.length > 1 ? nameParts.slice(0, -1).join(' ') : nameParts[0];
+  const lastName = nameParts.length > 1 ? nameParts[nameParts.length - 1] : '';
+
+  // Backend CreateOwnerCommand beklentileri
+  const commandData = {
+    firstName: firstName,
+    lastName: lastName,
+    phoneNumber: owner.value.phone,
+    email: owner.value.email,
+    apartmentNumber: owner.value.units[0] || '', // Ana daire olarak ilki alınıyor
+    monthlyDues: 0, // Varsayılan
+    flats: owner.value.units // Birden fazla kat seçimi için (Handler'da işlenmeli)
+  };
+
+  emit('save', commandData);
 };
 
 watch(() => props.visible, (newVal) => {

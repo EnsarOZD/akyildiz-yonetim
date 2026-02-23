@@ -1,127 +1,133 @@
+// services/aidatService.js
 import apiService from './api.js'
 
 class AidatService {
   constructor() {
-    // Backend API'nin aidat endpoint'lerinin mevcut olup olmadığını kontrol et
-    this.backendAvailable = false
-    this.checkBackendAvailability()
+    this.backendAvailable = null  // bilinmiyor
+    this.lastHealthCheck = 0
+    this.healthTTLms = 60_000 // 1 dk
   }
 
-  // Backend API'nin aidat endpoint'lerinin mevcut olup olmadığını kontrol et
-  async checkBackendAvailability() {
+  async ensureAvailable() {
+    const now = Date.now()
+    if (this.backendAvailable !== null && (now - this.lastHealthCheck) < this.healthTTLms) {
+      return this.backendAvailable
+    }
     try {
-      // Basit bir health check yap
       await apiService.get('/health')
       this.backendAvailable = true
-    } catch (error) {
-      console.log('⚠️ Aidat backend endpoint\'leri mevcut değil, fallback modu kullanılıyor')
+    } catch (e) {
+      console.log('⚠️ Aidat backend şu an erişilemedi, fallback devrede.')
       this.backendAvailable = false
+    } finally {
+      this.lastHealthCheck = now
     }
+    return this.backendAvailable
   }
 
-  // Tüm aidat tanımlarını getir
+  // -----------------------
+  // A) AİDAT TANIMLARI (definitions)
+  // -----------------------
   async getAidatDefinitions(filters = {}) {
-    try {
-      if (this.backendAvailable) {
-        const params = {}
-        
-        if (filters.year) params.year = filters.year
-        if (filters.tenantId) params.tenantId = filters.tenantId
-        if (filters.unit) params.unit = filters.unit
-        
-        return await apiService.get('/aidat-definitions', params)
-      }
-    } catch (error) {
-      console.log('⚠️ Aidat backend endpoint\'i mevcut değil, fallback modu kullanılıyor')
-      this.backendAvailable = false
+    const ok = await this.ensureAvailable()
+    if (ok) {
+      const params = {}
+      if (filters.year) params.year = filters.year
+      if (filters.tenantId) params.tenantId = filters.tenantId
+      if (filters.unit) params.unit = filters.unit
+      return apiService.get('/aidat-definitions', { params })
     }
-
-    // Fallback: Boş array döndür
     return []
   }
 
-  // ID'ye göre aidat tanımı getir
   async getAidatDefinitionById(id) {
-    try {
-      if (this.backendAvailable) {
-        return await apiService.get(`/aidat-definitions/${id}`)
-      }
-    } catch (error) {
-      console.log('⚠️ Aidat backend endpoint\'i mevcut değil, fallback modu kullanılıyor')
-      this.backendAvailable = false
-    }
-
-    // Fallback: null döndür
+    const ok = await this.ensureAvailable()
+    if (ok) return apiService.get(`/aidat-definitions/${id}`)
     return null
   }
 
-  // Yeni aidat tanımı oluştur
-  async createAidatDefinition(aidatData) {
-    try {
-      if (this.backendAvailable) {
-        return await apiService.post('/aidat-definitions', aidatData)
-      }
-    } catch (error) {
-      console.log('⚠️ Aidat backend endpoint\'i mevcut değil, fallback modu kullanılıyor')
-      this.backendAvailable = false
-    }
-
-    // Fallback: Başarılı gibi davran
-    console.log('📝 Fallback: Aidat tanımı oluşturuldu (backend mevcut değil)', aidatData)
-    return { success: true, message: 'Aidat tanımı oluşturuldu (backend mevcut değil)' }
+  async createAidatDefinition(payload) {
+    const ok = await this.ensureAvailable()
+    if (ok) return apiService.post('/aidat-definitions', payload)
+    console.log('📝 Fallback: createAidatDefinition', payload)
+    return { success: true, message: 'Aidat tanımı oluşturuldu (fallback)' }
   }
 
-  // Aidat tanımı güncelle
-  async updateAidatDefinition(id, aidatData) {
-    try {
-      if (this.backendAvailable) {
-        return await apiService.put(`/aidat-definitions/${id}`, aidatData)
-      }
-    } catch (error) {
-      console.log('⚠️ Aidat backend endpoint\'i mevcut değil, fallback modu kullanılıyor')
-      this.backendAvailable = false
-    }
-
-    // Fallback: Başarılı gibi davran
-    console.log('📝 Fallback: Aidat tanımı güncellendi (backend mevcut değil)', { id, ...aidatData })
-    return { success: true, message: 'Aidat tanımı güncellendi (backend mevcut değil)' }
+  async updateAidatDefinition(id, payload) {
+    const ok = await this.ensureAvailable()
+    if (ok) return apiService.put(`/aidat-definitions/${id}`, payload)
+    console.log('📝 Fallback: updateAidatDefinition', { id, ...payload })
+    return { success: true, message: 'Aidat tanımı güncellendi (fallback)' }
   }
 
-  // Aidat tanımı sil
   async deleteAidatDefinition(id) {
-    try {
-      if (this.backendAvailable) {
-        return await apiService.delete(`/aidat-definitions/${id}`)
-      }
-    } catch (error) {
-      console.log('⚠️ Aidat backend endpoint\'i mevcut değil, fallback modu kullanılıyor')
-      this.backendAvailable = false
-    }
-
-    // Fallback: Başarılı gibi davran
-    console.log('📝 Fallback: Aidat tanımı silindi (backend mevcut değil)', id)
-    return { success: true, message: 'Aidat tanımı silindi (backend mevcut değil)' }
+    const ok = await this.ensureAvailable()
+    if (ok) return apiService.delete(`/aidat-definitions/${id}`)
+    console.log('📝 Fallback: deleteAidatDefinition', id)
+    return { success: true, message: 'Aidat tanımı silindi (fallback)' }
   }
 
-  // Aidat istatistikleri
   async getAidatStats() {
-    try {
-      if (this.backendAvailable) {
-        return await apiService.get('/aidat-definitions/stats')
-      }
-    } catch (error) {
-      console.log('⚠️ Aidat backend endpoint\'i mevcut değil, fallback modu kullanılıyor')
-      this.backendAvailable = false
-    }
+    const ok = await this.ensureAvailable()
+    if (ok) return apiService.get('/aidat-definitions/stats')
+    return { totalCount: 0, totalAmount: 0, thisMonthCount: 0, thisMonthAmount: 0 }
+  }
 
-    // Fallback: Boş istatistikler döndür
-    return {
-      totalCount: 0,
-      totalAmount: 0,
-      thisMonthCount: 0,
-      thisMonthAmount: 0
-    }
+  // -----------------------
+  // B) AİDAT KAYITLARI / BORÇLAR (dues / utilitydebts)
+  // -----------------------
+  // Listele (sayfan ve filteredDues bunu bekliyor)
+  async getDues(filters = {}) {
+    const ok = await this.ensureAvailable()
+    const params = {}
+    if (filters.period) params.period = filters.period       // 'YYYY-MM'
+    if (filters.flatId) params.flatId = filters.flatId
+    if (filters.status) params.status = filters.status       // 'paid' | 'unpaid'
+    if (ok) return apiService.get('/utilitydebts', { params })
+    return []
+  }
+
+  // Dönemden aidat üret (Create Modal bunu yapıyor)
+  async createPeriodDues({ period, dueDate, year }) {
+    const ok = await this.ensureAvailable()
+    const payload = { period, dueDate, year }
+    if (ok) return apiService.post('/utilitydebts/create-aidat', payload)
+    console.log('📝 Fallback: createPeriodDues', payload)
+    // örnek sahte dönüş:
+    return { tenantDuesCreated: 0, ownerDuesCreated: 0 }
+  }
+
+  // Tek kaydı getir (gerekirse)
+  async getDueById(id) {
+    const ok = await this.ensureAvailable()
+    if (ok) return apiService.get(`/utilitydebts/${id}`)
+    return null
+  }
+
+  // Düzenle (Edit Modal burada: updateAidat)
+  async updateAidat(id, payload) {
+    const ok = await this.ensureAvailable()
+    if (ok) return apiService.patch(`/utilitydebts/${id}`, payload)
+    console.log('📝 Fallback: updateAidat', { id, ...payload })
+    return { success: true }
+  }
+
+  // Sil (Delete Modal burada)
+  async deleteAidat(id) {
+    const ok = await this.ensureAvailable()
+    if (ok) return apiService.delete(`/utilitydebts/${id}`)
+    console.log('📝 Fallback: deleteAidat', id)
+    return { success: true }
+  }
+
+  // Ödendi işaretle (istersen)
+  async markAsPaid(id, paidAmount) {
+    const ok = await this.ensureAvailable()
+    const payload = { isPaid: true, remainingAmount: 0, paidAmount }
+    if (ok) return apiService.patch(`/utilitydebts/${id}`, payload)
+    console.log('📝 Fallback: markAsPaid', { id, paidAmount })
+    return { success: true }
   }
 }
 
-export default new AidatService() 
+export default new AidatService()

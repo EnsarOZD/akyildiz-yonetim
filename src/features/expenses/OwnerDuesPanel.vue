@@ -139,6 +139,7 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import ownerDuesService from '@/services/ownerDuesService'
+import tenantsService from '@/services/tenantsService'
 import { useErrorHandler } from '@/composables/useErrorHandler'
 import { UNIT_OPTIONS } from '../../constants/units'
 
@@ -159,7 +160,7 @@ const tenants = ref([])
 const occupiedUnitsSet = ref(new Set())
 
 const formatCurrency = (val) => {
-  if (!val || isNaN(val)) return '₺0.00'
+  if (!val || isNaN(val)) return '₺0,00'
   return Number(val).toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' })
 }
 
@@ -175,7 +176,7 @@ const parseBulkAmount = () => {
 
 const vatIncludedAmount = computed(() => {
   const parsed = parseAmount();
-  if (!parsed) return '0.00 ₺'
+  if (!parsed) return '0,00 ₺'
   return (parsed * 1.2).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ₺'
 })
 
@@ -222,45 +223,41 @@ const vacantUnitOptions = computed(() => {
 });
 
 const fetchTenants = async () => {
-  const tenantSnap = await getDocs(collection(db, 'tenants'))
-  tenants.value = tenantSnap.docs.map(doc => ({
-    id: doc.id,
-    ...doc.data()
-  }))
-  
-  occupiedUnitsSet.value.clear()
-  tenants.value.forEach(tenant => {
-    if (tenant.isActive && tenant.units) {
-      tenant.units.forEach(unit => {
-        occupiedUnitsSet.value.add(unit)
-      })
-    }
-  })
+  try {
+    tenants.value = await tenantsService.getTenants()
+    
+    occupiedUnitsSet.value.clear()
+    tenants.value.forEach(tenant => {
+      if (tenant.isActive && tenant.flats) {
+        tenant.flats.forEach(flat => {
+          const code = typeof flat === 'object' ? flat.code : flat;
+          occupiedUnitsSet.value.add(code)
+        })
+      }
+    })
+  } catch (error) {
+    handleNetworkError(error)
+  }
 }
 
 const fetchOwnerDues = async () => {
-  ownerDuesList.value = []
-  const snap = await getDocs(collection(db, 'ownerDues'))
-  const dues = []
-  snap.forEach(docSnap => {
-    const data = docSnap.data()
-    dues.push({
-      id: docSnap.id,
-      year: data.year,
-      amount: data.amount,
-      vatIncludedAmount: data.vatIncludedAmount,
-      unit: data.unit,
-      isActive: data.isActive !== false,
-      createdAt: data.createdAt
-    })
-  })
-  ownerDuesList.value = dues.sort((a,b) => b.year - a.year || a.unit.localeCompare(b.unit));
+  try {
+    const data = await ownerDuesService.getOwnerDues()
+    ownerDuesList.value = data.sort((a,b) => b.year - a.year || a.unit.localeCompare(b.unit));
+  } catch (error) {
+    handleNetworkError(error)
+  }
 }
 
 const deleteDues = async (id) => {
   if (confirm('Bu aidat tanımını silmek istiyor musunuz? Bu işlem, gelecekte bu tanıma göre aidat oluşturulmasını engeller.')) {
-    await deleteDoc(doc(db, 'ownerDues', id))
-    await fetchOwnerDues()
+    try {
+      await ownerDuesService.deleteOwnerDue(id)
+      showSuccess('Aidat tanımı silindi.')
+      await fetchOwnerDues()
+    } catch (error) {
+      handleValidationError(error)
+    }
   }
 }
 
@@ -298,20 +295,17 @@ const handleSubmit = async () => {
 
   try {
     if (selectedId.value) {
-      const refDoc = doc(db, 'ownerDues', selectedId.value)
-      await setDoc(refDoc, { ...data, updatedAt: new Date() }, { merge: true })
-      alert('Aidat güncellendi.')
+      await ownerDuesService.updateOwnerDue(selectedId.value, data)
+      showSuccess('Aidat güncellendi.')
     } else {
-      await addDoc(collection(db, 'ownerDues'), { ...data, createdAt: new Date() })
-      alert('Aidat kaydı eklendi.')
+      await ownerDuesService.createOwnerDue(data)
+      showSuccess('Aidat kaydı eklendi.')
     }
+    resetForm()
+    await fetchOwnerDues()
   } catch(error) {
-    console.error("Aidat kaydetme hatası:", error);
-    alert("Bir hata oluştu.");
+    handleValidationError(error)
   }
-
-  resetForm()
-  await fetchOwnerDues()
 }
 
 const createBulkDues = async () => {
@@ -338,29 +332,26 @@ const createBulkDues = async () => {
 
   if (confirm(`${bulkYear.value} yılı için ${targetUnits.length} boş kata ${formatCurrency(rawAmount)} (KDV hariç) aidat oluşturmak istiyor musunuz?`)) {
     const vatAmount = parseFloat((rawAmount * 1.2).toFixed(2))
-    const batch = writeBatch(db);
-
-    for (const unit of targetUnits) {
-      const newDocRef = doc(collection(db, 'ownerDues'));
-      batch.set(newDocRef, {
-        unit: unit,
-        year: bulkYear.value,
-        amount: rawAmount,
-        vatIncludedAmount: vatAmount,
-        ownerId: 'MAL_SAHIBI',
-        isActive: true,
-        createdAt: new Date()
-      });
-    }
-
+    
     try {
-      await batch.commit();
-      alert(`${targetUnits.length} adet yeni boş kat aidat kaydı oluşturuldu.`)
+      // Backend toplu işlem desteklemediği için (fallback modunda zaten) döngü ile asenkron yapıyoruz
+      // Not: Fallback modunda console log yazacak
+      for (const unit of targetUnits) {
+        await ownerDuesService.createOwnerDue({
+          unit: unit,
+          year: bulkYear.value,
+          amount: rawAmount,
+          vatIncludedAmount: vatAmount,
+          ownerId: 'MAL_SAHIBI',
+          isActive: true
+        });
+      }
+      
+      showSuccess(`${targetUnits.length} adet yeni boş kat aidat kaydı oluşturuldu.`)
       await fetchOwnerDues()
       bulkAmount.value = ''
     } catch(error) {
-      console.error("Toplu aidat oluşturma hatası:", error);
-      alert("Toplu aidat oluşturulurken bir hata oluştu.");
+      handleValidationError(error)
     }
   }
 }

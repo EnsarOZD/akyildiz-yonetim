@@ -1,8 +1,7 @@
 <template>
   <dialog open class="modal">
     <div class="modal-box max-w-md bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-      
-      <!-- Modal Header -->
+      <!-- Header -->
       <div class="flex items-center justify-between mb-6 pb-4 border-b border-gray-200 dark:border-gray-700">
         <div class="flex items-center gap-3">
           <div class="bg-yellow-100 dark:bg-yellow-900/50 text-yellow-600 dark:text-yellow-400 rounded-full p-2">
@@ -19,34 +18,32 @@
         </button>
       </div>
 
-      <!-- Form Content -->
       <div class="space-y-6">
-        
         <!-- Bilgi Alanları -->
         <div class="bg-gray-50 dark:bg-gray-900 rounded-lg p-4 space-y-4">
           <h4 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-3">Kayıt Bilgileri</h4>
-          
+
           <div class="form-control">
             <label class="label">
-              <span class="label-text font-semibold text-gray-700 dark:text-gray-300">Kat</span>
+              <span class="label-text font-semibold text-gray-700 dark:text-gray-300">Kat/Daire</span>
             </label>
-            <input 
-              type="text" 
-              class="input input-bordered w-full bg-gray-100 dark:bg-gray-600 border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400" 
-              :value="record.unit" 
-              disabled 
+            <input
+              type="text"
+              class="input input-bordered w-full bg-gray-100 dark:bg-gray-600 border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400"
+              :value="record.unit || record.flatNumber || '-'"
+              disabled
             />
           </div>
 
           <div class="form-control">
             <label class="label">
-              <span class="label-text font-semibold text-gray-700 dark:text-gray-300">Şirket</span>
+              <span class="label-text font-semibold text-gray-700 dark:text-gray-300">Şirket/Kişi</span>
             </label>
-            <input 
-              type="text" 
-              class="input input-bordered w-full bg-gray-100 dark:bg-gray-600 border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400" 
-              :value="record.tenantName || '-'" 
-              disabled 
+            <input
+              type="text"
+              class="input input-bordered w-full bg-gray-100 dark:bg-gray-600 border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400"
+              :value="record.tenantName || record.ownerName || '-'"
+              disabled
             />
           </div>
         </div>
@@ -54,18 +51,17 @@
         <!-- Düzenlenebilir Alanlar -->
         <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 space-y-4">
           <h4 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-3">Tutar Bilgileri</h4>
-          
+
           <div class="form-control">
             <label class="label">
               <span class="label-text font-semibold text-gray-700 dark:text-gray-300">KDV Hariç Tutar (₺)</span>
               <span class="label-text-alt text-red-500">*</span>
             </label>
-            <input 
-              type="number" 
-              v-model.number="local.kdvHaric" 
-              class="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300" 
-              step="0.01"
-              min="0"
+            <input
+              type="number"
+              v-model.number="local.kdvHaric"
+              class="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300"
+              step="0.01" min="0"
             />
             <label class="label">
               <span class="label-text-alt text-gray-500 dark:text-gray-400">KDV hariç aidat tutarı</span>
@@ -77,12 +73,11 @@
               <span class="label-text font-semibold text-gray-700 dark:text-gray-300">Toplam Tutar (₺)</span>
               <span class="label-text-alt text-red-500">*</span>
             </label>
-            <input 
-              type="number" 
-              v-model.number="local.toplamTutar" 
-              class="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300" 
-              step="0.01"
-              min="0"
+            <input
+              type="number"
+              v-model.number="local.toplamTutar"
+              class="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300"
+              step="0.01" min="0"
             />
             <label class="label">
               <span class="label-text-alt text-gray-500 dark:text-gray-400">KDV dahil toplam tutar</span>
@@ -90,7 +85,7 @@
           </div>
         </div>
 
-        <!-- Uyarı Kutusu -->
+        <!-- Uyarı -->
         <div class="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-4 border border-yellow-200 dark:border-yellow-800">
           <div class="flex items-start gap-3">
             <div class="bg-yellow-100 dark:bg-yellow-900/50 text-yellow-600 dark:text-yellow-400 rounded-full p-1 mt-0.5">
@@ -100,30 +95,17 @@
             </div>
             <div class="text-sm text-gray-700 dark:text-gray-300">
               <p class="font-medium mb-1">Dikkat</p>
-              <p>Bu değişiklik aidat kaydını kalıcı olarak güncelleyecektir.</p>
+              <p>Bu değişiklik aidat kaydını kalıcı olarak günceller.</p>
             </div>
           </div>
         </div>
 
-        <!-- Modal Actions -->
+        <!-- Actions -->
         <div class="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
-          <button 
-            class="btn btn-outline btn-sm" 
-            @click="$emit('close')"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
+          <button class="btn btn-outline btn-sm" @click="$emit('close')">
             İptal
           </button>
-          <button 
-            class="btn btn-primary btn-sm" 
-            @click="save"
-            :disabled="local.kdvHaric < 0 || local.toplamTutar < 0"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-            </svg>
+          <button class="btn btn-primary btn-sm" @click="save" :disabled="local.kdvHaric < 0 || local.toplamTutar < 0">
             Kaydet
           </button>
         </div>
@@ -137,36 +119,36 @@ import { ref, onMounted } from 'vue'
 import aidatService from '@/services/aidatService'
 import { useErrorHandler } from '@/composables/useErrorHandler'
 
-const props = defineProps({ record: Object })
+const props = defineProps({ record: { type: Object, required: true } })
 const emit = defineEmits(['close', 'updated'])
 
-const { handleNetworkError, handleValidationError, showSuccess } = useErrorHandler()
+const { handleValidationError, showSuccess } = useErrorHandler?.() ?? {}
 
-const local = ref({
-  kdvHaric: 0,
-  toplamTutar: 0
-})
+const local = ref({ kdvHaric: 0, toplamTutar: 0 })
 
 onMounted(() => {
   if (props.record) {
-    local.value.kdvHaric = props.record.kdvHaric ?? 0
-    local.value.toplamTutar = props.record.toplamTutar ?? 0
+    local.value.kdvHaric = Number(props.record.kdvHaric ?? props.record.amountExVat ?? 0)
+    local.value.toplamTutar = Number(props.record.toplamTutar ?? props.record.amount ?? 0)
   }
 })
 
 const save = async () => {
   try {
+    const paid = Number(props.record.paidAmount || 0)
+    const remaining = Number(local.value.toplamTutar) - paid
+
     await aidatService.updateAidat(props.record.id, {
       kdvHaric: local.value.kdvHaric,
       kdvDahil: local.value.toplamTutar,
-      remainingAmount: local.value.toplamTutar - (props.record.paidAmount || 0),
-      isPaid: (local.value.toplamTutar - (props.record.paidAmount || 0)) <= 0
+      remainingAmount: remaining,
+      isPaid: remaining <= 0
     })
-    showSuccess('Aidat kaydı güncellendi.')
+    showSuccess?.('Aidat kaydı güncellendi.')
     emit('updated')
     emit('close')
   } catch (error) {
-    handleValidationError(error)
+    handleValidationError?.(error)
   }
 }
 </script>

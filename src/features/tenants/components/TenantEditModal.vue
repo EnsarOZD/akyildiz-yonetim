@@ -26,14 +26,6 @@
                 <input v-model.trim="form.companyName" class="input input-bordered w-full bg-white dark:bg-gray-700" required />
               </div>
 
-              <div class="form-control">
-                <label class="label"><span class="label-text font-semibold">Firma Türü *</span></label>
-                <select v-model="form.companyType" class="select select-bordered w-full bg-white dark:bg-gray-700" required>
-                  <option value="">Firma türü seçin</option>
-                  <option value="Individual">Bireysel</option>
-                  <option value="Corporate">Kurumsal</option>
-                </select>
-              </div>
 
               <div class="form-control">
                 <label class="label"><span class="label-text font-semibold">İş Türü *</span></label>
@@ -49,19 +41,14 @@
               </div>
 
               <div class="form-control">
-                <label class="label"><span class="label-text font-semibold">{{ companyTypeLabel }} *</span></label>
+                <label class="label"><span class="label-text font-semibold">Kimlik/Vergi Numarası *</span></label>
                 <input
                   v-model="form.identityNumber"
-                  :class="['input input-bordered w-full bg-white dark:bg-gray-700', identityNumberError ? 'input-error' : '']"
-                  :placeholder="companyTypePlaceholder"
-                  :maxlength="form.companyType === 'Individual' ? 11 : 10"
-                  :pattern="form.companyType === 'Individual' ? '[0-9]{11}' : '[0-9]{10}'"
+                  class="input input-bordered w-full bg-white dark:bg-gray-700"
+                  placeholder="TC veya Vergi No"
                   inputmode="numeric"
                   required
                 />
-                <label v-if="identityNumberError" class="label">
-                  <span class="label-text-alt text-error">{{ identityNumberError }}</span>
-                </label>
               </div>
             </div>
           </div>
@@ -100,21 +87,6 @@
             </div>
           </div>
 
-          <!-- Sözleşme -->
-          <div class="card bg-base-200 p-4">
-            <h4 class="text-lg font-semibold mb-4 text-gray-700 dark:text-gray-300">📅 Sözleşme</h4>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div class="form-control">
-                <label class="label"><span class="label-text font-semibold">Başlangıç *</span></label>
-                <input type="date" v-model="form.contractStartDate" class="input input-bordered w-full bg-white dark:bg-gray-700" required />
-              </div>
-              <div class="form-control">
-                <label class="label"><span class="label-text font-semibold">Bitiş</span></label>
-                <input type="date" v-model="form.contractEndDate" class="input input-bordered w-full bg-white dark:bg-gray-700" />
-              </div>
-            </div>
-            <p v-if="dateError" class="mt-2 text-sm text-error">{{ dateError }}</p>
-          </div>
         </form>
       </div>
 
@@ -140,89 +112,39 @@ const emit = defineEmits(['save', 'close'])
 const form = ref(null)
 
 // helpers
-const toInputDate = (d) => {
-  if (!d) return ''
-  const dt = new Date(d)
-  if (Number.isNaN(dt.getTime())) return ''
-  return dt.toISOString().slice(0, 10)
-}
 
 watch(() => props.tenant, (t) => {
   if (!t) { form.value = null; return }
-  // Backend (UpdateTenantCommand) ile bire bir eşleşen form modeli
   form.value = {
     id: t.id,
     companyName: t.companyName || '',
     businessType: t.businessType || '',
-    companyType: t.companyType || 'Corporate', // default
     identityNumber: t.identityNumber || '',
     contactPersonName: t.contactPersonName || '',
     contactPersonPhone: t.contactPersonPhone || '',
     contactPersonEmail: t.contactPersonEmail || '',
     monthlyAidat: Number(t.monthlyAidat ?? 0),
-    contractStartDate: toInputDate(t.contractStartDate) || '',
-    contractEndDate: toInputDate(t.contractEndDate) || '',
     isActive: Boolean(t.isActive)
   }
 }, { immediate: true })
 
-// Computeds
-const companyTypeLabel = computed(() =>
-  form.value?.companyType === 'Individual' ? 'TC Kimlik Numarası' :
-  form.value?.companyType === 'Corporate' ? 'Vergi Numarası' : 'Kimlik/Vergi Numarası'
-)
-const companyTypePlaceholder = computed(() =>
-  form.value?.companyType === 'Individual' ? '12345678901' :
-  form.value?.companyType === 'Corporate' ? '1234567890' : 'Numara girin'
-)
-
-const identityNumberError = computed(() => {
-  const f = form.value
-  if (!f) return ''
-  if (!f.companyType || !f.identityNumber) return ''
-  if (f.companyType === 'Individual') {
-    if (!/^\d{11}$/.test(f.identityNumber)) return 'TC Kimlik Numarası 11 hane ve sadece rakam olmalıdır'
-  } else if (f.companyType === 'Corporate') {
-    if (!/^\d{10}$/.test(f.identityNumber)) return 'Vergi Numarası 10 hane ve sadece rakam olmalıdır'
-  }
-  return ''
-})
-
-const dateError = computed(() => {
-  const f = form.value
-  if (!f?.contractStartDate || !f.contractEndDate) return ''
-  const s = new Date(f.contractStartDate).getTime()
-  const e = new Date(f.contractEndDate).getTime()
-  return e < s ? 'Sözleşme bitiş tarihi, başlangıç tarihinden önce olamaz.' : ''
-})
 
 // Save
 const save = () => {
   const f = form.value
   if (!f) return
 
-  if (identityNumberError.value) {
-    alert(identityNumberError.value)
-    return
-  }
-  if (dateError.value) {
-    alert(dateError.value)
-    return
-  }
 
   // UpdateTenantCommand payload
   const payload = {
     id: f.id,
     companyName: f.companyName.trim(),
     businessType: f.businessType,
-    companyType: f.companyType,
     identityNumber: f.identityNumber.trim(),
     contactPersonName: f.contactPersonName.trim(),
     contactPersonPhone: f.contactPersonPhone.trim(),
     contactPersonEmail: f.contactPersonEmail.trim(),
     monthlyAidat: Number(f.monthlyAidat ?? 0),
-    contractStartDate: f.contractStartDate ? new Date(f.contractStartDate) : null,
-    contractEndDate: f.contractEndDate ? new Date(f.contractEndDate) : null,
     isActive: Boolean(f.isActive)
   }
 

@@ -15,6 +15,9 @@
           <div class="bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 px-3 py-1 rounded-full text-sm">
             {{ totalTransactionsCount }} işlem
           </div>
+          <div class="bg-orange-100 dark:bg-orange-900/50 text-orange-600 dark:text-orange-400 px-3 py-1 rounded-full text-sm">
+            Toplam Borç: {{ formatCurrency(totalDebt) }}
+          </div>
         </div>
       </div>
 
@@ -30,6 +33,7 @@
               <option value="">Tüm Tipler</option>
               <option value="income">Gelir</option>
               <option value="expense">Gider</option>
+              <option value="debt">Borç</option>
             </select>
           </div>
 
@@ -75,20 +79,27 @@
               <div 
                 :class="{
                   'bg-green-100 dark:bg-green-900/50 text-green-600 dark:text-green-400': item.type === 'income',
-                  'bg-red-100 dark:bg-red-900/50 text-red-600 dark:text-red-400': item.type === 'expense'
+                  'bg-red-100 dark:bg-red-900/50 text-red-600 dark:text-red-400': item.type === 'expense',
+                  'bg-orange-100 dark:bg-orange-900/50 text-orange-600 dark:text-orange-400': item.type === 'debt'
                 }"
                 class="rounded-full p-3"
               >
                 <svg v-if="item.type === 'income'" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
                 </svg>
-                <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <svg v-else-if="item.type === 'expense'" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                </svg>
+                <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
               <div>
                 <p class="font-semibold text-gray-800 dark:text-gray-100">
-                  {{ item.payer || item.description || 'İşlem' }}
+                  {{ item.type === 'debt' ? (item.company || 'Borç') : (item.payer || item.description || 'İşlem') }}
+                  <span v-if="item.type === 'debt'" class="text-xs font-normal text-gray-400 ml-1">
+                    ({{ item.typeLabel }})
+                  </span>
                 </p>
                 <p class="text-sm text-gray-500 dark:text-gray-400">{{ formatDate(item.date) }}</p>
                 <p v-if="item.bank" class="text-xs text-gray-400 dark:text-gray-500">{{ item.bank }}</p>
@@ -98,7 +109,8 @@
               <p 
                 :class="{
                   'text-green-600 dark:text-green-400': item.type === 'income',
-                  'text-red-600 dark:text-red-400': item.type === 'expense'
+                  'text-red-600 dark:text-red-400': item.type === 'expense',
+                  'text-orange-600 dark:text-orange-400': item.type === 'debt'
                 }"
                 class="font-bold text-lg"
               >
@@ -111,7 +123,7 @@
                 }"
                 class="text-sm font-medium"
               >
-                {{ item.type === 'income' ? 'Gelir' : 'Gider' }}
+                {{ item.type === 'income' ? 'Gelir' : (item.type === 'expense' ? 'Gider' : 'Borç') }}
               </p>
             </div>
           </div>
@@ -139,6 +151,7 @@ import apiService from '@/services/api'
 const tenants = ref([])
 const payments = ref([])
 const expenses = ref([])
+const debts = ref([])
 
 const filterType = ref('')
 const filterStart = ref('')
@@ -184,15 +197,30 @@ const fetchData = async () => {
       ...expense,
       type: 'expense'
     }))
+
+    // Borçları getir
+    const debtsResponse = await apiService.get('/UtilityDebts')
+    debts.value = (debtsResponse || []).map(debt => {
+        const tenant = tenants.value.find(t => t.id === debt.tenantId)
+        return {
+            ...debt,
+            type: 'debt',
+            date: debt.dueDate || debt.createdAt, // Borcun tarihi olarak vade tarihi veya oluşturulma tarihi
+            description: debt.description || 'Borç Tahakkuku',
+            company: debt.tenantName || tenant?.companyName || tenant?.company || tenant?.fullName || debt.description || 'Bilinmiyor',
+            typeLabel: debt.type === 0 || debt.type === 'Aidat' ? 'Aidat' : (debt.type === 1 || debt.type === 'Electricity' ? 'Elektrik' : 'Su')
+        }
+    })
   } catch (error) {
     console.error('Veriler yüklenirken hata:', error)
     payments.value = []
     expenses.value = []
+    debts.value = []
   }
 }
 
 const allTransactions = computed(() => {
-  return [...payments.value, ...expenses.value].sort((a, b) => new Date(b.date) - new Date(a.date))
+  return [...payments.value, ...expenses.value, ...debts.value].sort((a, b) => new Date(b.date) - new Date(a.date))
 })
 
 const totalIncome = computed(() => {
@@ -201,6 +229,10 @@ const totalIncome = computed(() => {
 
 const totalExpense = computed(() => {
   return expenses.value.reduce((sum, expense) => sum + Number(expense.amount || 0), 0)
+})
+
+const totalDebt = computed(() => {
+  return debts.value.reduce((sum, debt) => sum + Number(debt.remainingAmount || 0), 0)
 })
 
 const totalTransactionsCount = computed(() => {

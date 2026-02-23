@@ -10,7 +10,7 @@
           </h1>
           <p class="text-gray-600 dark:text-gray-400">İş hanındaki tüm üniteleri yönetin</p>
         </div>
-        <button @click="showCreateModal = true" class="btn btn-success bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 border-0 text-white shadow-lg">
+        <button v-if="authStore.role === ROLES.ADMIN || authStore.role === ROLES.MANAGER" @click="showCreateModal = true" class="btn btn-success bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 border-0 text-white shadow-lg">
           <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
           </svg>
@@ -102,17 +102,14 @@
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/><circle cx="5" cy="12" r="1.5"/></svg>
             </button>
             <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-200 rounded-box w-40 z-10">
-              <li><a @click="viewFlat(flat)">Detayları Gör</a></li>
-              <li><a @click="editFlat(flat)">Düzenle</a></li>
-              <li v-if="canDelete(flat)">
-   <a @click="deleteFlat(flat)" class="text-error">Sil</a>
- </li>
- <li v-else>
-   <a class="opacity-50 pointer-events-none text-error">Sil (izin yok)</a>
- </li>
- <li v-if="flat.type === 2">
-   <a @click="deactivateFlat(flat)">Pasifleştir</a>
- </li>
+              <li v-if="authStore.role === ROLES.ADMIN || authStore.role === ROLES.MANAGER"><a @click="editFlat(flat)">Düzenle</a></li>
+              <li v-if="authStore.role === ROLES.ADMIN">
+                <a v-if="canDelete(flat)" @click="deleteFlat(flat)" class="text-error">Sil</a>
+                <a v-else class="opacity-50 pointer-events-none text-error">Sil (Dolu)</a>
+              </li>
+              <li v-if="(authStore.role === ROLES.ADMIN || authStore.role === ROLES.MANAGER) && flat.type === 2">
+                <a @click="deactivateFlat(flat)">Pasifleştir</a>
+              </li>
             </ul>
           </div>
         </div>
@@ -135,7 +132,6 @@
               <span :class="['badge font-semibold', flat.isOccupied ? 'badge-warning' : 'badge-info']">
                 {{ flat.isOccupied ? 'Dolu' : 'Boş' }}
               </span>
-              <span v-if="flat.effectiveShare != null" class="badge badge-outline">Hisse: {{ flat.effectiveShare }}</span>
             </div>
           </div>
         </div>
@@ -202,6 +198,8 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
+import { ROLES } from '@/constants/roles'
+import { useAuthStore } from '@/stores/auth'
 import FlatEditModal from './components/FlatEditModal.vue'
 import FlatCreateModal from './components/FlatCreateModal.vue'
 import flatsService from '@/features/flats/services/flatsService'
@@ -223,6 +221,7 @@ const normalizeFlatPayload = (d) => ({
 });
 
 const router = useRouter()
+const authStore = useAuthStore()
 
 // State
 const flats = ref([])
@@ -362,9 +361,6 @@ const closeEditModal = () => {
   showEditModal.value = false
 }
 
-const viewFlat = (flat) => {
-  router.push(`/flats/${flat.id}`)
-}
 
 const deleteFlat = async (flat) => {
   if (!confirm(`${flat.code} ünitesini silmek istediğinizden emin misiniz?`)) return
