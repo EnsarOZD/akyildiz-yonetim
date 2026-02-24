@@ -69,6 +69,17 @@
             <button @click="openManualDebt(2)" class="btn btn-info btn-md text-white">
               <span class="mr-1">💧</span> Su Borcu Ekle
             </button>
+            <div class="divider divider-horizontal mx-0"></div>
+            <button @click="triggerExcelImport" class="btn btn-neutral btn-md text-white border-2 border-dashed border-gray-400">
+              <span class="mr-1">📊</span> Excel'den Yükle
+            </button>
+            <input 
+              type="file" 
+              ref="fileInput" 
+              hidden 
+              accept=".xlsx,.xls" 
+              @change="handleExcelImport"
+            />
           </div>
         </div>
       </section>
@@ -317,6 +328,36 @@ const openManualDebt = (type) => {
   manualType.value = type
   selectedDue.value = null
   showManualModal.value = true
+}
+
+const fileInput = ref(null)
+
+const triggerExcelImport = () => {
+  fileInput.value.click()
+}
+
+const handleExcelImport = async (event) => {
+  const file = event.target.files[0]
+  if (!file) return
+
+  const formData = new FormData()
+  formData.append('file', file)
+
+  setLoading(true)
+  try {
+    const response = await api.post('/utilitydebts/import', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    })
+    showSuccess(`${response.count} adet borç kaydı başarıyla içeri aktarıldı.`)
+    refreshAll()
+  } catch (error) {
+    handleNetworkError(error)
+  } finally {
+    setLoading(false)
+    event.target.value = '' // Temizle
+  }
 }
 
 const editDebt = (d) => {
