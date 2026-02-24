@@ -16,8 +16,8 @@ export const useAuthStore = defineStore('auth', () => {
 
   async function fetchUserProfile() {
     // Backend API kontrolü
-    const isBackendActive = import.meta.env.VITE_API_BASE_URL && 
-                           import.meta.env.VITE_API_BASE_URL !== 'http://localhost:5000/api'
+    const isBackendActive = import.meta.env.VITE_API_BASE_URL &&
+      import.meta.env.VITE_API_BASE_URL !== 'http://localhost:5000/api'
 
     if (isBackendActive) {
       // Backend API ile kullanıcı profili
@@ -25,7 +25,7 @@ export const useAuthStore = defineStore('auth', () => {
         const backendUser = await authService.checkAuthStatus()
         if (backendUser) {
           user.value = { id: backendUser.id, email: backendUser.email }
-          role.value = backendUser.role
+          role.value = backendUser.role ? backendUser.role.toLowerCase() : null
           companyId.value = backendUser.companyId
           fullName.value = `${backendUser.firstName || ''} ${backendUser.lastName || ''}`.trim()
           email.value = backendUser.email
@@ -43,7 +43,7 @@ export const useAuthStore = defineStore('auth', () => {
 
     // Demo modu kontrolü
     const isDemoMode = !import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_BASE_URL === 'http://localhost:5000/api'
-    
+
     if (isDemoMode) {
       // Demo kullanıcı profili
       user.value = { uid: 'demo-user-id', email: 'demo@akyildiz.com' }
@@ -60,13 +60,13 @@ export const useAuthStore = defineStore('auth', () => {
   // 👇 Bu fonksiyon App.vue'de çağrılmalı
   function initAuthListener() {
     // Backend API kontrolü
-    const isBackendActive = import.meta.env.VITE_API_BASE_URL && 
-                           import.meta.env.VITE_API_BASE_URL !== 'http://localhost:5000/api'
+    const isBackendActive = import.meta.env.VITE_API_BASE_URL &&
+      import.meta.env.VITE_API_BASE_URL !== 'http://localhost:5000/api'
 
     if (isBackendActive) {
       // Backend API ile auth listener
       fetchUserProfile()
-      
+
       // Backend auth state değişikliklerini dinle
       authService.onAuthStateChanged((user) => {
         if (user) {
@@ -81,7 +81,7 @@ export const useAuthStore = defineStore('auth', () => {
 
     // Demo modu kontrolü
     const isDemoMode = !import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_BASE_URL === 'http://localhost:5000/api'
-    
+
     if (isDemoMode) {
       // Demo modu için mock auth listener
       console.log('Demo mode: Initializing auth listener')
