@@ -20,6 +20,8 @@ const OverdueOwnerPayments = () => import('../pages/OverdueOwnerPayments.vue')
 const Overdue = () => import('../pages/Overdue.vue')
 const Flats = () => import('../features/flats/Flats.vue')
 const Reports = () => import('../features/reports/ReportsView.vue')
+const Notifications = () => import('../features/notifications/NotificationsView.vue')
+const Profile = () => import('../features/users/ProfileView.vue')
 
 const routes = [
   { path: '/', name: 'Login', component: LoginView, meta: { public: true, hideLayout: true } },
@@ -33,10 +35,11 @@ const routes = [
   { path: '/utilities', name: 'Utilities', component: Utilities, meta: { requiresAuth: true, roles: ['admin', 'manager', 'dataentry'] } },
   { path: '/flats', name: 'Flats', component: Flats, meta: { requiresAuth: true, roles: ['admin', 'manager', 'dataentry'] } },
   { path: '/reports', name: 'Reports', component: Reports, meta: { requiresAuth: true, roles: ['admin', 'manager', 'observer'] } },
+  { path: '/notifications', name: 'Notifications', component: Notifications, meta: { requiresAuth: true } },
 
   { path: '/admin', name: 'Admin', component: AdminDashboard, meta: { requiresAuth: true, roles: ['admin', 'manager'] } },
 
-  { path: '/profile', name: 'Profile', component: TenantDetailPage, meta: { requiresAuth: true, roles: ['tenant'] } },
+  { path: '/profile', name: 'Profile', component: Profile, meta: { requiresAuth: true } },
 
   { path: '/login', redirect: '/' },
   { path: '/set-password', name: 'SetPassword', component: () => import('../views/SetPasswordView.vue'), meta: { public: true, hideLayout: true } },
