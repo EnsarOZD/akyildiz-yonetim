@@ -14,9 +14,12 @@ export const useNotificationsStore = defineStore('notifications', () => {
         loading.value = true
         try {
             const data = await notificationsService.getNotifications(false, 20, 0)
-            items.value = data.items
-            totalCount.value = data.totalCount
-            unreadCount.value = data.unreadCount
+            items.value = data.items || []
+            totalCount.value = data.totalCount || 0
+            unreadCount.value = data.unreadCount || 0
+        } catch (error) {
+            console.error('Failed to refresh notifications:', error)
+            // Error is handled by apiService (401 redirect), so we just fail gracefully here
         } finally {
             loading.value = false
         }
@@ -28,9 +31,11 @@ export const useNotificationsStore = defineStore('notifications', () => {
         loading.value = true
         try {
             const data = await notificationsService.getNotifications(false, 20, items.value.length)
-            items.value = [...items.value, ...data.items]
-            totalCount.value = data.totalCount
-            unreadCount.value = data.unreadCount
+            items.value = [...items.value, ...(data.items || [])]
+            totalCount.value = data.totalCount || totalCount.value
+            unreadCount.value = data.unreadCount || unreadCount.value
+        } catch (error) {
+            console.error('Failed to fetch more notifications:', error)
         } finally {
             loading.value = false
         }

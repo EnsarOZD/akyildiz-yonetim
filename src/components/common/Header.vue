@@ -311,8 +311,10 @@ onMounted(() => {
     // Backend API ile kullanıcı kontrolü
     loadUserFromBackend()
     
-    // Bildirimleri çek
-    notificationsStore.refresh()
+    // Bildirimleri çek (Sadece giriş yapılmışsa)
+    if (authStore.user) {
+      notificationsStore.refresh()
+    }
   } else {
     // Demo modu kontrolü
     const isDemoMode = !import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_BASE_URL === 'http://localhost:5000/api'
@@ -343,6 +345,12 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   document.removeEventListener('click', clickOutsideHandler)
+})
+
+watch(() => authStore.user, (newUser) => {
+  if (newUser && import.meta.env.VITE_API_BASE_URL && import.meta.env.VITE_API_BASE_URL !== 'http://localhost:5000/api') {
+    notificationsStore.refresh()
+  }
 })
 
 watch(route, () => {
