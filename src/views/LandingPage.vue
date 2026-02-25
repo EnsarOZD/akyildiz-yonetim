@@ -7,10 +7,10 @@
           <!-- Logo -->
           <div class="flex items-center space-x-3">
             <div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center overflow-hidden p-1.5">
-              <img src="/logo.svg" class="w-full h-full object-contain brightness-0 invert" alt="Logo" />
+              <img :src="logoUrl" class="w-full h-full object-contain brightness-0 invert" :alt="appName" />
             </div>
             <span class="text-xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
-              Akyıldız Yönetim
+              {{ appName }}
             </span>
           </div>
 
@@ -60,7 +60,7 @@
       <div class="max-w-7xl mx-auto">
         <div class="text-center">
           <h1 class="text-4xl md:text-6xl font-bold text-white mb-6">
-            Akyıldız Yönetim
+            {{ appName }}
             <span class="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
               Profesyonel Hizmet
             </span>
@@ -97,7 +97,7 @@
       <div class="max-w-7xl mx-auto">
         <div class="text-center mb-16">
           <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">
-            Akyıldız Yönetim Hizmetleri
+            {{ appName }} Hizmetleri
           </h2>
           <p class="text-xl text-gray-300 max-w-2xl mx-auto">
             Profesyonel ekibimizle sunduğumuz kapsamlı apartman ve site yönetim hizmetleri
@@ -192,10 +192,10 @@
         <div class="grid lg:grid-cols-2 gap-12 items-center">
           <div>
             <h2 class="text-3xl md:text-4xl font-bold text-white mb-6">
-              Akyıldız Yönetim Hakkında
+              {{ appName }} Hakkında
             </h2>
             <p class="text-lg text-gray-300 mb-6">
-              2024 yılında İstanbul'da kurulan Akyıldız Yönetim, apartman ve site yönetiminde 
+              2024 yılında İstanbul'da kurulan {{ appName }}, apartman ve site yönetiminde 
               güvenilir ve kaliteli hizmet anlayışıyla yola çıktı.
             </p>
             <p class="text-lg text-gray-300 mb-8">
@@ -285,9 +285,9 @@
           <div>
             <div class="flex items-center space-x-3 mb-4">
               <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center overflow-hidden p-1">
-                <img src="/logo.svg" class="w-full h-full object-contain brightness-0 invert" alt="Logo" />
+                <img :src="logoUrl" class="w-full h-full object-contain brightness-0 invert" :alt="appName" />
               </div>
-              <span class="text-xl font-bold">Akyıldız Yönetim</span>
+              <span class="text-xl font-bold">{{ appName }}</span>
             </div>
             <p class="text-gray-400">
               İstanbul'un güvenilir apartman ve site yönetim firması.
@@ -323,7 +323,7 @@
         </div>
 
         <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-          <p>&copy; 2024 Akyıldız Yönetim. Tüm hakları saklıdır.</p>
+          <p>&copy; 2024 {{ appName }}. Tüm hakları saklıdır.</p>
         </div>
       </div>
     </footer>
@@ -332,8 +332,10 @@
 
 <script setup>
 import { ref } from 'vue'
+import { useBranding } from '@/composables/useBranding'
 
 const mobileMenuOpen = ref(false)
+const { logoUrl, appName } = useBranding()
 
 const toggleMobileMenu = () => {
   mobileMenuOpen.value = !mobileMenuOpen.value

@@ -5,8 +5,8 @@
         <!-- Logo ve Başlık -->
         <div class="flex items-center">
           <router-link to="/" class="flex-shrink-0 flex items-center gap-2">
-            <img src="/logo.svg" class="h-8 w-auto" alt="Logo" />
-            <span class="text-xl font-semibold font-cormorantSC hidden md:block">AKYILDIZ İŞ MERKEZİ</span>
+            <img :src="logoUrl" class="h-9 w-9 text-blue-600 dark:text-blue-400" :alt="appName" />
+            <span class="text-xl font-semibold font-cormorantSC hidden md:block uppercase">{{ appName }}</span>
           </router-link>
         </div>
 
@@ -123,11 +123,11 @@
 
 <script setup>
 import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import { ROLES } from '@/constants/roles'
-import authService from '@/services/authService'
 import { useAuthStore } from '@/stores/auth'
+import { useBranding } from '@/composables/useBranding'
+
 const authStore = useAuthStore()
+const { logoUrl, appName } = useBranding()
 
 const route = useRoute()
 const router = useRouter()

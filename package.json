@@ -37,6 +37,7 @@
     "postcss": "^8.5.3",
     "tailwindcss": "^3.4.0",
     "terser": "^5.43.1",
-    "vite": "^5.0.11"
+    "vite": "^5.0.11",
+    "vite-plugin-pwa": "^1.2.0"
   }
 }
