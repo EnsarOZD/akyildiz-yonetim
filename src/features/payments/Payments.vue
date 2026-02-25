@@ -168,7 +168,7 @@
           </div>
           <div v-else>
             <div 
-              v-for="p in filteredPayments" 
+              v-for="p in paginatedPayments" 
               :key="p.id"
               class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center p-4 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-200 border-b dark:border-gray-700/50"
             >
@@ -199,6 +199,60 @@
                     <li><a @click="deletePayment(p.id)" class="text-red-500">Sil</a></li>
                   </ul>
                 </div>
+              </div>
+            </div>
+
+            <!-- Pagination Control -->
+            <div v-if="totalPages > 1" class="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6 pt-6 border-t dark:border-gray-700">
+              <p class="text-sm text-gray-500">
+                Toplam <span class="font-medium">{{ filteredPayments.length }}</span> kayıt arasından 
+                <span class="font-medium">{{ (currentPage - 1) * pageSize + 1 }}</span> - 
+                <span class="font-medium">{{ Math.min(currentPage * pageSize, filteredPayments.length) }}</span> arası gösteriliyor
+              </p>
+              <div class="flex items-center gap-1">
+                <button 
+                  @click="currentPage = 1" 
+                  :disabled="currentPage === 1"
+                  class="btn btn-sm btn-ghost"
+                  aria-label="İlk Sayfa"
+                >
+                  ««
+                </button>
+                <button 
+                  @click="currentPage--" 
+                  :disabled="currentPage === 1"
+                  class="btn btn-sm btn-ghost"
+                >
+                  Önceki
+                </button>
+                
+                <div class="flex items-center gap-1">
+                  <button 
+                    v-for="page in displayedPages" 
+                    :key="page"
+                    @click="currentPage = page"
+                    class="btn btn-sm"
+                    :class="currentPage === page ? 'btn-primary' : 'btn-ghost'"
+                  >
+                    {{ page }}
+                  </button>
+                </div>
+
+                <button 
+                  @click="currentPage++" 
+                  :disabled="currentPage === totalPages"
+                  class="btn btn-sm btn-ghost"
+                >
+                  Sonraki
+                </button>
+                <button 
+                  @click="currentPage = totalPages" 
+                  :disabled="currentPage === totalPages"
+                  class="btn btn-sm btn-ghost"
+                  aria-label="Son Sayfa"
+                >
+                  »»
+                </button>
               </div>
             </div>
           </div>
@@ -258,7 +312,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { ROLES } from '@/constants/roles'
 import { useAuthStore } from '@/stores/auth'
 import PaymentModal from './PaymentModal.vue'
@@ -411,6 +465,37 @@ const filteredPayments = computed(() => {
 
   return filtered.sort((a, b) => new Date(getPaymentDate(b)) - new Date(getPaymentDate(a)))
 })
+
+/* ---- Pagination ---- */
+const currentPage = ref(1)
+const pageSize = ref(10)
+
+const totalPages = computed(() => Math.ceil(filteredPayments.value.length / pageSize.value))
+
+const paginatedPayments = computed(() => {
+  const start = (currentPage.value - 1) * pageSize.value
+  const end = start + pageSize.value
+  return filteredPayments.value.slice(start, end)
+})
+
+const displayedPages = computed(() => {
+  const total = totalPages.value
+  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1)
+  
+  const curr = currentPage.value
+  let start = Math.max(1, curr - 3)
+  let end = Math.min(total, curr + 3)
+  
+  if (curr <= 4) end = 7
+  if (curr >= total - 3) start = total - 6
+  
+  return Array.from({ length: end - start + 1 }, (_, i) => start + i)
+})
+
+// Reset to first page when filters change
+watch(filters, () => {
+  currentPage.value = 1
+}, { deep: true })
 
 /* ---- Modal form ---- */
 const newPayment = ref({

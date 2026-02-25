@@ -257,22 +257,22 @@
           <div 
             v-for="item in overdueItems.slice(0, 5)" 
             :key="item.id"
-            class="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800"
+            class="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800 gap-3"
           >
             <div class="flex items-center gap-3">
-              <div class="bg-red-100 dark:bg-red-900/50 text-red-600 dark:text-red-400 rounded-full p-2">
+              <div class="bg-red-100 dark:bg-red-900/50 text-red-600 dark:text-red-400 rounded-full p-2 flex-shrink-0">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
-              <div>
-                <p class="font-medium text-gray-800 dark:text-gray-100">{{ item.company }}</p>
-                <p class="text-sm text-gray-500 dark:text-gray-400">{{ item.floor }} - {{ item.typeLabel }}</p>
+              <div class="min-w-0">
+                <p class="font-medium text-gray-800 dark:text-gray-100 truncate">{{ item.company }}</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 capitalize">{{ item.floor }} - {{ item.typeLabel }}</p>
               </div>
             </div>
-            <div class="text-right">
+            <div class="text-left sm:text-right border-t sm:border-0 pt-2 sm:pt-0">
               <p class="font-semibold text-red-600 dark:text-red-400">{{ formatCurrency(item.amount) }}</p>
-              <p class="text-xs text-gray-500 dark:text-gray-400">{{ formatDate(item.dueDate) }}</p>
+              <p class="text-[10px] text-gray-500 dark:text-gray-400">{{ formatDate(item.dueDate) }}</p>
             </div>
           </div>
         </div>
@@ -321,24 +321,28 @@
           </div>
         </div>
         
-        <div class="h-64 flex items-end justify-between gap-2">
-          <div 
-            v-for="(month, index) in monthlyData" 
-            :key="index"
-            class="flex-1 flex flex-col items-center gap-2"
-          >
-            <!-- Gelir çubuğu -->
+        <div class="overflow-x-auto pb-4">
+          <div class="h-64 flex items-end justify-between gap-4 min-w-[500px] px-2">
             <div 
-              class="w-full bg-green-500 rounded-t"
-              :style="{ height: `${(month.income / maxAmount) * 200}px` }"
-            ></div>
-            <!-- Gider çubuğu -->
-            <div 
-              class="w-full bg-red-500 rounded-t"
-              :style="{ height: `${(month.expense / maxAmount) * 200}px` }"
-            ></div>
-            <!-- Ay etiketi -->
-            <span class="text-xs text-gray-500 dark:text-gray-400">{{ month.month }}</span>
+              v-for="(month, index) in monthlyData" 
+              :key="index"
+              class="flex-1 flex flex-col items-center gap-2 group relative"
+            >
+              <!-- Gelir çubuğu -->
+              <div 
+                class="w-full max-w-[20px] bg-green-500 rounded-t hover:bg-green-600 transition-all cursor-help"
+                :style="{ height: `${(month.income / maxAmount) * 200}px` }"
+                :title="`Gelir: ${formatCurrency(month.income)}`"
+              ></div>
+              <!-- Gider çubuğu -->
+              <div 
+                class="w-full max-w-[20px] bg-red-500 rounded-t hover:bg-red-600 transition-all cursor-help"
+                :style="{ height: `${(month.expense / maxAmount) * 200}px` }"
+                :title="`Gider: ${formatCurrency(month.expense)}`"
+              ></div>
+              <!-- Ay etiketi -->
+              <span class="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">{{ month.month }}</span>
+            </div>
           </div>
         </div>
       </section>
