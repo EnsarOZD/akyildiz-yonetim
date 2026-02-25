@@ -1,31 +1,44 @@
 import axios from 'axios'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || ''
+let cachedVapidKey = null
 
 export const pushNotificationService = {
-    async requestPermission() {
-        if (!('Notification' in window)) {
-            console.warn('This browser does not support notifications.')
-            return false
-        }
+    isSupported() {
+        return 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window
+    },
 
-        const permission = await Notification.requestPermission()
-        return permission === 'granted'
+    getPermission() {
+        return Notification.permission
+    },
+
+    async isSubscribed() {
+        if (!this.isSupported()) return false
+        const registration = await navigator.serviceWorker.ready
+        const subscription = await registration.pushManager.getSubscription()
+        return subscription !== null
+    },
+
+    async requestPermission() {
+        if (!this.isSupported()) return 'denied'
+        return await Notification.requestPermission()
     },
 
     async subscribeUser() {
-        if (!('serviceWorker' in navigator)) return
+        if (!this.isSupported()) return null
 
         try {
             const registration = await navigator.serviceWorker.ready
 
-            // Public VAPID Key from backend
-            // In a real app, fetch this from an endpoint or env
-            const publicVapidKey = 'BFmS_K7B4m8R_Y_8T_S5_P_B_Q_G_Z_L_M_X_G_K_Q' // Example
+            // Fetch VAPID public key from backend if not cached
+            if (!cachedVapidKey) {
+                const response = await axios.get(`${API_BASE_URL}/api/notifications/vapid-public-key`)
+                cachedVapidKey = response.data.publicKey
+            }
 
             const subscription = await registration.pushManager.subscribe({
                 userVisibleOnly: true,
-                applicationServerKey: urlBase64ToUint8Array(publicVapidKey)
+                applicationServerKey: urlBase64ToUint8Array(cachedVapidKey)
             })
 
             const payload = {
@@ -36,13 +49,32 @@ export const pushNotificationService = {
 
             await axios.post(`${API_BASE_URL}/api/notifications/subscribe`, payload)
             console.log('User is subscribed to push notifications.')
+            return subscription
         } catch (err) {
             console.error('Failed to subscribe the user: ', err)
+            throw err
         }
     },
 
     async unsubscribeUser() {
-        // Implementation for unsubscription...
+        if (!this.isSupported()) return
+
+        try {
+            const registration = await navigator.serviceWorker.ready
+            const subscription = await registration.pushManager.getSubscription()
+
+            if (subscription) {
+                const endpoint = subscription.endpoint
+                await subscription.unsubscribe()
+                await axios.delete(`${API_BASE_URL}/api/notifications/unsubscribe`, {
+                    params: { endpoint }
+                })
+                console.log('User is unsubscribed from push notifications.')
+            }
+        } catch (err) {
+            console.error('Failed to unsubscribe the user: ', err)
+            throw err
+        }
     }
 }
 

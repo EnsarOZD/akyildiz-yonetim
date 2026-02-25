@@ -29,10 +29,73 @@
 
         <!-- Kullanıcı Menüsü ve Mobil Menü Butonu (Sağ Alan) -->
         <div class="flex items-center">
+          <!-- Bildirimler Zil Butonu -->
+          <div v-if="userInfo" class="relative mr-2">
+            <button
+              @click="toggleNotifications"
+              class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition relative"
+              aria-label="Bildirimleri göster"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
+              </svg>
+              <span v-if="notificationsStore.unreadCount > 0" class="absolute top-1 right-1 flex h-4 w-4">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-4 w-4 bg-red-500 text-[10px] text-white items-center justify-center font-bold">
+                  {{ notificationsStore.unreadCount > 9 ? '9+' : notificationsStore.unreadCount }}
+                </span>
+              </span>
+            </button>
+
+            <!-- Bildirim Dropdown -->
+            <transition
+              enter-active-class="transition ease-out duration-100"
+              enter-from-class="transform opacity-0 scale-95"
+              enter-to-class="transform opacity-100 scale-100"
+              leave-active-class="transition ease-in duration-75"
+              leave-from-class="transform opacity-100 scale-100"
+              leave-to-class="transform opacity-0 scale-95"
+            >
+              <div v-if="showNotificationsDropdown" class="origin-top-right absolute right-0 mt-2 w-80 rounded-lg shadow-xl py-1 bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 focus:outline-none z-50 overflow-hidden">
+                <div class="px-4 py-2 text-sm font-bold border-b dark:border-gray-700 flex justify-between items-center bg-gray-50 dark:bg-gray-900/50">
+                  <span class="text-gray-900 dark:text-white">Bildirimler</span>
+                  <button @click="notificationsStore.markAllAsRead" class="text-xs text-blue-600 hover:underline font-medium">Tümünü oku</button>
+                </div>
+                
+                <div class="max-h-96 overflow-y-auto">
+                  <div v-if="notificationsStore.loading && notificationsStore.items.length === 0" class="p-8 text-center">
+                    <span class="loading loading-spinner text-blue-600"></span>
+                  </div>
+                  <div v-else-if="notificationsStore.items.length === 0" class="p-8 text-center text-gray-500">
+                    <p class="text-sm">Henüz bildirim bulunmuyor.</p>
+                  </div>
+                  <div v-else>
+                    <div 
+                      v-for="item in notificationsStore.items.slice(0, 5)" 
+                      :key="item.id"
+                      @click="handleNotificationClick(item)"
+                      class="px-4 py-3 border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition relative"
+                      :class="{'bg-blue-50/50 dark:bg-blue-900/10': !item.isRead}"
+                    >
+                      <div v-if="!item.isRead" class="absolute left-1 top-1/2 -translate-y-1/2 w-1.5 h-1.5 bg-blue-600 rounded-full"></div>
+                      <p class="text-sm font-semibold text-gray-900 dark:text-white line-clamp-1">{{ item.title }}</p>
+                      <p class="text-xs text-gray-600 dark:text-gray-400 line-clamp-2 mt-0.5">{{ item.message }}</p>
+                      <p class="text-[10px] text-gray-400 mt-1">{{ formatDate(item.createdAt) }}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <router-link to="/notifications" @click="showNotificationsDropdown = false" class="block w-full text-center py-2 text-sm text-blue-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition font-semibold border-t dark:border-gray-700">
+                  Tüm Bildirimleri Gör
+                </router-link>
+              </div>
+            </transition>
+          </div>
+
           <!-- Tema Değiştir Butonu -->
           <button
             @click="authStore.toggleTheme"
-            class="ml-4 p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition"
+            class="mr-2 p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition"
             :aria-label="authStore.theme === 'dark' ? 'Açık moda geç' : 'Karanlık moda geç'"
           >
             <svg v-if="authStore.theme === 'dark'" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -145,9 +208,16 @@
 <script setup>
 import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
 import { useAuthStore } from '@/stores/auth'
+import { useNotificationsStore } from '@/stores/notificationsStore'
 import { useBranding } from '@/composables/useBranding'
+import { useRoute, useRouter } from 'vue-router'
+import authService from '@/services/authService'
+import { ROLES } from '@/constants/roles'
+import { formatDistanceToNow } from 'date-fns'
+import { tr } from 'date-fns/locale'
 
 const authStore = useAuthStore()
+const notificationsStore = useNotificationsStore()
 const { logoUrl, appName } = useBranding()
 
 const route = useRoute()
@@ -156,12 +226,20 @@ const router = useRouter()
 const userInfo = ref(null)
 const tabs = ref([])
 const showUserDropdown = ref(false)
+const showNotificationsDropdown = ref(false)
 const isMobileMenuOpen = ref(false)
 
 const clickOutsideHandler = (event) => {
-  const userDropdown = document.querySelector('.relative button');
-  if (userDropdown && !userDropdown.contains(event.target) && !event.target.closest('.origin-top-right')) {
+  // User dropdown click outside
+  const userBtn = document.querySelector('.relative button[aria-label="Kullanıcı menüsünü aç"]');
+  if (showUserDropdown.value && userBtn && !userBtn.contains(event.target) && !event.target.closest('.origin-top-right')) {
     showUserDropdown.value = false
+  }
+  
+  // Notifications dropdown click outside
+  const notifBtn = document.querySelector('button[aria-label="Bildirimleri göster"]');
+  if (showNotificationsDropdown.value && notifBtn && !notifBtn.contains(event.target) && !event.target.closest('.origin-top-right')) {
+    showNotificationsDropdown.value = false
   }
 }
 
@@ -232,6 +310,9 @@ onMounted(() => {
   if (isBackendActive) {
     // Backend API ile kullanıcı kontrolü
     loadUserFromBackend()
+    
+    // Bildirimleri çek
+    notificationsStore.refresh()
   } else {
     // Demo modu kontrolü
     const isDemoMode = !import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_BASE_URL === 'http://localhost:5000/api'
@@ -270,10 +351,36 @@ watch(route, () => {
 
 const toggleUserDropdown = () => {
   showUserDropdown.value = !showUserDropdown.value
+  if (showUserDropdown.value) {
+    showNotificationsDropdown.value = false
+  }
 }
 
-const toggleMobileMenu = () => {
-  isMobileMenuOpen.value = !isMobileMenuOpen.value
+const toggleNotifications = () => {
+  showNotificationsDropdown.value = !showNotificationsDropdown.value
+  if (showNotificationsDropdown.value) {
+    showUserDropdown.value = false
+    notificationsStore.refresh()
+  }
+}
+
+const handleNotificationClick = async (notification) => {
+  if (!notification.isRead) {
+    await notificationsStore.markAsRead(notification.id)
+  }
+  showNotificationsDropdown.value = false
+  
+  // Route mapping
+  if (notification.type === 'Debt') {
+    router.push('/dashboard')
+  } else {
+    // If we have more specifically mapped routes, add them here
+  }
+}
+
+const formatDate = (date) => {
+  if (!date) return ''
+  return formatDistanceToNow(new Date(date), { addSuffix: true, locale: tr })
 }
 
 const logout = async () => {

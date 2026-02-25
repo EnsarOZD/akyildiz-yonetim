@@ -11,6 +11,9 @@
         <!-- Header -->
         <Header />
         
+        <!-- Bildirim İzni Banner -->
+        <NotificationPermissionBanner />
+        
         <div class="w-full md:max-w-6xl mx-auto bg-base-100 md:shadow-lg md:rounded-xl overflow-hidden mb-20 md:mb-0">
           <!-- İçerik -->
           <router-view class="p-4 md:p-6" />
@@ -33,6 +36,7 @@
 import { useRoute } from 'vue-router'
 import Header from './components/common/Header.vue'
 import MobileBottomNav from './components/common/MobileBottomNav.vue'
+import NotificationPermissionBanner from './components/notifications/NotificationPermissionBanner.vue'
 import ErrorNotification from './components/common/ErrorNotification.vue'
 import SuccessNotification from './components/common/SuccessNotification.vue'
 import { useAuthStore } from '@/stores/auth'
