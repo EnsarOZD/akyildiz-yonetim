@@ -8,7 +8,7 @@ const tenantsService = {
   // Not: 'floor' controller içinde FloorNumber’a map ediliyor.
   async getTenants(filters = {}) {
     const params = new URLSearchParams()
-   
+
 
     if (filters.isActive !== undefined && filters.isActive !== '') {
       params.append('isActive', String(filters.isActive))
@@ -84,6 +84,11 @@ const tenantsService = {
   // Mevcut kiracıya birden fazla ünite bağlama (BE: POST /tenants/{id}/assign-flats)
   async assignFlats(tenantId, { flatIds, contractStartDate = null }) {
     return await apiService.post(`${base}/${tenantId}/assign-flats`, { flatIds, contractStartDate })
+  },
+
+  // Avans bakiyelerini geçmişe dönük denetle ve düzelt (BE: POST /AdvanceAccounts/recalculate)
+  async syncAdvanceBalances() {
+    return await apiService.post('/AdvanceAccounts/recalculate')
   }
 }
 
