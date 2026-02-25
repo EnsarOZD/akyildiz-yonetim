@@ -5,9 +5,7 @@
         <!-- Logo ve Başlık -->
         <div class="flex items-center">
           <router-link to="/" class="flex-shrink-0 flex items-center gap-2">
-            <svg class="h-8 w-auto text-cyan-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h6M9 11.25h6M9 15.75h6" />
-            </svg>
+            <img src="/logo.svg" class="h-8 w-auto" alt="Logo" />
             <span class="text-xl font-semibold font-cormorantSC hidden md:block">AKYILDIZ İŞ MERKEZİ</span>
           </router-link>
         </div>
