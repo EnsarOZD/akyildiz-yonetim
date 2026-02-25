@@ -278,7 +278,7 @@ const resetForm = () => {
 const handleSubmit = async () => {
   const rawAmount = parseAmount()
   if (!isFormValid.value) {
-    alert('Lütfen tüm alanları eksiksiz doldurun.')
+    notifyError('Lütfen tüm alanları eksiksiz doldurun.')
     return
   }
 
@@ -311,7 +311,7 @@ const handleSubmit = async () => {
 const createBulkDues = async () => {
   const rawAmount = parseBulkAmount()
   if (!bulkYear.value || rawAmount <= 0) {
-    alert('Lütfen yıl ve tutar bilgilerini eksiksiz doldurun.')
+    notifyError('Lütfen yıl ve tutar bilgilerini eksiksiz doldurun.')
     return
   }
   
@@ -326,7 +326,7 @@ const createBulkDues = async () => {
     .filter(unit => !unitsWithDuesForBulkYear.has(unit));
 
   if (targetUnits.length === 0) {
-    alert('Aidat tanımlanacak uygun (boş ve bu yıl için aidatı olmayan) kat bulunmamaktadır.');
+    notifyInfo('Aidat tanımlanacak uygun (boş ve bu yıl için aidatı olmayan) kat bulunmamaktadır.');
     return;
   }
 

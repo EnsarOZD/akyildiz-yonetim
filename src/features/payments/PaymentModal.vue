@@ -1,5 +1,5 @@
 <template>
-  <dialog v-if="visible" class="modal" open>
+  <dialog v-if="visible" class="modal" open @cancel.prevent>
     <div class="modal-box max-w-4xl bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 border border-gray-200 dark:border-gray-700 shadow-2xl">
       <!-- Başlık -->
       <div class="flex items-center justify-between pb-4 border-b border-gray-200 dark:border-gray-700 mb-6">
@@ -122,7 +122,7 @@
         </div>
 
         <!-- Borç Eşleştirme Seçenekleri -->
-        <div v-if="form.tenantId && tenantDebts.length > 0" class="bg-amber-50 dark:bg-amber-900/20 rounded-lg p-4 border border-amber-200 dark:border-amber-800">
+        <div v-if="(paymentType === 'tenant' ? form.tenantId : form.ownerId) && tenantDebts.length > 0" class="bg-amber-50 dark:bg-amber-900/20 rounded-lg p-4 border border-amber-200 dark:border-amber-800">
           <div class="flex items-center justify-between mb-4">
             <h4 class="text-lg font-semibold text-gray-800 dark:text-gray-100 flex items-center gap-2">
               <span class="text-xl">📋</span>
@@ -230,7 +230,7 @@
         </div>
 
         <!-- Borç Yoksa Avans Bilgisi -->
-        <div v-if="form.tenantId && tenantDebts.length === 0" class="bg-green-50 dark:bg-green-900/20 rounded-lg p-4 border border-green-200 dark:border-green-800">
+        <div v-if="(paymentType === 'tenant' ? form.tenantId : form.ownerId) && tenantDebts.length === 0" class="bg-green-50 dark:bg-green-900/20 rounded-lg p-4 border border-green-200 dark:border-green-800">
           <div class="flex items-center gap-3">
             <svg class="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -238,7 +238,7 @@
             <div>
               <p class="text-green-700 dark:text-green-300 font-semibold">Borç Bulunamadı</p>
               <p class="text-green-600 dark:text-green-400 text-sm">
-                Seçilen kiracının ödenmemiş borcu bulunmuyor. 
+                Seçilen {{ paymentType === 'tenant' ? 'kiracının' : 'mal sahibinin' }} ödenmemiş borcu bulunmuyor.
                 <strong>{{ formatCurrency(form.amount || 0) }}</strong> tutarı avans hesabına aktarılacak.
               </p>
             </div>
@@ -289,11 +289,15 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, watch, onMounted, onBeforeUnmount } from 'vue'
+import { ref, reactive, computed, watch, onMounted } from 'vue'
 import paymentsService from '@/services/paymentsService'
 import ownersService from '@/services/ownersService'
 import utilityDebtsService from '@/services/utilityDebtsService'
 import { useErrorHandler } from '@/composables/useErrorHandler'
+import { useNotify } from '@/composables/useNotify'
+import { useDirtyGuard } from '@/composables/useDirtyGuard'
+
+const { notifyError } = useNotify()
 
 
 
@@ -315,7 +319,7 @@ const props = defineProps({
   banks:   { type: Array, default: () => [] },
   editMode:{ type: Boolean, default: false }
 })
-const emit = defineEmits(['save','cancel','close'])
+const emit = defineEmits(['save', 'cancel', 'dirty-changed'])
 
 const { handleNetworkError } = useErrorHandler()
 
@@ -347,6 +351,17 @@ const getTenantDisplayName = (t) =>
   [t?.firstName, t?.lastName].filter(Boolean).join(' ') ||
   t?.email ||
   `#${t?.id}`
+
+const { notifySuccess, notifyError, notifyInfo } = useNotify()
+const { isDirty, resetDirty } = useDirtyGuard(() => form)
+
+defineExpose({ isDirty, resetDirty })
+
+watch(isDirty, v => emit('dirty-changed', v), { immediate: true })
+
+watch(() => props.visible, (v) => {
+  if (v) resetDirty()
+})
 
 /* ---------------- Payment type ---------------- */
 const paymentType = ref('tenant')
@@ -403,7 +418,7 @@ const getDaysOverdue = (dueDate) => {
 const isFormValid = computed(() =>
   !!form.date &&
   Number(form.amount) > 0 &&
-  form.type !== '' &&
+  Number.isFinite(Number(form.type)) &&
   !!form.bank &&
   ((paymentType.value === 'tenant' && !!form.tenantId) ||
    (paymentType.value === 'owner'  && !!form.ownerId))
@@ -415,7 +430,7 @@ const fetchTenantDebts = async () => {
   try {
     const utilityDebts = await utilityDebtsService.getUtilityDebts({
       tenantId: form.tenantId,
-      status: 'Unpaid'
+      status: 0
     })
     tenantDebts.value = utilityDebts || []
   } catch (error) {
@@ -429,7 +444,7 @@ const fetchOwnerDebts = async () => {
   try {
     const ownerDebts = await utilityDebtsService.getUtilityDebts({
       ownerId: form.ownerId,
-      status: 'Unpaid'
+      status: 0
     })
     tenantDebts.value = ownerDebts || []
   } catch (error) {
@@ -445,15 +460,19 @@ const handleSave = async () => {
     showErrorToast(errorMessage.value)
     return
   }
+
   isLoading.value = true
   errorMessage.value = ''
+
   try {
+    const parsedType = Number.isFinite(Number(form.type)) ? Number(form.type) : null
+
     const payload = {
       tenantId: paymentType.value === 'tenant' ? form.tenantId : null,
       ownerId:  paymentType.value === 'owner'  ? form.ownerId  : null,
       amount: Number(form.amount),
       paymentDate: form.date,
-      type: parseInt(form.type) || 0,
+      type: parsedType,
       bank: form.bank,
       description: form.description || '',
       autoAllocate: autoAllocate.value,
@@ -465,7 +484,7 @@ const handleSave = async () => {
 
     const saved = await paymentsService.createPaymentWithAllocation(payload)
 
-    
+    resetDirty()
     emit('save', saved)
   } catch (error) {
     try {
@@ -479,7 +498,6 @@ const handleSave = async () => {
 }
 
 const handleCancel = () => {
-  resetForm()
   emit('cancel')
 }
 
@@ -489,23 +507,19 @@ function resetForm() {
   debtAllocations.value = {}
   isLoading.value = false
   errorMessage.value = ''
+  
+  if (props.payment) {
+    // Note: useDirtyGuard automatically watches form if passed as getter
+  }
 }
 
 /* ---------------- Toast fallback ---------------- */
 function showErrorToast(msg) {
-  try {
-    if (typeof window !== 'undefined' && window.$toast) window.$toast.error(msg)
-    else alert(msg)
-  } catch { alert(msg) }
+  notifyError(msg)
 }
 
 /* ---------------- Lifecycle & watchers ---------------- */
-const handleEscape = (e) => {
-  if (props.visible && e.key === 'Escape') handleCancel()
-}
-
 onMounted(async () => {
-  window.addEventListener('keydown', handleEscape)
   try {
     const data = await ownersService.getOwners()
     owners.value = data || []
@@ -516,13 +530,18 @@ onMounted(async () => {
   else await fetchOwnerDebts()
 })
 
-onBeforeUnmount(() => {
-  window.removeEventListener('keydown', handleEscape)
-})
-
 watch(paymentType, (val) => {
-  if (val === 'tenant') fetchTenantDebts()
-  else fetchOwnerDebts()
+  tenantDebts.value = []
+  selectedDebts.value = []
+  debtAllocations.value = {}
+
+  if (val === 'tenant') {
+    form.ownerId = null
+    fetchTenantDebts()
+  } else {
+    form.tenantId = null
+    fetchOwnerDebts()
+  }
 })
 
 watch(() => form.tenantId, () => {

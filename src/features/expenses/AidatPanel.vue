@@ -134,12 +134,11 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
-import aidatService from '@/services/aidatService'
-import tenantsService from '@/services/tenantsService'
-import { watch } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
+import { useNotify } from '@/composables/useNotify'
 
-const emit = defineEmits(['stats']) // üst karta toplamı gönderebilmek için (AdminDashboard dinliyor)
+const { notifySuccess, notifyError } = useNotify()
+const emit = defineEmits(['stats'])
 const tenants = ref([])
 const selectedTenant = ref('')
 const selectedUnit = ref('')
@@ -281,7 +280,7 @@ const deleteDues = async (id) => {
       await fetchDues()
     } catch (error) {
       console.error("Aidat silme hatası:", error)
-      alert("Aidat silinirken bir hata oluştu.")
+      notifyError("Aidat silinirken bir hata oluştu.")
     }
   }
 }
@@ -297,7 +296,7 @@ const editDues = (item) => {
 const handleSubmit = async () => {
   const rawAmount = parseAmount()
   if (!isFormValid.value) {
-    alert('Lütfen tüm alanları eksiksiz doldurun.')
+    notifyError('Lütfen tüm alanları eksiksiz doldurun.')
     return
   }
 
@@ -314,22 +313,22 @@ const handleSubmit = async () => {
   try {
     if (selectedId.value) {
       await aidatService.updateAidatDefinition(selectedId.value, data)
-      alert('Aidat güncellendi.')
+      notifySuccess('Aidat güncellendi.')
     } else {
       const exists = duesList.value.find(
         d => d.year === year.value && d.tenantId === selectedTenant.value && d.unit === selectedUnit.value
       )
       if (exists) {
-        alert('Bu şirketin bu katı için bu yıl zaten aidat tanımlanmış.')
+        notifyError('Bu şirketin bu katı için bu yıl zaten aidat tanımlanmış.')
         return
       }
 
       await aidatService.createAidatDefinition(data)
-      alert('Aidat kaydı eklendi.')
+      notifySuccess('Aidat kaydı eklendi.')
     }
   } catch (error) {
     console.error("Aidat kaydetme hatası:", error)
-    alert("Bir hata oluştu.")
+    notifyError("Bir hata oluştu.")
   }
 
   resetForm()

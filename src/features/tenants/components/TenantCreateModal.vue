@@ -171,13 +171,18 @@
 
 <script setup>
 import { ref, watch, onMounted, computed } from 'vue'
+import { useNotify } from '@/composables/useNotify'
 import tenantsService from '@/features/tenants/services/tenantsService.js'
 import { COMPANY_TYPES } from '@/constants/units'
 import { useEventBus } from '@/composables/useEventBus'
+import { useDirtyGuard } from '@/composables/useDirtyGuard'
 
 const props = defineProps({ visible: Boolean })
 const emit = defineEmits(['save', 'close'])
 const { on: onEvent } = useEventBus()
+const { isDirty, setInitialState, resetDirty } = useDirtyGuard()
+
+defineExpose({ isDirty, resetDirty })
 
 // --- Helpers
 const UNIT_TYPE = {
@@ -280,6 +285,7 @@ watch(() => props.visible, (v) => {
   if (v) {
     tenant.value = emptyTenant()
     fetchAvailableFlats()
+    setInitialState(tenant.value)
   }
 })
 
@@ -296,7 +302,7 @@ function handleSave () {
 
   // Kullanıcı ne ünite ne de kat seçmişse, backend'e boş istek göndermeyelim:
   if (ids.length === 0 && (tenant.value.floorNumber === undefined || tenant.value.floorNumber === null)) {
-    alert('Lütfen en az bir ünite seçin veya kat filtresi belirleyin.')
+    notifyError('Lütfen en az bir ünite seçin veya kat filtresi belirleyin.')
     return
   }
 

@@ -384,6 +384,9 @@ const newExpense = ref({
 })
 
 /** API çağrıları */
+import { useNotify } from '@/composables/useNotify'
+const { notifyError } = useNotify()
+
 const fetchExpenses = async () => {
   loading.value = true
   error.value = null
@@ -460,7 +463,7 @@ const deleteExpense = async (id) => {
     await fetchExpenses()
   } catch (err) {
     console.error('Gider silinirken hata:', err)
-    alert('Gider silinirken bir hata oluştu')
+    notifyError('Gider silinirken bir hata oluştu')
   }
 }
 const saveExpense = async (expenseData) => {

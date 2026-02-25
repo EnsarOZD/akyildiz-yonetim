@@ -3,18 +3,17 @@
   <div class="p-4 sm:p-6 bg-gray-50 min-h-screen font-sans dark:bg-gray-900">
     <div class="max-w-7xl mx-auto">
 
-      <!-- Başlık -->
-      <div class="flex items-center justify-between mb-6">
-        <h1 class="text-3xl font-bold text-gray-800 dark:text-gray-100">Kiracı Ödemeleri</h1>
-        <div class="flex items-center gap-4">
-          <div class="bg-green-100 dark:bg-green-900/50 text-green-600 dark:text-green-400 px-3 py-1 rounded-full text-sm">
-            Toplam: {{ formatCurrency(totalIncome) }}
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+        <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-gray-100 text-center sm:text-left">Ödemeler</h1>
+        <div class="flex flex-wrap items-center justify-center sm:justify-end gap-2 sm:gap-4">
+          <div class="bg-green-100 dark:bg-green-900/50 text-green-600 dark:text-green-400 px-3 py-1 rounded-full text-xs sm:text-sm whitespace-nowrap">
+            <span class="hidden sm:inline">Toplam:</span><span class="sm:hidden">Top:</span> {{ formatCurrency(totalIncome) }}
           </div>
-          <div class="bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 px-3 py-1 rounded-full text-sm">
-            Bu Ay: {{ formatCurrency(thisMonthIncome) }}
+          <div class="bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 px-3 py-1 rounded-full text-xs sm:text-sm whitespace-nowrap">
+            <span class="hidden sm:inline">Bu Ay:</span><span class="sm:hidden">Ay:</span> {{ formatCurrency(thisMonthIncome) }}
           </div>
-          <div class="bg-purple-100 dark:bg-purple-900/50 text-purple-600 dark:text-purple-400 px-3 py-1 rounded-full text-sm">
-            {{ paymentsCount }} ödeme
+          <div class="bg-purple-100 dark:bg-purple-900/50 text-purple-600 dark:text-purple-400 px-3 py-1 rounded-full text-xs sm:text-sm whitespace-nowrap">
+            {{ paymentsCount }} <span class="hidden sm:inline">ödeme</span><span class="sm:hidden">kayıt</span>
           </div>
         </div>
       </div>
@@ -91,7 +90,7 @@
 
       <!-- Yeni Ödeme Ekle Butonu -->
       <div v-if="authStore.role === ROLES.ADMIN || authStore.role === ROLES.MANAGER" class="mb-6">
-        <button @click="showModal = true" class="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-4 px-6 rounded-xl shadow-lg transition-all duration-300 flex items-center justify-center gap-3">
+        <button @click="showModal = true" class="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-4 px-6 rounded-xl shadow-lg transition-all duration-300 active:scale-[0.98] active:opacity-90 flex items-center justify-center gap-3">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
           </svg>
@@ -166,21 +165,21 @@
           <div v-if="filteredPayments.length === 0" class="text-center py-12 text-gray-500 dark:text-gray-400">
             <p>Aramanızla eşleşen ödeme bulunamadı.</p>
           </div>
-          <div v-else>
-            <div 
-              v-for="p in paginatedPayments" 
-              :key="p.id"
-              class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center p-4 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-200 border-b dark:border-gray-700/50"
-            >
-              <div class="md:col-span-5 flex items-center gap-4">
-                <div class="flex-shrink-0 h-12 w-12 flex items-center justify-center text-white rounded-full text-xl font-bold" :class="getAvatarColor(getTenantCompany(p.tenantId))">
-                   {{ getAvatarInitial(getTenantCompany(p.tenantId)) }}
+            <div v-else>
+              <div 
+                v-for="p in paymentsView" 
+                :key="p.id"
+                class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center p-4 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-200 border-b dark:border-gray-700/50"
+              >
+                <div class="md:col-span-5 flex items-center gap-4">
+                  <div class="flex-shrink-0 h-12 w-12 flex items-center justify-center text-white rounded-full text-xl font-bold" :class="getAvatarColor(p.company)">
+                     {{ getAvatarInitial(p.company) }}
+                  </div>
+                  <div>
+                    <p class="font-bold text-gray-800 dark:text-gray-100">{{ p.company }}</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ formatDate(getPaymentDate(p)) }}</p>
+                  </div>
                 </div>
-                <div>
-                  <p class="font-bold text-gray-800 dark:text-gray-100">{{ getTenantCompany(p.tenantId) }}</p>
-                  <p class="text-sm text-gray-500 dark:text-gray-400">{{ formatDate(getPaymentDate(p)) }}</p>
-                </div>
-              </div>
               <div class="md:col-span-3 text-left md:text-center text-2xl font-semibold text-green-600 dark:text-green-400">
                 {{ formatCurrency(p.amount) }}
               </div>
@@ -270,7 +269,20 @@
       :editMode="editMode"
       @save="handlePaymentSave"
       @cancel="handleModalClose"
+      @dirty-changed="v => (isPaymentModalDirty = v)"
     />
+
+    <!-- Confirm Dialog (DaisyUI) -->
+    <dialog v-if="confirmModalVisible" class="modal" open>
+      <div class="modal-box">
+        <h3 class="font-bold text-lg">Değişiklikler kaybolacak</h3>
+        <p class="py-4">Kaydetmeden çıkmak istediğine emin misin?</p>
+        <div class="modal-action">
+          <button class="btn btn-ghost" @click="cancelClose">Vazgeç</button>
+          <button class="btn btn-primary" @click="confirmClose">Devam Et</button>
+        </div>
+      </div>
+    </dialog>
 
     <!-- Avans Hesabı Yönetimi Modal -->
     <dialog v-if="showAdvanceManager" class="modal" open>
@@ -322,7 +334,7 @@ import FinancialReports from '@/components/FinancialReports.vue'
 import AuditLogs from '@/components/AuditLogs.vue'
 import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
 import { useErrorHandler } from '@/composables/useErrorHandler'
-import { useNotification } from '@/composables/useNotification'
+import { useNotify } from '@/composables/useNotify'
 import { usePaymentsStore } from '@/stores/payments.js'
 import { useTenantsStore } from '@/stores/tenants.js'
 import { paymentTypes, getPaymentTypeLabel } from '@/constants/enums'
@@ -330,7 +342,7 @@ import { safeFormatDate } from '@/utils/dateUtils'
 import { formatCurrency, getAvatarColor, getAvatarInitial } from '@/utils/uiHelpers'
 
 const { handleNetworkError } = useErrorHandler()
-const { showCreateSuccess, showUpdateSuccess, showDeleteSuccess, showSuccess } = useNotification()
+const { notifySuccess, notifyError } = useNotify()
 
 const authStore = useAuthStore()
 
@@ -349,6 +361,10 @@ const showAdvanceManager = ref(false)
 const showFinancialReports = ref(false)
 const showAuditLogs = ref(false)
 const loading = computed(() => paymentsStore.loading || tenantsStore.loading)
+
+const isPaymentModalDirty = ref(false)
+const confirmModalVisible = ref(false)
+const pendingCloseAction = ref(null)
 
 const filters = ref({
   searchTerm: '',
@@ -478,6 +494,11 @@ const paginatedPayments = computed(() => {
   return filteredPayments.value.slice(start, end)
 })
 
+const paymentsView = computed(() => paginatedPayments.value.map(p => ({
+  ...p,
+  company: getTenantCompany(p.tenantId)
+})))
+
 const displayedPages = computed(() => {
   const total = totalPages.value
   if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1)
@@ -512,8 +533,11 @@ const editMode = ref(false)
 const selectedPaymentId = ref(null)
 
 /* ---- Handlers ---- */
-const handleModalClose = () => {
+const reallyClosePaymentModal = () => {
   showModal.value = false
+  isPaymentModalDirty.value = false
+  confirmModalVisible.value = false
+  pendingCloseAction.value = null
   newPayment.value = {
     date: new Date().toISOString().substring(0, 10),
     tenantId: '',
@@ -527,11 +551,30 @@ const handleModalClose = () => {
   selectedPaymentId.value = null
 }
 
+const handleModalClose = () => {
+  if (isPaymentModalDirty.value) {
+    pendingCloseAction.value = 'closePaymentModal'
+    confirmModalVisible.value = true
+    return
+  }
+  reallyClosePaymentModal()
+}
+
+const confirmClose = () => {
+  if (pendingCloseAction.value === 'closePaymentModal') reallyClosePaymentModal()
+}
+
+const cancelClose = () => {
+  confirmModalVisible.value = false
+  pendingCloseAction.value = null
+}
+
 const deletePayment = async (id) => {
   try {
     await paymentsStore.deletePayment(id)
-    showDeleteSuccess('Ödeme')
+    notifySuccess('Ödeme silindi.')
   } catch (error) {
+    notifyError('Ödeme silinemedi.')
     handleNetworkError(error, { component: 'Payments', action: 'deletePayment' })
   }
 }
@@ -576,14 +619,14 @@ const handlePaymentSave = async () => {
     paymentsStore.fetchAdvanceAccounts()
   ])
 
-  if (wasEdit) showUpdateSuccess('Ödeme')
-  else showCreateSuccess('Ödeme')
+  if (wasEdit) notifySuccess('Ödeme güncellendi.')
+  else notifySuccess('Ödeme kaydedildi.')
 }
 
 const handleAdvanceSuccess = () => {
   showAdvanceManager.value = false
   paymentsStore.fetchAdvanceAccounts()
-  showSuccess('Avans hesabı işlemi başarıyla tamamlandı')
+  notifySuccess('Avans hesabı işlemi başarıyla tamamlandı.')
 }
 
 /* ---- Analitik ---- */
