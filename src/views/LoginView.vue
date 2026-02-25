@@ -21,10 +21,10 @@
       <!-- Logo/Brand Section -->
       <div class="text-center mb-8">
         <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl mb-4 shadow-lg overflow-hidden p-2">
-          <img src="/logo.svg" class="w-full h-full object-contain brightness-0 invert" alt="Logo" />
+          <img :src="logoUrl" class="w-full h-full object-contain brightness-0 invert" :alt="appName" />
         </div>
         <h1 class="text-3xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
-          Akyıldız Yönetim
+          {{ appName }}
         </h1>
         <p class="text-gray-300 mt-2">Yönetim Sistemi Giriş</p>
       </div>
@@ -146,7 +146,7 @@
       <!-- Footer -->
       <div class="text-center mt-8">
         <p class="text-sm text-gray-400">
-          © 2024 Akyıldız Yönetim. Tüm hakları saklıdır.
+          © 2024 {{ appName }}. Tüm hakları saklıdır.
         </p>
       </div>
     </div>
@@ -220,6 +220,9 @@ import { useRouter } from 'vue-router'
 import { useErrorHandler } from '@/composables/useErrorHandler'
 import { getErrorMessage } from '@/utils/errorHandler'
 import authService from '@/services/authService'
+import { useBranding } from '@/composables/useBranding'
+
+const { logoUrl, appName } = useBranding()
 
 // Error handler
 const { handleNetworkError, showSuccess } = useErrorHandler()
