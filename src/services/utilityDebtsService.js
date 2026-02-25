@@ -7,6 +7,11 @@ class UtilityDebtsService {
 
     if (filters.flatId) params.flatId = filters.flatId
     if (filters.type) params.type = filters.type
+    if (filters.period && filters.period.includes('-')) {
+      const [y, m] = filters.period.split('-').map(Number)
+      params.periodYear = y
+      params.periodMonth = m
+    }
     if (filters.periodYear) params.periodYear = filters.periodYear
     if (filters.periodMonth) params.periodMonth = filters.periodMonth
     if (filters.status) params.status = filters.status

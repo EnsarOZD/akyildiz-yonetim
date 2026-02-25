@@ -103,6 +103,7 @@
                 </p>
                 <p class="text-sm text-gray-500 dark:text-gray-400">{{ formatDate(item.date) }}</p>
                 <p v-if="item.bank" class="text-xs text-gray-400 dark:text-gray-500">{{ item.bank }}</p>
+                <p v-if="item.unit && item.unit !== '-'" class="text-xs text-gray-400 dark:text-gray-500">{{ item.unit }}</p>
               </div>
             </div>
             <div class="text-right">
@@ -183,11 +184,12 @@ const fetchData = async () => {
     // Ödemeleri getir
     const paymentsResponse = await apiService.get('/payments')
     payments.value = (paymentsResponse || []).map(payment => {
-      const tenant = tenants.value.find(t => t.id === payment.tenantId)
+      // Backend artık isim ve daire bilgisini (TenantName/OwnerName/FlatInfo) kendisi getiriyor
       return {
         ...payment,
         type: 'income',
-        payer: tenant?.company || 'Bilinmiyor'
+        payer: payment.tenantName || payment.ownerName || 'Bilinmiyor',
+        unit: payment.flatInfo || '-'
       }
     })
 
