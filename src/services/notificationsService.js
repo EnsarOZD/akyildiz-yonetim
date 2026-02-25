@@ -1,20 +1,15 @@
-import axios from 'axios'
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || ''
+import apiService from './api.js'
 
 export const notificationsService = {
     async getNotifications(unreadOnly = false, take = 20, skip = 0) {
-        const response = await axios.get(`${API_BASE_URL}/api/notifications`, {
-            params: { unreadOnly, take, skip }
-        })
-        return response.data
+        return await apiService.get('/notifications', { unreadOnly, take, skip })
     },
 
     async markAsRead(id) {
-        await axios.post(`${API_BASE_URL}/api/notifications/${id}/read`)
+        await apiService.post(`/notifications/${id}/read`)
     },
 
     async markAllAsRead() {
-        await axios.post(`${API_BASE_URL}/api/notifications/read-all`)
+        await apiService.post('/notifications/read-all')
     }
 }
