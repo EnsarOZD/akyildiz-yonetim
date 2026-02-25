@@ -12,6 +12,7 @@ class PaymentsService {
     if (filters.startDate) params.startDate = filters.startDate
     if (filters.endDate) params.endDate = filters.endDate
     if (filters.utilityType) params.utilityType = filters.utilityType
+    if (filters.excludeAdvanceUse !== undefined) params.excludeAdvanceUse = filters.excludeAdvanceUse
 
     return apiService.get('/payments', params)
   }

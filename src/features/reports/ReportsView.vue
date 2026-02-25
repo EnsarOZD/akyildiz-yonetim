@@ -230,7 +230,8 @@ const fetchData = async () => {
         ownerId: filters.ownerId || undefined,
         startDate: filters.startDate || undefined,
         endDate: filters.endDate || undefined,
-        utilityType: filters.utilityType || undefined
+        utilityType: filters.utilityType || undefined,
+        excludeAdvanceUse: true
       })
     ])
     

@@ -6,10 +6,8 @@
         <div class="flex justify-between items-center h-16">
           <!-- Logo -->
           <div class="flex items-center space-x-3">
-            <div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
-              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
-              </svg>
+            <div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center overflow-hidden p-1.5">
+              <img src="/logo.svg" class="w-full h-full object-contain brightness-0 invert" alt="Logo" />
             </div>
             <span class="text-xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
               Akyıldız Yönetim
@@ -22,7 +20,7 @@
             <a href="#about" class="text-gray-300 hover:text-white transition-colors duration-200">Hakkımızda</a>
             <a href="#contact" class="text-gray-300 hover:text-white transition-colors duration-200">İletişim</a>
             <router-link 
-              :to="{ name: 'Login' }" 
+              to="/login" 
               class="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 py-2 rounded-xl font-medium transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl"
             >
               Sisteme Giriş
@@ -42,11 +40,12 @@
         <!-- Mobile menu -->
         <div v-if="mobileMenuOpen" class="md:hidden py-4 border-t border-gray-700">
           <div class="flex flex-col space-y-4">
-            <a href="#services" class="text-gray-300 hover:text-white transition-colors duration-200">Hizmetlerimiz</a>
-            <a href="#about" class="text-gray-300 hover:text-white transition-colors duration-200">Hakkımızda</a>
-            <a href="#contact" class="text-gray-300 hover:text-white transition-colors duration-200">İletişim</a>
+            <a href="#services" @click="mobileMenuOpen = false" class="text-gray-300 hover:text-white transition-colors duration-200">Hizmetlerimiz</a>
+            <a href="#about" @click="mobileMenuOpen = false" class="text-gray-300 hover:text-white transition-colors duration-200">Hakkımızda</a>
+            <a href="#contact" @click="mobileMenuOpen = false" class="text-gray-300 hover:text-white transition-colors duration-200">İletişim</a>
             <router-link 
-              :to="{ name: 'Login' }" 
+              to="/login"
+              @click="mobileMenuOpen = false"
               class="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 py-2 rounded-xl font-medium transition-all duration-200 text-center"
             >
               Sisteme Giriş
@@ -72,7 +71,7 @@
           </p>
           <div class="flex flex-col sm:flex-row gap-4 justify-center">
             <router-link 
-              :to="{ name: 'Login' }" 
+              to="/login" 
               class="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl"
             >
               Sisteme Giriş
@@ -285,10 +284,8 @@
         <div class="grid md:grid-cols-4 gap-8">
           <div>
             <div class="flex items-center space-x-3 mb-4">
-              <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
-                </svg>
+              <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center overflow-hidden p-1">
+                <img src="/logo.svg" class="w-full h-full object-contain brightness-0 invert" alt="Logo" />
               </div>
               <span class="text-xl font-bold">Akyıldız Yönetim</span>
             </div>
