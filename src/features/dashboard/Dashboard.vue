@@ -749,8 +749,16 @@ const overdueItems = computed(() => {
 
 const recentActivities = computed(() => {
   const items = [
-    ...payments.value.map(p => ({ ...p, type: 'income' })),
-    ...expenses.value.map(e => ({ ...e, type: 'expense' })),
+    ...payments.value.map(p => ({ 
+      ...p, 
+      type: 'income',
+      payer: p.tenantName || p.ownerName || p.description || 'Tahsilat'
+    })),
+    ...expenses.value.map(e => ({ 
+      ...e, 
+      type: 'expense',
+      payer: e.description || 'Gider'
+    })),
     ...debts.value.map(d => {
       const tenant = tenants.value.find(t => t.id === d.tenantId)
       return { 

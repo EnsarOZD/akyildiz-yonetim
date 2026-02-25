@@ -224,6 +224,7 @@ import { useAuthStore } from '@/stores/auth'
 import FilterBar from '@/components/common/FilterBar.vue'
 import { useErrorHandler } from '@/composables/useErrorHandler'
 import api from '@/services/api'
+import utilityDebtsService from '@/services/utilityDebtsService'
 import AidatEditModal from './EditAidatModal.vue'
 import AidatDeleteModal from './AidatDeleteModal.vue'
 import ManualDebtModal from './ManualDebtModal.vue'
@@ -311,7 +312,7 @@ const setLoading = (inc) => {
 /* ---------- API ---------- */
 const fetchFlats = async () => {
   try {
-    const response = await api.get('/flats')
+    const response = await api.get('/Flats')
     return response || []
   } catch (error) {
     console.error('Flat bilgileri alınırken hata:', error)
@@ -345,7 +346,7 @@ const handleExcelImport = async (event) => {
 
   setLoading(true)
   try {
-    const response = await api.post('/utilitydebts/import', formData, {
+    const response = await api.post('/UtilityDebts/import', formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
       }
@@ -375,8 +376,8 @@ const fetchDues = async () => {
   try {
     const [duesRes, flatsRes, tenantsRes] = await Promise.all([
       utilityDebtsService.getUtilityDebts({ period: selectedPeriod.value || undefined }),
-      api.get('/flats'),
-      api.get('/tenants'),
+      api.get('/Flats'),
+      api.get('/Tenants'),
     ])
 
     const flatById = new Map((flatsRes || []).map(f => [f.id, f]))

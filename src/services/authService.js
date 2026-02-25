@@ -9,7 +9,7 @@ class AuthService {
   // Kullanıcı girişi
   async login(email, password) {
     try {
-      const response = await apiService.post('/auth/login', { email, password })
+      const response = await apiService.post('/Auth/login', { email, password })
       console.log('Backend login response:', response)
 
       // Backend yanıt formatını kontrol et
@@ -57,7 +57,7 @@ class AuthService {
   // Kullanıcı çıkışı
   async logout() {
     try {
-      await apiService.post('/auth/logout')
+      await apiService.post('/Auth/logout')
     } catch (error) {
       console.error('Logout error:', error)
     } finally {
@@ -135,7 +135,7 @@ class AuthService {
       console.log('✅ JWT Token geçerli, backend\'den bilgi alınıyor...')
       // Token geçerliyse backend'den kullanıcı bilgilerini al
       try {
-        const response = await apiService.get('/auth/me')
+        const response = await apiService.get('/Auth/me')
         console.log('📡 Backend /auth/me yanıtı:', response)
         this.currentUser = response.user || response
         this.notifyAuthListeners(this.currentUser)

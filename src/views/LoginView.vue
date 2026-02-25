@@ -240,9 +240,11 @@ const resetError = ref('')
 const router = useRouter()
 
 onMounted(() => {
-  // Tüm auth kontrolleri geçici olarak devre dışı bırakıldı
-  // Böylece sayfa sadece login formunu gösterir ve
-  // kullanıcı manuel olarak giriş yapabilir
+  const savedEmail = localStorage.getItem('rememberedEmail')
+  if (savedEmail) {
+    email.value = savedEmail
+    rememberMe.value = true
+  }
 })
 
 const togglePasswordVisibility = () => {
@@ -262,6 +264,13 @@ const handleLogin = async () => {
     console.log('Backend login response:', response)
     
     if (response && response.token) {
+      // "Beni Hatırla" seçimi yapılmışsa e-postayı kaydet
+      if (rememberMe.value) {
+        localStorage.setItem('rememberedEmail', email.value)
+      } else {
+        localStorage.removeItem('rememberedEmail')
+      }
+
       showSuccess('Başarıyla giriş yapıldı!')
       
       // Role göre yönlendirme

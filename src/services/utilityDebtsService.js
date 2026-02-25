@@ -20,7 +20,7 @@ class UtilityDebtsService {
     if (filters.startDate) params.startDate = filters.startDate
     if (filters.endDate) params.endDate = filters.endDate
 
-    return apiService.get('/utilitydebts', params)
+    return apiService.get('/UtilityDebts', params)
   }
 
   // ID'ye göre utility debt getir
