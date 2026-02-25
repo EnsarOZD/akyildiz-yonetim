@@ -157,12 +157,14 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
+import { useNotify } from '@/composables/useNotify'
 import apiService from '@/services/api'
 
 const overduePayments = ref([])
 const owners = ref([])
 const loading = ref(false)
 const search = ref('')
+const { notifySuccess } = useNotify()
 const overdueFilter = ref('')
 const paymentTypeFilter = ref('')
 const sortBy = ref('dueDate')
@@ -240,7 +242,7 @@ const getPaymentTypeText = (type) => {
 
 const sendReminder = (overdue) => {
   // Hatırlatma gönderme işlemi
-  alert(`${overdue.ownerName} için hatırlatma gönderildi.`)
+  notifySuccess(`${overdue.ownerName} için hatırlatma gönderildi.`)
 }
 
 const viewDetails = (overdue) => {

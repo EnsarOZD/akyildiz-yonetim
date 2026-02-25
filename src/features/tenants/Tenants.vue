@@ -11,14 +11,14 @@
           <p class="text-gray-600 dark:text-gray-400">İş hanındaki tüm kiracıları yönetin</p>
         </div>
         <div class="flex gap-2">
-          <button v-if="authStore.role === ROLES.ADMIN" @click="handleSyncBalances" :disabled="syncLoading" class="btn btn-outline btn-primary shadow-lg">
+          <button v-if="authStore.role === ROLES.ADMIN" @click="handleSyncBalances" :disabled="syncLoading" class="btn btn-outline btn-primary shadow-lg active:scale-[0.98] active:opacity-90 transition-all">
             <span v-if="syncLoading" class="loading loading-spinner loading-xs"></span>
             <svg v-else class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
             </svg>
             Bakiyeleri Senkronize Et
           </button>
-          <button v-if="authStore.role === ROLES.ADMIN || authStore.role === ROLES.MANAGER" @click="showCreateModal = true" class="btn btn-success bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 border-0 text-white shadow-lg">
+          <button v-if="authStore.role === ROLES.ADMIN || authStore.role === ROLES.MANAGER" @click="showCreateModal = true" class="btn btn-success bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 border-0 text-white shadow-lg active:scale-[0.98] active:opacity-90 transition-all">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
             </svg>

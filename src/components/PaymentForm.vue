@@ -10,7 +10,7 @@
             <span class="label-text font-semibold">Tutar *</span>
           </label>
           <input 
-            v-model="payment.amount" 
+            v-model.number="payment.amount" 
             type="number" 
             step="0.01"
             class="input input-bordered" 
@@ -47,8 +47,8 @@
           <label class="label">
             <span class="label-text font-semibold">Kiracı</span>
           </label>
-          <select v-model="payment.tenantId" class="select select-bordered">
-            <option value="">Seçiniz</option>
+          <select v-model.number="payment.tenantId" class="select select-bordered">
+            <option :value="null">Seçiniz</option>
             <option v-for="tenant in tenants" :key="tenant.id" :value="tenant.id">
               {{ tenant.firstName }} {{ tenant.lastName }}
             </option>
@@ -83,7 +83,7 @@
         </div>
         
         <!-- Manuel borç seçimi -->
-        <div v-if="!payment.autoAllocate && payment.tenantId" class="mt-4">
+        <div v-if="!payment.autoAllocate && payment.tenantId != null" class="mt-4">
           <h4 class="font-semibold mb-3">Manuel Borç Seçimi</h4>
           <div class="space-y-3">
             <div v-for="debt in availableDebts" :key="debt.id" class="border rounded-lg p-3">
@@ -102,7 +102,7 @@
                     </div>
                   </div>
                 </div>
-                <div v-if="selectedDebts.includes(debt.id)" class="w-32">
+                <div v-if="selectedDebtIdSet.has(Number(debt.id))" class="w-32">
                   <input 
                     v-model="debtAllocations[debt.id]" 
                     type="number" 
@@ -142,13 +142,14 @@
         <button 
           type="button" 
           @click="$emit('cancel')" 
-          class="btn btn-outline"
+          class="btn btn-outline active:scale-95 active:opacity-80 transition-transform duration-75"
+          :disabled="loading"
         >
           İptal
         </button>
         <button 
           type="submit" 
-          class="btn btn-primary" 
+          class="btn btn-primary active:scale-95 active:opacity-80 transition-transform duration-75" 
           :disabled="loading"
         >
           <span v-if="loading" class="loading loading-spinner loading-sm"></span>
@@ -167,8 +168,10 @@ import paymentsService from '@/services/paymentsService'
 import tenantsService from '@/services/tenantsService'
 import utilityDebtsService from '@/services/utilityDebtsService'
 import { paymentTypeOptions, getDebtTypeLabel } from '@/constants/enums'
+import { useNotify } from '@/composables/useNotify'
 
 const emit = defineEmits(['success', 'cancel'])
+const { notifySuccess, notifyError } = useNotify()
 
 // Reactive data
 const loading = ref(false)
@@ -179,10 +182,10 @@ const debtAllocations = ref({})
 
 const payment = ref({
   amount: 0,
-  type: 0,
+  type: '',
   paymentDate: format(new Date(), 'yyyy-MM-dd'),
   description: '',
-  tenantId: '',
+  tenantId: null,
   autoAllocate: true,
   debtAllocations: []
 })
@@ -190,9 +193,11 @@ const payment = ref({
 // Computed
 const totalAllocated = computed(() => {
   return selectedDebts.value.reduce((total, debtId) => {
-    return total + (debtAllocations.value[debtId] || 0)
+    const val = Number(debtAllocations.value[Number(debtId)] || 0)
+    return total + (isNaN(val) ? 0 : val)
   }, 0)
 })
+const selectedDebtIdSet = computed(() => new Set(selectedDebts.value.map(Number)))
 
 // Methods
 const formatCurrency = (amount) => {
@@ -202,8 +207,15 @@ const formatCurrency = (amount) => {
   }).format(amount)
 }
 
+
 const formatDate = (date) => {
   return format(new Date(date), 'dd MMM yyyy', { locale: tr })
+}
+
+const toUserMessage = (err) => {
+  const msg = err?.response?.data?.message || err?.response?.data?.title
+  if (msg) return `Ödeme kaydedilemedi. ${msg}`
+  return "Ödeme kaydedilemedi. Lütfen tekrar deneyin."
 }
 
 const loadTenants = async () => {
@@ -216,7 +228,7 @@ const loadTenants = async () => {
 }
 
 const loadDebts = async () => {
-  if (!payment.value.tenantId) {
+  if (payment.value.tenantId == null) {
     availableDebts.value = []
     return
   }
@@ -234,29 +246,57 @@ const loadDebts = async () => {
 
 const submitPayment = async () => {
   if (loading.value) return
+  if (!payment.value.autoAllocate && selectedDebts.value.length === 0) {
+  notifyError('Manuel eşleştirme için en az 1 borç seçmelisiniz.')
+  return
+}
   
+  // Manuel eşleştirme validasyonu
+  if (!payment.value.autoAllocate && selectedDebts.value.length > 0) {
+    for (const debtId of selectedDebts.value) {
+      const amount = Number(debtAllocations.value[Number(debtId)] || 0)
+      const debt = availableDebts.value.find(d => Number(d.id) === Number(debtId))
+      
+      if (amount <= 0) {
+        notifyError('Lütfen seçili borçlar için geçerli bir tutar girin.')
+        return
+      }
+      
+      if (debt && amount > debt.remainingAmount) {
+        notifyError(`Eşleştirilen tutar borç kalanını (${formatCurrency(debt.remainingAmount)}) aşamaz.`)
+        return
+      }
+    }
+  }
+
   loading.value = true
   
   try {
+    const payload = {
+      ...payment.value,
+      type: Number(payment.value.type)
+    }
+
     // Manuel borç eşleştirmelerini hazırla
     if (!payment.value.autoAllocate && selectedDebts.value.length > 0) {
-      payment.value.debtAllocations = selectedDebts.value.map(debtId => ({
-        debtId: debtId,
-        amount: debtAllocations.value[debtId] || 0
+      payload.debtAllocations = selectedDebts.value.map(debtId => ({
+        debtId: Number(debtId),
+        amount: Number(debtAllocations.value[Number(debtId)] || 0)
       }))
     }
     
-    const response = await paymentsService.createPaymentWithAllocation(payment.value)
+    const response = await paymentsService.createPaymentWithAllocation(payload)
     
+    notifySuccess('Ödeme kaydedildi.')
     emit('success', response)
     
     // Formu temizle
     payment.value = {
       amount: 0,
-      type: 0,
+      type: '',
       paymentDate: format(new Date(), 'yyyy-MM-dd'),
       description: '',
-      tenantId: '',
+      tenantId: null,
       autoAllocate: true,
       debtAllocations: []
     }
@@ -265,7 +305,7 @@ const submitPayment = async () => {
     
   } catch (error) {
     console.error('Ödeme oluşturulamadı:', error)
-    alert('Ödeme oluşturulamadı: ' + error.message)
+    notifyError(toUserMessage(error))
   } finally {
     loading.value = false
   }
@@ -282,4 +322,6 @@ watch(() => payment.value.tenantId, () => {
 onMounted(() => {
   loadTenants()
 })
-</script> 
+</script>
+
+ 

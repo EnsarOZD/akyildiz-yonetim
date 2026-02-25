@@ -53,8 +53,11 @@ import { ref } from 'vue'
 import utilityDebtsService from '@/services/utilityDebtsService'
 import { useErrorHandler } from '@/composables/useErrorHandler'
 
+import { useNotify } from '@/composables/useNotify'
+
 const emit = defineEmits(['close', 'refresh'])
 const { showSuccess } = useErrorHandler()
+const { notifyError } = useNotify()
 
 const loading = ref(false)
 const period = ref(new Date().toISOString().substring(0, 7)) // YYYY-MM
@@ -75,7 +78,7 @@ const handleDistribute = async () => {
     emit('close')
   } catch (error) {
     console.error('Dağıtım hatası:', error)
-    alert('Hata: ' + (error.message || 'Dağıtım gerçekleştirilemedi. Ortak alan gider kaydının girildiğinden emin olun.'))
+    notifyError('Hata: ' + (error.message || 'Dağıtım gerçekleştirilemedi. Ortak alan gider kaydının girildiğinden emin olun.'))
   } finally {
     loading.value = false
   }

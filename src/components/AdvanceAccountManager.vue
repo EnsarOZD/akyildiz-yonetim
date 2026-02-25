@@ -163,8 +163,10 @@ import paymentsService from '@/services/paymentsService'
 import tenantsService from '@/services/tenantsService'
 import utilityDebtsService from '@/services/utilityDebtsService'
 import { getDebtTypeLabel } from '@/constants/enums'
-import { safeFormatDate } from '@/utils/dateUtils'
+import { useNotify } from '@/composables/useNotify'
 // import { errorHandler } from '@/utils/errorHandler' // istersen merkezi error’la
+
+const { notifyError } = useNotify()
 
 const props = defineProps({
   tenantId: { type: String, default: '' }
@@ -322,7 +324,7 @@ const useAdvanceAccount = async () => {
   } catch (e) {
     console.error('Avans kullanılamadı:', e)
     // errorHandler.logError(e, { component: 'AdvanceAccountManager', action: 'useAdvance' })
-    alert('Avans kullanılamadı. Lütfen tekrar deneyin.')
+    notifyError('Avans kullanılamadı. Lütfen tekrar deneyin.')
   } finally {
     loading.value = false
   }

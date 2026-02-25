@@ -30,7 +30,7 @@
         <!-- Kullanıcı Menüsü ve Mobil Menü Butonu (Sağ Alan) -->
         <div class="flex items-center">
           <!-- Bildirimler Zil Butonu -->
-          <div v-if="userInfo" class="relative mr-2">
+          <div v-if="userInfo" class="relative mr-2" ref="notificationsRef">
             <button
               @click="toggleNotifications"
               class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition relative"
@@ -106,7 +106,7 @@
             </svg>
           </button>
           <!-- Kullanıcı Dropdown -->
-          <div v-if="userInfo" class="relative">
+          <div v-if="userInfo" class="relative" ref="userMenuRef">
             <button 
               @click="toggleUserDropdown" 
               class="flex items-center gap-2 text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white"
@@ -210,7 +210,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
+import { ref, onMounted, onBeforeUnmount, watch, computed } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useNotificationsStore } from '@/stores/notificationsStore'
 import { useBranding } from '@/composables/useBranding'
@@ -219,6 +219,9 @@ import authService from '@/services/authService'
 import { ROLES } from '@/constants/roles'
 import { formatDistanceToNow } from 'date-fns'
 import { tr } from 'date-fns/locale'
+import { useClickOutside } from '@/composables/useClickOutside'
+import { useNotify } from '@/composables/useNotify'
+import { useBackendMode } from '@/composables/useBackendMode'
 
 const authStore = useAuthStore()
 const notificationsStore = useNotificationsStore()
@@ -233,25 +236,19 @@ const showUserDropdown = ref(false)
 const showNotificationsDropdown = ref(false)
 const isMobileMenuOpen = ref(false)
 
-const clickOutsideHandler = (event) => {
-  // User dropdown click outside
-  if (showUserDropdown.value) {
-    const userBtn = document.querySelector('button[aria-label="Kullanıcı menüsünü aç"]');
-    const dropdown = document.querySelector('.origin-top-right'); // Simplified check
-    if (userBtn && dropdown && !userBtn.contains(event.target) && !dropdown.contains(event.target)) {
-      showUserDropdown.value = false
-    }
-  }
-  
-  // Notifications dropdown click outside
-  if (showNotificationsDropdown.value) {
-    const notifBtn = document.querySelector('button[aria-label="Bildirimleri göster"]');
-    const dropdown = document.querySelector('.origin-top-right');
-    if (notifBtn && dropdown && !notifBtn.contains(event.target) && !dropdown.contains(event.target)) {
-      showNotificationsDropdown.value = false
-    }
-  }
-}
+const { isDemoMode } = useBackendMode()
+const { notifySuccess, notifyError, notifyInfo } = useNotify()
+
+const userMenuRef = ref(null)
+const notificationsRef = ref(null)
+
+useClickOutside(userMenuRef, () => {
+  showUserDropdown.value = false
+})
+
+useClickOutside(notificationsRef, () => {
+  showNotificationsDropdown.value = false
+})
 
 // Backend'den kullanıcı bilgilerini yükle
 const loadUserFromBackend = async () => {
@@ -311,8 +308,6 @@ const setTabsBasedOnRole = (role) => {
 }
 
 onMounted(() => {
-  document.addEventListener('click', clickOutsideHandler)
-
   // Backend API kontrolü
   const isBackendActive = import.meta.env.VITE_API_BASE_URL && 
                          import.meta.env.VITE_API_BASE_URL !== 'http://localhost:5000/api'
@@ -354,7 +349,6 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
-  document.removeEventListener('click', clickOutsideHandler)
 })
 
 watch(() => authStore.user, (newUser) => {
@@ -437,37 +431,24 @@ const logout = async () => {
 }
 
 const changePassword = async () => {
-  // Backend API kontrolü
-  const isBackendActive = import.meta.env.VITE_API_BASE_URL && 
-                         import.meta.env.VITE_API_BASE_URL !== 'http://localhost:5000/api'
+  if (isDemoMode.value) {
+    notifyInfo('Demo modu: Şifre sıfırlama bağlantısı e-posta adresinize gönderildi.')
+    showUserDropdown.value = false;
+    return
+  }
 
-  if (isBackendActive) {
-    // Backend API ile şifre sıfırlama
-    try {
-      const user = await authService.checkAuthStatus()
-      if (user && user.email) {
-        await authService.resetPassword(user.email)
-        alert('Şifre sıfırlama bağlantısı e-posta adresinize gönderildi.')
-      } else {
-        alert('Kullanıcı bilgileri bulunamadı.')
-      }
-    } catch (error) {
-      console.error("Backend şifre sıfırlama hatası:", error);
-      alert("Bir hata oluştu. Lütfen tekrar deneyin.");
+  try {
+    const user = await authService.checkAuthStatus()
+    if (user && user.email) {
+      await authService.resetPassword(user.email)
+      notifySuccess('Şifre sıfırlama bağlantısı e-posta adresinize gönderildi.')
+    } else {
+      notifyError('Kullanıcı bilgileri bulunamadı.')
     }
-    showUserDropdown.value = false;
-    return
+  } catch (error) {
+    console.error("Backend şifre sıfırlama hatası:", error);
+    notifyError("Bir hata oluştu. Lütfen tekrar deneyin.");
   }
-
-  // Demo modu kontrolü
-  const isDemoMode = !import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_BASE_URL === 'http://localhost:5000/api'
-  
-  if (isDemoMode) {
-    alert('Demo modu: Şifre sıfırlama bağlantısı e-posta adresinize gönderildi.')
-    showUserDropdown.value = false;
-    return
-  }
-  
   showUserDropdown.value = false;
 }
 </script>

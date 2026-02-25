@@ -223,10 +223,12 @@
 import { ref, onMounted } from 'vue'
 import { format } from 'date-fns'
 import { tr } from 'date-fns/locale'
+import { useNotify } from '@/composables/useNotify'
 import paymentsService from '@/services/paymentsService'
 import { auditActions, entityTypes, getAuditActionLabel, getEntityTypeLabel } from '@/constants/enums'
 
 // Reactive data
+const { notifyError } = useNotify()
 const loading = ref(false)
 const logs = ref([])
 const selectedLog = ref(null)
@@ -264,7 +266,7 @@ const loadLogs = async () => {
     logs.value = response || []
   } catch (error) {
     console.error('Loglar yüklenemedi:', error)
-    alert('Loglar yüklenemedi: ' + error.message)
+    notifyError('Loglar yüklenemedi: ' + error.message)
   } finally {
     loading.value = false
   }

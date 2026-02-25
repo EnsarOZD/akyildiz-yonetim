@@ -14,9 +14,9 @@
         <!-- Bildirim İzni Banner -->
         <NotificationPermissionBanner />
         
-        <div class="w-full md:max-w-6xl mx-auto bg-base-100 md:shadow-lg md:rounded-xl overflow-hidden mb-20 md:mb-0">
+        <div class="w-full md:max-w-7xl mx-auto bg-base-100 md:shadow-lg md:rounded-xl overflow-hidden mb-20 md:mb-0">
           <!-- İçerik -->
-          <router-view class="p-4 md:p-6" />
+          <router-view class="p-4 sm:p-6" />
         </div>
       </div>
       
