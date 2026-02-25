@@ -10,12 +10,21 @@
           </h1>
           <p class="text-gray-600 dark:text-gray-400">İş hanındaki tüm kiracıları yönetin</p>
         </div>
-        <button v-if="authStore.role === ROLES.ADMIN || authStore.role === ROLES.MANAGER" @click="showCreateModal = true" class="btn btn-success bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 border-0 text-white shadow-lg">
-          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-          </svg>
-          Yeni Kiracı Ekle
-        </button>
+        <div class="flex gap-2">
+          <button v-if="authStore.role === ROLES.ADMIN" @click="handleSyncBalances" :disabled="syncLoading" class="btn btn-outline btn-primary shadow-lg">
+            <span v-if="syncLoading" class="loading loading-spinner loading-xs"></span>
+            <svg v-else class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+            </svg>
+            Bakiyeleri Senkronize Et
+          </button>
+          <button v-if="authStore.role === ROLES.ADMIN || authStore.role === ROLES.MANAGER" @click="showCreateModal = true" class="btn btn-success bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 border-0 text-white shadow-lg">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+            </svg>
+            Yeni Kiracı Ekle
+          </button>
+        </div>
       </div>
     </div>
     <!-- Stats Widgets -->
@@ -253,6 +262,7 @@ const showEditModal = ref(false)
 const editingTenant = ref(null)
 const currentPage = ref(1)
 const pageSize = 10
+const syncLoading = ref(false)
 
 // Filters
 const filters = ref({
@@ -323,6 +333,22 @@ const fetchTenants = async () => {
     await tenantsStore.fetchTenants()
   } catch (err) {
     console.error('Kiracılar yüklenirken hata:', err)
+  }
+}
+
+const handleSyncBalances = async () => {
+  if (!confirm('Tüm kiracıların avans bakiyeleri geçmiş işlem verilerine göre yeniden hesaplanacak ve eşitlenecektir. Devam etmek istiyor musunuz?')) return
+  
+  syncLoading.value = true
+  try {
+    const response = await tenantsService.syncAdvanceBalances()
+    errorHandler.logSuccess('success', `Senkronizasyon tamamlandı. ${response.updatedAccountsCount} hesap güncellendi.`, { component: 'Tenants', action: 'sync-balances' })
+    await fetchTenants()
+  } catch (err) {
+    console.error('Senkronizasyon hatası:', err)
+    errorHandler.logError(err, { component: 'Tenants', action: 'sync-balances' })
+  } finally {
+    syncLoading.value = false
   }
 }
 
