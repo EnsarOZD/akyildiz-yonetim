@@ -40,7 +40,7 @@ import NotificationPermissionBanner from './components/notifications/Notificatio
 import ErrorNotification from './components/common/ErrorNotification.vue'
 import SuccessNotification from './components/common/SuccessNotification.vue'
 import { useAuthStore } from '@/stores/auth'
-import { onMounted, watchEffect, watch } from 'vue'
+import { onMounted, watchEffect, watch, computed } from 'vue'
 
 const route = useRoute()
 const authStore = useAuthStore()

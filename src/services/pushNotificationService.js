@@ -1,6 +1,5 @@
-import axios from 'axios'
+import apiService from './api.js'
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || ''
 let cachedVapidKey = null
 
 export const pushNotificationService = {
@@ -32,8 +31,8 @@ export const pushNotificationService = {
 
             // Fetch VAPID public key from backend if not cached
             if (!cachedVapidKey) {
-                const response = await axios.get(`${API_BASE_URL}/api/notifications/vapid-public-key`)
-                cachedVapidKey = response.data.publicKey
+                const response = await apiService.get('/notifications/vapid-public-key')
+                cachedVapidKey = response.publicKey
             }
 
             const subscription = await registration.pushManager.subscribe({
@@ -47,7 +46,7 @@ export const pushNotificationService = {
                 auth: btoa(String.fromCharCode.apply(null, new Uint8Array(subscription.getKey('auth'))))
             }
 
-            await axios.post(`${API_BASE_URL}/api/notifications/subscribe`, payload)
+            await apiService.post('/notifications/subscribe', payload)
             console.log('User is subscribed to push notifications.')
             return subscription
         } catch (err) {
@@ -66,9 +65,7 @@ export const pushNotificationService = {
             if (subscription) {
                 const endpoint = subscription.endpoint
                 await subscription.unsubscribe()
-                await axios.delete(`${API_BASE_URL}/api/notifications/unsubscribe`, {
-                    params: { endpoint }
-                })
+                await apiService.delete(`/notifications/unsubscribe?endpoint=${encodeURIComponent(endpoint)}`)
                 console.log('User is unsubscribed from push notifications.')
             }
         } catch (err) {

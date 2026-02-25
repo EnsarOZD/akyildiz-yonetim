@@ -1,0 +1,6 @@
+<svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Monogram A -->
+  <path d="M50 15L85 85H72L50 38L28 85H15L50 15Z" fill="currentColor"/>
+  <!-- Star Accent -->
+  <path d="M50 42L53 50L61 50L55 54L57 62L50 58L43 62L45 54L39 50L47 50L50 42Z" fill="white" fill-opacity="0.8"/>
+</svg>
