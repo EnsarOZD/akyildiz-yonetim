@@ -3,17 +3,17 @@
   <div class="p-4 sm:p-6 bg-gray-50 min-h-screen font-sans dark:bg-gray-900">
     <div class="max-w-7xl mx-auto">
 
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-        <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-gray-100 text-center sm:text-left">Ödemeler</h1>
-        <div class="flex flex-wrap items-center justify-center sm:justify-end gap-2 sm:gap-4">
-          <div class="bg-green-100 dark:bg-green-900/50 text-green-600 dark:text-green-400 px-3 py-1 rounded-full text-xs sm:text-sm whitespace-nowrap">
-            <span class="hidden sm:inline">Toplam:</span><span class="sm:hidden">Top:</span> {{ formatCurrency(totalIncome) }}
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+        <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-gray-100 text-center md:text-left">Ödemeler</h1>
+        <div class="flex flex-wrap items-center justify-center md:justify-end gap-2 sm:gap-4">
+          <div class="bg-green-100 dark:bg-green-900/50 text-green-600 dark:text-green-400 px-3 py-1 rounded-full text-xs font-semibold shadow-sm">
+            <span class="hidden sm:inline">Toplam:</span><span class="sm:hidden text-[10px]">TOPLAM</span> {{ formatCurrency(totalIncome) }}
           </div>
-          <div class="bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 px-3 py-1 rounded-full text-xs sm:text-sm whitespace-nowrap">
-            <span class="hidden sm:inline">Bu Ay:</span><span class="sm:hidden">Ay:</span> {{ formatCurrency(thisMonthIncome) }}
+          <div class="bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 px-3 py-1 rounded-full text-xs font-semibold shadow-sm">
+            <span class="hidden sm:inline">Bu Ay:</span><span class="sm:hidden text-[10px]">BU AY</span> {{ formatCurrency(thisMonthIncome) }}
           </div>
-          <div class="bg-purple-100 dark:bg-purple-900/50 text-purple-600 dark:text-purple-400 px-3 py-1 rounded-full text-xs sm:text-sm whitespace-nowrap">
-            {{ paymentsCount }} <span class="hidden sm:inline">ödeme</span><span class="sm:hidden">kayıt</span>
+          <div class="bg-purple-100 dark:bg-purple-900/50 text-purple-600 dark:text-purple-400 px-3 py-1 rounded-full text-xs font-semibold shadow-sm">
+            {{ paymentsCount }} <span class="hidden sm:inline">ödeme</span><span class="sm:hidden text-[10px]">KAYIT</span>
           </div>
         </div>
       </div>

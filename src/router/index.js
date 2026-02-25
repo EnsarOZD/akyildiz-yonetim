@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import authService from '@/services/authService'
+import { useAuthStore } from '@/stores/auth'
 
 // Lazy loaded components for better performance
 const Dashboard = () => import('../features/dashboard/Dashboard.vue')

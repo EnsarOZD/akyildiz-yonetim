@@ -1,28 +1,28 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 p-6">
+  <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 p-4 sm:p-6">
     <!-- Header -->
     <div class="mb-8">
-      <div class="flex items-center justify-between">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 class="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-2 flex items-center gap-3">
-            <span class="text-4xl">🏢</span>
+          <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-gray-100 mb-2 flex items-center gap-3">
+            <span class="text-3xl sm:text-4xl">🏢</span>
             İş Hanı Kiracıları
           </h1>
-          <p class="text-gray-600 dark:text-gray-400">İş hanındaki tüm kiracıları yönetin</p>
+          <p class="text-gray-600 dark:text-gray-400 text-sm sm:text-base">İş hanındaki tüm kiracıları yönetin</p>
         </div>
-        <div class="flex gap-2">
-          <button v-if="authStore.role === ROLES.ADMIN" @click="handleSyncBalances" :disabled="syncLoading" class="btn btn-outline btn-primary shadow-lg active:scale-[0.98] active:opacity-90 transition-all">
+        <div class="flex flex-wrap gap-2">
+          <button v-if="authStore.role === ROLES.ADMIN" @click="handleSyncBalances" :disabled="syncLoading" class="btn btn-outline btn-primary btn-sm sm:btn-md shadow-lg transition-all flex-1 sm:flex-none">
             <span v-if="syncLoading" class="loading loading-spinner loading-xs"></span>
-            <svg v-else class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg v-else class="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
             </svg>
-            Bakiyeleri Senkronize Et
+            <span class="text-[10px] sm:text-sm">Senkronize Et</span>
           </button>
-          <button v-if="authStore.role === ROLES.ADMIN || authStore.role === ROLES.MANAGER" @click="showCreateModal = true" class="btn btn-success bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 border-0 text-white shadow-lg active:scale-[0.98] active:opacity-90 transition-all">
-            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <button v-if="authStore.role === ROLES.ADMIN || authStore.role === ROLES.MANAGER" @click="showCreateModal = true" class="btn btn-success btn-sm sm:btn-md bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 border-0 text-white shadow-lg transition-all flex-1 sm:flex-none">
+            <svg class="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
             </svg>
-            Yeni Kiracı Ekle
+            <span class="text-[10px] sm:text-sm">Yeni Ekle</span>
           </button>
         </div>
       </div>

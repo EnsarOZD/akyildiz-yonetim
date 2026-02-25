@@ -498,6 +498,11 @@ const handleSave = async () => {
 }
 
 const handleCancel = () => {
+  if (isDirty.value) {
+    if (!confirm('Kaydedilmemiş değişiklikleriniz var. Kapatmak istediğinizden emin misiniz?')) {
+      return
+    }
+  }
   emit('cancel')
 }
 

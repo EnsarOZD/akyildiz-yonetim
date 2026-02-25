@@ -152,7 +152,7 @@
 
       <!-- Sabit Butonlar -->
       <div class="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700 mt-6">
-        <button type="button" @click="$emit('close')" class="btn btn-outline border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">
+        <button type="button" @click="handleClose" class="btn btn-outline border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">
           <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
           </svg>
@@ -180,7 +180,7 @@ import { useDirtyGuard } from '@/composables/useDirtyGuard'
 const props = defineProps({ visible: Boolean })
 const emit = defineEmits(['save', 'close'])
 const { on: onEvent } = useEventBus()
-const { isDirty, setInitialState, resetDirty } = useDirtyGuard()
+const { isDirty, resetDirty } = useDirtyGuard(() => tenant.value)
 
 defineExpose({ isDirty, resetDirty })
 
