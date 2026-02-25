@@ -107,6 +107,7 @@
             <thead>
               <tr class="bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
                 <th>Tarih</th>
+                <th>Dönem</th>
                 <th>Kiracı / Ünite</th>
                 <th>İşlem</th>
                 <th>Açıklama</th>
@@ -118,6 +119,7 @@
             <tbody>
               <tr v-for="(item, idx) in reportItems" :key="idx" class="hover">
                 <td class="whitespace-nowrap">{{ formatDate(item.date) }}</td>
+                <td class="whitespace-nowrap font-mono text-sm">{{ formatPeriod(item.periodYear, item.periodMonth) }}</td>
                 <td>
                   <div class="font-bold">{{ item.tenantName }}</div>
                   <div class="text-xs opacity-60">{{ item.unitCode }}</div>
@@ -143,7 +145,7 @@
                 </td>
               </tr>
               <tr v-if="reportItems.length === 0">
-                <td colspan="7" class="text-center py-12 text-gray-500 italic">
+                <td colspan="8" class="text-center py-12 text-gray-500 italic">
                   {{ loading ? 'Veriler yükleniyor...' : 'Kritere uygun kayıt bulunamadı.' }}
                 </td>
               </tr>
@@ -260,6 +262,8 @@ const reportItems = computed(() => {
     debtsData.value.forEach(d => {
       items.push({
         date: d.date || d.createdAt || d.dueDate,
+        periodYear: d.periodYear,
+        periodMonth: d.periodMonth,
         tenantName: d.tenantName || 'Bilinmiyor',
         unitCode: d.flatInfo || d.unit || '-',
         description: d.description || `${d.type === 'Electricity' ? 'Elektrik' : d.type === 'Water' ? 'Su' : 'Aidat'} faturası`,
@@ -275,9 +279,11 @@ const reportItems = computed(() => {
     paymentsData.value.forEach(p => {
       items.push({
         date: p.paymentDate,
+        periodYear: p.periodYear,
+        periodMonth: p.periodMonth,
         tenantName: p.tenantName || p.ownerName || 'Bilinmiyor',
         unitCode: p.flatInfo || '-',
-        description: p.description || 'Tahsilat kaydı',
+        description: p.description || p.Type || 'Tahsilat kaydı',
         amount: Number(p.amount ?? 0),
         isPayment: true,
         isPaid: true
@@ -285,8 +291,13 @@ const reportItems = computed(() => {
     })
   }
   
-  // Sıralama: Tarihe göre eski -> yeni veya yeni -> eski
-  return items.sort((a, b) => new Date(b.date) - new Date(a.date))
+  // Sıralama: Dönem (Yıl-Ay) -> Tarih (Giriş sırası)
+  return items.sort((a, b) => {
+    const pA = (a.periodYear || 0) * 100 + (a.periodMonth || 0)
+    const pB = (b.periodYear || 0) * 100 + (b.periodMonth || 0)
+    if (pA !== pB) return pB - pA
+    return new Date(b.date) - new Date(a.date)
+  })
 })
 
 const summary = computed(() => {
@@ -308,10 +319,16 @@ const formatDate = (date) => {
   return new Date(date).toLocaleDateString('tr-TR')
 }
 
+const formatPeriod = (year, month) => {
+  if (!year || !month) return '-'
+  return `${year}-${String(month).padStart(2, '0')}`
+}
+
 // EXPORT FUNCTIONS
 const exportToExcel = () => {
   const data = reportItems.value.map(i => ({
     'Tarih': formatDate(i.date),
+    'Dönem': formatPeriod(i.periodYear, i.periodMonth),
     'Kiracı': i.tenantName,
     'Ünite': i.unitCode,
     'Tür': i.isPayment ? 'Tahsilat' : 'Borç Tahakkuku',
@@ -351,6 +368,7 @@ const exportToPDF = () => {
   
   const columns = [
     { header: 'Tarih', dataKey: 'date' },
+    { header: 'Donem', dataKey: 'period' },
     { header: 'Kiraci', dataKey: 'tenant' },
     { header: 'Unit', dataKey: 'unit' },
     { header: 'Aciklama', dataKey: 'desc' },
@@ -360,6 +378,7 @@ const exportToPDF = () => {
   
   const rows = reportItems.value.map(i => ({
     date: formatDate(i.date),
+    period: formatPeriod(i.periodYear, i.periodMonth),
     tenant: i.tenantName,
     unit: i.unitCode,
     desc: i.description,
