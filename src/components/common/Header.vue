@@ -107,7 +107,11 @@
           </button>
           <!-- Kullanıcı Dropdown -->
           <div v-if="userInfo" class="relative">
-            <button @click="toggleUserDropdown" class="flex items-center gap-2 text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white">
+            <button 
+              @click="toggleUserDropdown" 
+              class="flex items-center gap-2 text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white"
+              aria-label="Kullanıcı menüsünü aç"
+            >
               <span class="sr-only">Kullanıcı menüsünü aç</span>
               <span class="hidden sm:inline">{{ userInfo.firstName }}</span>
               <svg class="h-8 w-8 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
@@ -231,15 +235,21 @@ const isMobileMenuOpen = ref(false)
 
 const clickOutsideHandler = (event) => {
   // User dropdown click outside
-  const userBtn = document.querySelector('.relative button[aria-label="Kullanıcı menüsünü aç"]');
-  if (showUserDropdown.value && userBtn && !userBtn.contains(event.target) && !event.target.closest('.origin-top-right')) {
-    showUserDropdown.value = false
+  if (showUserDropdown.value) {
+    const userBtn = document.querySelector('button[aria-label="Kullanıcı menüsünü aç"]');
+    const dropdown = document.querySelector('.origin-top-right'); // Simplified check
+    if (userBtn && dropdown && !userBtn.contains(event.target) && !dropdown.contains(event.target)) {
+      showUserDropdown.value = false
+    }
   }
   
   // Notifications dropdown click outside
-  const notifBtn = document.querySelector('button[aria-label="Bildirimleri göster"]');
-  if (showNotificationsDropdown.value && notifBtn && !notifBtn.contains(event.target) && !event.target.closest('.origin-top-right')) {
-    showNotificationsDropdown.value = false
+  if (showNotificationsDropdown.value) {
+    const notifBtn = document.querySelector('button[aria-label="Bildirimleri göster"]');
+    const dropdown = document.querySelector('.origin-top-right');
+    if (notifBtn && dropdown && !notifBtn.contains(event.target) && !dropdown.contains(event.target)) {
+      showNotificationsDropdown.value = false
+    }
   }
 }
 

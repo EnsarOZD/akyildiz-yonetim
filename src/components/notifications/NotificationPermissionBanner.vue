@@ -40,10 +40,20 @@
         </button>
       </div>
 
-      <!-- Permission Denied Hint -->
       <div v-if="permissionDenied" class="absolute inset-x-0 -bottom-8 bg-amber-100 text-amber-800 text-[10px] text-center py-1 font-medium md:static md:bg-transparent md:text-white/80 md:w-full md:text-center animate-pulse">
         Lütfen tarayıcı ayarlarından bildirim iznini aktif hale getirin.
       </div>
+
+      <!-- Close Button -->
+      <button 
+        @click="dismiss" 
+        class="absolute right-2 top-2 p-1 hover:bg-white/10 rounded-full md:static"
+        aria-label="Kapat"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
     </div>
   </transition>
 </template>
@@ -120,6 +130,8 @@ const subscribe = async () => {
         }
     } catch (error) {
         console.error('Subscription failed:', error)
+        // Ensure it doesn't get stuck open on error
+        setTimeout(() => { showBanner.value = false }, 3000)
     } finally {
         loading.value = false
     }
