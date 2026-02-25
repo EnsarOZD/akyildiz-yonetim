@@ -1,23 +1,17 @@
 import { computed } from 'vue'
 
-/**
- * SaaS Phase 1: Backend mode and configuration management
- * Consolidates API URL checks and Demo Mode logic
- */
 export function useBackendMode() {
-    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || ''
-
     const isDemoMode = computed(() => {
-        return !apiBaseUrl || apiBaseUrl === 'http://localhost:5000/api'
+        return import.meta.env.VITE_API_BASE_URL?.includes('localhost') ||
+            import.meta.env.VITE_DEMO_MODE === 'true'
     })
 
-    const isProduction = computed(() => {
-        return apiBaseUrl && apiBaseUrl.includes('akyildizyonetim.com')
+    const apiBaseUrl = computed(() => {
+        return import.meta.env.VITE_API_BASE_URL || 'https://api.akyildizyonetim.com/api'
     })
 
     return {
-        apiBaseUrl,
         isDemoMode,
-        isProduction
+        apiBaseUrl
     }
 }

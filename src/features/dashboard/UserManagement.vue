@@ -1,19 +1,19 @@
 <template>
-  <div class="space-y-6">
+  <div class="px-4 sm:px-0 space-y-6">
     <!-- Başlık ve Yeni Kullanıcı Butonu -->
-    <div class="flex items-center justify-between">
-      <div>
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div class="text-center md:text-left">
         <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">Kullanıcı Yönetimi</h2>
-        <p class="text-gray-500 dark:text-gray-400">Sistem kullanıcılarını yönetin ve yeni kullanıcılar ekleyin</p>
+        <p class="text-gray-500 dark:text-gray-400 text-sm">Sistem kullanıcılarını yönetin ve yeni kullanıcılar ekleyin</p>
       </div>
       <button 
         @click="showAddUserModal = true" 
-        class="btn btn-primary"
+        class="btn btn-primary btn-sm sm:btn-md w-full md:w-auto shadow-md"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
         </svg>
-        Yeni Kullanıcı Ekle
+        <span>Yeni Kullanıcı Ekle</span>
       </button>
     </div>
 

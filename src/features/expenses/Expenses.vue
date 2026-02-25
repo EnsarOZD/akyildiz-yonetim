@@ -3,15 +3,15 @@
   <div class="p-4 sm:p-6 bg-gray-50 min-h-screen font-sans dark:bg-gray-900">
     <div class="max-w-7xl mx-auto">
       <!-- Başlık ve Kontroller -->
-      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
-        <h1 class="text-3xl font-bold text-gray-800 dark:text-gray-100">Giderler</h1>
+      <div class="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
+        <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-gray-100 text-center md:text-left">Giderler</h1>
 
-        <div class="flex items-center gap-3">
+        <div class="flex items-center justify-center md:justify-end gap-3 flex-wrap">
           <!-- Tarih Filtresi -->
           <select
             v-model="dateFilter"
             @change="fetchExpenses"
-            class="select select-sm select-bordered bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300"
+            class="select select-sm select-bordered bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 min-w-[140px]"
           >
             <option value="all">Tüm Zamanlar</option>
             <option value="this_month">Bu Ay</option>
@@ -23,12 +23,12 @@
           <button
             @click="fetchExpenses"
             :disabled="loading"
-            class="btn btn-sm btn-outline btn-primary"
+            class="btn btn-sm btn-outline btn-primary shadow-sm"
           >
-            <svg v-if="!loading" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <svg v-if="!loading" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
             </svg>
-            <div v-else class="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
+            <div v-else class="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-1"></div>
             Yenile
           </button>
         </div>

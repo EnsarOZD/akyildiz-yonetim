@@ -184,10 +184,12 @@
 
 <script setup>
 import { computed, ref, watch, nextTick, onMounted } from 'vue'
+import { useDirtyGuard } from '@/composables/useDirtyGuard'
 
 const props = defineProps(['visible', 'expense', 'types', 'editMode'])
-const emit = defineEmits(['save', 'close'])
+const emit = defineEmits(['close', 'save'])
 
+const { isDirty, resetDirty } = useDirtyGuard(() => props.expense)
 const typeSelect = ref(null)
 const showPreview = ref(false)
 const loading = ref(false)
@@ -269,6 +271,7 @@ watch(() => props.visible, (newVisible) => {
     error.value = null
     errors.value = {}
     showPreview.value = false
+    resetDirty()
   }
 })
 
@@ -344,6 +347,12 @@ async function handleSave() {
 function handleClose() {
   if (loading.value) return // Prevent closing while loading
   
+  if (isDirty.value) {
+    if (!confirm('Kaydedilmemiş değişiklikleriniz var. Kapatmak istediğinizden emin misiniz?')) {
+      return
+    }
+  }
+
   // Reset form state
   error.value = null
   errors.value = {}

@@ -77,3 +77,10 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+/* Tactile feedback for mobile/touch */
+.btn:active, button:active {
+  transform: scale(0.95);
+  opacity: 0.9;
+  transition: transform 0.1s;
+}
