@@ -22,7 +22,8 @@ const Flats = () => import('../features/flats/Flats.vue')
 const Reports = () => import('../features/reports/ReportsView.vue')
 
 const routes = [
-  { path: '/', name: 'Landing', component: LandingPage, meta: { public: true, hideLayout: true } },
+  { path: '/', name: 'Login', component: LoginView, meta: { public: true, hideLayout: true } },
+  { path: '/landing', name: 'Landing', component: LandingPage, meta: { public: true, hideLayout: true } },
 
   { path: '/dashboard', name: 'Dashboard', component: Dashboard, meta: { requiresAuth: true, roles: ['admin', 'manager', 'viewer', 'tenant', 'observer', 'dataentry'] } },
   { path: '/tenants', name: 'Tenants', component: Tenants, meta: { requiresAuth: true, roles: ['admin', 'manager', 'dataentry'] } },
@@ -37,7 +38,7 @@ const routes = [
 
   { path: '/profile', name: 'Profile', component: TenantDetailPage, meta: { requiresAuth: true, roles: ['tenant'] } },
 
-  { path: '/login', name: 'Login', component: LoginView, meta: { public: true, hideLayout: true } },
+  { path: '/login', redirect: '/' },
   { path: '/set-password', name: 'SetPassword', component: () => import('../views/SetPasswordView.vue'), meta: { public: true, hideLayout: true } },
   { path: '/reset-password', name: 'ResetPassword', component: () => import('../views/SetPasswordView.vue'), meta: { public: true, hideLayout: true } },
   { path: '/invite', name: 'Invite', component: () => import('../views/SetPasswordView.vue'), meta: { public: true, hideLayout: true } },
@@ -110,8 +111,8 @@ router.beforeEach(async (to, from, next) => {
       }
     }
 
-    // Already logged in tries to access login page
-    if (user && to.path === '/login') {
+    // Already logged in tries to access login page or root
+    if (user && (to.path === '/' || to.path === '/login')) {
       let target = '/dashboard';
       if (user.role === 'admin') target = '/admin';
       else if (user.role === 'manager') target = '/dashboard';

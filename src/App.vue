@@ -11,11 +11,14 @@
         <!-- Header -->
         <Header />
         
-        <div class="max-w-6xl mx-auto bg-base-100 shadow-lg rounded-xl overflow-hidden">
+        <div class="w-full md:max-w-6xl mx-auto bg-base-100 md:shadow-lg md:rounded-xl overflow-hidden mb-20 md:mb-0">
           <!-- İçerik -->
-          <router-view class="p-6" />
+          <router-view class="p-4 md:p-6" />
         </div>
       </div>
+      
+      <!-- Mobil Alt Navigasyon -->
+      <MobileBottomNav v-if="showMobileNav" />
     </template>
 
     <!-- Global Hata Bildirimleri -->
@@ -29,6 +32,7 @@
 <script setup>
 import { useRoute } from 'vue-router'
 import Header from './components/common/Header.vue'
+import MobileBottomNav from './components/common/MobileBottomNav.vue'
 import ErrorNotification from './components/common/ErrorNotification.vue'
 import SuccessNotification from './components/common/SuccessNotification.vue'
 import { useAuthStore } from '@/stores/auth'
@@ -36,6 +40,10 @@ import { onMounted, watchEffect, watch } from 'vue'
 
 const route = useRoute()
 const authStore = useAuthStore()
+
+const showMobileNav = computed(() => {
+  return authStore.user && !route.meta.hideLayout;
+})
 
 onMounted(() => {
   authStore.initAuthListener()

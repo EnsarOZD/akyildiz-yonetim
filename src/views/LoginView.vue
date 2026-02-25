@@ -146,7 +146,7 @@
       <!-- Footer -->
       <div class="text-center mt-8">
         <p class="text-sm text-gray-400">
-          © 2024 {{ appName }}. Tüm hakları saklıdır.
+          © 2025 {{ appName }}. Tüm hakları saklıdır.
         </p>
       </div>
     </div>
