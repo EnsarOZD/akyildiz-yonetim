@@ -114,7 +114,7 @@ class PaymentsService {
     if (filters.userId) params.userId = filters.userId
     if (filters.action) params.action = filters.action
 
-    return apiService.get('/audit-logs', params)
+    return apiService.get('/AuditLogs', params)
   }
 
   // Ödeme istatistikleri

@@ -374,7 +374,7 @@ const editDebt = (d) => {
 const fetchDues = async () => {
   try {
     const [duesRes, flatsRes, tenantsRes] = await Promise.all([
-      api.get('/utilitydebts', { params: { period: selectedPeriod.value || undefined } }),
+      utilityDebtsService.getUtilityDebts({ period: selectedPeriod.value || undefined }),
       api.get('/flats'),
       api.get('/tenants'),
     ])

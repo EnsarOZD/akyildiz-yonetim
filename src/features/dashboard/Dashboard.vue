@@ -866,17 +866,21 @@ const loadExpenses = async () => {
     // Expenses için backend enum değerleri: "Electricity", "Water", "Gas", "Maintenance", "Cleaning", "Security", "Other"
     const response = await expensesService.getExpenses(filters)
     expenses.value = response || []
-    // Verileri işle
-    processActivities()
-    
-    // Borç özetini yükle
+  } catch (err) {
+    console.error('Giderler yüklenirken hata:', err)
+    expenses.value = []
+  }
+}
+
+const loadDebtsSummary = async () => {
+  try {
     if (userRole.value !== 'tenant') {
       const summaryResult = await dashboardService.getDebtsSummary()
       debtsSummary.value = summaryResult || []
     }
   } catch (err) {
-    console.error('Giderler yüklenirken hata:', err)
-    expenses.value = []
+    console.error('Borç özeti yüklenirken hata:', err)
+    debtsSummary.value = []
   }
 }
 
@@ -965,7 +969,8 @@ const loadDashboardData = async () => {
       loadOwnerDues(),
       loadOwners(),
       loadOwnerPayments(),
-      loadUtilityDebts()
+      loadUtilityDebts(),
+      loadDebtsSummary()
     ])
     
     console.log('Dashboard verileri başarıyla yüklendi:', {

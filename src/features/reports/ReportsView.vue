@@ -275,7 +275,7 @@ const reportItems = computed(() => {
     paymentsData.value.forEach(p => {
       items.push({
         date: p.paymentDate,
-        tenantName: p.tenantName || p.tenant?.companyName || 'Bilinmiyor',
+        tenantName: p.tenantName || p.ownerName || 'Bilinmiyor',
         unitCode: p.flatInfo || '-',
         description: p.description || 'Tahsilat kaydı',
         amount: Number(p.amount ?? 0),
