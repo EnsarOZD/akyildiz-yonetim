@@ -413,6 +413,8 @@ const fetchDues = async () => {
 })(),
         status: normStatus(d.status),
         remainingAmount: Number(d.remainingAmount ?? d.RemainingAmount ?? 0),
+        tenantId: d.tenantId ?? d.TenantId ?? null,
+        ownerId: d.ownerId ?? d.OwnerId ?? null,
       }
     })
   } catch (e) {
