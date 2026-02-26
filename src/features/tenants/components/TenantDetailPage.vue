@@ -43,6 +43,16 @@
             <span :class="['badge badge-lg font-semibold', tenant.isActive ? 'badge-success' : 'badge-ghost']">
               {{ tenant.isActive ? 'Aktif' : 'Pasif' }}
             </span>
+            <button 
+              v-if="authStore.role === 'admin' || authStore.role === 'manager'"
+              @click="showEditModal = true"
+              class="btn btn-outline btn-sm sm:btn-md"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              </svg>
+              Bilgileri Düzenle
+            </button>
           </div>
         </div>
       </div>
@@ -147,13 +157,19 @@
                 <tr>
                   <th>Ödeme Tarihi</th>
                   <th>Açıklama</th>
+                  <th>Ödeme Şekli</th>
+                  <th>Banka</th>
                   <th class="text-right">Tutar</th>
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="payment in payments" :key="payment.id" class="hover">
+                <tr v-for="payment in filteredPayments" :key="payment.id" class="hover">
                   <td>{{ formatDate(payment.paymentDate) }}</td>
                   <td>{{ payment.description }}</td>
+                  <td>
+                    <span class="badge badge-outline badge-sm">{{ getPaymentMethodLabel(payment.method) }}</span>
+                  </td>
+                  <td>{{ payment.bankName || '-' }}</td>
                   <td class="text-right font-semibold text-success">{{ formatCurrency(payment.amount) }}</td>
                 </tr>
                 <tr v-if="payments.length === 0">
@@ -280,6 +296,15 @@
       </div>
       <div class="modal-backdrop" @click="showAdvanceModal = false"></div>
     </div>
+
+    <!-- Düzenleme Modalı -->
+    <TenantEditModal
+      v-if="tenant"
+      :visible="showEditModal"
+      :tenant="tenant"
+      @save="handleUpdateTenant"
+      @close="showEditModal = false"
+    />
   </div>
 </template>
 
@@ -287,11 +312,14 @@
 import { ref, onMounted, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import AdvanceAccountManager from '@/components/AdvanceAccountManager.vue'
+import TenantEditModal from './TenantEditModal.vue'
 import tenantsService from '@/features/tenants/services/tenantsService.js'
 import paymentsService from '@/services/paymentsService'
 import utilityDebtsService from '@/services/utilityDebtsService'
 import { useAuthStore } from '@/stores/auth'
 import { useErrorHandler } from '@/composables/useErrorHandler'
+import { useNotify } from '@/composables/useNotify'
+import { getPaymentMethodLabel } from '@/constants/enums'
 
 const route = useRoute()
 const router = useRouter()
@@ -307,9 +335,27 @@ const loading = ref(true)
 const activeTab = ref('timeline')
 const totalDebt = ref(0)
 const showAdvanceModal = ref(false)
+const showEditModal = ref(false)
+const { notifySuccess } = useNotify()
+
+const filteredPayments = computed(() => {
+  return payments.value.filter(p => !p.receiptNumber?.startsWith('AVANS-'))
+})
 
 const openAdvanceModal = (item) => {
   showAdvanceModal.value = true
+}
+
+const handleUpdateTenant = async (data) => {
+  try {
+    await tenantsService.updateTenant(tenantId.value, data)
+    notifySuccess('Kiracı bilgileri güncellendi')
+    showEditModal.value = false
+    await fetchTenantDetails()
+  } catch (err) {
+    console.error('Kiracı güncellenirken hata:', err)
+    handleNetworkError(err, { component: 'TenantDetailPage', action: 'handleUpdateTenant' })
+  }
 }
 
 const handleAdvanceSuccess = () => {
