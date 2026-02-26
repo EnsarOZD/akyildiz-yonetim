@@ -203,11 +203,19 @@
 
             <!-- Pagination Control -->
             <div v-if="totalPages > 1" class="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6 pt-6 border-t dark:border-gray-700">
-              <p class="text-sm text-gray-500">
-                Toplam <span class="font-medium">{{ filteredPayments.length }}</span> kayıt arasından 
-                <span class="font-medium">{{ (currentPage - 1) * pageSize + 1 }}</span> - 
-                <span class="font-medium">{{ Math.min(currentPage * pageSize, filteredPayments.length) }}</span> arası gösteriliyor
-              </p>
+              <div class="flex items-center gap-4">
+                <p class="text-sm text-gray-500">
+                  Toplam <span class="font-medium">{{ filteredPayments.length }}</span> kayıt arasından 
+                  <span class="font-medium">{{ (currentPage - 1) * pageSize + 1 }}</span> - 
+                  <span class="font-medium">{{ Math.min(currentPage * pageSize, filteredPayments.length) }}</span> arası gösteriliyor
+                </p>
+                <select v-model="pageSize" class="select select-xs select-bordered bg-white dark:bg-gray-700">
+                  <option :value="10">10 / sayfa</option>
+                  <option :value="25">25 / sayfa</option>
+                  <option :value="50">50 / sayfa</option>
+                  <option :value="100">100 / sayfa</option>
+                </select>
+              </div>
               <div class="flex items-center gap-1">
                 <button 
                   @click="currentPage = 1" 
@@ -513,8 +521,8 @@ const displayedPages = computed(() => {
   return Array.from({ length: end - start + 1 }, (_, i) => start + i)
 })
 
-// Reset to first page when filters change
-watch(filters, () => {
+// Reset to first page when filters or pageSize change
+watch([filters, pageSize], () => {
   currentPage.value = 1
 }, { deep: true })
 

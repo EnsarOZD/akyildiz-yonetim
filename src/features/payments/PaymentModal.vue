@@ -1,295 +1,342 @@
 <template>
-  <dialog v-if="visible" class="modal" open @cancel.prevent>
-    <div class="modal-box max-w-4xl bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 border border-gray-200 dark:border-gray-700 shadow-2xl">
-      <!-- Başlık -->
-      <div class="flex items-center justify-between pb-4 border-b border-gray-200 dark:border-gray-700 mb-6">
-        <h3 class="text-xl font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2">
-          <span class="text-2xl">💳</span>
-          Akıllı Ödeme Sistemi
-        </h3>
-        <button @click="$emit('cancel')" class="btn btn-sm btn-ghost text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-          </svg>
-        </button>
+  <BaseModal
+    :model-value="visible"
+    title="Akıllı Ödeme Sistemi"
+    icon="💳"
+    size="xl"
+    :is-dirty="isDirty"
+    @close="handleCancel"
+  >
+    <!-- Step İndikatörü -->
+    <div class="flex items-center justify-between mb-6 select-none">
+      <div
+        v-for="(stepLabel, i) in stepLabels"
+        :key="i"
+        class="flex items-center gap-2"
+        :class="i < stepLabels.length - 1 ? 'flex-1' : ''"
+      >
+        <div class="flex flex-col items-center gap-1">
+          <div
+            class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-200"
+            :class="
+              currentStep > i + 1
+                ? 'bg-green-500 text-white'
+                : currentStep === i + 1
+                ? 'bg-blue-600 text-white shadow-lg shadow-blue-200 dark:shadow-none'
+                : 'bg-gray-200 dark:bg-gray-700 text-gray-400'
+            "
+          >
+            <svg v-if="currentStep > i + 1" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+            </svg>
+            <span v-else>{{ i + 1 }}</span>
+          </div>
+          <span class="text-[10px] sm:text-xs font-medium text-center leading-tight"
+            :class="currentStep === i + 1 ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400'">
+            {{ stepLabel }}
+          </span>
+        </div>
+        <div v-if="i < stepLabels.length - 1"
+          class="flex-1 h-0.5 mx-2 mb-4 transition-all duration-300"
+          :class="currentStep > i + 1 ? 'bg-green-400' : 'bg-gray-200 dark:bg-gray-700'"
+        />
+      </div>
+    </div>
+
+    <!-- ADIM 1: Kim + Ne Kadar? -->
+    <div v-if="currentStep === 1" class="space-y-5">
+      <!-- Ödeme Türü -->
+      <div class="form-control">
+        <label class="label">
+          <span class="label-text font-semibold text-gray-700 dark:text-gray-300">Ödeme Türü</span>
+        </label>
+        <div class="flex gap-3">
+          <button
+            type="button"
+            @click="paymentType = 'tenant'"
+            class="flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl border-2 font-semibold transition-all active:scale-95"
+            :class="paymentType === 'tenant'
+              ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300'
+              : 'border-gray-200 dark:border-gray-700 text-gray-500 hover:border-gray-300'"
+          >
+            <span>👤</span> Kiracı
+          </button>
+          <button
+            type="button"
+            @click="paymentType = 'owner'"
+            class="flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl border-2 font-semibold transition-all active:scale-95"
+            :class="paymentType === 'owner'
+              ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300'
+              : 'border-gray-200 dark:border-gray-700 text-gray-500 hover:border-gray-300'"
+          >
+            <span>🏠</span> Mal Sahibi
+          </button>
+        </div>
       </div>
 
-      <!-- Form -->
-      <form class="space-y-6">
-        <!-- Ödeme Tipi Seçimi -->
+      <!-- Kişi Seçimi -->
+      <div class="form-control">
+        <label class="label">
+          <span class="label-text font-semibold text-gray-700 dark:text-gray-300">
+            {{ paymentType === 'tenant' ? 'Kiracı' : 'Mal Sahibi' }}
+          </span>
+        </label>
+        <select
+          v-if="paymentType === 'tenant'"
+          v-model="form.tenantId"
+          class="select select-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600"
+          :class="{ 'border-red-400': step1Touched && !form.tenantId }"
+        >
+          <option disabled value="">Kiracı seçin</option>
+          <option v-for="t in tenantsSafe" :key="t.id" :value="t.id">{{ getTenantDisplayName(t) }}</option>
+        </select>
+        <select
+          v-else
+          v-model="form.ownerId"
+          class="select select-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600"
+          :class="{ 'border-red-400': step1Touched && !form.ownerId }"
+        >
+          <option disabled value="">Mal sahibi seçin</option>
+          <option v-for="o in owners" :key="o.id" :value="o.id">{{ o.company || o.fullName || o.name || o.email }}</option>
+        </select>
+        <p v-if="step1Touched && paymentType === 'tenant' && !form.tenantId" class="text-red-500 text-xs mt-1">Lütfen kiracı seçin.</p>
+        <p v-if="step1Touched && paymentType === 'owner' && !form.ownerId" class="text-red-500 text-xs mt-1">Lütfen mal sahibi seçin.</p>
+      </div>
+
+      <!-- Banka Hareketi Bilgileri -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div class="form-control">
-          <label class="label">
-            <span class="label-text font-semibold text-gray-700 dark:text-gray-300">Ödeme Türü</span>
-          </label>
-          <div class="flex gap-4">
-            <label class="flex items-center gap-2">
-              <input type="radio" value="tenant" v-model="paymentType" />
-              <span>KİRACI</span>
-            </label>
-            <label class="flex items-center gap-2">
-              <input type="radio" value="owner" v-model="paymentType" />
-              <span>MAL SAHİBİ</span>
-            </label>
-          </div>
+          <label class="label"><span class="label-text font-semibold text-gray-700 dark:text-gray-300">Hareket Tarihi *</span></label>
+          <input
+            v-model="form.date"
+            type="date"
+            class="input input-bordered w-full bg-white dark:bg-gray-700"
+            :class="{ 'border-red-400': step1Touched && !form.date }"
+          />
+          <p v-if="step1Touched && !form.date" class="text-red-500 text-xs mt-1">Tarih zorunludur.</p>
         </div>
-
-        <!-- Kiracı veya Mal Sahibi Seçimi -->
-        <div v-if="paymentType === 'tenant'" class="bg-green-50 dark:bg-green-900/20 rounded-lg p-4 border border-green-200 dark:border-green-800">
-          <h4 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4 flex items-center gap-2">
-            <span class="text-xl">👤</span>
-            Kiracı Seçimi
-          </h4>
-          <div class="form-control">
-            <label class="label">
-              <span class="label-text font-semibold text-gray-700 dark:text-gray-300">Kiracı</span>
-            </label>
-            <select v-model="form.tenantId" @change="fetchTenantDebts" class="select select-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400" required>
-              <option disabled value="">Kiracı seçin</option>
-              <option v-for="tenant in tenantsSafe" :key="tenant.id" :value="tenant.id">
-                {{ getTenantDisplayName(tenant) }}
-              </option>
-            </select>
-          </div>
+        <div class="form-control">
+          <label class="label"><span class="label-text font-semibold text-gray-700 dark:text-gray-300">Gelen Tutar (₺) *</span></label>
+          <input
+            v-model.number="form.amount"
+            type="number"
+            step="0.01"
+            placeholder="0.00"
+            class="input input-bordered w-full bg-white dark:bg-gray-700"
+            :class="{ 'border-red-400': step1Touched && !(Number(form.amount) > 0) }"
+          />
+          <p v-if="step1Touched && !(Number(form.amount) > 0)" class="text-red-500 text-xs mt-1">Geçerli bir tutar girin.</p>
         </div>
-
-        <div v-if="paymentType === 'owner'" class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 border border-blue-200 dark:border-blue-800">
-          <h4 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4 flex items-center gap-2">
-            <span class="text-xl">🏠</span>
-            Mal Sahibi Seçimi
-          </h4>
-          <div class="form-control">
-            <label class="label">
-              <span class="label-text font-semibold text-gray-700 dark:text-gray-300">Mal Sahibi</span>
-            </label>
-            <select v-model="form.ownerId" @change="fetchOwnerDebts" class="select select-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400" required>
-              <option disabled value="">Mal Sahibi seçin</option>
-              <option v-for="owner in owners" :key="owner.id" :value="owner.id">
-                {{ owner.company || owner.fullName || owner.name || owner.email || `#${owner.id}` }}
-              </option>
-            </select>
-          </div>
-        </div>
-
-        <!-- Banka Hareketi Bilgileri -->
-        <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 border border-blue-200 dark:border-blue-800">
-          <h4 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4 flex items-center gap-2">
-            <span class="text-xl">🏦</span>
-            Banka Hareketi Bilgileri
-          </h4>
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <!-- Tarih -->
-            <div class="form-control">
-              <label class="label">
-                <span class="label-text font-semibold text-gray-700 dark:text-gray-300">Hareket Tarihi</span>
-              </label>
-              <input v-model="form.date" type="date" class="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400" required />
-            </div>
-
-            <!-- Tutar -->
-            <div class="form-control">
-              <label class="label">
-                <span class="label-text font-semibold text-gray-700 dark:text-gray-300">Gelen Tutar (₺)</span>
-              </label>
-              <input v-model.number="form.amount" type="number" step="0.01" placeholder="0.00" class="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400" required />
-            </div>
-
-            <!-- Ödeme Tipi -->
-            <div class="form-control">
-              <label class="label">
-                <span class="label-text font-semibold text-gray-700 dark:text-gray-300">Ödeme Tipi</span>
-              </label>
-              <select v-model="form.type" class="select select-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400" required>
-                <option disabled value="">Ödeme Tipi Seçin</option>
-                <option value="0">Aidat</option>
-                <option value="1">Elektrik</option>
-                <option value="2">Su</option>
-                <option value="3">Doğalgaz</option>
-                <option value="4">Diğer</option>
-              </select>
-            </div>
-
-            <!-- Banka -->
-            <div class="form-control">
-              <label class="label">
-                <span class="label-text font-semibold text-gray-700 dark:text-gray-300">Banka</span>
-              </label>
-              <select v-model="form.bank" class="select select-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400" required>
-                <option disabled value="">Banka Seçin</option>
-                <option v-for="b in banksSafe" :key="b" :value="b">{{ b }}</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        <!-- Borç Eşleştirme Seçenekleri -->
-        <div v-if="(paymentType === 'tenant' ? form.tenantId : form.ownerId) && tenantDebts.length > 0" class="bg-amber-50 dark:bg-amber-900/20 rounded-lg p-4 border border-amber-200 dark:border-amber-800">
-          <div class="flex items-center justify-between mb-4">
-            <h4 class="text-lg font-semibold text-gray-800 dark:text-gray-100 flex items-center gap-2">
-              <span class="text-xl">📋</span>
-              Borç Eşleştirme
-            </h4>
-            <div class="flex gap-2">
-              <button type="button" @click="setAutoAllocation(true)" class="btn btn-sm btn-primary bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 border-0 text-white">
-                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                </svg>
-                Otomatik Eşleştir
-              </button>
-              <button type="button" @click="setAutoAllocation(false)" class="btn btn-sm btn-outline border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300">
-                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                </svg>
-                Manuel Seç
-              </button>
-              <button type="button" @click="clearAllSelections" class="btn btn-sm btn-outline border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300">
-                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                </svg>
-                Temizle
-              </button>
-            </div>
-          </div>
-
-          <!-- Eşleştirme Modu -->
-          <div class="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded border border-blue-200 dark:border-blue-800">
-            <div class="flex items-center gap-2">
-              <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-              </svg>
-              <span class="text-sm text-blue-700 dark:text-blue-300">
-                <strong>Akıllı Ödeme Sistemi:</strong> 
-                <span v-if="autoAllocate">Otomatik mod - Backend borçları kapatacak ve fazla tutarı avans hesabına aktaracak.</span>
-                <span v-else>Manuel mod - Hangi borçların ödeneceğini seçebilirsiniz.</span>
-              </span>
-            </div>
-          </div>
-
-          <!-- Manuel Borç Seçimi -->
-          <div v-if="!autoAllocate" class="space-y-3 max-h-64 overflow-y-auto">
-            <div v-for="debt in tenantDebts" :key="debt.id" class="flex items-center gap-3 p-3 bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
-              <input 
-                type="checkbox" 
-                :value="debt.id" 
-                v-model="selectedDebts" 
-                @change="updatePaymentAmounts"
-                class="checkbox checkbox-primary"
-              />
-              <div class="flex-1">
-                <div class="flex items-center justify-between">
-                  <div>
-                    <p class="font-semibold text-gray-800 dark:text-gray-100">{{ debt.typeLabel || debt.type }}</p>
-                    <p class="text-sm text-gray-600 dark:text-gray-400">
-                      {{ debt.period || debt.dueDateFormatted }}
-                      <span v-if="debt.unit && debt.unit !== '-'" class="ml-2 text-blue-600 dark:text-blue-400">
-                        ({{ debt.unit }})
-                      </span>
-                    </p>
-                  </div>
-                  <div class="text-right">
-                    <p class="font-bold text-red-600 dark:text-red-400">{{ formatCurrency(debt.remainingAmount || debt.amount) }}</p>
-                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ getDaysOverdue(debt.dueDate) }} gün gecikmiş</p>
-                    <p v-if="debt.paidAmount > 0" class="text-xs text-yellow-600 dark:text-yellow-400">
-                      {{ formatCurrency((debt.remainingAmount || debt.amount) - debt.paidAmount) }} kalan
-                    </p>
-                  </div>
-                </div>
-                <!-- Manuel tutar girişi -->
-                <div v-if="selectedDebts.includes(debt.id)" class="mt-2">
-                  <input 
-                    v-model="debtAllocations[debt.id]" 
-                    type="number" 
-                    step="0.01"
-                    :max="debt.remainingAmount || debt.amount"
-                    class="input input-sm input-bordered w-32" 
-                    placeholder="Tutar"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Ödeme Özeti -->
-          <div v-if="selectedDebts.length > 0 || autoAllocate" class="mt-4 p-3 bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
-            <h5 class="font-semibold text-gray-800 dark:text-gray-100 mb-2">Ödeme Özeti</h5>
-            
-            <div class="space-y-2">
-              <div class="flex justify-between items-center">
-                <span class="text-sm text-gray-600 dark:text-gray-400">Toplam Tutar:</span>
-                <span class="font-semibold text-gray-800 dark:text-gray-100">{{ formatCurrency(form.amount) }}</span>
-              </div>
-              <div class="flex justify-between items-center">
-                <span class="text-sm text-gray-600 dark:text-gray-400">Eşleştirilecek:</span>
-                <span class="font-semibold text-gray-800 dark:text-gray-100">{{ formatCurrency(totalAllocated) }}</span>
-              </div>
-              <div class="flex justify-between items-center">
-                <span class="text-sm text-gray-600 dark:text-gray-400">Avans Hesabına:</span>
-                <span class="font-semibold text-primary">{{ formatCurrency((form.amount || 0) - totalAllocated) }}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Borç Yoksa Avans Bilgisi -->
-        <div v-if="(paymentType === 'tenant' ? form.tenantId : form.ownerId) && tenantDebts.length === 0" class="bg-green-50 dark:bg-green-900/20 rounded-lg p-4 border border-green-200 dark:border-green-800">
-          <div class="flex items-center gap-3">
-            <svg class="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-            </svg>
-            <div>
-              <p class="text-green-700 dark:text-green-300 font-semibold">Borç Bulunamadı</p>
-              <p class="text-green-600 dark:text-green-400 text-sm">
-                Seçilen {{ paymentType === 'tenant' ? 'kiracının' : 'mal sahibinin' }} ödenmemiş borcu bulunmuyor.
-                <strong>{{ formatCurrency(form.amount || 0) }}</strong> tutarı avans hesabına aktarılacak.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Hata Mesajı -->
-        <div v-if="errorMessage" class="bg-red-50 dark:bg-red-900/20 rounded-lg p-4 border border-red-200 dark:border-red-800 mb-2">
-          <div class="flex items-center gap-3">
-            <svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
-            </svg>
-            <span class="text-red-700 dark:text-red-300 font-semibold">{{ errorMessage }}</span>
-          </div>
-        </div>
-
-        <!-- Butonlar -->
-        <div class="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
-          <button 
-            type="button" 
-            class="btn btn-outline border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700" 
-            @click="handleCancel"
-            :disabled="isLoading"
+        <div class="form-control">
+          <label class="label"><span class="label-text font-semibold text-gray-700 dark:text-gray-300">Ödeme Tipi *</span></label>
+          <select
+            v-model="form.type"
+            class="select select-bordered w-full bg-white dark:bg-gray-700"
+            :class="{ 'border-red-400': step1Touched && form.type === '' }"
           >
-            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-            </svg>
-            {{ isLoading ? 'İşlem Devam Ediyor...' : 'İptal' }}
-          </button>
-          <button 
-            type="button" 
-            class="btn btn-success bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 border-0 text-white shadow-lg" 
-            :disabled="!isFormValid || isLoading"
-            @click="handleSave"
-          >
-            <svg v-if="!isLoading" class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-            </svg>
-            <svg v-else class="w-4 h-4 mr-2 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-            </svg>
-            {{ isLoading ? 'Kaydediliyor...' : 'Ödemeyi Kaydet' }}
-          </button>
+            <option disabled value="">Seçin</option>
+            <option value="0">Aidat</option>
+            <option value="1">Elektrik</option>
+            <option value="2">Su</option>
+            <option value="3">Doğalgaz</option>
+            <option value="4">Diğer</option>
+          </select>
+          <p v-if="step1Touched && form.type === ''" class="text-red-500 text-xs mt-1">Ödeme tipi seçin.</p>
         </div>
-      </form>
+        <div class="form-control">
+          <label class="label"><span class="label-text font-semibold text-gray-700 dark:text-gray-300">Banka *</span></label>
+          <select
+            v-model="form.bank"
+            class="select select-bordered w-full bg-white dark:bg-gray-700"
+            :class="{ 'border-red-400': step1Touched && !form.bank }"
+          >
+            <option disabled value="">Seçin</option>
+            <option v-for="b in banksSafe" :key="b" :value="b">{{ b }}</option>
+          </select>
+          <p v-if="step1Touched && !form.bank" class="text-red-500 text-xs mt-1">Banka seçin.</p>
+        </div>
+      </div>
     </div>
-  </dialog>
+
+    <!-- ADIM 2: Borç Eşleştirme -->
+    <div v-if="currentStep === 2" class="space-y-4">
+      <!-- Yükleniyor -->
+      <div v-if="loadingDebts" class="flex items-center justify-center py-10 gap-3 text-gray-500">
+        <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+        <span>Borçlar yükleniyor...</span>
+      </div>
+
+      <!-- Borç yok -->
+      <div v-else-if="tenantDebts.length === 0" class="bg-green-50 dark:bg-green-900/20 rounded-xl p-5 border border-green-200 dark:border-green-800 flex items-start gap-3">
+        <svg class="w-6 h-6 text-green-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        <div>
+          <p class="font-semibold text-green-700 dark:text-green-300">Ödenmemiş borç bulunamadı</p>
+          <p class="text-sm text-green-600 dark:text-green-400 mt-1">
+            <strong>{{ formatCurrency(form.amount) }}</strong> tutarın tamamı avans hesabına aktarılacak.
+          </p>
+        </div>
+      </div>
+
+      <!-- Borçlar var -->
+      <template v-else>
+        <!-- Mod seçimi -->
+        <div class="flex gap-2">
+          <button
+            type="button"
+            @click="setAutoAllocation(true)"
+            class="flex-1 py-2 px-3 rounded-lg border-2 text-sm font-semibold transition-all active:scale-95"
+            :class="autoAllocate ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300' : 'border-gray-200 dark:border-gray-700 text-gray-500'"
+          >
+            ⚡ Otomatik Eşleştir
+          </button>
+          <button
+            type="button"
+            @click="setAutoAllocation(false)"
+            class="flex-1 py-2 px-3 rounded-lg border-2 text-sm font-semibold transition-all active:scale-95"
+            :class="!autoAllocate ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300' : 'border-gray-200 dark:border-gray-700 text-gray-500'"
+          >
+            ✏️ Manuel Seç
+          </button>
+        </div>
+
+        <div v-if="autoAllocate" class="text-sm text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 border border-blue-200 dark:border-blue-800">
+          Backend borçları en eskiden başlayarak kapatacak, fazla tutar avans hesabına aktarılacak.
+        </div>
+
+        <!-- Manuel borç listesi -->
+        <div v-else class="space-y-2 max-h-64 overflow-y-auto overscroll-contain">
+          <div
+            v-for="debt in tenantDebts"
+            :key="debt.id"
+            @click="toggleDebt(debt.id)"
+            class="flex items-start gap-3 p-3 bg-white dark:bg-gray-700 rounded-xl border-2 cursor-pointer transition-all active:scale-[0.99]"
+            :class="selectedDebts.includes(debt.id)
+              ? 'border-blue-400 bg-blue-50 dark:bg-blue-900/20'
+              : 'border-gray-200 dark:border-gray-600 hover:border-gray-300'"
+          >
+            <input
+              type="checkbox"
+              :checked="selectedDebts.includes(debt.id)"
+              @click.stop
+              @change="toggleDebt(debt.id)"
+              class="checkbox checkbox-primary mt-1 flex-shrink-0"
+            />
+            <div class="flex-1 min-w-0">
+              <div class="flex items-start justify-between gap-2">
+                <div>
+                  <p class="font-semibold text-gray-800 dark:text-gray-100 text-sm">{{ debt.typeLabel || debt.type }}</p>
+                  <p class="text-xs text-gray-500 dark:text-gray-400">{{ debt.period || debt.dueDateFormatted }}
+                    <span v-if="debt.unit && debt.unit !== '-'" class="text-blue-500 ml-1">({{ debt.unit }})</span>
+                  </p>
+                </div>
+                <div class="text-right flex-shrink-0">
+                  <p class="font-bold text-red-600 dark:text-red-400 text-sm">{{ formatCurrency(debt.remainingAmount || debt.amount) }}</p>
+                  <p class="text-xs text-gray-400">{{ getDaysOverdue(debt.dueDate) }} gün</p>
+                </div>
+              </div>
+              <div v-if="selectedDebts.includes(debt.id)" class="mt-2" @click.stop>
+                <input
+                  v-model="debtAllocations[debt.id]"
+                  type="number"
+                  step="0.01"
+                  :max="debt.remainingAmount || debt.amount"
+                  class="input input-sm input-bordered w-32"
+                  placeholder="Tutar"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Özet -->
+        <div class="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 space-y-2">
+          <div class="flex justify-between text-sm"><span class="text-gray-500">Toplam Tutar</span><span class="font-semibold">{{ formatCurrency(form.amount) }}</span></div>
+          <div class="flex justify-between text-sm"><span class="text-gray-500">Eşleştirilecek</span><span class="font-semibold">{{ formatCurrency(autoAllocate ? form.amount : totalAllocated) }}</span></div>
+          <div class="flex justify-between text-sm border-t dark:border-gray-700 pt-2"><span class="text-gray-500">Avans Hesabına</span><span class="font-semibold text-blue-600">{{ formatCurrency(autoAllocate ? 0 : (form.amount - totalAllocated)) }}</span></div>
+        </div>
+      </template>
+    </div>
+
+    <!-- ADIM 3: Özet ve Onay -->
+    <div v-if="currentStep === 3" class="space-y-4">
+      <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 divide-y dark:divide-gray-700">
+        <div class="px-4 py-3 flex justify-between items-center">
+          <span class="text-sm text-gray-500">Ödeme Türü</span>
+          <span class="font-semibold text-gray-800 dark:text-gray-100">{{ paymentType === 'tenant' ? '👤 Kiracı' : '🏠 Mal Sahibi' }}</span>
+        </div>
+        <div class="px-4 py-3 flex justify-between items-center">
+          <span class="text-sm text-gray-500">{{ paymentType === 'tenant' ? 'Kiracı' : 'Mal Sahibi' }}</span>
+          <span class="font-semibold text-gray-800 dark:text-gray-100">{{ selectedPersonName }}</span>
+        </div>
+        <div class="px-4 py-3 flex justify-between items-center">
+          <span class="text-sm text-gray-500">Tarih</span>
+          <span class="font-semibold text-gray-800 dark:text-gray-100">{{ form.date }}</span>
+        </div>
+        <div class="px-4 py-3 flex justify-between items-center">
+          <span class="text-sm text-gray-500">Tutar</span>
+          <span class="text-xl font-bold text-green-600 dark:text-green-400">{{ formatCurrency(form.amount) }}</span>
+        </div>
+        <div class="px-4 py-3 flex justify-between items-center">
+          <span class="text-sm text-gray-500">Banka</span>
+          <span class="font-semibold text-gray-800 dark:text-gray-100">{{ form.bank }}</span>
+        </div>
+        <div class="px-4 py-3 flex justify-between items-center">
+          <span class="text-sm text-gray-500">Borç Eşleştirme</span>
+          <span class="font-semibold text-gray-800 dark:text-gray-100">{{ autoAllocate ? '⚡ Otomatik' : `✏️ Manuel (${selectedDebts.length} borç)` }}</span>
+        </div>
+      </div>
+
+      <div v-if="errorMessage" class="bg-red-50 dark:bg-red-900/20 rounded-xl p-4 border border-red-200 dark:border-red-800 flex items-center gap-3">
+        <svg class="w-5 h-5 text-red-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+        </svg>
+        <span class="text-red-700 dark:text-red-300 text-sm font-semibold">{{ errorMessage }}</span>
+      </div>
+    </div>
+
+    <!-- Footer butonları (BaseModal footer slot'u) -->
+    <template #footer>
+      <button
+        v-if="currentStep > 1"
+        type="button"
+        @click="prevStep"
+        :disabled="isLoading"
+        class="btn btn-outline border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 active:scale-95"
+      >
+        ← Geri
+      </button>
+      <button
+        v-if="currentStep < 3"
+        type="button"
+        @click="nextStep"
+        class="btn btn-primary active:scale-95"
+      >
+        İleri →
+      </button>
+      <button
+        v-if="currentStep === 3"
+        type="button"
+        @click="handleSave"
+        :disabled="isLoading"
+        class="btn btn-success bg-gradient-to-r from-green-600 to-green-700 border-0 text-white active:scale-95"
+      >
+        <svg v-if="!isLoading" class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+        </svg>
+        <svg v-else class="w-4 h-4 mr-1 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+        </svg>
+        {{ isLoading ? 'Kaydediliyor...' : 'Ödemeyi Kaydet' }}
+      </button>
+    </template>
+  </BaseModal>
 </template>
 
 <script setup>
-import { ref, reactive, computed, watch, onMounted } from 'vue'
+import { ref, reactive, computed, watch, onMounted, onBeforeUnmount } from 'vue'
+import BaseModal from '@/components/common/BaseModal.vue'
 import paymentsService from '@/services/paymentsService'
 import ownersService from '@/services/ownersService'
 import utilityDebtsService from '@/services/utilityDebtsService'
@@ -297,182 +344,146 @@ import { useErrorHandler } from '@/composables/useErrorHandler'
 import { useNotify } from '@/composables/useNotify'
 import { useDirtyGuard } from '@/composables/useDirtyGuard'
 
-
-
-
-
 const props = defineProps({
   visible: { type: Boolean, default: false },
   payment: {
     type: Object,
-    default: () => ({
-      tenantId: null,
-      ownerId: null,
-      amount: null,
-      date: '',
-      type: '',
-      bank: '',
-      description: ''
-    })
+    default: () => ({ tenantId: null, ownerId: null, amount: null, date: '', type: '', bank: '', description: '' })
   },
   tenants: { type: Array, default: () => [] },
   banks:   { type: Array, default: () => [] },
-  editMode:{ type: Boolean, default: false }
+  editMode: { type: Boolean, default: false }
 })
-const emit = defineEmits(['save', 'cancel', 'dirty-changed'])
+const emit = defineEmits(['save', 'cancel', 'close'])
 
 const { handleNetworkError } = useErrorHandler()
+const { notifyError } = useNotify()
 
+// ── Wizard state ──────────────────────────────────────────────
+const currentStep = ref(1)
+const stepLabels = ['Temel Bilgiler', 'Borç Eşleştirme', 'Özet & Onay']
+const step1Touched = ref(false)
 
+// ── Form state ────────────────────────────────────────────────
+const form = reactive({ tenantId: null, ownerId: null, amount: null, date: '', type: '', bank: '', description: '' })
+watch(() => props.payment, (val) => { Object.assign(form, val || {}) }, { immediate: true, deep: true })
 
-/* ---------------- Local Form State ---------------- */
-const form = reactive({
-  tenantId: null,
-  ownerId: null,
-  amount: null,
-  date: '',
-  type: '',
-  bank: '',
-  description: ''
-})
-watch(() => props.payment, (val) => {
-  Object.assign(form, val || {})
-}, { immediate: true, deep: true })
+// ── Dirty guard ───────────────────────────────────────────────
+const { isDirty, resetDirty } = useDirtyGuard(() => ({ ...form }))
 
-/* ---------------- Select lists & helpers ---------------- */
+// ── Listeler ──────────────────────────────────────────────────
 const owners = ref([])
 const tenantsSafe = computed(() => props.tenants || [])
 const banksSafe   = computed(() => props.banks || [])
+
 const getTenantDisplayName = (t) =>
-  t?.companyName ||
-  t?.company ||
-  t?.contactPersonName ||
-  t?.fullName ||
-  [t?.firstName, t?.lastName].filter(Boolean).join(' ') ||
-  t?.email ||
-  `#${t?.id}`
+  t?.companyName || t?.company || t?.contactPersonName ||
+  t?.fullName || [t?.firstName, t?.lastName].filter(Boolean).join(' ') ||
+  t?.email || `#${t?.id}`
 
-const { notifySuccess, notifyError, notifyInfo } = useNotify()
-const { isDirty, resetDirty } = useDirtyGuard(() => form)
-
-defineExpose({ isDirty, resetDirty })
-
-watch(isDirty, v => emit('dirty-changed', v), { immediate: true })
-
-watch(() => props.visible, (v) => {
-  if (v) resetDirty()
-})
-
-/* ---------------- Payment type ---------------- */
+// ── Ödeme türü ────────────────────────────────────────────────
 const paymentType = ref('tenant')
 watch(() => props.payment, (val) => {
-  // parent set ettiyse otomatik tip seç
   if (val?.ownerId) paymentType.value = 'owner'
-  else if (val?.tenantId) paymentType.value = 'tenant'
+  else paymentType.value = 'tenant'
 }, { immediate: true })
 
-/* ---------------- Debts & allocation ---------------- */
-const tenantDebts = ref([])
-const selectedDebts = ref([])
-const autoAllocate = ref(true)
+// ── Borçlar ───────────────────────────────────────────────────
+const tenantDebts    = ref([])
+const loadingDebts   = ref(false)
+const selectedDebts  = ref([])
+const autoAllocate   = ref(true)
 const debtAllocations = ref({})
 
-const setAutoAllocation = (value) => {
-  autoAllocate.value = value
-  if (value) {
-    selectedDebts.value = []
-    debtAllocations.value = {}
-  }
+const setAutoAllocation = (v) => {
+  autoAllocate.value = v
+  if (v) { selectedDebts.value = []; debtAllocations.value = {} }
+}
+
+const toggleDebt = (id) => {
+  const idx = selectedDebts.value.indexOf(id)
+  if (idx === -1) selectedDebts.value.push(id)
+  else selectedDebts.value.splice(idx, 1)
 }
 
 const totalAllocated = computed(() =>
-  selectedDebts.value.reduce((total, id) => total + (Number(debtAllocations.value[id]) || 0), 0)
+  selectedDebts.value.reduce((s, id) => s + (Number(debtAllocations.value[id]) || 0), 0)
 )
 
-const clearAllSelections = () => {
-  selectedDebts.value = []
-  debtAllocations.value = {}
+const fetchDebts = async () => {
+  loadingDebts.value = true
+  tenantDebts.value = []
+  try {
+    if (paymentType.value === 'tenant' && form.tenantId) {
+      tenantDebts.value = await utilityDebtsService.getUtilityDebts({ tenantId: form.tenantId, status: 'Unpaid' }) || []
+    } else if (paymentType.value === 'owner' && form.ownerId) {
+      tenantDebts.value = await utilityDebtsService.getUtilityDebts({ ownerId: form.ownerId, status: 'Unpaid' }) || []
+    }
+  } catch (e) {
+    handleNetworkError(e, { component: 'PaymentModal', action: 'fetchDebts' })
+  } finally {
+    loadingDebts.value = false
+  }
 }
 
-const updatePaymentAmounts = () => {
-  // BE avans mantığını yönetecek, burada sadece state’i güncel tutuyoruz
-}
+// ── Özet için kişi adı ────────────────────────────────────────
+const selectedPersonName = computed(() => {
+  if (paymentType.value === 'tenant') {
+    const t = tenantsSafe.value.find(t => t.id === form.tenantId)
+    return t ? getTenantDisplayName(t) : '—'
+  }
+  const o = owners.value.find(o => o.id === form.ownerId)
+  return o ? (o.company || o.fullName || o.name || '—') : '—'
+})
 
-/* ---------------- UI helpers ---------------- */
-const isLoading = ref(false)
-const errorMessage = ref('')
-
-const formatCurrency = (value) => {
-  const n = Number(value || 0)
-  return n.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' })
-}
-const getDaysOverdue = (dueDate) => {
-  if (!dueDate) return 0
-  const now = new Date()
-  const due = new Date(dueDate)
-  const diff = Math.ceil((now - due) / (1000 * 60 * 60 * 24))
-  return diff > 0 ? diff : 0
-}
-
-/* ---------------- Validasyon ---------------- */
-const isFormValid = computed(() =>
+// ── Adım 1 validasyonu ────────────────────────────────────────
+const isStep1Valid = computed(() =>
   !!form.date &&
   Number(form.amount) > 0 &&
-  Number.isFinite(Number(form.type)) &&
+  form.type !== '' &&
   !!form.bank &&
   ((paymentType.value === 'tenant' && !!form.tenantId) ||
    (paymentType.value === 'owner'  && !!form.ownerId))
 )
 
-/* ---------------- API: Debts fetch ---------------- */
-const fetchTenantDebts = async () => {
-  if (!form.tenantId) return
-  try {
-    const utilityDebts = await utilityDebtsService.getUtilityDebts({
-      tenantId: form.tenantId,
-      status: 0
-    })
-    tenantDebts.value = utilityDebts || []
-  } catch (error) {
-    handleNetworkError(error, { component: 'PaymentModal', action: 'fetchTenantDebts' })
-    tenantDebts.value = []
+// ── Navigasyon ────────────────────────────────────────────────
+const nextStep = async () => {
+  if (currentStep.value === 1) {
+    step1Touched.value = true
+    if (!isStep1Valid.value) return
+    await fetchDebts()
   }
+  currentStep.value++
 }
 
-const fetchOwnerDebts = async () => {
-  if (!form.ownerId) return
-  try {
-    const ownerDebts = await utilityDebtsService.getUtilityDebts({
-      ownerId: form.ownerId,
-      status: 0
-    })
-    tenantDebts.value = ownerDebts || []
-  } catch (error) {
-    handleNetworkError(error, { component: 'PaymentModal', action: 'fetchOwnerDebts' })
-    tenantDebts.value = []
-  }
+const prevStep = () => {
+  if (currentStep.value > 1) currentStep.value--
 }
 
-/* ---------------- Save / Cancel ---------------- */
+// ── Yardımcılar ───────────────────────────────────────────────
+const isLoading    = ref(false)
+const errorMessage = ref('')
+
+const formatCurrency = (v) =>
+  Number(v || 0).toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' })
+
+const getDaysOverdue = (d) => {
+  if (!d) return 0
+  const diff = Math.ceil((Date.now() - new Date(d)) / 86400000)
+  return diff > 0 ? diff : 0
+}
+
+// ── Kaydet ────────────────────────────────────────────────────
 const handleSave = async () => {
-  if (!isFormValid.value) {
-    errorMessage.value = 'Lütfen tüm zorunlu alanları doldurun ve geçerli bir tutar girin.'
-    showErrorToast(errorMessage.value)
-    return
-  }
-
   isLoading.value = true
   errorMessage.value = ''
-
   try {
-    const parsedType = Number.isFinite(Number(form.type)) ? Number(form.type) : null
-
     const payload = {
       tenantId: paymentType.value === 'tenant' ? form.tenantId : null,
       ownerId:  paymentType.value === 'owner'  ? form.ownerId  : null,
       amount: Number(form.amount),
       paymentDate: form.date,
-      type: parsedType,
+      type: parseInt(form.type) || 0,
       bank: form.bank,
       description: form.description || '',
       autoAllocate: autoAllocate.value,
@@ -481,78 +492,48 @@ const handleSave = async () => {
         amount: Number(debtAllocations.value[id] || 0)
       }))
     }
-
     const saved = await paymentsService.createPaymentWithAllocation(payload)
-
     resetDirty()
     emit('save', saved)
-  } catch (error) {
+  } catch (e) {
     try {
-      handleNetworkError(error, { component: 'PaymentModal', action: 'savePayment' })
+      handleNetworkError(e, { component: 'PaymentModal', action: 'savePayment' })
     } catch {
-      showErrorToast('Ödeme kaydedilirken bir hata oluştu.')
+      errorMessage.value = 'Ödeme kaydedilirken bir hata oluştu.'
+      notifyError('Ödeme kaydedilirken bir hata oluştu.')
     }
   } finally {
     isLoading.value = false
   }
 }
 
+// ── İptal ─────────────────────────────────────────────────────
 const handleCancel = () => {
-  if (isDirty.value) {
-    if (!confirm('Kaydedilmemiş değişiklikleriniz var. Kapatmak istediğinizden emin misiniz?')) {
-      return
-    }
-  }
+  resetForm()
   emit('cancel')
 }
 
-function resetForm() {
+const resetForm = () => {
+  currentStep.value = 1
+  step1Touched.value = false
   tenantDebts.value = []
   selectedDebts.value = []
   debtAllocations.value = {}
   isLoading.value = false
   errorMessage.value = ''
-  
-  if (props.payment) {
-    // Note: useDirtyGuard automatically watches form if passed as getter
-  }
+  resetDirty()
 }
 
-/* ---------------- Toast fallback ---------------- */
-function showErrorToast(msg) {
-  notifyError(msg)
-}
+// ── Lifecycle ─────────────────────────────────────────────────
+const handleEscape = (e) => { if (props.visible && e.key === 'Escape') handleCancel() }
 
-/* ---------------- Lifecycle & watchers ---------------- */
 onMounted(async () => {
-  try {
-    const data = await ownersService.getOwners()
-    owners.value = data || []
-  } catch { owners.value = [] }
-
-  // görünür ve tenantId varsa ilk borçları çek
-  if (paymentType.value === 'tenant') await fetchTenantDebts()
-  else await fetchOwnerDebts()
+  window.addEventListener('keydown', handleEscape)
+  try { owners.value = await ownersService.getOwners() || [] }
+  catch { owners.value = [] }
 })
 
-watch(paymentType, (val) => {
-  tenantDebts.value = []
-  selectedDebts.value = []
-  debtAllocations.value = {}
+onBeforeUnmount(() => window.removeEventListener('keydown', handleEscape))
 
-  if (val === 'tenant') {
-    form.ownerId = null
-    fetchTenantDebts()
-  } else {
-    form.tenantId = null
-    fetchOwnerDebts()
-  }
-})
-
-watch(() => form.tenantId, () => {
-  if (paymentType.value === 'tenant') fetchTenantDebts()
-})
-watch(() => form.ownerId, () => {
-  if (paymentType.value === 'owner') fetchOwnerDebts()
-})
+watch(() => props.visible, (v) => { if (!v) resetForm() })
 </script>
