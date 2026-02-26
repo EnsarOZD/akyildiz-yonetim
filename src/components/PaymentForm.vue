@@ -30,6 +30,30 @@
             </option>
           </select>
         </div>
+
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text font-semibold">Ödeme Şekli *</span>
+          </label>
+          <select v-model="payment.method" class="select select-bordered" required>
+            <option v-for="method in PAYMENT_METHODS" :key="method.value" :value="method.value">
+              {{ method.label }}
+            </option>
+          </select>
+        </div>
+
+        <div v-if="payment.method === 1" class="form-control">
+          <label class="label">
+            <span class="label-text font-semibold">Banka Adı *</span>
+          </label>
+          <input 
+            v-model.trim="payment.bankName" 
+            type="text" 
+            class="input input-bordered" 
+            placeholder="Örn: Ziraat Bankası"
+            :required="payment.method === 1"
+          />
+        </div>
         
         <div class="form-control">
           <label class="label">
@@ -41,18 +65,6 @@
             class="input input-bordered" 
             required
           />
-        </div>
-        
-        <div class="form-control">
-          <label class="label">
-            <span class="label-text font-semibold">Kiracı</span>
-          </label>
-          <select v-model.number="payment.tenantId" class="select select-bordered">
-            <option :value="null">Seçiniz</option>
-            <option v-for="tenant in tenants" :key="tenant.id" :value="tenant.id">
-              {{ tenant.firstName }} {{ tenant.lastName }}
-            </option>
-          </select>
         </div>
       </div>
       
@@ -167,7 +179,7 @@ import { tr } from 'date-fns/locale'
 import paymentsService from '@/services/paymentsService'
 import tenantsService from '@/services/tenantsService'
 import utilityDebtsService from '@/services/utilityDebtsService'
-import { paymentTypeOptions, getDebtTypeLabel } from '@/constants/enums'
+import { paymentTypeOptions, getDebtTypeLabel, PAYMENT_METHODS } from '@/constants/enums'
 import { useNotify } from '@/composables/useNotify'
 
 const emit = defineEmits(['success', 'cancel'])
@@ -183,6 +195,8 @@ const debtAllocations = ref({})
 const payment = ref({
   amount: 0,
   type: '',
+  method: 0, // Nakit (default)
+  bankName: '',
   paymentDate: format(new Date(), 'yyyy-MM-dd'),
   description: '',
   tenantId: null,
@@ -294,6 +308,8 @@ const submitPayment = async () => {
     payment.value = {
       amount: 0,
       type: '',
+      method: 0,
+      bankName: '',
       paymentDate: format(new Date(), 'yyyy-MM-dd'),
       description: '',
       tenantId: null,

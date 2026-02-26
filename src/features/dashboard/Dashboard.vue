@@ -94,8 +94,8 @@
       </div>
 
       <!-- Özet Kartları -->
-      <!-- Finansal Durum & Özet -->
-      <section v-if="userRole !== 'viewer'" class="grid grid-cols-1 md:grid-cols-12 gap-6 mb-8">
+      <!-- Finansal Durum & Özet (Sadece Yönetici ve Manager Görür) -->
+      <section v-if="userRole === 'admin' || userRole === 'manager'" class="grid grid-cols-1 md:grid-cols-12 gap-6 mb-8">
         
         <!-- Sol Kolon: Finansal Özet (Bakiye, Gelir, Gider) -->
         <div class="md:col-span-8 grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -166,7 +166,7 @@
             
             <h4 class="text-base font-semibold text-gray-800 dark:text-gray-100 mb-3 flex items-center gap-2">
               <span class="w-2 h-6 bg-orange-500 rounded-full"></span>
-              Bekleyen Alacaklar
+              {{ userRole === 'tenant' ? 'Borç ve Ödeme Durumum' : 'Bekleyen Alacaklar' }}
             </h4>
             
             <div class="space-y-3">
@@ -203,8 +203,8 @@
         </div>
       </section>
 
-      <!-- Hızlı İşlemler (Yeni Tasarım) -->
-      <section class="mb-8">
+      <!-- Hızlı İşlemler (Sadece Yönetici ve Manager Görür) -->
+      <section v-if="userRole === 'admin' || userRole === 'manager'" class="mb-8">
         <h2 class="text-lg font-bold text-gray-800 dark:text-gray-100 mb-4 px-1">Hızlı İşlemler</h2>
         <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-4">
           <!-- Borç Ekle (Dropdown) -->
@@ -347,8 +347,8 @@
         <DebtsTable :debts="debtsSummary" :loading="loading" />
       </section>
 
-      <!-- Aylık Gelir/Gider Grafiği -->
-      <section class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 mb-8">
+      <!-- Aylık Gelir/Gider Grafiği (Sadece Yönetici Görür) -->
+      <section v-if="userRole === 'admin' || userRole === 'manager'" class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 mb-8">
         <div class="flex items-center justify-between mb-4">
           <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-100">Aylık Gelir/Gider Grafiği</h2>
           <div class="flex items-center gap-4">

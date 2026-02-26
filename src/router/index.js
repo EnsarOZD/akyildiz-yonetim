@@ -37,6 +37,7 @@ const routes = [
   { path: '/flats', name: 'Flats', component: Flats, meta: { requiresAuth: true, roles: ['admin', 'manager', 'dataentry'] } },
   { path: '/reports', name: 'Reports', component: Reports, meta: { requiresAuth: true, roles: ['admin', 'manager', 'observer'] } },
   { path: '/notifications', name: 'Notifications', component: Notifications, meta: { requiresAuth: true } },
+  { path: '/my-payments', name: 'MyPayments', component: () => import('../features/tenants/MyPaymentsView.vue'), meta: { requiresAuth: true, roles: ['admin', 'manager', 'tenant'] } },
 
   { path: '/admin', name: 'Admin', component: AdminDashboard, meta: { requiresAuth: true, roles: ['admin', 'manager'] } },
 

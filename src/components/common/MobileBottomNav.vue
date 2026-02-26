@@ -61,7 +61,7 @@ const navItems = computed(() => {
     return [
       { name: 'Ana Sayfa', path: '/dashboard', icon: DashboardIcon },
       { name: 'Profilim', path: '/profile', icon: UserIcon },
-      { name: 'Ödemelerim', path: '/dashboard', icon: WalletIcon }, // Tenant ödeme listesi dashboardda
+      { name: 'Ödemelerim', path: '/my-payments', icon: WalletIcon },
     ]
   }
 
