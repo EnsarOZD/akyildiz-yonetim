@@ -2,13 +2,25 @@
   <div class="notifications-view pb-20 md:pb-6">
     <div class="flex items-center justify-between mb-6">
       <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Bildirimler</h1>
-      <button 
-        v-if="notificationsStore.unreadCount > 0"
-        @click="notificationsStore.markAllAsRead"
-        class="text-sm text-blue-600 hover:underline font-medium"
-      >
-        Tümünü okundu yap
-      </button>
+      <div class="flex items-center gap-3">
+        <button 
+          v-if="canBroadcast"
+          @click="showAnnouncementModal = true"
+          class="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-bold hover:bg-blue-700 transition shadow-lg shadow-blue-500/30"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
+          </svg>
+          Duyuru Yayınla
+        </button>
+        <button 
+          v-if="notificationsStore.unreadCount > 0"
+          @click="notificationsStore.markAllAsRead"
+          class="text-sm text-blue-600 hover:outline-none hover:underline font-medium"
+        >
+          Tümünü okundu yap
+        </button>
+      </div>
     </div>
 
     <!-- Filters -->
@@ -62,6 +74,9 @@
               <svg v-if="item.type === 'Debt'" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
+              <svg v-else-if="item.type === 'Announcement'" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
+              </svg>
               <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
               </svg>
@@ -94,19 +109,35 @@
         Daha Fazla Yükle
       </button>
     </div>
+
+    <!-- Announcement Modal -->
+    <AnnouncementModal 
+      :show="showAnnouncementModal" 
+      @close="showAnnouncementModal = false"
+      @success="notificationsStore.refresh()"
+    />
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useNotificationsStore } from '@/stores/notificationsStore'
+import { useAuthStore } from '@/stores/auth'
+import AnnouncementModal from './components/AnnouncementModal.vue'
 import { formatDistanceToNow } from 'date-fns'
 import { tr } from 'date-fns/locale'
 import { useRouter } from 'vue-router'
 
 const notificationsStore = useNotificationsStore()
+const authStore = useAuthStore()
 const router = useRouter()
 const unreadOnly = ref(false)
+const showAnnouncementModal = ref(false)
+
+const canBroadcast = computed(() => {
+    const role = authStore.role?.toLowerCase()
+    return role === 'admin' || role === 'manager'
+})
 
 onMounted(() => {
     notificationsStore.refresh()
@@ -127,6 +158,7 @@ const getTypeColor = (type) => {
     switch (type) {
         case 'Debt': return 'bg-orange-100 text-orange-600 dark:bg-orange-900/30'
         case 'Payment': return 'bg-green-100 text-green-600 dark:bg-green-900/30'
+        case 'Announcement': return 'bg-purple-100 text-purple-600 dark:bg-purple-900/40 border border-purple-200 dark:border-purple-800'
         default: return 'bg-blue-100 text-blue-600 dark:bg-blue-900/30'
     }
 }
