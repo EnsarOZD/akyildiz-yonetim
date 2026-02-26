@@ -117,7 +117,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="(item, idx) in reportItems" :key="idx" class="hover">
+              <tr v-for="(item, idx) in paginatedReports" :key="idx" class="hover">
                 <td class="whitespace-nowrap">{{ formatDate(item.date) }}</td>
                 <td class="whitespace-nowrap font-mono text-sm">{{ formatPeriod(item.periodYear, item.periodMonth) }}</td>
                 <td>
@@ -152,13 +152,76 @@
             </tbody>
           </table>
         </div>
+
+        <!-- Pagination Control -->
+        <div v-if="totalPages > 1" class="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 bg-gray-50 dark:bg-gray-800/50 border-t dark:border-gray-700">
+          <div class="flex items-center gap-4">
+            <p class="text-sm text-gray-500">
+              Toplam <span class="font-medium">{{ reportItems.length }}</span> kayıttan 
+              <span class="font-medium">{{ (currentPage - 1) * pageSize + 1 }}</span> - 
+              <span class="font-medium">{{ Math.min(currentPage * pageSize, reportItems.length) }}</span> arası gösteriliyor
+            </p>
+            <select v-model="pageSize" class="select select-xs select-bordered bg-white dark:bg-gray-700">
+              <option :value="10">10 / sayfa</option>
+              <option :value="25">25 / sayfa</option>
+              <option :value="50">50 / sayfa</option>
+              <option :value="100">100 / sayfa</option>
+            </select>
+          </div>
+
+          <div class="flex items-center gap-1">
+            <button 
+              @click="currentPage = 1" 
+              :disabled="currentPage === 1"
+              class="btn btn-sm btn-ghost"
+              aria-label="İlk Sayfa"
+            >
+              ««
+            </button>
+            <button 
+              @click="currentPage--" 
+              :disabled="currentPage === 1"
+              class="btn btn-sm btn-ghost"
+            >
+              Önceki
+            </button>
+            
+            <div class="flex items-center gap-1">
+              <button 
+                v-for="page in displayedPages" 
+                :key="page"
+                @click="currentPage = page"
+                class="btn btn-sm"
+                :class="currentPage === page ? 'bg-blue-600 text-white shadow-sm' : 'btn-ghost text-gray-700 dark:text-gray-300'"
+              >
+                {{ page }}
+              </button>
+            </div>
+
+            <button 
+              @click="currentPage++" 
+              :disabled="currentPage === totalPages"
+              class="btn btn-sm btn-ghost"
+            >
+              Sonraki
+            </button>
+            <button 
+              @click="currentPage = totalPages" 
+              :disabled="currentPage === totalPages"
+              class="btn btn-sm btn-ghost"
+              aria-label="Son Sayfa"
+            >
+              »»
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted, watch } from 'vue'
 import tenantsService from '@/services/tenantsService'
 import ownersService from '@/services/ownersService'
 import utilityDebtsService from '@/services/utilityDebtsService'
@@ -310,6 +373,37 @@ const summary = computed(() => {
     balance: totalPayment - totalDebt
   }
 })
+
+/** Sayfalama Mantığı */
+const currentPage = ref(1)
+const pageSize = ref(10)
+
+const totalPages = computed(() => Math.ceil(reportItems.value.length / pageSize.value))
+
+const paginatedReports = computed(() => {
+  const start = (currentPage.value - 1) * pageSize.value
+  const end = start + pageSize.value
+  return reportItems.value.slice(start, end)
+})
+
+const displayedPages = computed(() => {
+  const total = totalPages.value
+  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1)
+  
+  const curr = currentPage.value
+  let start = Math.max(1, curr - 3)
+  let end = Math.min(total, curr + 3)
+  
+  if (curr <= 4) end = 7
+  if (curr >= total - 3) start = total - 6
+  
+  return Array.from({ length: end - start + 1 }, (_, i) => start + i)
+})
+
+// Filtreler veya sayfa boyutu değişince ilk sayfaya dön
+watch([filters, pageSize], () => {
+  currentPage.value = 1
+}, { deep: true })
 
 // Helpers
 const formatCurrency = (val) => 
