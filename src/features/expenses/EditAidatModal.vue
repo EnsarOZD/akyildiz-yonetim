@@ -42,31 +42,34 @@
             <input
               type="text"
               class="input input-bordered w-full bg-gray-100 dark:bg-gray-600 border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400"
-              :value="record.tenantName || record.ownerName || '-'"
+              :value="record.tenantCompany || record.tenantName || record.ownerName || '-'"
               disabled
             />
+          </div>
+
+          <!-- Dönem ve Tarih -->
+          <div class="grid grid-cols-2 gap-4 mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+            <div class="form-control">
+              <label class="label"><span class="label-text font-semibold">Yıl</span></label>
+              <input type="number" v-model.number="local.periodYear" class="input input-bordered w-full" min="2020" />
+            </div>
+            <div class="form-control">
+              <label class="label"><span class="label-text font-semibold">Ay</span></label>
+              <select v-model.number="local.periodMonth" class="select select-bordered w-full">
+                <option v-for="m in 12" :key="m" :value="m">{{ m }}</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-control mt-2">
+            <label class="label"><span class="label-text font-semibold">Son Ödeme Tarihi</span></label>
+            <input type="date" v-model="local.dueDate" class="input input-bordered w-full" />
           </div>
         </div>
 
         <!-- Düzenlenebilir Alanlar -->
         <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 space-y-4">
-          <h4 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-3">Tutar Bilgileri</h4>
-
-          <div class="form-control">
-            <label class="label">
-              <span class="label-text font-semibold text-gray-700 dark:text-gray-300">KDV Hariç Tutar (₺)</span>
-              <span class="label-text-alt text-red-500">*</span>
-            </label>
-            <input
-              type="number"
-              v-model.number="local.kdvHaric"
-              class="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300"
-              step="0.01" min="0"
-            />
-            <label class="label">
-              <span class="label-text-alt text-gray-500 dark:text-gray-400">KDV hariç aidat tutarı</span>
-            </label>
-          </div>
+          <h4 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-3">Tutar ve Açıklama</h4>
 
           <div class="form-control">
             <label class="label">
@@ -79,9 +82,17 @@
               class="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300"
               step="0.01" min="0"
             />
+          </div>
+
+          <div class="form-control">
             <label class="label">
-              <span class="label-text-alt text-gray-500 dark:text-gray-400">KDV dahil toplam tutar</span>
+              <span class="label-text font-semibold text-gray-700 dark:text-gray-300">Açıklama</span>
             </label>
+            <textarea
+              v-model="local.description"
+              class="textarea textarea-bordered h-20 w-full"
+              placeholder="Aidat açıklaması..."
+            ></textarea>
           </div>
         </div>
 
@@ -124,12 +135,16 @@ const emit = defineEmits(['close', 'updated'])
 
 const { handleValidationError, showSuccess } = useErrorHandler?.() ?? {}
 
-const local = ref({ kdvHaric: 0, toplamTutar: 0 })
+const local = ref({ kdvHaric: 0, toplamTutar: 0, periodYear: 2025, periodMonth: 1, dueDate: '', description: '' })
 
 onMounted(() => {
   if (props.record) {
     local.value.kdvHaric = Number(props.record.kdvHaric ?? props.record.amountExVat ?? 0)
     local.value.toplamTutar = Number(props.record.toplamTutar ?? props.record.amount ?? 0)
+    local.value.periodYear = props.record.periodYear || new Date().getFullYear()
+    local.value.periodMonth = props.record.periodMonth || (new Date().getMonth() + 1)
+    local.value.dueDate = props.record.dueDate ? new Date(props.record.dueDate).toISOString().split('T')[0] : ''
+    local.value.description = props.record.description || ''
   }
 })
 
@@ -142,7 +157,14 @@ const save = async () => {
       kdvHaric: local.value.kdvHaric,
       kdvDahil: local.value.toplamTutar,
       remainingAmount: remaining,
-      isPaid: remaining <= 0
+      isPaid: remaining <= 0,
+      periodYear: local.value.periodYear,
+      periodMonth: local.value.periodMonth,
+      dueDate: local.value.dueDate,
+      description: local.value.description,
+      tenantId: props.record.tenantId,
+      ownerId: props.record.ownerId,
+      flatId: props.record.flatId
     })
     showSuccess?.('Aidat kaydı güncellendi.')
     emit('updated')
