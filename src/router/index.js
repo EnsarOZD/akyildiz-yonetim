@@ -25,8 +25,8 @@ const Notifications = () => import('../features/notifications/NotificationsView.
 const Profile = () => import('../features/users/ProfileView.vue')
 
 const routes = [
-  { path: '/', name: 'Login', component: LoginView, meta: { public: true, hideLayout: true } },
-  { path: '/landing', name: 'Landing', component: LandingPage, meta: { public: true, hideLayout: true } },
+  { path: '/', name: 'Landing', component: LandingPage, meta: { public: true, hideLayout: true } },
+  { path: '/login', name: 'Login', component: LoginView, meta: { public: true, hideLayout: true } },
 
   { path: '/dashboard', name: 'Dashboard', component: Dashboard, meta: { requiresAuth: true, roles: ['admin', 'manager', 'viewer', 'tenant', 'observer', 'dataentry'] } },
   { path: '/tenants', name: 'Tenants', component: Tenants, meta: { requiresAuth: true, roles: ['admin', 'manager', 'dataentry'] } },
@@ -42,7 +42,6 @@ const routes = [
 
   { path: '/profile', name: 'Profile', component: Profile, meta: { requiresAuth: true } },
 
-  { path: '/login', redirect: '/' },
   { path: '/set-password', name: 'SetPassword', component: () => import('../views/SetPasswordView.vue'), meta: { public: true, hideLayout: true } },
   { path: '/reset-password', name: 'ResetPassword', component: () => import('../views/SetPasswordView.vue'), meta: { public: true, hideLayout: true } },
   { path: '/invite', name: 'Invite', component: () => import('../views/SetPasswordView.vue'), meta: { public: true, hideLayout: true } },
@@ -72,6 +71,13 @@ const router = createRouter({
   routes
 })
 
+// PWA / Standalone mod kontrolü
+const isStandalone = () => {
+  return window.matchMedia('(display-mode: standalone)').matches ||
+    window.navigator.standalone ||
+    document.referrer.includes('android-app://');
+};
+
 // Güvenlik için rate limiting
 const authAttempts = new Map()
 const MAX_AUTH_ATTEMPTS = 5
@@ -82,6 +88,11 @@ let loginRedirectCount = 0;
 router.beforeEach(async (to, from, next) => {
   const requiresAuth = to.meta.requiresAuth;
   const isPublic = to.meta.public;
+
+  // PWA Modunda Landing'den Login'e yönlendir
+  if (to.path === '/' && isStandalone()) {
+    return next('/login');
+  }
 
   if (to.path === '/login' && (from.path === '/login' || !requiresAuth)) {
     return next();
@@ -115,7 +126,7 @@ router.beforeEach(async (to, from, next) => {
       }
     }
 
-    // Already logged in tries to access login page or root
+    // Already logged in tries to access landing page, login page or root
     if (user && (to.path === '/' || to.path === '/login')) {
       let target = '/dashboard';
       if (user.role === 'admin') target = '/admin';
