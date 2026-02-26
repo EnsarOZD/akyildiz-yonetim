@@ -258,8 +258,8 @@
             <span class="text-[10px] text-gray-400 mt-0.5">{{ activeTenantsCount }} aktif kiracı</span>
           </router-link>
 
-           <!-- Raporlar -->
-           <router-link to="/reports" class="flex flex-col items-center justify-center p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-all group">
+          <!-- Raporlar -->
+          <router-link to="/reports" class="flex flex-col items-center justify-center p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-all group">
             <div class="p-3 bg-cyan-100 dark:bg-cyan-900/30 text-cyan-600 dark:text-cyan-400 rounded-full mb-2 group-hover:scale-110 transition-transform">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -268,6 +268,21 @@
             <span class="text-sm font-semibold text-gray-700 dark:text-gray-200">Raporlar</span>
             <span class="text-[10px] text-gray-400 mt-0.5">Detaylı analiz</span>
           </router-link>
+
+          <!-- Duyuru Yayınla (Admin/Manager) -->
+          <div 
+            v-if="userRole === 'admin' || userRole === 'manager'"
+            @click="showAnnouncementModal = true"
+            class="flex flex-col items-center justify-center p-4 bg-white dark:bg-gray-800 rounded-xl border border-purple-200 dark:border-purple-800 shadow-sm hover:shadow-md hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all group cursor-pointer"
+          >
+            <div class="p-3 bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded-full mb-2 group-hover:scale-110 transition-transform">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
+              </svg>
+            </div>
+            <span class="text-sm font-semibold text-gray-700 dark:text-gray-200">Duyuru Yap</span>
+            <span class="text-[10px] text-gray-400 mt-0.5">Tüm kullanıcılara</span>
+          </div>
         </div>
       </section>
 
@@ -473,6 +488,12 @@
         @refresh="loadDashboardData"
       />
 
+      <AnnouncementModal 
+        :show="showAnnouncementModal" 
+        @close="showAnnouncementModal = false"
+        @success="loadDashboardData"
+      />
+
     </div>
   </div>
 
@@ -511,6 +532,7 @@ import dashboardService from '@/services/dashboardService'
 import ManualDebtModal from '../expenses/ManualDebtModal.vue'
 import DebtsTable from './components/DebtsTable.vue'
 import { useNotificationsStore } from '@/stores/notificationsStore'
+import AnnouncementModal from '../notifications/components/AnnouncementModal.vue'
 
 // Reactive data
 const payments = ref([])
@@ -526,6 +548,7 @@ const dateFilter = ref('all')
 const loading = ref(true)
 const error = ref(null)
 const showManualDebtModal = ref(false)
+const showAnnouncementModal = ref(false)
 const selectedDebtType = ref(0) // Default Aidat
 
 const openManualDebtModal = (type = 0) => {
