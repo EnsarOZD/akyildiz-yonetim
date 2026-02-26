@@ -11,5 +11,9 @@ export const notificationsService = {
 
     async markAllAsRead() {
         await apiService.post('/notifications/read-all')
+    },
+
+    async broadcast(title, message) {
+        await apiService.post('/notifications/broadcast', { title, message })
     }
 }

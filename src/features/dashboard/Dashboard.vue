@@ -66,6 +66,33 @@
       <!-- Dashboard içeriği -->
       <div v-else>
 
+      <div v-if="notificationsStore.latestAnnouncement" class="mb-8 overflow-hidden bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-purple-100 dark:border-purple-900/30 flex flex-col sm:flex-row items-stretch">
+        <div class="bg-purple-600 px-4 py-3 flex items-center justify-center text-white">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
+          </svg>
+        </div>
+        <div class="flex-1 p-4 md:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div class="min-w-0">
+            <h3 class="text-sm font-bold text-purple-700 dark:text-purple-400 uppercase tracking-wider mb-1 flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-purple-500 animate-pulse"></span>
+              Son Önemli Duyuru
+            </h3>
+            <p class="text-lg font-bold text-gray-900 dark:text-white leading-tight mb-1">{{ notificationsStore.latestAnnouncement.title }}</p>
+            <p class="text-gray-600 dark:text-gray-400 text-sm line-clamp-2 md:line-clamp-1">{{ notificationsStore.latestAnnouncement.message }}</p>
+          </div>
+          <router-link 
+            to="/notifications" 
+            class="flex-shrink-0 px-6 py-2 bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 rounded-xl text-sm font-bold hover:bg-purple-100 dark:hover:bg-purple-900/40 transition flex items-center justify-center gap-2"
+          >
+            Detayları Gör
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+          </router-link>
+        </div>
+      </div>
+
       <!-- Özet Kartları -->
       <!-- Finansal Durum & Özet -->
       <section v-if="userRole !== 'viewer'" class="grid grid-cols-1 md:grid-cols-12 gap-6 mb-8">
@@ -483,6 +510,7 @@ import utilityDebtsService from '@/services/utilityDebtsService'
 import dashboardService from '@/services/dashboardService'
 import ManualDebtModal from '../expenses/ManualDebtModal.vue'
 import DebtsTable from './components/DebtsTable.vue'
+import { useNotificationsStore } from '@/stores/notificationsStore'
 
 // Reactive data
 const payments = ref([])
@@ -507,6 +535,7 @@ const openManualDebtModal = (type = 0) => {
 
 // Store
 const authStore = useAuthStore()
+const notificationsStore = useNotificationsStore()
 const userRole = computed(() => authStore.role)
 
 // Computed properties
@@ -982,7 +1011,8 @@ const loadDashboardData = async () => {
       loadOwners(),
       loadOwnerPayments(),
       loadUtilityDebts(),
-      loadDebtsSummary()
+      loadDebtsSummary(),
+      notificationsStore.refresh()
     ])
     
     console.log('Dashboard verileri başarıyla yüklendi:', {

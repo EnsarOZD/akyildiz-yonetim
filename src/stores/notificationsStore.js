@@ -9,6 +9,7 @@ export const useNotificationsStore = defineStore('notifications', () => {
     const loading = ref(false)
 
     const unreadItems = computed(() => items.value.filter(n => !n.isRead))
+    const latestAnnouncement = computed(() => items.value.find(n => n.type === 'Announcement'))
 
     async function refresh() {
         loading.value = true
