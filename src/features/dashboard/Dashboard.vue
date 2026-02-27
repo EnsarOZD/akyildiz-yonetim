@@ -541,6 +541,7 @@ import ManualDebtModal from '../expenses/ManualDebtModal.vue'
 import OverdueWidget from './components/OverdueWidget.vue'
 import { useNotificationsStore } from '@/stores/notificationsStore'
 import TargetedNotificationModal from '../notifications/components/TargetedNotificationModal.vue'
+import { formatCurrency } from '@/utils/currencyUtils'
 
 // Reactive data
 const payments = ref([])
@@ -581,11 +582,6 @@ const formatDate = (dateStr) => {
   if (!dateStr) return '-'
   const options = { year: 'numeric', month: 'short', day: 'numeric' }
   return new Date(dateStr).toLocaleDateString('tr-TR', options)
-}
-
-const formatCurrency = (value) => {
-  if (value === undefined || value === null || isNaN(value)) return '₺0.00'
-  return Number(value).toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' })
 }
 
 // Tarih aralığı hesaplama yardımcı fonksiyonu

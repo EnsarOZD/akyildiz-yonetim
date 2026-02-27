@@ -111,6 +111,7 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { formatCurrency } from '@/utils/currencyUtils'
 
 const props = defineProps({
   debts: {
@@ -126,10 +127,6 @@ const props = defineProps({
 const search = ref('')
 const sortKey = ref('totalDebt')
 const sortOrder = ref(-1) // -1 desc, 1 asc
-
-const formatCurrency = (value) => {
-  return new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(value || 0)
-}
 
 const sortBy = (key) => {
   if (sortKey.value === key) {

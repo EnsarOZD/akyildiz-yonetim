@@ -35,6 +35,8 @@
 </template>
 
 <script setup>
+import { formatCurrency } from '@/utils/currencyUtils'
+
 defineProps({
   items: Array,
   showAllLink: {
@@ -42,6 +44,4 @@ defineProps({
     default: true
   }
 })
-const formatCurrency = (value) =>
-  Number(value || 0).toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' })
 </script>
