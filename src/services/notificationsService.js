@@ -15,5 +15,10 @@ export const notificationsService = {
 
     async broadcast(title, message) {
         await apiService.post('/notifications/broadcast', { title, message })
+    },
+
+    async sendTargeted(payload) {
+        // payload: { title, message, type, targetType, targetId, delayDays }
+        await apiService.post('/notifications/targeted', payload)
     }
 }

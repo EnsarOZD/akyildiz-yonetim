@@ -59,8 +59,8 @@
 </div>
     </div>
 
-    <!-- Duyuru Modal -->
-    <AnnouncementModal 
+    <!-- Hedefli Bildirim Modal -->
+    <TargetedNotificationModal 
       :show="showAnnouncementModal" 
       @close="showAnnouncementModal = false"
     />
@@ -74,7 +74,7 @@ import OwnerDuesPanel from '../expenses/OwnerDuesPanel.vue'
 import Owners from '../owners/Owners.vue'
 import UserManagement from './UserManagement.vue'
 import tenantsService from '@/services/tenantsService'
-import AnnouncementModal from '../notifications/components/AnnouncementModal.vue'
+import TargetedNotificationModal from '../notifications/components/TargetedNotificationModal.vue'
 
 const showAnnouncementModal = ref(false)
 

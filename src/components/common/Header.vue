@@ -150,62 +150,12 @@
             </transition>
           </div>
 
-          <!-- Mobil Menü Butonu -->
-          <div class="ml-2 -mr-2 flex md:hidden">
-            <button @click="toggleMobileMenu" class="bg-gray-800 inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white">
-              <span class="sr-only">Ana menüyü aç</span>
-              <svg v-if="!isMobileMenuOpen" class="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-              </svg>
-              <svg v-else class="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
+<!-- Mobil Menü Butonu (Kaldırıldı - BottomNav kullanılacak) -->
         </div>
       </div>
     </div>
 
     <!-- Mobil Menü (Açılır) -->
-    <transition
-      enter-active-class="transition ease-out duration-200"
-      enter-from-class="opacity-0 -translate-y-2"
-      enter-to-class="opacity-100 translate-y-0"
-      leave-active-class="transition ease-in duration-150"
-      leave-from-class="opacity-100 translate-y-0"
-      leave-to-class="opacity-0 -translate-y-2"
-    >
-      <div v-if="isMobileMenuOpen" class="md:hidden fixed inset-x-0 top-16 bg-white dark:bg-gray-800 shadow-xl border-b border-gray-200 dark:border-gray-700 z-50 overflow-y-auto max-h-[calc(100vh-4rem)]" id="mobile-menu">
-        <div class="px-3 pt-2 pb-6 space-y-1">
-          <router-link
-            v-for="tab in tabs"
-            :key="tab.value"
-            :to="tab.route"
-            @click="isMobileMenuOpen = false"
-            class="flex items-center gap-3 px-4 py-3 rounded-lg text-base font-semibold transition-all"
-            :class="[
-              route.path === tab.route 
-                ? 'bg-blue-600 text-white shadow-md' 
-                : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-            ]"
-          >
-            {{ tab.label }}
-          </router-link>
-          
-          <div v-if="!authStore.user" class="pt-4 border-t border-gray-100 dark:border-gray-700 px-4">
-             <router-link to="/" @click="isMobileMenuOpen = false" class="btn btn-primary w-full">Giriş Yap</router-link>
-          </div>
-
-          <div v-else class="border-t border-gray-100 dark:border-gray-700 pt-4 mt-4 px-4">
-            <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Hesap</p>
-            <button @click="logout" class="flex items-center gap-3 w-full text-left px-0 py-3 text-red-600 font-bold hover:opacity-80">
-              <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" /></svg>
-              Çıkış Yap
-            </button>
-          </div>
-        </div>
-      </div>
-    </transition>
   </header>
 </template>
 

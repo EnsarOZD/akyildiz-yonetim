@@ -65,19 +65,22 @@
           <!-- Tutar -->
           <div class="form-control">
             <label class="label">
-              <span class="label-text font-semibold text-gray-700 dark:text-gray-300">Tutar (₺) *</span>
+              <span class="label-text font-semibold text-gray-700 dark:text-gray-300">Tutar *</span>
             </label>
-            <input 
-              v-model="expense.amount" 
-              type="number" 
-              min="0" 
-              step="0.01" 
-              class="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400"
-              :class="{ 'border-red-500': errors.amount }"
-              placeholder="0.00"
-              required 
-              @input="formatAmountInput"
-            />
+            <div class="relative">
+              <input 
+                v-model="displayAmount" 
+                @input="handleAmountInput"
+                @blur="validateField('amount')"
+                type="text" 
+                inputmode="decimal"
+                class="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400 pr-10"
+                :class="{ 'border-red-500': errors.amount }"
+                placeholder="0,00"
+                required 
+              />
+              <span class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 font-bold">₺</span>
+            </div>
             <label v-if="errors.amount" class="label">
               <span class="label-text-alt text-red-500">{{ errors.amount }}</span>
             </label>
@@ -185,6 +188,7 @@
 <script setup>
 import { computed, ref, watch, nextTick, onMounted } from 'vue'
 import { useDirtyGuard } from '@/composables/useDirtyGuard'
+import { formatCurrency, parseCurrency, formatInputCurrency } from '@/utils/currencyUtils'
 
 const props = defineProps(['visible', 'expense', 'types', 'editMode'])
 const emit = defineEmits(['close', 'save'])
@@ -195,6 +199,47 @@ const showPreview = ref(false)
 const loading = ref(false)
 const error = ref(null)
 const errors = ref({})
+const displayAmount = ref('')
+
+// Initialize display amount
+watch(() => props.expense.amount, (newVal) => {
+  if (parseCurrency(displayAmount.value) !== newVal) {
+    displayAmount.value = formatCurrency(newVal, false)
+  }
+}, { immediate: true })
+
+const handleAmountInput = (e) => {
+  const formatted = formatInputCurrency(e.target.value)
+  displayAmount.value = formatted
+  props.expense.amount = parseCurrency(formatted)
+}
+
+const validateField = (field) => {
+  // Sadece ilgili alanı doğrula
+  if (field === 'amount') {
+    if (!props.expense.amount || isNaN(props.expense.amount) || props.expense.amount <= 0) {
+      errors.value.amount = 'Geçerli bir tutar girilmelidir'
+    } else {
+      delete errors.value.amount
+    }
+  }
+  
+  if (field === 'type') {
+    if (!props.expense.type) {
+      errors.value.type = 'Gider tipi seçilmelidir'
+    } else {
+      delete errors.value.type
+    }
+  }
+  
+  if (field === 'title') {
+    if (!props.expense.title || props.expense.title.trim() === '') {
+      errors.value.title = 'Başlık girilmelidir'
+    } else {
+      delete errors.value.title
+    }
+  }
+}
 
 // Parent'tan gelen types prop'unu kullan
 const expenseTypeOptions = computed(() => {
