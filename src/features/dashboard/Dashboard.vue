@@ -156,7 +156,15 @@
 
         <!-- Sağ Kolon: İstatistikler & Aidat Durumu -->
         <div class="md:col-span-4 grid grid-cols-1 gap-4">
-          <!-- Borç/Alacak Özeti (Yeni Bileşen) -->
+          <!-- Geciken Ödeme Widget'ı (Yeni) -->
+          <OverdueWidget 
+            v-if="overdueItems.length > 0"
+            :count="overdueItems.length"
+            :total-amount="overdueTotalAmount"
+            :oldest-date="oldestOverdueDate"
+          />
+
+          <!-- Borç/Alacak Özeti -->
           <router-link to="/utilities" class="bg-white dark:bg-gray-800 p-5 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-all cursor-pointer relative overflow-hidden">
             <div class="absolute top-0 right-0 p-3 opacity-10">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-24 w-24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -488,7 +496,7 @@
         @refresh="loadDashboardData"
       />
 
-      <AnnouncementModal 
+      <TargetedNotificationModal 
         :show="showAnnouncementModal" 
         @close="showAnnouncementModal = false"
         @success="loadDashboardData"
@@ -530,9 +538,9 @@ import ownersService from '@/services/ownersService'
 import utilityDebtsService from '@/services/utilityDebtsService'
 import dashboardService from '@/services/dashboardService'
 import ManualDebtModal from '../expenses/ManualDebtModal.vue'
-import DebtsTable from './components/DebtsTable.vue'
+import OverdueWidget from './components/OverdueWidget.vue'
 import { useNotificationsStore } from '@/stores/notificationsStore'
-import AnnouncementModal from '../notifications/components/AnnouncementModal.vue'
+import TargetedNotificationModal from '../notifications/components/TargetedNotificationModal.vue'
 
 // Reactive data
 const payments = ref([])
@@ -752,6 +760,16 @@ const overdueOwnerPayments = computed(() => {
 
 const overdueOwnerPaymentsCount = computed(() => {
   return overdueOwnerPayments.value.length
+})
+
+const overdueTotalAmount = computed(() => {
+  return overdueItems.value.reduce((sum, item) => sum + Number(item.amount || 0), 0)
+})
+
+const oldestOverdueDate = computed(() => {
+  if (overdueItems.value.length === 0) return null
+  // En eski tarihi bul
+  return Array.from(overdueItems.value).sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))[0].dueDate
 })
 
 const overdueOwnerPaymentsTotal = computed(() => {

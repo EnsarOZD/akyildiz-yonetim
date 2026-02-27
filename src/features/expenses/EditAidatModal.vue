@@ -73,15 +73,22 @@
 
           <div class="form-control">
             <label class="label">
-              <span class="label-text font-semibold text-gray-700 dark:text-gray-300">Toplam Tutar (₺)</span>
-              <span class="label-text-alt text-red-500">*</span>
+              <span class="label-text font-semibold text-gray-700 dark:text-gray-300">Toplam Tutar *</span>
             </label>
-            <input
-              type="number"
-              v-model.number="local.toplamTutar"
-              class="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300"
-              step="0.01" min="0"
-            />
+            <div class="relative">
+              <input
+                type="text"
+                v-model="displayAmount"
+                @input="handleAmountInput"
+                @blur="validateAmount"
+                class="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 pr-10"
+                :class="{ 'border-red-500': amountError }"
+                placeholder="0,00"
+                required
+              />
+              <span class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 font-bold">₺</span>
+            </div>
+            <p v-if="amountError" class="text-error text-xs mt-1">{{ amountError }}</p>
           </div>
 
           <div class="form-control">
@@ -126,9 +133,10 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import aidatService from '@/services/aidatService'
 import { useErrorHandler } from '@/composables/useErrorHandler'
+import { formatCurrency, parseCurrency, formatInputCurrency } from '@/utils/currencyUtils'
 
 const props = defineProps({ record: { type: Object, required: true } })
 const emit = defineEmits(['close', 'updated'])
@@ -136,6 +144,28 @@ const emit = defineEmits(['close', 'updated'])
 const { handleValidationError, showSuccess } = useErrorHandler?.() ?? {}
 
 const local = ref({ kdvHaric: 0, toplamTutar: 0, periodYear: 2025, periodMonth: 1, dueDate: '', description: '' })
+const displayAmount = ref('')
+const amountError = ref('')
+
+const handleAmountInput = (e) => {
+  const formatted = formatInputCurrency(e.target.value)
+  displayAmount.value = formatted
+  local.value.toplamTutar = parseCurrency(formatted)
+}
+
+const validateAmount = () => {
+  if (local.value.toplamTutar <= 0) {
+    amountError.value = 'Lütfen geçerli bir tutar girin'
+  } else {
+    amountError.value = ''
+  }
+}
+
+watch(() => local.value.toplamTutar, (newVal) => {
+  if (parseCurrency(displayAmount.value) !== newVal) {
+    displayAmount.value = formatCurrency(newVal, false)
+  }
+}, { immediate: true })
 
 onMounted(() => {
   if (props.record) {

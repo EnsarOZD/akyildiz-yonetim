@@ -9,14 +9,21 @@
           <label class="label">
             <span class="label-text font-semibold">Tutar *</span>
           </label>
-          <input 
-            v-model.number="payment.amount" 
-            type="number" 
-            step="0.01"
-            class="input input-bordered" 
-            required
-            placeholder="0.00"
-          />
+          <div class="relative">
+            <input 
+              v-model="displayAmount"
+              @input="handleAmountInput"
+              @blur="validateAmount"
+              type="text" 
+              inputmode="decimal"
+              class="input input-bordered w-full pr-12" 
+              :class="{ 'input-error': amountError }"
+              required
+              placeholder="0,00"
+            />
+            <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">₺</span>
+          </div>
+          <p v-if="amountError" class="text-error text-xs mt-1">{{ amountError }}</p>
         </div>
         
         <div class="form-control">
@@ -178,9 +185,7 @@ import { format } from 'date-fns'
 import { tr } from 'date-fns/locale'
 import paymentsService from '@/services/paymentsService'
 import tenantsService from '@/services/tenantsService'
-import utilityDebtsService from '@/services/utilityDebtsService'
-import { paymentTypeOptions, getDebtTypeLabel, PAYMENT_METHODS } from '@/constants/enums'
-import { useNotify } from '@/composables/useNotify'
+import { formatCurrency, parseCurrency, formatInputCurrency } from '@/utils/currencyUtils'
 
 const emit = defineEmits(['success', 'cancel'])
 const { notifySuccess, notifyError } = useNotify()
@@ -191,6 +196,8 @@ const tenants = ref([])
 const availableDebts = ref([])
 const selectedDebts = ref([])
 const debtAllocations = ref({})
+const displayAmount = ref('')
+const amountError = ref('')
 
 const payment = ref({
   amount: 0,
@@ -214,13 +221,26 @@ const totalAllocated = computed(() => {
 const selectedDebtIdSet = computed(() => new Set(selectedDebts.value.map(Number)))
 
 // Methods
-const formatCurrency = (amount) => {
-  return new Intl.NumberFormat('tr-TR', {
-    style: 'currency',
-    currency: 'TRY'
-  }).format(amount)
+const handleAmountInput = (e) => {
+  const formatted = formatInputCurrency(e.target.value)
+  displayAmount.value = formatted
+  payment.value.amount = parseCurrency(formatted)
 }
 
+const validateAmount = () => {
+  if (payment.value.amount <= 0) {
+    amountError.value = 'Lütfen geçerli bir tutar girin'
+  } else {
+    amountError.value = ''
+  }
+}
+
+// Watch existing amount changes (e.g. from props or initial state)
+watch(() => payment.value.amount, (newVal) => {
+  if (parseCurrency(displayAmount.value) !== newVal) {
+    displayAmount.value = formatCurrency(newVal, false)
+  }
+}, { immediate: true })
 
 const formatDate = (date) => {
   return format(new Date(date), 'dd MMM yyyy', { locale: tr })

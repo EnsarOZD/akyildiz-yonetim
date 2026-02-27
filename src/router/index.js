@@ -28,7 +28,8 @@ const routes = [
   { path: '/', name: 'Landing', component: LandingPage, meta: { public: true, hideLayout: true } },
   { path: '/login', name: 'Login', component: LoginView, meta: { public: true, hideLayout: true } },
 
-  { path: '/dashboard', name: 'Dashboard', component: Dashboard, meta: { requiresAuth: true, roles: ['admin', 'manager', 'viewer', 'tenant', 'observer', 'dataentry'] } },
+  { path: '/dashboard', name: 'Dashboard', component: Dashboard, meta: { requiresAuth: true, roles: ['admin', 'manager', 'viewer', 'observer', 'dataentry'] } },
+  { path: '/tenant-dashboard', name: 'TenantDashboard', component: () => import('../features/dashboard/TenantDashboard.vue'), meta: { requiresAuth: true, roles: ['tenant', 'admin', 'manager'] } },
   { path: '/tenants', name: 'Tenants', component: Tenants, meta: { requiresAuth: true, roles: ['admin', 'manager', 'dataentry'] } },
   { path: '/tenants/:id', name: 'TenantDetailPage', component: TenantDetailPage, meta: { requiresAuth: true, roles: ['admin', 'manager', 'dataentry'] } },
   { path: '/payments', name: 'Payments', component: Payments, meta: { requiresAuth: true, roles: ['admin', 'manager', 'dataentry', 'observer'] } },
@@ -121,7 +122,8 @@ router.beforeEach(async (to, from, next) => {
 
       if (!allowedRoles.includes(userRole)) {
         console.warn(`Access denied for role: ${userRole}. Allowed: ${allowedRoles}`);
-        // Redirect to dashboard if not authorized for this specific route
+        // Redirect based on role
+        if (userRole === 'tenant') return next('/tenant-dashboard');
         if (to.path !== '/dashboard') return next('/dashboard');
         return next();
       }
@@ -133,7 +135,7 @@ router.beforeEach(async (to, from, next) => {
       if (user.role === 'admin') target = '/admin';
       else if (user.role === 'manager') target = '/dashboard';
       else if (user.role === 'viewer') target = '/overdue';
-      else if (user.role === 'tenant') target = '/profile';
+      else if (user.role === 'tenant') target = '/tenant-dashboard';
 
       if (to.path !== target) return next(target);
       return next();
