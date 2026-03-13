@@ -229,11 +229,13 @@ export class ErrorHandler {
   }
 
   logSuccess(type, message, context = {}) {
+    if (!message) return null;
+    
     const payload = {
       id: Math.random().toString(36).substr(2, 9),
-      type,
-      message,
-      context,
+      type: type || 'success',
+      message: String(message),
+      context: context || {},
       timestamp: new Date().toISOString()
     };
 
@@ -251,9 +253,16 @@ export class ErrorHandler {
   }
 
   notifyListeners(payload) {
+    if (!payload) {
+      console.warn('Attempted to notify listeners with undefined payload');
+      return;
+    }
+    
     this.errorListeners.forEach(callback => {
       try {
-        callback(payload);
+        if (typeof callback === 'function') {
+          callback(payload);
+        }
       } catch (listenerError) {
         console.error('Error listener failed:', listenerError);
       }
