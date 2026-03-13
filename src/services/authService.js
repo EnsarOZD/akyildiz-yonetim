@@ -13,19 +13,20 @@ class AuthService {
       console.log('Backend login response:', response)
 
       if (response) {
-        const token = response.token || response.accessToken || response.access_token || response.jwt
+        // Handle various token property names (token, access_token, jwt, Token)
+        const token = response.token || response.accessToken || response.access_token || response.jwt || response.Token;
 
         if (token) {
           localStorage.setItem('authToken', token)
-          console.log('✅ JWT Token kaydedildi')
+          console.log('✅ JWT Token kaydedildi (Found in response property)')
 
           this.currentUser = response.user || response.data || response
           this.notifyAuthListeners(this.currentUser)
 
           return response
         } else {
-          console.error('❌ JWT Token bulunamadı')
-          throw new Error('Giriş başarısız: Token alınamadı')
+          console.error('❌ JWT Token bulunamadı. Response keys:', Object.keys(response))
+          throw new Error('Giriş başarısız: Sunucudan geçerli bir oturum anahtarı alınamadı.')
         }
       } else {
         throw new Error('Boş yanıt alındı')
@@ -38,10 +39,16 @@ class AuthService {
 
   // Kullanıcı çıkışı
   async logout() {
+    const token = localStorage.getItem('authToken');
     try {
-      await apiService.post('/Auth/logout')
+      if (token) {
+        console.log('🚪 Logging out from backend...');
+        await apiService.post('/Auth/logout')
+      } else {
+        console.log('🚪 Local logout (no token to invalidate on backend)');
+      }
     } catch (error) {
-      console.error('Logout error:', error)
+      console.warn('Logout error (backend):', error.message)
     } finally {
       localStorage.removeItem('authToken')
       this.currentUser = null
@@ -63,15 +70,26 @@ class AuthService {
         return null
       }
 
-      console.log('✅ JWT Token geçerli, backend\'den bilgi alınıyor...')
+      console.log('✅ Valid token found in localStorage. Verifying with backend...')
       try {
         const response = await apiService.get('/Auth/me')
-        this.currentUser = response.user || response
+        if (!response) {
+          throw new Error('Empty response from /Auth/me');
+        }
+        
+        // Handle possible data wrapping
+        this.currentUser = response.user || response.data || response;
+        console.log('👤 User profile loaded:', this.currentUser.email || this.currentUser.name);
+        
         this.notifyAuthListeners(this.currentUser)
         return this.currentUser
       } catch (apiError) {
-        console.error('❌ API auth check failed, logging out:', apiError)
-        await this.logout()
+        console.error('❌ Session verification failed:', apiError.message)
+        // Explicitly don't call this.logout() if it was a 401, as api.js already handles it.
+        // But for other errors (network, 500), we might want to clean up.
+        if (apiError.status !== 401) {
+          await this.logout()
+        }
         return null
       }
     } catch (error) {
