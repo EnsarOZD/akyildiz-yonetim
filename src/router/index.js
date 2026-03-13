@@ -108,7 +108,23 @@ router.beforeEach(async (to, from, next) => {
     import.meta.env.VITE_API_BASE_URL !== 'http://localhost:5000/api';
 
   if (isBackendActive) {
-    const user = await authService.checkAuthStatus();
+    const authStore = useAuthStore();
+
+    // Fast path: store already initialized — use cached state, no API call
+    let user = null;
+    let userRole = '';
+
+    if (authStore.isInitialized && authStore.role) {
+      userRole = authStore.role.toLowerCase();
+      user = { role: userRole };
+    } else {
+      // Slow path: first load or after logout — verify with backend
+      const backendUser = await authService.checkAuthStatus();
+      if (backendUser) {
+        userRole = (backendUser.role || '').toLowerCase();
+        user = backendUser;
+      }
+    }
 
     // Auth required but not logged in
     if (!user && requiresAuth) {
@@ -118,12 +134,10 @@ router.beforeEach(async (to, from, next) => {
 
     // Role check
     if (user && to.meta.roles) {
-      const userRole = (user.role || '').toLowerCase();
       const allowedRoles = to.meta.roles.map(r => r.toLowerCase());
 
       if (!allowedRoles.includes(userRole)) {
         console.warn(`Access denied for role: ${userRole}. Allowed: ${allowedRoles}`);
-        // Rolle uygun sayfaya yönlendir
         if (userRole === 'tenant') return next('/tenant-dashboard');
         if (userRole === 'owner') return next('/my-properties');
         return next('/dashboard');
@@ -132,7 +146,6 @@ router.beforeEach(async (to, from, next) => {
 
     // Giriş yapmış kullanıcı ana sayfa veya login'e gitmeye çalışırsa
     if (user && (to.path === '/' || to.path === '/login')) {
-      const userRole = (user.role || '').toLowerCase();
       let target = '/dashboard';
       if (userRole === 'admin') target = '/admin';
       else if (userRole === 'tenant') target = '/tenant-dashboard';

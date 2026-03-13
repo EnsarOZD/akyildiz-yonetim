@@ -1,5 +1,8 @@
 <template>
-  <div v-if="authStore.isInitialized && canViewDashboard" class="p-4 sm:p-6 bg-gray-50 min-h-screen font-sans dark:bg-gray-900">
+  <div v-if="!authStore.isInitialized" class="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+  </div>
+  <div v-else-if="canViewDashboard" class="p-4 sm:p-6 bg-gray-50 min-h-screen font-sans dark:bg-gray-900">
     <div class="max-w-7xl mx-auto">
       
       <!-- Başlık ve Kontroller -->
@@ -502,14 +505,6 @@
         @success="loadDashboardData"
       />
 
-    </div>
-  </div>
-
-  <!-- Loading durumu -->
-  <div v-else-if="!authStore.isInitialized" class="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900">
-    <div class="text-center">
-      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-      <p class="text-gray-500 dark:text-gray-400 text-lg">Yükleniyor...</p>
     </div>
   </div>
 
