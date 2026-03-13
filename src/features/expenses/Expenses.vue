@@ -197,7 +197,7 @@
                     <label tabindex="0" class="btn btn-ghost btn-sm">İşlemler</label>
                     <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-200 rounded-box w-32 z-10">
                       <li><a @click="startEdit(e)">Düzenle</a></li>
-                      <li><a @click="deleteExpense(e.id)" class="text-red-500">Sil</a></li>
+                      <li><a @click="deleteExpense(e)" class="text-red-500">Sil</a></li>
                     </ul>
                   </div>
                 </div>
@@ -281,13 +281,25 @@
       @save="saveExpense"
       @close="cancelEdit"
     />
+
+    <ConfirmModal
+      :isOpen="showDeleteModal"
+      title="Gider Silinecek"
+      :message="`'${expenseToDelete?.title || 'Seçili gider'}' silinecek. Bu işlem geri alınamaz.`"
+      confirmLabel="Evet, Sil"
+      confirmClass="btn-error"
+      :loading="deleting"
+      @confirm="handleConfirmDelete"
+      @cancel="closeDeleteModal"
+    />
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted, watch } from 'vue'
 import expensesService from '@/services/expensesService'
 import ExpenseModal from './ExpenseModal.vue'
+import ConfirmModal from '@/components/common/ConfirmModal.vue'
 import CustomFilterBar from '@/components/common/CustomFilterBar.vue'
 import { useErrorHandler } from '@/composables/useErrorHandler'
 
@@ -311,6 +323,10 @@ const selectedExpenseId = ref(null)
 const dateFilter = ref('all')
 const modalLoading = ref(false)
 const modalError = ref(null)
+
+const showDeleteModal = ref(false)
+const expenseToDelete = ref(null)
+const deleting = ref(false)
 
 /** reactive filtre nesnesi */
 const filters = reactive({
@@ -551,15 +567,30 @@ const cancelEdit = () => {
   modalError.value = null
   modalLoading.value = false
 }
-const deleteExpense = async (id) => {
-  if (!confirm('Bu gideri silmek istediğinizden emin misiniz?')) return
+const deleteExpense = (expense) => {
+  expenseToDelete.value = expense
+  showDeleteModal.value = true
+}
+
+const closeDeleteModal = () => {
+  expenseToDelete.value = null
+  showDeleteModal.value = false
+  deleting.value = false
+}
+
+const handleConfirmDelete = async () => {
+  if (!expenseToDelete.value) return
+  
+  deleting.value = true
   try {
-    await expensesService.deleteExpense(id)
+    await expensesService.deleteExpense(expenseToDelete.value.id)
     showSuccess('Gider')
     await fetchExpenses()
+    closeDeleteModal()
   } catch (err) {
     console.error('Gider silinirken hata:', err)
     notifyError('Gider silinirken bir hata oluştu')
+    deleting.value = false
   }
 }
 const saveExpense = async (expenseData) => {

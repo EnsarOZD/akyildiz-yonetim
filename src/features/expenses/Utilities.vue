@@ -312,8 +312,8 @@ const setLoading = (inc) => {
 /* ---------- API ---------- */
 const fetchFlats = async () => {
   try {
-    const response = await api.get('/Flats')
-    return response || []
+    const response = await api.get('/Flats?pageSize=100')
+    return Array.isArray(response) ? response : (response?.items ?? [])
   } catch (error) {
     console.error('Flat bilgileri alınırken hata:', error)
     return []
@@ -376,12 +376,13 @@ const fetchDues = async () => {
   try {
     const [duesRes, flatsRes, tenantsRes] = await Promise.all([
       utilityDebtsService.getUtilityDebts({ period: selectedPeriod.value || undefined }),
-      api.get('/Flats'),
-      api.get('/Tenants'),
+      api.get('/Flats?pageSize=100'),
+      api.get('/Tenants?pageSize=100'),
     ])
 
-    const flatById = new Map((flatsRes || []).map(f => [f.id, f]))
-    const tenantById = new Map((tenantsRes || []).map(t => [t.id, t]))
+    const toArray = (r) => Array.isArray(r) ? r : (r?.items ?? [])
+    const flatById = new Map(toArray(flatsRes).map(f => [f.id, f]))
+    const tenantById = new Map(toArray(tenantsRes).map(t => [t.id, t]))
 
     const normStatus = (s) => {
       if (typeof s === 'number') { // 0:Unpaid 1:Partial 2:Paid

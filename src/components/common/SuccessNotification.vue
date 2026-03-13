@@ -158,15 +158,39 @@ const getProgressClasses = (type) => {
 }
 
 // Error handler listener - sadece başarı mesajlarını yakala
-const notificationListener = (error) => {
+const notificationListener = (payload) => {
   // Sadece success, info, warning tipindeki mesajları göster
-  if (error.type === 'success' || error.type === 'info' || error.type === 'warning') {
-    const displayMessage = error.getDisplayMessage()
+  if (payload.type === 'success' || payload.type === 'info' || payload.type === 'warning') {
+    let title = 'Başarılı'
+    let message = 'İşlem başarıyla tamamlandı'
+
+    // Case 1: string
+    if (typeof payload === 'string') {
+      message = payload
+    } 
+    // Case 2 & 3: object with message or displayMessage
+    else if (typeof payload === 'object' && payload !== null) {
+      // getDisplayMessage override (AppError instance or similar)
+      if (typeof payload.getDisplayMessage === 'function') {
+        const display = payload.getDisplayMessage()
+        title = display.title || title
+        message = display.message || message
+      } else {
+        message = payload.message || payload.displayMessage || message
+        title = payload.title || title
+      }
+    }
+    // Case 4: Error instance
+    else if (payload instanceof Error) {
+      message = payload.message || message
+    }
+
     addNotification({
-      ...displayMessage,
-      type: error.type,
-      timestamp: error.timestamp,
-      context: error.context
+      title,
+      message,
+      type: payload.type || 'success',
+      timestamp: payload.timestamp || new Date().toISOString(),
+      context: payload.context || {}
     })
   }
 }

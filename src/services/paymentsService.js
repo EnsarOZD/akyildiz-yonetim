@@ -13,8 +13,10 @@ class PaymentsService {
     if (filters.endDate) params.endDate = filters.endDate
     if (filters.utilityType) params.utilityType = filters.utilityType
     if (filters.excludeAdvanceUse !== undefined) params.excludeAdvanceUse = filters.excludeAdvanceUse
+    params.pageSize = 100
 
-    return apiService.get('/payments', params)
+    const response = await apiService.get('/payments', params)
+    return Array.isArray(response) ? response : (response?.items ?? [])
   }
 
   // ID'ye göre ödeme getir
@@ -49,6 +51,9 @@ class PaymentsService {
     if (filters.tenantId) params.tenantId = filters.tenantId
     if (filters.activeOnly !== undefined) params.activeOnly = filters.activeOnly
 
+    // Backend now returns PagedResult<T>; callers (store + AdvanceAccountManager) already
+    // handle both array and {items} shapes — just ensure we fetch the full page.
+    params.pageSize = 100
     return apiService.get('/advanceaccounts', params)
   }
 
@@ -118,9 +123,9 @@ class PaymentsService {
     return apiService.get('/AuditLogs', params)
   }
 
-  // Ödeme istatistikleri
+  // Ödeme istatistikleri — /payments/stats backend'de yok, /expenses/stats kullanılır
   async getPaymentStats() {
-    return apiService.get('/payments/stats')
+    return apiService.get('/expenses/stats')
   }
 }
 

@@ -122,10 +122,13 @@
       @save="saveOwner"
       @close="createModalVisible = false"
     />
-    <ConfirmDeleteModal
-      :visible="deleteModalVisible"
-      :item-name="ownerToDelete ? ownerToDelete.name : ''"
-      item-type="mal sahibini"
+    <ConfirmModal
+      :isOpen="deleteModalVisible"
+      title="Mal Sahibi Silinecek"
+      :message="`'${ownerToDelete?.name}' mal sahibini silmek istediğinizden emin misiniz?`"
+      confirmLabel="Evet, Sil"
+      confirmClass="btn-error"
+      :loading="deleting"
       @confirm="confirmDelete"
       @cancel="deleteModalVisible = false"
     />
@@ -146,7 +149,7 @@ import { ROLES } from '@/constants/roles'
 import ownersService from '@/services/ownersService'
 import tenantsService from '@/services/tenantsService'
 import { useErrorHandler } from '@/composables/useErrorHandler'
-import ConfirmDeleteModal from '../tenants/components/ConfirmDeleteModal.vue';
+import ConfirmModal from '@/components/common/ConfirmModal.vue';
 import FilterBar from '@/components/common/FilterBar.vue';
 import OwnerCreateModal from './components/OwnerCreateModal.vue';
 import OwnerEditModal from './components/OwnerEditModal.vue';
@@ -164,6 +167,7 @@ const editModalVisible = ref(false);
 const createModalVisible = ref(false);
 const deleteModalVisible = ref(false);
 const ownerToDelete = ref(null);
+const deleting = ref(false);
 const search = ref('');
 
 const fetchOwners = async () => {
@@ -281,12 +285,15 @@ const askDelete = (owner) => {
 
 const confirmDelete = async () => {
   try {
+    deleting.value = true;
     await ownersService.deleteOwner(ownerToDelete.value.id);
     showDeleteSuccess('Mal Sahibi');
     deleteModalVisible.value = false;
     await fetchOwners();
   } catch (error) {
     handleValidationError(error, { component: 'Owners', action: 'deleteOwner' });
+  } finally {
+    deleting.value = false;
   }
 };
 

@@ -25,9 +25,10 @@
             </label>
             <select v-model="filterType" class="select select-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300">
               <option value="">Tüm Tipler</option>
-              <option value="electricity">Elektrik</option>
-              <option value="water">Su</option>
-              <option value="aidat">Aidat</option>
+              <option value="Rent">Kira</option>
+              <option value="Dues">Aidat</option>
+              <option value="Utility">Fatura</option>
+              <option value="Other">Diğer</option>
             </select>
           </div>
 
@@ -250,10 +251,13 @@ const uniquePeriods = computed(() => {
   return periods.filter(period => period).sort().reverse()
 })
 
+const TYPE_LABELS = { Rent: 'Kira', Dues: 'Aidat', Utility: 'Fatura', Other: 'Diğer' }
+
 const fetchTenants = async () => {
   try {
-    const response = await apiService.get('/tenants')
-    tenants.value = response || []
+    const response = await apiService.get('/tenants', { pageSize: 100 })
+    const data = Array.isArray(response) ? response : (response?.items ?? [])
+    tenants.value = data
   } catch (error) {
     console.error('Kiracılar yüklenirken hata:', error)
     tenants.value = []
@@ -263,12 +267,23 @@ const fetchTenants = async () => {
 const fetchOverduePayments = async () => {
   loading.value = true
   try {
-    const response = await apiService.get('/payments/overdue')
-    overduePayments.value = (response || []).map(payment => {
-      const tenant = tenants.value.find(t => t.id === payment.tenantId)
+    const response = await apiService.get('/payments', { status: 'Pending', pageSize: 100 })
+    const items = Array.isArray(response) ? response : (response?.items ?? [])
+    overduePayments.value = items.map(payment => {
+      const period = payment.periodYear && payment.periodMonth
+        ? `${payment.periodYear}-${String(payment.periodMonth).padStart(2, '0')}`
+        : null
       return {
         ...payment,
-        tenantName: tenant?.company || 'Bilinmiyor'
+        company: payment.tenantName || payment.ownerName || 'Bilinmiyor',
+        unit: payment.flatInfo || '-',
+        typeLabel: TYPE_LABELS[payment.type] || payment.type,
+        period,
+        dueDate: payment.paymentDate,
+        dueDateFormatted: formatDate(payment.paymentDate),
+        paymentStatus: { status: 'unpaid', label: 'Ödenmedi' },
+        unpaidAmount: payment.amount,
+        paidAmount: 0,
       }
     })
   } catch (error) {
@@ -281,7 +296,18 @@ const fetchOverduePayments = async () => {
 
 const markAsPaid = async (paymentId) => {
   try {
-    await apiService.put(`/payments/${paymentId}`, { status: 'paid' })
+    const payment = overduePayments.value.find(p => p.id === paymentId)
+    await apiService.put(`/payments/${paymentId}`, {
+      id: paymentId,
+      amount: payment?.amount,
+      type: payment?.type,
+      status: 'Completed',
+      paymentDate: payment?.paymentDate,
+      description: payment?.description,
+      receiptNumber: payment?.receiptNumber,
+      tenantId: payment?.tenantId,
+      ownerId: payment?.ownerId,
+    })
     await fetchOverduePayments()
   } catch (error) {
     console.error('Ödeme durumu güncellenirken hata:', error)
@@ -297,6 +323,6 @@ const isManagerOrViewer = computed(() =>
 )
 
 onMounted(() => {
-  fetchTenants().then(() => fetchOverduePayments())
+  fetchOverduePayments()
 })
 </script>

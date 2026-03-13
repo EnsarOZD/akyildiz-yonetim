@@ -35,7 +35,10 @@ class AidatService {
       if (filters.year) params.year = filters.year
       if (filters.tenantId) params.tenantId = filters.tenantId
       if (filters.unit) params.unit = filters.unit
-      return apiService.get('/aidat-definitions', { params })
+      // Backend now returns PagedResult<T>; fetch max page and unwrap.
+      params.pageSize = 100
+      const response = await apiService.get('/aidat-definitions', params)
+      return Array.isArray(response) ? response : (response?.items ?? [])
     }
     return []
   }
@@ -83,7 +86,12 @@ class AidatService {
     if (filters.period) params.period = filters.period       // 'YYYY-MM'
     if (filters.flatId) params.flatId = filters.flatId
     if (filters.status) params.status = filters.status       // 'paid' | 'unpaid'
-    if (ok) return apiService.get('/utilitydebts', { params })
+    if (ok) {
+      // Backend now returns PagedResult<T>; fetch max page and unwrap.
+      params.pageSize = 100
+      const response = await apiService.get('/utilitydebts', params)
+      return Array.isArray(response) ? response : (response?.items ?? [])
+    }
     return []
   }
 

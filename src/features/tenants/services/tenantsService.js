@@ -35,9 +35,12 @@ const tenantsService = {
       params.append('floor', String(filters.floorNumber))
     }
 
+    params.append('pageSize', '100')
+
     const qs = params.toString()
     const url = qs ? `${base}?${qs}` : base
-    return await apiService.get(url)
+    const response = await apiService.get(url)
+    return Array.isArray(response) ? response : (response?.items ?? [])
   },
 
   // Boş üniteleri getir (TenantsController: GET /tenants/available-flats?floor=&searchTerm=)

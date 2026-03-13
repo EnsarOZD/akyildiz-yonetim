@@ -130,12 +130,25 @@
         </div>
       </div>
     </div>
+    <ConfirmModal
+      :isOpen="showDeleteModal"
+      title="Aidat Tanımı Silinecek"
+      message="Bu aidat tanımını silmek istiyor musunuz? Bu işlem geri alınamaz."
+      confirmLabel="Evet, Sil"
+      confirmClass="btn-error"
+      :loading="deleting"
+      @confirm="handleConfirmDelete"
+      @cancel="showDeleteModal = false"
+    />
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue'
 import { useNotify } from '@/composables/useNotify'
+import aidatService from '@/services/aidatService'
+import tenantsService from '@/features/tenants/services/tenantsService'
+import ConfirmModal from '@/components/common/ConfirmModal.vue'
 
 const { notifySuccess, notifyError } = useNotify()
 const emit = defineEmits(['stats'])
@@ -152,6 +165,10 @@ const yearFilter = ref('')
 const companyFilter = ref('')
 const unitFilter = ref('')
 const searchTerm = ref('')
+
+const showDeleteModal = ref(false)
+const duesToDeleteId = ref(null)
+const deleting = ref(false)
 
 const formatCurrency = (val) => {
   if (!val || isNaN(val)) return '₺0.00'
@@ -273,15 +290,25 @@ const resetForm = () => {
   selectedId.value = null
 }
 
-const deleteDues = async (id) => {
-  if (confirm('Bu aidat tanımını silmek istiyor musunuz? Bu işlem geri alınamaz.')) {
-    try {
-      await aidatService.deleteAidatDefinition(id)
-      await fetchDues()
-    } catch (error) {
-      console.error("Aidat silme hatası:", error)
-      notifyError("Aidat silinirken bir hata oluştu.")
-    }
+const deleteDues = (id) => {
+  duesToDeleteId.value = id
+  showDeleteModal.value = true
+}
+
+const handleConfirmDelete = async () => {
+  if (!duesToDeleteId.value) return
+  deleting.value = true
+  try {
+    await aidatService.deleteAidatDefinition(duesToDeleteId.value)
+    notifySuccess('Aidat tanımı silindi.')
+    await fetchDues()
+    showDeleteModal.value = false
+  } catch (error) {
+    console.error("Aidat silme hatası:", error)
+    notifyError("Aidat silinirken bir hata oluştu.")
+  } finally {
+    deleting.value = false
+    duesToDeleteId.value = null
   }
 }
 
