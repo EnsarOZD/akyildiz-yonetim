@@ -58,6 +58,9 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  // Listener'ın birden fazla kez kaydedilmesini önle
+  let _listenerRegistered = false
+
   // 👇 Bu fonksiyon App.vue'de çağrılmalı
   function initAuthListener() {
     // Backend API kontrolü
@@ -65,18 +68,23 @@ export const useAuthStore = defineStore('auth', () => {
       import.meta.env.VITE_API_BASE_URL !== 'http://localhost:5000/api'
 
     if (isBackendActive) {
-      // Backend API ile auth listener
-      fetchUserProfile()
+      // Listener'ı yalnızca bir kez kaydet
+      if (!_listenerRegistered) {
+        _listenerRegistered = true
 
-      // Backend auth state değişikliklerini dinle
-      authService.onAuthStateChanged((user) => {
-        if (user) {
-          fetchUserProfile()
-        } else {
-          clearUser()
-          isInitialized.value = true
-        }
-      })
+        // Backend auth state değişikliklerini dinle
+        authService.onAuthStateChanged((user) => {
+          if (user) {
+            fetchUserProfile()
+          } else {
+            clearUser()
+            isInitialized.value = true
+          }
+        })
+      }
+
+      // Her durumda profil yükle
+      fetchUserProfile()
       return
     }
 
