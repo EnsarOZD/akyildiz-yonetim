@@ -90,12 +90,12 @@
         <table class="table table-zebra w-full">
           <thead>
             <tr>
-              <th>Tarih</th>
-              <th>Kiracı</th>
-              <th>Ödeme</th>
-              <th>Borç</th>
-              <th>Kalan</th>
-              <th>Durum</th>
+              <th scope="col">Tarih</th>
+              <th scope="col">Kiracı</th>
+              <th scope="col">Ödeme</th>
+              <th scope="col">Borç</th>
+              <th scope="col">Kalan</th>
+              <th scope="col">Durum</th>
             </tr>
           </thead>
           <tbody>

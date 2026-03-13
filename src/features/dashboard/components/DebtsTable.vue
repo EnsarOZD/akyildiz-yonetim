@@ -31,19 +31,19 @@
       <table class="table w-full">
         <thead class="bg-gray-50/50 dark:bg-gray-700/50">
           <tr class="text-gray-500 dark:text-gray-400 border-b dark:border-gray-700">
-            <th class="font-semibold text-xs uppercase tracking-wider py-4">AD SOYAD/FİRMA</th>
-            <th class="font-semibold text-xs uppercase tracking-wider py-4 text-center">TİP</th>
-            <th class="font-semibold text-xs uppercase tracking-wider py-4 text-center">BLOK/NO</th>
-            <th @click="sortBy('aidatDebt')" class="font-semibold text-xs uppercase tracking-wider py-4 text-right cursor-pointer hover:text-blue-500">
+            <th scope="col" class="font-semibold text-xs uppercase tracking-wider py-4">AD SOYAD/FİRMA</th>
+            <th scope="col" class="font-semibold text-xs uppercase tracking-wider py-4 text-center">TİP</th>
+            <th scope="col" class="font-semibold text-xs uppercase tracking-wider py-4 text-center">BLOK/NO</th>
+            <th scope="col" @click="sortBy('aidatDebt')" class="font-semibold text-xs uppercase tracking-wider py-4 text-right cursor-pointer hover:text-blue-500">
               AİDAT <span v-if="sortKey === 'aidatDebt'">{{ sortOrder === 1 ? '↑' : '↓' }}</span>
             </th>
-            <th @click="sortBy('electricityDebt')" class="font-semibold text-xs uppercase tracking-wider py-4 text-right cursor-pointer hover:text-blue-500">
+            <th scope="col" @click="sortBy('electricityDebt')" class="font-semibold text-xs uppercase tracking-wider py-4 text-right cursor-pointer hover:text-blue-500">
               ELEKTRİK <span v-if="sortKey === 'electricityDebt'">{{ sortOrder === 1 ? '↑' : '↓' }}</span>
             </th>
-            <th @click="sortBy('waterDebt')" class="font-semibold text-xs uppercase tracking-wider py-4 text-right cursor-pointer hover:text-blue-500">
+            <th scope="col" @click="sortBy('waterDebt')" class="font-semibold text-xs uppercase tracking-wider py-4 text-right cursor-pointer hover:text-blue-500">
               SU <span v-if="sortKey === 'waterDebt'">{{ sortOrder === 1 ? '↑' : '↓' }}</span>
             </th>
-            <th @click="sortBy('totalDebt')" class="font-semibold text-xs uppercase tracking-wider py-4 text-right cursor-pointer hover:text-blue-500 text-orange-600 dark:text-orange-400">
+            <th scope="col" @click="sortBy('totalDebt')" class="font-semibold text-xs uppercase tracking-wider py-4 text-right cursor-pointer hover:text-blue-500 text-orange-600 dark:text-orange-400">
               TOPLAM <span v-if="sortKey === 'totalDebt'">{{ sortOrder === 1 ? '↑' : '↓' }}</span>
             </th>
           </tr>

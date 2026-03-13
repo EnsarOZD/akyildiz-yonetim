@@ -106,14 +106,14 @@
           <table class="table table-zebra w-full" id="report-table">
             <thead>
               <tr class="bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
-                <th>Tarih</th>
-                <th>Dönem</th>
-                <th>Kiracı / Ünite</th>
-                <th>İşlem</th>
-                <th>Açıklama</th>
-                <th class="text-right">Borç(-)</th>
-                <th class="text-right">Alacak(+)</th>
-                <th class="text-center">Durum</th>
+                <th scope="col">Tarih</th>
+                <th scope="col">Dönem</th>
+                <th scope="col">Kiracı / Ünite</th>
+                <th scope="col">İşlem</th>
+                <th scope="col">Açıklama</th>
+                <th scope="col" class="text-right">Borç(-)</th>
+                <th scope="col" class="text-right">Alacak(+)</th>
+                <th scope="col" class="text-center">Durum</th>
               </tr>
             </thead>
             <tbody>

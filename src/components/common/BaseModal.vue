@@ -1,6 +1,7 @@
 <template>
   <dialog v-if="modelValue" class="modal" open @keydown.esc="handleClose">
     <div
+      ref="modalBoxRef"
       class="modal-box flex flex-col p-0 w-full max-w-[95vw] sm:max-w-lg md:max-w-2xl lg:max-w-4xl"
       :class="sizeClass"
       :style="{ maxHeight: 'min(90dvh, 800px)' }"
@@ -39,10 +40,23 @@
     <!-- Backdrop -->
     <div class="modal-backdrop bg-black/50" @click="handleClose" />
   </dialog>
+
+  <!-- Kaydedilmemiş değişiklik uyarısı -->
+  <ConfirmModal
+    :isOpen="showUnsavedWarning"
+    title="Kaydedilmemiş Değişiklikler"
+    message="Kaydedilmemiş değişiklikleriniz var. Yine de çıkmak istiyor musunuz?"
+    confirmLabel="Evet, Çık"
+    confirmClass="btn-warning"
+    @confirm="onUnsavedConfirm"
+    @cancel="showUnsavedWarning = false"
+  />
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { ref, computed } from 'vue'
+import ConfirmModal from './ConfirmModal.vue'
+import { useFocusTrap } from '@/composables/useFocusTrap'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
@@ -61,13 +75,22 @@ const sizeClass = computed(() => ({
   'sm:max-w-4xl': props.size === 'xl',
 }))
 
+const modalBoxRef = ref(null)
+const showUnsavedWarning = ref(false)
+
+useFocusTrap(modalBoxRef, computed(() => props.modelValue && !showUnsavedWarning.value))
+
 function handleClose() {
   if (props.isDirty) {
-    // Faz 2'de ConfirmDialog bileşeni gelince burası değişecek.
-    // Şimdilik confirm() yeterli — merkezi yönetim için tek yer.
-    const ok = window.confirm('Kaydedilmemiş değişiklikler var. Çıkmak istediğinizden emin misiniz?')
-    if (!ok) return
+    showUnsavedWarning.value = true
+    return
   }
+  emit('update:modelValue', false)
+  emit('close')
+}
+
+function onUnsavedConfirm() {
+  showUnsavedWarning.value = false
   emit('update:modelValue', false)
   emit('close')
 }

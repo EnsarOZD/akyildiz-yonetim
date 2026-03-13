@@ -180,17 +180,13 @@
     </div>
 
     <!-- Sayfalama -->
-    <div class="card-body border-t border-gray-200 dark:border-gray-700">
-      <div class="flex items-center justify-between">
-        <div class="text-sm text-gray-600 dark:text-gray-400">
-          {{ (currentPage - 1) * pageSize + 1 }}-{{ Math.min(currentPage * pageSize, filteredTenants.length) }} / {{ filteredTenants.length }} kiracı
-        </div>
-        <div class="join">
-          <button @click="currentPage--" :disabled="currentPage === 1" class="join-item btn btn-sm">«</button>
-          <button class="join-item btn btn-sm">{{ currentPage }}</button>
-          <button @click="currentPage++" :disabled="currentPage >= totalPages" class="join-item btn btn-sm">»</button>
-        </div>
-      </div>
+    <div class="px-4 pb-2">
+      <PaginationBar
+        v-model:currentPage="currentPage"
+        :total-count="filteredTenants.length"
+        :page-size="pageSize"
+        :page-size-options="[]"
+      />
     </div>
 
     <!-- Modallar -->
@@ -253,6 +249,7 @@ import TenantCreateModal from './components/TenantCreateModal.vue'
 import { useTenantsStore } from '@/stores/tenants.js'
 import { errorHandler } from '@/utils/errorHandler'
 import ConfirmModal from '@/components/common/ConfirmModal.vue'
+import PaginationBar from '@/components/common/PaginationBar.vue'
 import { useEventBus } from '@/composables/useEventBus'
 import { safeFormatDate as formatDate } from '@/utils/dateUtils'
 import { getAvatarColor, getAvatarInitial } from '@/utils/uiHelpers'

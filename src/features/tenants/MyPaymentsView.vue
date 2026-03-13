@@ -80,13 +80,13 @@
           <table class="table table-zebra w-full" id="report-table">
             <thead>
               <tr class="bg-gray-50 dark:bg-gray-700/50 text-gray-800 dark:text-gray-200">
-                <th>Tarih</th>
-                <th>Dönem</th>
-                <th>İşlem Türü</th>
-                <th>Açıklama</th>
-                <th class="text-right">Borç(-)</th>
-                <th class="text-right">Ödeme(+)</th>
-                <th class="text-center">Durum</th>
+                <th scope="col">Tarih</th>
+                <th scope="col">Dönem</th>
+                <th scope="col">İşlem Türü</th>
+                <th scope="col">Açıklama</th>
+                <th scope="col" class="text-right">Borç(-)</th>
+                <th scope="col" class="text-right">Ödeme(+)</th>
+                <th scope="col" class="text-center">Durum</th>
               </tr>
             </thead>
             <tbody>

@@ -3,6 +3,9 @@
     name="success-notification"
     tag="div"
     class="fixed top-4 right-4 z-50 space-y-2 max-w-md"
+    role="status"
+    aria-live="polite"
+    aria-atomic="false"
   >
     <div
       v-for="notification in notifications"
@@ -200,7 +203,7 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
-  // Listener'ı kaldır (eğer gerekirse)
+  errorHandler.removeListener(notificationListener)
 })
 </script>
 

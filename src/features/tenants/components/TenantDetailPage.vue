@@ -122,10 +122,10 @@
             <table class="table w-full">
               <thead>
                 <tr>
-                  <th>Açıklama</th>
-                  <th>Son Ödeme Tarihi</th>
-                  <th class="text-right">Tutar</th>
-                  <th class="text-center">İşlemler</th>
+                  <th scope="col">Açıklama</th>
+                  <th scope="col">Son Ödeme Tarihi</th>
+                  <th scope="col" class="text-right">Tutar</th>
+                  <th scope="col" class="text-center">İşlemler</th>
                 </tr>
               </thead>
               <tbody>
@@ -155,11 +155,11 @@
             <table class="table w-full">
               <thead>
                 <tr>
-                  <th>Ödeme Tarihi</th>
-                  <th>Açıklama</th>
-                  <th>Ödeme Şekli</th>
-                  <th>Banka</th>
-                  <th class="text-right">Tutar</th>
+                  <th scope="col">Ödeme Tarihi</th>
+                  <th scope="col">Açıklama</th>
+                  <th scope="col">Ödeme Şekli</th>
+                  <th scope="col">Banka</th>
+                  <th scope="col" class="text-right">Tutar</th>
                 </tr>
               </thead>
               <tbody>
@@ -187,11 +187,11 @@
             <table class="table w-full">
               <thead>
                 <tr>
-                  <th>Tarih</th>
-                  <th>Tür</th>
-                  <th>Açıklama</th>
-                  <th class="text-right">Tutar</th>
-                  <th>Durum</th>
+                  <th scope="col">Tarih</th>
+                  <th scope="col">Tür</th>
+                  <th scope="col">Açıklama</th>
+                  <th scope="col" class="text-right">Tutar</th>
+                  <th scope="col">Durum</th>
                 </tr>
               </thead>
               <tbody>

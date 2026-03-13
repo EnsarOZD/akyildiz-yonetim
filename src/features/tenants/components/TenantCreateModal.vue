@@ -25,7 +25,13 @@
                 <label class="label">
                   <span class="label-text font-semibold text-gray-700 dark:text-gray-300">Şirket Adı *</span>
                 </label>
-                <input v-model="tenant.companyName" class="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400" placeholder="ABC Ticaret Ltd. Şti." required />
+                <input
+                  v-model="tenant.companyName"
+                  class="input input-bordered w-full bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200"
+                  :class="formErrors.companyName ? 'input-error' : 'border-gray-300 dark:border-gray-600'"
+                  placeholder="ABC Ticaret Ltd. Şti."
+                />
+                <p v-if="formErrors.companyName" class="text-error text-xs mt-1">{{ formErrors.companyName }}</p>
               </div>
 
 
@@ -33,7 +39,11 @@
                 <label class="label">
                   <span class="label-text font-semibold text-gray-700 dark:text-gray-300">İş Türü *</span>
                 </label>
-                <select v-model="tenant.businessType" class="select select-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400" required>
+                <select
+                  v-model="tenant.businessType"
+                  class="select select-bordered w-full bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200"
+                  :class="formErrors.businessType ? 'select-error' : 'border-gray-300 dark:border-gray-600'"
+                >
                   <option value="">İş türü seçin</option>
                   <option value="Ticaret">Ticaret</option>
                   <option value="Hizmet">Hizmet</option>
@@ -42,6 +52,7 @@
                   <option value="Depo">Depo</option>
                   <option value="Diğer">Diğer</option>
                 </select>
+                <p v-if="formErrors.businessType" class="text-error text-xs mt-1">{{ formErrors.businessType }}</p>
               </div>
 
               <div class="form-control">
@@ -50,12 +61,13 @@
                 </label>
                 <input
                   v-model="tenant.identityNumber"
-                  class="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400"
+                  class="input input-bordered w-full bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200"
+                  :class="formErrors.identityNumber ? 'input-error' : 'border-gray-300 dark:border-gray-600'"
                   placeholder="TC veya Vergi No"
-                  required
                   type="text"
                   inputmode="numeric"
                 />
+                <p v-if="formErrors.identityNumber" class="text-error text-xs mt-1">{{ formErrors.identityNumber }}</p>
               </div>
             </div>
           </div>
@@ -296,9 +308,21 @@ onMounted(() => {
   onEvent('tenant:deleted', () => fetchAvailableFlats(tenant.value.floorNumber))
 })
 
+// --- Field-level validation
+const formErrors = ref({})
+
+function validateForm () {
+  const errs = {}
+  if (!tenant.value.companyName?.trim())     errs.companyName     = 'Şirket adı zorunludur.'
+  if (!tenant.value.businessType)            errs.businessType    = 'İş türü seçilmelidir.'
+  if (!tenant.value.identityNumber?.trim())  errs.identityNumber  = 'Kimlik/Vergi numarası zorunludur.'
+  formErrors.value = errs
+  return Object.keys(errs).length === 0
+}
+
 // --- Submit
 function handleSave () {
-  if (!tenant.value.companyName || !tenant.value.businessType || !tenant.value.identityNumber) return
+  if (!validateForm()) return
 
   const ids = (tenant.value.selectedFlatIds || []).filter(Boolean)
 

@@ -70,12 +70,12 @@
       <table class="table table-zebra w-full">
         <thead>
           <tr>
-            <th>Tarih</th>
-            <th>Kullanıcı</th>
-            <th>İşlem</th>
-            <th>Varlık</th>
-            <th>IP Adresi</th>
-            <th>Detaylar</th>
+            <th scope="col">Tarih</th>
+            <th scope="col">Kullanıcı</th>
+            <th scope="col">İşlem</th>
+            <th scope="col">Varlık</th>
+            <th scope="col">IP Adresi</th>
+            <th scope="col">Detaylar</th>
           </tr>
         </thead>
         <tbody>

@@ -29,6 +29,9 @@
     
     <!-- Global Bildirimler -->
     <SuccessNotification />
+
+    <!-- Üste Dön -->
+    <ScrollToTop />
   </div>
 </template>
 
@@ -39,6 +42,7 @@ import MobileBottomNav from './components/common/MobileBottomNav.vue'
 import NotificationPermissionBanner from './components/notifications/NotificationPermissionBanner.vue'
 import ErrorNotification from './components/common/ErrorNotification.vue'
 import SuccessNotification from './components/common/SuccessNotification.vue'
+import ScrollToTop from './components/common/ScrollToTop.vue'
 import { useAuthStore } from '@/stores/auth'
 import { onMounted, watchEffect, watch, computed } from 'vue'
 

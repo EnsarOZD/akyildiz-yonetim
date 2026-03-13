@@ -184,6 +184,18 @@
       </div>
     </div>
   </div>
+
+  <!-- Şifre Sıfırlama Onay Modalı -->
+  <ConfirmModal
+    :isOpen="!!confirmResetUser"
+    :title="`${confirmResetUser?.firstName} ${confirmResetUser?.lastName} — Şifre Sıfırla`"
+    message="Bu kullanıcının şifresini sıfırlamak ve yeni şifreyi e-posta ile göndermek istediğinize emin misiniz?"
+    confirmLabel="Evet, Sıfırla"
+    confirmClass="btn-warning"
+    :loading="loading"
+    @confirm="onConfirmPasswordReset"
+    @cancel="confirmResetUser = null"
+  />
 </template>
 
 <script setup>
@@ -192,6 +204,7 @@ import usersService from '@/services/usersService'
 import tenantsService from '@/services/tenantsService'
 import { useErrorHandler } from '@/composables/useErrorHandler'
 import { ROLE_LABELS, ROLES } from '@/constants/roles'
+import ConfirmModal from '@/components/common/ConfirmModal.vue'
 
 const { handleNetworkError, handleValidationError, showSuccess } = useErrorHandler()
 
@@ -256,17 +269,23 @@ const closeModal = () => {
   resetForm()
 }
 
-const triggerPasswordReset = async (user) => {
-  if (confirm(`${user.firstName} ${user.lastName} kullanıcısının şifresini sıfırlamak ve yeni şifreyi e-posta ile göndermek istediğinize emin misiniz?`)) {
-    try {
-      loading.value = true
-      await usersService.resetPassword(user.id)
-      showSuccess('Şifre sıfırlama e-postası gönderildi.')
-    } catch (error) {
-      handleValidationError(error)
-    } finally {
-      loading.value = false
-    }
+const confirmResetUser = ref(null)
+
+const triggerPasswordReset = (user) => {
+  confirmResetUser.value = user
+}
+
+const onConfirmPasswordReset = async () => {
+  const user = confirmResetUser.value
+  confirmResetUser.value = null
+  try {
+    loading.value = true
+    await usersService.resetPassword(user.id)
+    showSuccess('Şifre sıfırlama e-postası gönderildi.')
+  } catch (error) {
+    handleValidationError(error)
+  } finally {
+    loading.value = false
   }
 }
 

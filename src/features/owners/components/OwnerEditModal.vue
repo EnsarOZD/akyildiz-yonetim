@@ -65,7 +65,7 @@
           <button type="button" @click="$emit('close')" class="btn btn-outline border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">
             İptal
           </button>
-          <button type="submit" class="btn btn-primary bg-blue-600 hover:bg-blue-700 text-white shadow-lg" :disabled="!isFormValid">
+          <button type="submit" class="btn btn-primary" :disabled="!isFormValid">
             Değişiklikleri Kaydet
           </button>
         </div>

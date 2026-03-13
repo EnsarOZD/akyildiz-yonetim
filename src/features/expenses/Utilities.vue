@@ -172,22 +172,11 @@
         </div>
 
         <!-- Aidat: Pagination -->
-        <div class="mt-4 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <div class="text-sm text-gray-600 dark:text-gray-300">
-            Gösterilen
-            {{ duesTotal ? ( (duesPage-1)*pageSize + 1 ) : 0 }}
-            –
-            {{ Math.min(duesPage*pageSize, duesTotal) }}
-            / {{ duesTotal }}
-          </div>
-          <div class="flex items-center gap-2">
-            <button class="btn btn-sm" :disabled="duesPage===1" @click="duesPage=1">« İlk</button>
-            <button class="btn btn-sm" :disabled="duesPage===1" @click="duesPage--">‹ Geri</button>
-            <span class="mx-2 text-sm">Sayfa {{ duesPage }} / {{ Math.max(1, Math.ceil(duesTotal / pageSize)) }}</span>
-            <button class="btn btn-sm" :disabled="duesPage>=Math.ceil(duesTotal/pageSize)" @click="duesPage++">İleri ›</button>
-            <button class="btn btn-sm" :disabled="duesPage>=Math.ceil(duesTotal/pageSize)" @click="duesPage=Math.ceil(duesTotal/pageSize)">Son »</button>
-          </div>
-        </div>
+        <PaginationBar
+          v-model:currentPage="duesPage"
+          v-model:pageSize="pageSize"
+          :total-count="duesTotal"
+        />
       </div>
     </div>
 
@@ -222,6 +211,7 @@ import { ref, computed, watch, onMounted } from 'vue'
 import { ROLES } from '@/constants/roles'
 import { useAuthStore } from '@/stores/auth'
 import FilterBar from '@/components/common/FilterBar.vue'
+import PaginationBar from '@/components/common/PaginationBar.vue'
 import { useErrorHandler } from '@/composables/useErrorHandler'
 import api from '@/services/api'
 import utilityDebtsService from '@/services/utilityDebtsService'

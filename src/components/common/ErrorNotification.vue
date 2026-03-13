@@ -3,6 +3,9 @@
     name="error-notification"
     tag="div"
     class="fixed top-4 right-4 z-50 space-y-2 max-w-md"
+    role="alert"
+    aria-live="assertive"
+    aria-atomic="false"
   >
     <div
       v-for="error in errors"

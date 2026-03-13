@@ -101,12 +101,12 @@
           <table class="table w-full">
             <thead>
               <tr>
-                <th>Yıl</th>
-                <th>Kat</th>
-                <th>Aidat (KDV Hariç)</th>
-                <th>KDV Dahil Tutar</th>
-                <th>Durum</th>
-                <th class="text-right">İşlemler</th>
+                <th scope="col">Yıl</th>
+                <th scope="col">Kat</th>
+                <th scope="col">Aidat (KDV Hariç)</th>
+                <th scope="col">KDV Dahil Tutar</th>
+                <th scope="col">Durum</th>
+                <th scope="col" class="text-right">İşlemler</th>
               </tr>
             </thead>
             <tbody>
@@ -134,6 +134,28 @@
       </div>
     </div>
   </div>
+
+  <!-- Silme Onay Modalı -->
+  <ConfirmModal
+    :isOpen="!!confirmDelete.id"
+    title="Aidat Tanımını Sil"
+    message="Bu aidat tanımını silmek istiyor musunuz? Bu işlem, gelecekte bu tanıma göre aidat oluşturulmasını engeller."
+    confirmLabel="Evet, Sil"
+    confirmClass="btn-error"
+    @confirm="onConfirmDelete"
+    @cancel="confirmDelete = {}"
+  />
+
+  <!-- Toplu Oluşturma Onay Modalı -->
+  <ConfirmModal
+    :isOpen="confirmBulk.show"
+    title="Toplu Aidat Oluştur"
+    :message="confirmBulk.message"
+    confirmLabel="Evet, Oluştur"
+    confirmClass="btn-primary"
+    @confirm="onConfirmBulk"
+    @cancel="confirmBulk = { show: false, message: '' }"
+  />
 </template>
 
 <script setup>
@@ -142,6 +164,7 @@ import ownerDuesService from '@/services/ownerDuesService'
 import tenantsService from '@/services/tenantsService'
 import { useErrorHandler } from '@/composables/useErrorHandler'
 import { UNIT_OPTIONS } from '../../constants/units'
+import ConfirmModal from '@/components/common/ConfirmModal.vue'
 
 const { handleNetworkError, handleValidationError, showSuccess } = useErrorHandler()
 
@@ -249,15 +272,23 @@ const fetchOwnerDues = async () => {
   }
 }
 
-const deleteDues = async (id) => {
-  if (confirm('Bu aidat tanımını silmek istiyor musunuz? Bu işlem, gelecekte bu tanıma göre aidat oluşturulmasını engeller.')) {
-    try {
-      await ownerDuesService.deleteOwnerDue(id)
-      showSuccess('Aidat tanımı silindi.')
-      await fetchOwnerDues()
-    } catch (error) {
-      handleValidationError(error)
-    }
+const confirmDelete = ref({})
+const confirmBulk = ref({ show: false, message: '' })
+let pendingBulkParams = null
+
+const deleteDues = (id) => {
+  confirmDelete.value = { id }
+}
+
+const onConfirmDelete = async () => {
+  const id = confirmDelete.value.id
+  confirmDelete.value = {}
+  try {
+    await ownerDuesService.deleteOwnerDue(id)
+    showSuccess('Aidat tanımı silindi.')
+    await fetchOwnerDues()
+  } catch (error) {
+    handleValidationError(error)
   }
 }
 
@@ -330,29 +361,35 @@ const createBulkDues = async () => {
     return;
   }
 
-  if (confirm(`${bulkYear.value} yılı için ${targetUnits.length} boş kata ${formatCurrency(rawAmount)} (KDV hariç) aidat oluşturmak istiyor musunuz?`)) {
-    const vatAmount = parseFloat((rawAmount * 1.2).toFixed(2))
-    
-    try {
-      // Backend toplu işlem desteklemediği için (fallback modunda zaten) döngü ile asenkron yapıyoruz
-      // Not: Fallback modunda console log yazacak
-      for (const unit of targetUnits) {
-        await ownerDuesService.createOwnerDue({
-          unit: unit,
-          year: bulkYear.value,
-          amount: rawAmount,
-          vatIncludedAmount: vatAmount,
-          ownerId: 'MAL_SAHIBI',
-          isActive: true
-        });
-      }
-      
-      showSuccess(`${targetUnits.length} adet yeni boş kat aidat kaydı oluşturuldu.`)
-      await fetchOwnerDues()
-      bulkAmount.value = ''
-    } catch(error) {
-      handleValidationError(error)
+  pendingBulkParams = { targetUnits, rawAmount }
+  confirmBulk.value = {
+    show: true,
+    message: `${bulkYear.value} yılı için ${targetUnits.length} boş kata ${formatCurrency(rawAmount)} (KDV hariç) aidat oluşturmak istiyor musunuz?`
+  }
+}
+
+const onConfirmBulk = async () => {
+  confirmBulk.value = { show: false, message: '' }
+  if (!pendingBulkParams) return
+  const { targetUnits, rawAmount } = pendingBulkParams
+  pendingBulkParams = null
+  const vatAmount = parseFloat((rawAmount * 1.2).toFixed(2))
+  try {
+    for (const unit of targetUnits) {
+      await ownerDuesService.createOwnerDue({
+        unit: unit,
+        year: bulkYear.value,
+        amount: rawAmount,
+        vatIncludedAmount: vatAmount,
+        ownerId: 'MAL_SAHIBI',
+        isActive: true
+      });
     }
+    showSuccess(`${targetUnits.length} adet yeni boş kat aidat kaydı oluşturuldu.`)
+    await fetchOwnerDues()
+    bulkAmount.value = ''
+  } catch(error) {
+    handleValidationError(error)
   }
 }
 
