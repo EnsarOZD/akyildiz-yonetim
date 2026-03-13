@@ -37,6 +37,7 @@ export const useAuthStore = defineStore('auth', () => {
         clearUser()
       } finally {
         isInitialized.value = true
+        console.log('🔐 Auth Store initialized (Backend mode)')
       }
       return
     }

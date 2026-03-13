@@ -48,13 +48,14 @@ class ApiService {
     }
 
     try {
-      console.log('🌐 API Request:', { url, method: config.method, headers: config.headers })
+      console.log(`🌐 API Request [${config.method}]:`, endpoint)
       const response = await fetch(url, config)
-      console.log('📡 API Response Status:', response.status, response.statusText)
-
+      
       if (!response.ok) {
+        console.warn(`📡 API Response Error: ${response.status} ${response.statusText}`, { url: endpoint });
+        
         let errorData = null;
-        let errorMessage = `Bir hata oluştu. (HTTP ${response.status})`;
+        let errorMessage = `Sunucu hatası. (HTTP ${response.status})`;
 
         try {
           const text = await response.text();
@@ -67,7 +68,7 @@ class ApiService {
             }
           }
         } catch (e) {
-          console.error('Error parsing response:', e);
+          console.error('API response parse error:', e);
         }
 
         const error = new Error(errorMessage);
@@ -80,12 +81,21 @@ class ApiService {
         };
 
         // Oturum süresi doldu kontrolü (Login isteği değilse ve login sayfasında değilsek)
-        const isLoginRequest = endpoint.includes('/auth/login');
+        const isLoginRequest = endpoint.toLowerCase().includes('/auth/login');
         const isLoginPage = window.location.pathname === '/login' || window.location.hash.includes('/login');
 
         if (response.status === 401 && !isLoginRequest && !isLoginPage) {
+          console.error('🔒 401 Unauthorized detected! Clearing token and redirecting to login.', {
+            endpoint,
+            currentPath: window.location.pathname
+          });
+          
           localStorage.removeItem('authToken');
-          window.location.href = '/login';
+          
+          // Sadece eğer login sayfasında değilsek yönlendir (XSS/Loop koruması)
+          if (!window.location.pathname.includes('/login')) {
+            window.location.href = '/login?reason=session_expired';
+          }
         }
 
         throw error;
@@ -97,10 +107,13 @@ class ApiService {
       try {
         return JSON.parse(responseText);
       } catch (parseError) {
-        throw new Error('Geçersiz JSON yanıtı');
+        console.error('Invalid JSON response:', responseText.substring(0, 100));
+        throw new Error('Geçersiz sunucu yanıtı (JSON formatlanamadı)');
       }
     } catch (error) {
-      console.error('API request failed:', error);
+      if (error.status !== 401) {
+        console.error('🚩 API Request Exception:', error.message, { endpoint });
+      }
       throw error;
     }
   }
