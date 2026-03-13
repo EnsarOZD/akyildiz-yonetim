@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <!-- Ana Sayfa Konteyneri -->
   <div class="p-4 sm:p-6 bg-gray-50 min-h-screen font-sans dark:bg-gray-900">
     <div class="max-w-7xl mx-auto">
@@ -70,16 +70,9 @@
               <span class="mr-1">💧</span> Su Borcu Ekle
             </button>
             <div class="divider divider-horizontal mx-0"></div>
-            <button @click="triggerExcelImport" class="btn btn-neutral btn-md text-white border-2 border-dashed border-gray-400">
+            <button @click="showImportModal = true" class="btn btn-neutral btn-md text-white border-2 border-dashed border-gray-400">
               <span class="mr-1">📊</span> Excel'den Yükle
             </button>
-            <input 
-              type="file" 
-              ref="fileInput" 
-              hidden 
-              accept=".xlsx,.xls" 
-              @change="handleExcelImport"
-            />
           </div>
         </div>
       </section>
@@ -203,6 +196,13 @@
       @refresh="refreshAll"
     />
 
+    <!-- Excel Aktarım Modalı -->
+    <UtilityDebtImportModal
+      v-if="showImportModal"
+      @close="showImportModal = false"
+      @refresh="refreshAll"
+    />
+
   </div>
 </template>
 
@@ -218,6 +218,7 @@ import utilityDebtsService from '@/services/utilityDebtsService'
 import AidatEditModal from './EditAidatModal.vue'
 import AidatDeleteModal from './AidatDeleteModal.vue'
 import ManualDebtModal from './ManualDebtModal.vue'
+import UtilityDebtImportModal from './UtilityDebtImportModal.vue'
 
 const { handleNetworkError, showSuccess } = useErrorHandler()
 const authStore = useAuthStore()
@@ -245,6 +246,7 @@ const selectedDue = ref(null)
 const showAidatEditModal = ref(false)
 const showAidatDeleteModal = ref(false)
 const showManualModal = ref(false)
+const showImportModal = ref(false)
 const manualType = ref(1)
 
 const typeOptions = [
@@ -321,35 +323,7 @@ const openManualDebt = (type) => {
   showManualModal.value = true
 }
 
-const fileInput = ref(null)
-
-const triggerExcelImport = () => {
-  fileInput.value.click()
-}
-
-const handleExcelImport = async (event) => {
-  const file = event.target.files[0]
-  if (!file) return
-
-  const formData = new FormData()
-  formData.append('file', file)
-
-  setLoading(true)
-  try {
-    const response = await api.post('/UtilityDebts/import', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
-    })
-    showSuccess(`${response.count} adet borç kaydı başarıyla içeri aktarıldı.`)
-    refreshAll()
-  } catch (error) {
-    handleNetworkError(error)
-  } finally {
-    setLoading(false)
-    event.target.value = '' // Temizle
-  }
-}
+// Excel aktarımı modal aracılığıyla yönetiliyor
 
 const editDebt = (d) => {
   selectedDue.value = d
