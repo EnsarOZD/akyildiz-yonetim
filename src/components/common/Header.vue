@@ -248,8 +248,8 @@ const setTabsBasedOnRole = (role) => {
     ]
   } else if (normalizedRole === ROLES.OWNER) {
     tabs.value = [
-      { label: 'Özet', value: 'dashboard', route: '/dashboard' },
-      { label: 'Mülklerim', value: 'my-properties', route: '/my-properties' }
+      { label: 'Mülklerim', value: 'my-properties', route: '/my-properties' },
+      { label: 'Bildirimler', value: 'notifications', route: '/notifications' },
     ]
   } else if (normalizedRole === ROLES.OBSERVER) {
     tabs.value = [

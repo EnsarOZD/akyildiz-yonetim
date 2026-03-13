@@ -319,7 +319,7 @@ const totalOverdueAmount = computed(() => {
 })
 
 const isManagerOrViewer = computed(() =>
-  ['admin', 'manager', 'viewer'].includes(userRole.value)
+  ['admin', 'manager', 'observer', 'dataentry'].includes(userRole.value)
 )
 
 onMounted(() => {

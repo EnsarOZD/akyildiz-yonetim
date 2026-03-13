@@ -576,7 +576,7 @@ const canViewDashboard = computed(() => {
   if (!authStore.isInitialized) return false
   if (!userRole.value) return false
   const role = userRole.value.toLowerCase()
-  return ['admin', 'manager', 'viewer', 'tenant'].includes(role)
+  return ['admin', 'manager', 'observer', 'dataentry'].includes(role)
 })
 
 const formatDate = (dateStr) => {

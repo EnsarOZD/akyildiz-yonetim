@@ -275,14 +275,15 @@ const handleLogin = async () => {
       showSuccess('Başarıyla giriş yapıldı!')
       
       // Role göre yönlendirme
-      if (response.role === 'admin') {
+      const role = (response.role || '').toLowerCase()
+      if (role === 'admin') {
         router.push('/admin')
-      } else if (response.role === 'manager') {
+      } else if (role === 'manager') {
         router.push('/dashboard')
-      } else if (response.role === 'viewer') {
-        router.push('/overdue')
-      } else if (response.role === 'tenant') {
-        router.push('/profile')
+      } else if (role === 'tenant') {
+        router.push('/tenant-dashboard')
+      } else if (role === 'owner') {
+        router.push('/my-properties')
       } else {
         router.push('/dashboard')
       }

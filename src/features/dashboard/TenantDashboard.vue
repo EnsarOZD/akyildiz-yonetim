@@ -180,7 +180,7 @@ const lastPaymentAmount = computed(() => lastPayment.value?.amount || 0)
 const loadData = async () => {
   loading.value = true
   try {
-    const tenantId = authStore.user?.id
+    const tenantId = authStore.companyId
     if (tenantId) {
       // Borçları çek
       const debtData = await utilityDebtsService.getUtilityDebts({ tenantId })
