@@ -149,4 +149,13 @@ router.beforeEach(async (to, from, next) => {
   }
 });
 
+router.onError((error, to) => {
+  if (error.message.includes('Failed to fetch dynamically imported module') || 
+      error.message.includes('Importing a zipped bundle') ||
+      error.message.includes('chunk')) {
+    console.error('🚀 Chunk Load Factor detected. Forcing page reload to clear cache...', error);
+    window.location.reload();
+  }
+});
+
 export default router
