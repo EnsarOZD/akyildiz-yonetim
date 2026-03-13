@@ -3,20 +3,20 @@
     <div class="flex items-center justify-between mb-6">
       <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Bildirimler</h1>
       <div class="flex items-center gap-3">
-        <button 
+        <button
           v-if="canBroadcast"
           @click="showAnnouncementModal = true"
-          class="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-bold hover:bg-blue-700 transition shadow-lg shadow-blue-500/30"
+          class="btn btn-primary btn-sm"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
           </svg>
           Duyuru Yayınla
         </button>
-        <button 
+        <button
           v-if="notificationsStore.unreadCount > 0"
           @click="notificationsStore.markAllAsRead"
-          class="text-sm text-blue-600 hover:outline-none hover:underline font-medium"
+          class="btn btn-ghost btn-sm text-primary"
         >
           Tümünü okundu yap
         </button>
@@ -25,20 +25,20 @@
 
     <!-- Filters -->
     <div class="flex gap-2 mb-6">
-      <button 
+      <button
         @click="unreadOnly = false"
-        class="px-4 py-2 rounded-full text-sm font-medium transition"
-        :class="!unreadOnly ? 'bg-blue-600 text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'"
+        class="btn btn-sm rounded-full"
+        :class="!unreadOnly ? 'btn-primary' : 'btn-ghost'"
       >
         Tümü
       </button>
-      <button 
+      <button
         @click="unreadOnly = true"
-        class="px-4 py-2 rounded-full text-sm font-medium transition flex items-center gap-2"
-        :class="unreadOnly ? 'bg-blue-600 text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'"
+        class="btn btn-sm rounded-full gap-2"
+        :class="unreadOnly ? 'btn-primary' : 'btn-ghost'"
       >
         Okunmamış
-        <span v-if="notificationsStore.unreadCount > 0" class="inline-flex items-center justify-center w-5 h-5 bg-red-500 text-white text-[10px] rounded-full font-bold">
+        <span v-if="notificationsStore.unreadCount > 0" class="badge badge-error badge-sm text-white">
           {{ notificationsStore.unreadCount }}
         </span>
       </button>

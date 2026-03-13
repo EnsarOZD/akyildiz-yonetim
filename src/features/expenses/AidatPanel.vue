@@ -88,12 +88,12 @@
           <table class="table w-full">
             <thead>
               <tr>
-                <th>Yıl</th>
-                <th>Şirket</th>
-                <th>Kat</th>
-                <th>Aidat (KDV Hariç)</th>
-                <th>KDV Dahil Tutar</th>
-                <th class="text-right">İşlemler</th>
+                <th scope="col">Yıl</th>
+                <th scope="col">Şirket</th>
+                <th scope="col">Kat</th>
+                <th scope="col">Aidat (KDV Hariç)</th>
+                <th scope="col">KDV Dahil Tutar</th>
+                <th scope="col" class="text-right">İşlemler</th>
               </tr>
             </thead>
             <tbody>

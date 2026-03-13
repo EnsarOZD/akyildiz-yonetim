@@ -13,10 +13,10 @@
         <table class="table table-zebra w-full">
           <thead>
             <tr>
-              <th>Tarih</th>
-              <th>Açıklama</th>
-              <th>Kategori</th>
-              <th class="text-right">Tutar</th>
+              <th scope="col">Tarih</th>
+              <th scope="col">Açıklama</th>
+              <th scope="col">Kategori</th>
+              <th scope="col" class="text-right">Tutar</th>
             </tr>
           </thead>
           <tbody>

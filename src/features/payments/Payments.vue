@@ -90,35 +90,35 @@
 
       <!-- Yeni Ödeme Ekle Butonu -->
       <div v-if="authStore.role === ROLES.ADMIN || authStore.role === ROLES.MANAGER" class="mb-6">
-        <button @click="showModal = true" class="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-4 px-6 rounded-xl shadow-lg transition-all duration-300 active:scale-[0.98] active:opacity-90 flex items-center justify-center gap-3">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <button @click="showModal = true" class="btn btn-primary w-full">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
           </svg>
-          <span>Yeni Ödeme Ekle</span>
+          Yeni Ödeme Ekle
         </button>
       </div>
 
       <!-- Yeni Özellikler Butonları -->
       <div v-if="authStore.role === ROLES.ADMIN || authStore.role === ROLES.MANAGER" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <button @click="showAdvanceManager = true" class="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-semibold py-3 px-4 rounded-xl shadow-lg transition-all duration-300 flex items-center justify-center gap-2">
+        <button @click="showAdvanceManager = true" class="btn btn-secondary w-full">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
           </svg>
-          <span>Avans Hesabı</span>
+          Avans Hesabı
         </button>
-        
-        <button @click="showFinancialReports = true" class="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-semibold py-3 px-4 rounded-xl shadow-lg transition-all duration-300 flex items-center justify-center gap-2">
+
+        <button @click="showFinancialReports = true" class="btn btn-success w-full">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2z" />
           </svg>
-          <span>Finansal Raporlar</span>
+          Finansal Raporlar
         </button>
-        
-        <button v-if="authStore.role === ROLES.ADMIN" @click="showAuditLogs = true" class="bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 text-white font-semibold py-3 px-4 rounded-xl shadow-lg transition-all duration-300 flex items-center justify-center gap-2">
+
+        <button v-if="authStore.role === ROLES.ADMIN" @click="showAuditLogs = true" class="btn btn-warning w-full">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
           </svg>
-          <span>Sistem Logları</span>
+          Sistem Logları
         </button>
       </div>
 
@@ -162,8 +162,13 @@
 
         <!-- Ödeme Kart Listesi -->
         <div class="mt-6 space-y-2">
-          <div v-if="filteredPayments.length === 0" class="text-center py-12 text-gray-500 dark:text-gray-400">
-            <p>Aramanızla eşleşen ödeme bulunamadı.</p>
+          <div v-if="filteredPayments.length === 0" class="text-center py-16">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-4 text-gray-300 dark:text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a2.25 2.25 0 00-2.25-2.25H15a3 3 0 11-6 0H5.25A2.25 2.25 0 003 12m18 0v6a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 18v-6m18 0V9M3 12V9m18 0a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 9m18 0V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v3" />
+            </svg>
+            <h3 class="text-base font-semibold text-gray-700 dark:text-gray-300 mb-1">Ödeme Bulunamadı</h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Seçilen kriterlere uygun ödeme kaydı yok.</p>
+            <button @click="handleClearFilters" class="btn btn-outline btn-sm">Filtreleri Temizle</button>
           </div>
             <div v-else>
               <div 
@@ -201,67 +206,11 @@
               </div>
             </div>
 
-            <!-- Pagination Control -->
-            <div v-if="totalPages > 1" class="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6 pt-6 border-t dark:border-gray-700">
-              <div class="flex items-center gap-4">
-                <p class="text-sm text-gray-500">
-                  Toplam <span class="font-medium">{{ filteredPayments.length }}</span> kayıt arasından 
-                  <span class="font-medium">{{ (currentPage - 1) * pageSize + 1 }}</span> - 
-                  <span class="font-medium">{{ Math.min(currentPage * pageSize, filteredPayments.length) }}</span> arası gösteriliyor
-                </p>
-                <select v-model="pageSize" class="select select-xs select-bordered bg-white dark:bg-gray-700">
-                  <option :value="10">10 / sayfa</option>
-                  <option :value="25">25 / sayfa</option>
-                  <option :value="50">50 / sayfa</option>
-                  <option :value="100">100 / sayfa</option>
-                </select>
-              </div>
-              <div class="flex items-center gap-1">
-                <button 
-                  @click="currentPage = 1" 
-                  :disabled="currentPage === 1"
-                  class="btn btn-sm btn-ghost"
-                  aria-label="İlk Sayfa"
-                >
-                  ««
-                </button>
-                <button 
-                  @click="currentPage--" 
-                  :disabled="currentPage === 1"
-                  class="btn btn-sm btn-ghost"
-                >
-                  Önceki
-                </button>
-                
-                <div class="flex items-center gap-1">
-                  <button 
-                    v-for="page in displayedPages" 
-                    :key="page"
-                    @click="currentPage = page"
-                    class="btn btn-sm"
-                    :class="currentPage === page ? 'btn-primary' : 'btn-ghost'"
-                  >
-                    {{ page }}
-                  </button>
-                </div>
-
-                <button 
-                  @click="currentPage++" 
-                  :disabled="currentPage === totalPages"
-                  class="btn btn-sm btn-ghost"
-                >
-                  Sonraki
-                </button>
-                <button 
-                  @click="currentPage = totalPages" 
-                  :disabled="currentPage === totalPages"
-                  class="btn btn-sm btn-ghost"
-                  aria-label="Son Sayfa"
-                >
-                  »»
-                </button>
-              </div>
-            </div>
+            <PaginationBar
+              v-model:currentPage="currentPage"
+              v-model:pageSize="pageSize"
+              :total-count="filteredPayments.length"
+            />
           </div>
         </div>
       </div>
@@ -325,8 +274,8 @@
       </div>
     </dialog>
 
-    <div v-if="loading" class="flex justify-center items-center py-12">
-      <LoadingSpinner />
+    <div v-if="loading">
+      <SkeletonRows :rows="6" />
     </div>
   </div>
 </template>
@@ -336,11 +285,12 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { ROLES } from '@/constants/roles'
 import { useAuthStore } from '@/stores/auth'
 import PaymentModal from './PaymentModal.vue'
+import PaginationBar from '@/components/common/PaginationBar.vue'
+import SkeletonRows from '@/components/common/SkeletonRows.vue'
 import CustomFilterBar from '@/components/common/CustomFilterBar.vue'
 import AdvanceAccountManager from '@/components/AdvanceAccountManager.vue'
 import FinancialReports from '@/components/FinancialReports.vue'
 import AuditLogs from '@/components/AuditLogs.vue'
-import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
 import { useErrorHandler } from '@/composables/useErrorHandler'
 import { useNotify } from '@/composables/useNotify'
 import { usePaymentsStore } from '@/stores/payments.js'
@@ -507,19 +457,6 @@ const paymentsView = computed(() => paginatedPayments.value.map(p => ({
   company: getTenantCompany(p.tenantId)
 })))
 
-const displayedPages = computed(() => {
-  const total = totalPages.value
-  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1)
-  
-  const curr = currentPage.value
-  let start = Math.max(1, curr - 3)
-  let end = Math.min(total, curr + 3)
-  
-  if (curr <= 4) end = 7
-  if (curr >= total - 3) start = total - 6
-  
-  return Array.from({ length: end - start + 1 }, (_, i) => start + i)
-})
 
 // Reset to first page when filters or pageSize change
 watch([filters, pageSize], () => {

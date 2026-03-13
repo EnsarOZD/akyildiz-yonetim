@@ -18,10 +18,11 @@
             :to="tab.route"
             class="px-3 py-2 rounded-md text-sm font-medium transition-colors"
             :class="[
-              route.path === tab.route 
-                ? 'bg-gray-900 text-white' 
+              route.path === tab.route
+                ? 'bg-gray-900 text-white'
                 : 'text-gray-300 hover:bg-gray-700 hover:text-white'
             ]"
+            :aria-current="route.path === tab.route ? 'page' : undefined"
           >
             {{ tab.label }}
           </router-link>
@@ -35,6 +36,8 @@
               @click="toggleNotifications"
               class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition relative"
               aria-label="Bildirimleri göster"
+              :aria-expanded="showNotificationsDropdown"
+              aria-haspopup="true"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
@@ -107,10 +110,12 @@
           </button>
           <!-- Kullanıcı Dropdown -->
           <div v-if="userInfo" class="relative" ref="userMenuRef">
-            <button 
-              @click="toggleUserDropdown" 
+            <button
+              @click="toggleUserDropdown"
               class="flex items-center gap-2 text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white"
               aria-label="Kullanıcı menüsünü aç"
+              :aria-expanded="showUserDropdown"
+              aria-haspopup="true"
             >
               <span class="sr-only">Kullanıcı menüsünü aç</span>
               <span class="hidden sm:inline">{{ userInfo.firstName }}</span>

@@ -9,12 +9,12 @@
         <table class="table table-sm w-full text-sm">
           <thead>
             <tr>
-              <th>Firma</th>
-              <th>Tip</th>
-              <th>Dönem</th>
-              <th>Son Ödeme</th>
-              <th>Kat</th>
-              <th>Tutar</th>
+              <th scope="col">Firma</th>
+              <th scope="col">Tip</th>
+              <th scope="col">Dönem</th>
+              <th scope="col">Son Ödeme</th>
+              <th scope="col">Kat</th>
+              <th scope="col">Tutar</th>
             </tr>
           </thead>
           <tbody>

@@ -62,13 +62,13 @@
           <table class="table w-full">
             <thead class="bg-gray-50 dark:bg-gray-700">
               <tr>
-                <th class="text-left p-4">Mal Sahibi</th>
-                <th class="text-left p-4">Kat</th>
-                <th class="text-left p-4">Dönem</th>
-                <th class="text-left p-4">Tutar</th>
-                <th class="text-left p-4">Son Ödeme</th>
-                <th class="text-left p-4">Durum</th>
-                <th class="text-left p-4">İşlemler</th>
+                <th scope="col" class="text-left p-4">Mal Sahibi</th>
+                <th scope="col" class="text-left p-4">Kat</th>
+                <th scope="col" class="text-left p-4">Dönem</th>
+                <th scope="col" class="text-left p-4">Tutar</th>
+                <th scope="col" class="text-left p-4">Son Ödeme</th>
+                <th scope="col" class="text-left p-4">Durum</th>
+                <th scope="col" class="text-left p-4">İşlemler</th>
               </tr>
             </thead>
             <tbody>

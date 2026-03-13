@@ -1,8 +1,10 @@
 import api from './api'
 
 class DashboardService {
-    async getDebtsSummary() {
-        return api.get('/dashboard/debts-summary')
+    async getDebtsSummary(year) {
+        const params = {}
+        if (year) params.year = year
+        return api.get('/dashboard/debts-summary', params)
     }
 
     async getFinancialSummary(startDate, endDate) {

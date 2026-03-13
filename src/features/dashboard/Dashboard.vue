@@ -968,7 +968,11 @@ const loadExpenses = async () => {
 const loadDebtsSummary = async () => {
   try {
     if (userRole.value !== 'tenant') {
-      const summaryResult = await dashboardService.getDebtsSummary()
+      const now = new Date()
+      const year = dateFilter.value === 'last_month' && now.getMonth() === 0
+        ? now.getFullYear() - 1
+        : now.getFullYear()
+      const summaryResult = await dashboardService.getDebtsSummary(year)
       debtsSummary.value = summaryResult || []
     }
   } catch (err) {

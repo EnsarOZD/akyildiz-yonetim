@@ -114,9 +114,9 @@
             <table class="table table-zebra table-sm">
               <thead class="sticky top-0 bg-white dark:bg-gray-800 z-10 shadow-sm">
                 <tr>
-                  <th class="w-1/3">Daire / Kiracı</th>
-                  <th class="w-1/3 text-center">Tutar (₺)</th>
-                  <th class="w-1/3">Açıklama</th>
+                  <th scope="col" class="w-1/3">Daire / Kiracı</th>
+                  <th scope="col" class="w-1/3 text-center">Tutar (₺)</th>
+                  <th scope="col" class="w-1/3">Açıklama</th>
                 </tr>
               </thead>
               <tbody>
