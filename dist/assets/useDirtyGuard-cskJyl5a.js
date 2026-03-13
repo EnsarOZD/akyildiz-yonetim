@@ -1,0 +1,1 @@
+import{r as e,w as r}from"./vue-vendor-BM1V2flB.js";function t(t){const i=e(!1),s=e(null),u=()=>{const e=t();s.value=JSON.stringify(e),i.value=!1};r(t,e=>{s.value?i.value=JSON.stringify(e)!==s.value:s.value=JSON.stringify(e)},{deep:!0});return u(),{isDirty:i,resetDirty:()=>{u()}}}export{t as u};
