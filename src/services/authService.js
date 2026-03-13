@@ -12,38 +12,20 @@ class AuthService {
       const response = await apiService.post('/Auth/login', { email, password })
       console.log('Backend login response:', response)
 
-      // Backend yanıt formatını kontrol et
       if (response) {
-        // JWT Token kontrolü - ASP.NET Core formatı
         const token = response.token || response.accessToken || response.access_token || response.jwt
 
         if (token) {
-          // JWT Token'ı localStorage'a kaydet
           localStorage.setItem('authToken', token)
           console.log('✅ JWT Token kaydedildi')
 
-          // Kullanıcı bilgilerini güncelle
           this.currentUser = response.user || response.data || response
-
-          // Auth state değişikliğini bildir
           this.notifyAuthListeners(this.currentUser)
 
           return response
         } else {
-          // JWT Token yoksa geçici olarak kullanıcı bilgilerini kullan
-          console.log('⚠️ JWT Token bulunamadı, geçici auth kullanılıyor')
-
-          // Kullanıcı bilgilerini güncelle
-          this.currentUser = response.user || response.data || response
-
-          // Geçici bir session token oluştur
-          const tempToken = btoa(JSON.stringify(this.currentUser))
-          localStorage.setItem('authToken', tempToken)
-
-          // Auth state değişikliğini bildir
-          this.notifyAuthListeners(this.currentUser)
-
-          return response
+          console.error('❌ JWT Token bulunamadı')
+          throw new Error('Giriş başarısız: Token alınamadı')
         }
       } else {
         throw new Error('Boş yanıt alındı')
@@ -61,115 +43,40 @@ class AuthService {
     } catch (error) {
       console.error('Logout error:', error)
     } finally {
-      // Local storage'ı temizle
       localStorage.removeItem('authToken')
       this.currentUser = null
-
-      // Auth state değişikliğini bildir
       this.notifyAuthListeners(null)
-    }
-  }
-
-  // Kullanıcı kaydı
-  async register(userData) {
-    try {
-      const response = await apiService.post('/auth/register', userData)
-
-      if (response.token) {
-        localStorage.setItem('authToken', response.token)
-        this.currentUser = response.user
-        this.notifyAuthListeners(this.currentUser)
-      }
-
-      return response
-    } catch (error) {
-      console.error('Register error:', error)
-      throw error
     }
   }
 
   // Mevcut kullanıcıyı kontrol et
   async checkAuthStatus() {
     try {
-      // Eğer zaten kullanıcı varsa, tekrar kontrol etme
       if (this.currentUser) {
-        console.log('👤 Kullanıcı zaten mevcut, tekrar kontrol edilmiyor')
         return this.currentUser
       }
 
-      console.log('🔍 Auth status kontrol ediliyor...')
       const token = localStorage.getItem('authToken')
-      console.log('🎫 Token var mı:', !!token)
-
-      if (!token) {
-        console.log('❌ Token yok, kullanıcı null')
-        this.currentUser = null
-        this.notifyAuthListeners(null)
-        return null
-      }
-
-      // JWT Token'ın geçerliliğini kontrol et
-      if (!this.isTokenValid(token)) {
-        console.log('⚠️ JWT Token geçersiz, geçici token kontrol ediliyor...')
-
-        // Geçici token kontrolü
-        try {
-          const tempUser = JSON.parse(atob(token))
-          if (tempUser && tempUser.email) {
-            console.log('✅ Geçici token geçerli:', tempUser.email)
-            this.currentUser = tempUser
-            this.notifyAuthListeners(this.currentUser)
-            return this.currentUser
-          }
-        } catch (tempError) {
-          console.log('❌ Geçici token da geçersiz:', tempError.message)
-        }
-
-        console.log('🗑️ Token temizleniyor')
-        localStorage.removeItem('authToken')
-        this.currentUser = null
-        this.notifyAuthListeners(null)
+      if (!token || !this.isTokenValid(token)) {
+        console.log('❌ Token yok veya geçersiz')
+        await this.logout() // Garantili temizlik
         return null
       }
 
       console.log('✅ JWT Token geçerli, backend\'den bilgi alınıyor...')
-      // Token geçerliyse backend'den kullanıcı bilgilerini al
       try {
         const response = await apiService.get('/Auth/me')
-        console.log('📡 Backend /auth/me yanıtı:', response)
         this.currentUser = response.user || response
         this.notifyAuthListeners(this.currentUser)
         return this.currentUser
       } catch (apiError) {
-        console.error('❌ API auth check failed:', apiError)
-
-        // API hatası durumunda JWT'den kullanıcı bilgilerini çıkar
-        const decodedToken = this.decodeJWT(token)
-        if (decodedToken && decodedToken.sub) {
-          console.log('🔍 JWT\'den kullanıcı bilgileri çıkarılıyor')
-          this.currentUser = {
-            id: decodedToken.sub,
-            email: decodedToken.email,
-            role: decodedToken.role || decodedToken.role_name,
-            firstName: decodedToken.firstName || decodedToken.given_name,
-            lastName: decodedToken.lastName || decodedToken.family_name
-          }
-          this.notifyAuthListeners(this.currentUser)
-          return this.currentUser
-        }
-
-        // Hiçbir şekilde kullanıcı bilgisi alınamazsa temizle
-        console.log('🗑️ Hiçbir kullanıcı bilgisi alınamadı, temizleniyor')
-        localStorage.removeItem('authToken')
-        this.currentUser = null
-        this.notifyAuthListeners(null)
+        console.error('❌ API auth check failed, logging out:', apiError)
+        await this.logout()
         return null
       }
     } catch (error) {
       console.error('❌ Auth check error:', error)
-      localStorage.removeItem('authToken')
-      this.currentUser = null
-      this.notifyAuthListeners(null)
+      await this.logout()
       return null
     }
   }

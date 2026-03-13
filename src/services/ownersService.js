@@ -23,7 +23,9 @@ class OwnersService {
   async getOwners(filters = {}) {
     try {
       if (this.backendAvailable) {
-        return await apiService.get('/owners', filters)
+        const params = { ...filters, pageSize: 100 }
+        const response = await apiService.get('/owners', params)
+        return Array.isArray(response) ? response : (response?.items ?? [])
       }
     } catch (error) {
       console.log('⚠️ Owners backend endpoint\'i mevcut değil, fallback modu kullanılıyor')

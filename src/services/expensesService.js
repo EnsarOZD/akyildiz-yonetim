@@ -10,8 +10,11 @@ class ExpensesService {
     if (filters.startDate) params.startDate = filters.startDate
     if (filters.endDate) params.endDate = filters.endDate
     if (filters.searchTerm) params.searchTerm = filters.searchTerm
-    
-    return apiService.get('/expenses', params)
+
+    // Backend now returns PagedResult<T>; fetch max page and unwrap so callers receive a plain array.
+    params.pageSize = 100
+    const response = await apiService.get('/expenses', params)
+    return Array.isArray(response) ? response : (response?.items ?? [])
   }
 
   // ID'ye göre gider getir

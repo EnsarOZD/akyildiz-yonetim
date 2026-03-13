@@ -200,16 +200,36 @@
       @close="showCreateModal = false"
     />
 
-    <ConfirmDeleteModal
-      :visible="showDeleteModal"
-      :tenant="tenantToDelete"
-      :title="deleteModalTitle"
+    <ConfirmModal
+      :isOpen="showDeleteModal"
+      title="Kiracı Silinecek"
       :message="deleteModalMessage"
-      confirm-label="Evet, Sil"
-      cancel-label="İptal"
+      confirmLabel="Evet, Sil"
+      confirmClass="btn-error"
       :loading="deleteLoading"
       @confirm="confirmDelete"
       @cancel="closeDeleteModal"
+    />
+
+    <ConfirmModal
+      :isOpen="showSyncModal"
+      title="Bakiye Senkronizasyonu"
+      message="Tüm kiracıların avans bakiyeleri geçmiş işlem verilerine göre yeniden hesaplanacak ve eşitlenecektir. Devam etmek istiyor musunuz?"
+      confirmLabel="Evet, Senkronize Et"
+      confirmClass="btn-primary"
+      :loading="syncLoading"
+      @confirm="handleConfirmSync"
+      @cancel="showSyncModal = false"
+    />
+
+    <ConfirmModal
+      :isOpen="showAssignModal"
+      title="Mevcut Kiracı Bulundu"
+      :message="assignModalMessage"
+      confirmLabel="Evet, Bağla"
+      confirmClass="btn-primary"
+      @confirm="handleConfirmAssign"
+      @cancel="showAssignModal = false"
     />
 
     <TenantEditModal
@@ -232,7 +252,7 @@ import TenantEditModal from './components/TenantEditModal.vue'
 import TenantCreateModal from './components/TenantCreateModal.vue'
 import { useTenantsStore } from '@/stores/tenants.js'
 import { errorHandler } from '@/utils/errorHandler'
-import ConfirmDeleteModal from './components/ConfirmDeleteModal.vue'
+import ConfirmModal from '@/components/common/ConfirmModal.vue'
 import { useEventBus } from '@/composables/useEventBus'
 import { safeFormatDate as formatDate } from '@/utils/dateUtils'
 import { getAvatarColor, getAvatarInitial } from '@/utils/uiHelpers'
@@ -246,14 +266,48 @@ const tenantsStore = useTenantsStore()
 const showDeleteModal = ref(false)
 const deleteLoading = ref(false)
 const tenantToDelete = ref(null)
-const deleteModalTitle = computed(() =>
-  tenantToDelete.value ? `${tenantToDelete.value.companyName} silinsin mi?` : 'Silinsin mi?'
-)
 const deleteModalMessage = computed(() =>
-  tenantToDelete.value ? `${tenantToDelete.value.companyName} kiracısını silerseniz ilgili ünite boşaltılacaktır.` : ''
+  tenantToDelete.value ? `'${tenantToDelete.value.companyName}' kiracısını silerseniz ilgili ünite boşaltılacaktır. Bu işlem geri alınamaz.` : ''
 )
 const openDeleteModal = (tenant) => { tenantToDelete.value = tenant; showDeleteModal.value = true }
 const closeDeleteModal = () => { showDeleteModal.value = false; tenantToDelete.value = null }
+
+// Sync Modal State
+const showSyncModal = ref(false)
+const handleSyncBalances = () => { showSyncModal.value = true }
+const handleConfirmSync = async () => {
+  showSyncModal.value = false
+  syncLoading.value = true
+  try {
+    const response = await tenantsService.syncAdvanceBalances()
+    errorHandler.logSuccess('success', `Senkronizasyon tamamlandı. ${response.updatedAccountsCount} hesap güncellendi.`, { component: 'Tenants', action: 'sync-balances' })
+    await fetchTenants()
+  } catch (err) {
+    console.error('Senkronizasyon hatası:', err)
+    errorHandler.logError(err, { component: 'Tenants', action: 'sync-balances' })
+  } finally {
+    syncLoading.value = false
+  }
+}
+
+// Assign Modal State
+const showAssignModal = ref(false)
+const assignModalMessage = ref('')
+const assignData = ref(null)
+const handleConfirmAssign = async () => {
+  if (!assignData.value) return
+  showAssignModal.value = false
+  try {
+    await tenantsStore.updateTenant(assignData.value.existingId, {
+      ...assignData.value.existing,
+      flatIds: [...(assignData.value.existing.flatIds || []), ...assignData.value.selectedIds]
+    })
+    errorHandler.logSuccess('success', 'Üniteler mevcut kiracıya atandı.', { component: 'Tenants', action: 'assign-flats' })
+    showCreateModal.value = false
+  } catch (err) {
+    errorHandler.logError(err, { component: 'Tenants', action: 'assign-flats' })
+  }
+}
 
 // Page state
 const loading = computed(() => tenantsStore.loading)
@@ -337,22 +391,6 @@ const fetchTenants = async () => {
   }
 }
 
-const handleSyncBalances = async () => {
-  if (!confirm('Tüm kiracıların avans bakiyeleri geçmiş işlem verilerine göre yeniden hesaplanacak ve eşitlenecektir. Devam etmek istiyor musunuz?')) return
-  
-  syncLoading.value = true
-  try {
-    const response = await tenantsService.syncAdvanceBalances()
-    errorHandler.logSuccess('success', `Senkronizasyon tamamlandı. ${response.updatedAccountsCount} hesap güncellendi.`, { component: 'Tenants', action: 'sync-balances' })
-    await fetchTenants()
-  } catch (err) {
-    console.error('Senkronizasyon hatası:', err)
-    errorHandler.logError(err, { component: 'Tenants', action: 'sync-balances' })
-  } finally {
-    syncLoading.value = false
-  }
-}
-
 const handleSearch = () => { currentPage.value = 1 }
 const clearFilters = () => {
   filters.value = { searchTerm: '', isActive: '', floorNumber: '', businessType: '' }
@@ -378,20 +416,10 @@ const handleCreateTenant = async (data) => {
         const existing = candidates[0]
 
         if (existing) {
-          const ok = window.confirm(
-            `Bu kimlik numarasıyla zaten aktif bir kiracı var: "${existing.companyName}". ` +
-            `Seçili ${selectedIds.length} üniteyi bu kiracıya bağlayalım mı?`
-          )
-          if (ok) {
-            // BE hazır olduğunda çalışır
-            await tenantsStore.updateTenant(existing.id, {
-              ...existing,
-              flatIds: [...(existing.flatIds || []), ...selectedIds]
-            })
-            errorHandler.logSuccess('success', 'Üniteler mevcut kiracıya atandı.', { component: 'Tenants', action: 'assign-flats' })
-            showCreateModal.value = false
-            return
-          }
+          assignData.value = { existingId: existing.id, existing, selectedIds }
+          assignModalMessage.value = `Bu kimlik numarasıyla zaten aktif bir kiracı var: "${existing.companyName}". Seçili ${selectedIds.length} üniteyi bu kiracıya bağlayalım mı?`
+          showAssignModal.value = true
+          return
         }
       } catch (e) {
         console.warn('Mevcut kiracıya atama akışı başarısız:', e)

@@ -180,6 +180,28 @@ import { useDirtyGuard } from '@/composables/useDirtyGuard'
 const props = defineProps({ visible: Boolean })
 const emit = defineEmits(['save', 'close'])
 const { on: onEvent } = useEventBus()
+const { notifyError } = useNotify()
+
+// --- State & Helpers
+function emptyTenant () {
+  return {
+    companyName: '',
+    businessType: '',
+    identityNumber: '',
+    contactPersonName: '',
+    contactPersonPhone: '',
+    contactPersonEmail: '',
+    flatId: '',              // geri uyumluluk (tek seçim)
+    selectedFlatIds: [],     // çoklu seçim
+    floorNumber: undefined,
+    monthlyAidat: 0,
+    isActive: true
+  }
+}
+
+const availableFlats = ref([])
+const tenant = ref(emptyTenant())
+
 const { isDirty, resetDirty } = useDirtyGuard(() => tenant.value)
 
 defineExpose({ isDirty, resetDirty })
@@ -198,26 +220,6 @@ const flatOptionLabel = (f) => {
   }
   // Katı olmayanlar (ör. Otopark)
   return `${base} (${typeLabel(f.type)})`
-}
-
-// --- State
-const availableFlats = ref([])
-const tenant = ref(emptyTenant())
-
-function emptyTenant () {
-  return {
-    companyName: '',
-    businessType: '',
-    identityNumber: '',
-    contactPersonName: '',
-    contactPersonPhone: '',
-    contactPersonEmail: '',
-    flatId: '',              // geri uyumluluk (tek seçim)
-    selectedFlatIds: [],     // çoklu seçim
-    floorNumber: undefined,
-    monthlyAidat: 0,
-    isActive: true
-  }
 }
 
 
@@ -285,7 +287,7 @@ watch(() => props.visible, (v) => {
   if (v) {
     tenant.value = emptyTenant()
     fetchAvailableFlats()
-    setInitialState(tenant.value)
+    resetDirty()
   }
 })
 

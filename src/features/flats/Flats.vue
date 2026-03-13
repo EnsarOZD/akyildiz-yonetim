@@ -192,6 +192,17 @@
       @save="handleUpdateFlat" 
       @close="closeEditModal" 
     />
+
+    <ConfirmModal
+      :isOpen="showDeleteModal"
+      title="Ünite Silinecek"
+      :message="`'${flatToDelete?.code}' ünitesini silmek istediğinizden emin misiniz?`"
+      confirmLabel="Evet, Sil"
+      confirmClass="btn-error"
+      :loading="deleting"
+      @confirm="handleConfirmDelete"
+      @cancel="closeDeleteModal"
+    />
   </div>
 </template>
 
@@ -204,6 +215,7 @@ import FlatEditModal from './components/FlatEditModal.vue'
 import FlatCreateModal from './components/FlatCreateModal.vue'
 import flatsService from '@/features/flats/services/flatsService'
 import { errorHandler } from '@/utils/errorHandler'
+import ConfirmModal from '@/components/common/ConfirmModal.vue'
 
 const canDelete = (flat) => !flat?.isOccupied  
 
@@ -231,6 +243,10 @@ const showEditModal = ref(false)
 const editingFlat = ref(null)
 const currentPage = ref(1)
 const pageSize = 10
+
+const showDeleteModal = ref(false)
+const flatToDelete = ref(null)
+const deleting = ref(false)
 
 // Filtreler
 const filters = ref({
@@ -362,15 +378,29 @@ const closeEditModal = () => {
 }
 
 
-const deleteFlat = async (flat) => {
-  if (!confirm(`${flat.code} ünitesini silmek istediğinizden emin misiniz?`)) return
+const deleteFlat = (flat) => {
+  flatToDelete.value = flat
+  showDeleteModal.value = true
+}
+
+const closeDeleteModal = () => {
+  flatToDelete.value = null
+  showDeleteModal.value = false
+  deleting.value = false
+}
+
+const handleConfirmDelete = async () => {
+  if (!flatToDelete.value) return
+  deleting.value = true
   try {
-    await flatsService.deleteFlat(flat.id)
+    await flatsService.deleteFlat(flatToDelete.value.id)
     errorHandler.logSuccess('success', 'Ünite başarıyla silindi.', { component:'UnitsPage', action:'delete' })
     await fetchFlats()
+    closeDeleteModal()
   } catch (error) {
     console.error('Ünite silinirken hata:', error)
     errorHandler.logError(error, { component:'UnitsPage', action:'delete' })
+    deleting.value = false
   }
 }
 

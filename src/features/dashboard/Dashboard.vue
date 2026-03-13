@@ -541,6 +541,7 @@ import ManualDebtModal from '../expenses/ManualDebtModal.vue'
 import OverdueWidget from './components/OverdueWidget.vue'
 import { useNotificationsStore } from '@/stores/notificationsStore'
 import TargetedNotificationModal from '../notifications/components/TargetedNotificationModal.vue'
+import DebtsTable from './components/DebtsTable.vue'
 import { formatCurrency } from '@/utils/currencyUtils'
 
 // Reactive data
@@ -612,21 +613,24 @@ const getDateRange = (filter) => {
 }
 
 const totalIncome = computed(() => {
+  if (!Array.isArray(payments.value)) return 0
   const tenantPayments = payments.value.reduce((sum, p) => sum + Number(p.amount || 0), 0)
   return tenantPayments
 })
 
 const totalExpense = computed(() => {
+  if (!Array.isArray(expenses.value)) return 0
   return expenses.value.reduce((sum, e) => sum + Number(e.amount || 0), 0)
 })
 
 const balance = computed(() => totalIncome.value - totalExpense.value)
 
 const tenantPaymentsCount = computed(() => {
-  return payments.value.length
+  return Array.isArray(payments.value) ? payments.value.length : 0
 })
 
 const thisMonthTenantPayments = computed(() => {
+  if (!Array.isArray(payments.value)) return 0
   const today = new Date()
   const currentMonth = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0')
   
@@ -638,29 +642,31 @@ const thisMonthTenantPayments = computed(() => {
     .reduce((sum, p) => sum + Number(p.amount || 0), 0)
 })
 
-const tenantsCount = computed(() => tenants.value.length)
+const tenantsCount = computed(() => Array.isArray(tenants.value) ? tenants.value.length : 0)
 
 const activeTenantsCount = computed(() => 
-  tenants.value.filter(tenant => tenant.isActive !== false).length
+  Array.isArray(tenants.value) ? tenants.value.filter(tenant => tenant.isActive !== false).length : 0
 )
 
 const inactiveTenantsCount = computed(() => 
-  tenants.value.filter(tenant => tenant.isActive === false).length
+  Array.isArray(tenants.value) ? tenants.value.filter(tenant => tenant.isActive === false).length : 0
 )
 
-const ownersCount = computed(() => owners.value.length)
+const ownersCount = computed(() => Array.isArray(owners.value) ? owners.value.length : 0)
 
 const activeOwnerDuesCount = computed(() => 
-  ownerAidats.value.filter(aidat => aidat.isPaid !== true).length
+  Array.isArray(ownerAidats.value) ? ownerAidats.value.filter(aidat => aidat.isPaid !== true).length : 0
 )
 
 const totalUtilityDebts = computed(() => {
+  if (!Array.isArray(debts.value)) return 0
   return debts.value.reduce((sum, debt) => sum + Number(debt.remainingAmount || 0), 0)
 })
 
-const utilityDebtsCount = computed(() => debts.value.length)
+const utilityDebtsCount = computed(() => Array.isArray(debts.value) ? debts.value.length : 0)
 
 const overdueUtilityDebtsCount = computed(() => {
+  if (!Array.isArray(debts.value)) return 0
   const now = new Date()
   return debts.value.filter(debt => {
     const isOverdue = debt.dueDate && new Date(debt.dueDate) < now
@@ -670,24 +676,28 @@ const overdueUtilityDebtsCount = computed(() => {
 })
 
 const totalAidatDebt = computed(() => {
+  if (!Array.isArray(debts.value)) return 0
   return debts.value
     .filter(d => d.type === 0 || d.type === 'Aidat')
     .reduce((sum, d) => sum + Number(d.remainingAmount || 0), 0)
 })
 
 const totalElectricityDebt = computed(() => {
+  if (!Array.isArray(debts.value)) return 0
   return debts.value
     .filter(d => d.type === 1 || d.type === 'Electricity')
     .reduce((sum, d) => sum + Number(d.remainingAmount || 0), 0)
 })
 
 const totalWaterDebt = computed(() => {
+  if (!Array.isArray(debts.value)) return 0
   return debts.value
     .filter(d => d.type === 2 || d.type === 'Water')
     .reduce((sum, d) => sum + Number(d.remainingAmount || 0), 0)
 })
 
 const monthlyAverage = computed(() => {
+  if (!Array.isArray(payments.value) || !Array.isArray(expenses.value)) return 0
   const totalIncome = payments.value.reduce((sum, p) => sum + Number(p.amount || 0), 0)
   const totalExpense = expenses.value.reduce((sum, e) => sum + Number(e.amount || 0), 0)
   const totalNet = totalIncome - totalExpense
@@ -698,20 +708,21 @@ const monthlyAverage = computed(() => {
 })
 
 const monthlyIncomeAverage = computed(() => {
+  if (!Array.isArray(payments.value)) return 0
   const totalIncome = payments.value.reduce((sum, p) => sum + Number(p.amount || 0), 0)
   const months = 6
   return totalIncome / months
 })
 
 const ownerDuesIncome = computed(() => {
+  if (!Array.isArray(ownerAidats.value)) return 0
   return ownerAidats.value.reduce((sum, aidat) => sum + Number(aidat.amount || 0), 0)
 })
 
-const ownerDuesCount = computed(() => {
-  return ownerAidats.value.length
-})
+const ownerDuesCount = computed(() => Array.isArray(ownerAidats.value) ? ownerAidats.value.length : 0)
 
 const thisMonthOwnerDues = computed(() => {
+  if (!Array.isArray(ownerAidats.value)) return 0
   const today = new Date()
   const currentMonth = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0')
   
@@ -724,14 +735,14 @@ const thisMonthOwnerDues = computed(() => {
 })
 
 const ownerPaymentsTotal = computed(() => {
+  if (!Array.isArray(ownerPayments.value)) return 0
   return ownerPayments.value.reduce((sum, payment) => sum + Number(payment.amount || 0), 0)
 })
 
-const ownerPaymentsCount = computed(() => {
-  return ownerPayments.value.length
-})
+const ownerPaymentsCount = computed(() => Array.isArray(ownerPayments.value) ? ownerPayments.value.length : 0)
 
 const thisMonthOwnerPayments = computed(() => {
+  if (!Array.isArray(ownerPayments.value)) return 0
   const today = new Date()
   const currentMonth = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0')
   
@@ -744,6 +755,7 @@ const thisMonthOwnerPayments = computed(() => {
 })
 
 const overdueOwnerPayments = computed(() => {
+  if (!Array.isArray(ownerAidats.value)) return []
   const now = new Date()
   return ownerAidats.value.filter(aidat => {
     const isOverdue = aidat.dueDate && new Date(aidat.dueDate) < now
@@ -759,16 +771,18 @@ const overdueOwnerPaymentsCount = computed(() => {
 })
 
 const overdueTotalAmount = computed(() => {
+  if (!Array.isArray(overdueItems.value)) return 0
   return overdueItems.value.reduce((sum, item) => sum + Number(item.amount || 0), 0)
 })
 
 const oldestOverdueDate = computed(() => {
-  if (overdueItems.value.length === 0) return null
+  if (!Array.isArray(overdueItems.value) || overdueItems.value.length === 0) return null
   // En eski tarihi bul
   return Array.from(overdueItems.value).sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))[0].dueDate
 })
 
 const overdueOwnerPaymentsTotal = computed(() => {
+  if (!Array.isArray(overdueOwnerPayments.value)) return 0
   return overdueOwnerPayments.value.reduce((sum, aidat) => {
     const totalAmount = Number(aidat.amount || 0)
     const paidAmount = Number(aidat.paidAmount || 0)
@@ -779,6 +793,7 @@ const overdueOwnerPaymentsTotal = computed(() => {
 })
 
 const overdueItems = computed(() => {
+  if (!Array.isArray(debts.value)) return []
   const now = new Date()
   
   return debts.value
@@ -795,7 +810,7 @@ const overdueItems = computed(() => {
     })
     .sort((a, b) => new Date(b.dueDate) - new Date(a.dueDate))
     .map(debt => {
-      const tenant = tenants.value.find(t => t.id === debt.tenantId)
+      const tenant = Array.isArray(tenants.value) ? tenants.value.find(t => t.id === debt.tenantId) : null
       
       return {
         ...debt,

@@ -7,8 +7,10 @@ class TenantsService {
     
     if (filters.searchTerm) params.searchTerm = filters.searchTerm
     if (filters.isActive !== undefined) params.isActive = filters.isActive
-    
-    return apiService.get('/tenants', params)
+    params.pageSize = 100
+
+    const response = await apiService.get('/tenants', params)
+    return Array.isArray(response) ? response : (response?.items ?? [])
   }
 
   // ID'ye göre kiracı getir
