@@ -119,10 +119,11 @@ router.beforeEach(async (to, from, next) => {
       user = { role: userRole };
     } else {
       // Slow path: first load or after logout — verify with backend
-      const backendUser = await authService.checkAuthStatus();
-      if (backendUser) {
-        userRole = (backendUser.role || '').toLowerCase();
-        user = backendUser;
+      await authStore.fetchUserProfile();
+      // After fetchUserProfile, authStore is updated — use it directly
+      if (authStore.isInitialized && authStore.role) {
+        userRole = authStore.role.toLowerCase();
+        user = { role: userRole };
       }
     }
 
