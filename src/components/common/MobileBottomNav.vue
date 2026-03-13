@@ -127,39 +127,51 @@ const logout = () => {
 }
 
 const visibleNavItems = computed(() => {
-  const role = (authStore.user?.role || '').toLowerCase()
-  
+  const role = (authStore.role || '').toLowerCase()
+
   if (role === 'tenant') {
     return [
-      { name: 'Özet', path: '/dashboard', icon: DashboardIcon },
+      { name: 'Özet', path: '/tenant-dashboard', icon: DashboardIcon },
       { name: 'Ödemelerim', path: '/my-payments', icon: WalletIcon },
       { name: 'Bildirimler', path: '/notifications', icon: BellIcon },
       { name: 'Profil', path: '/profile', icon: UserIcon },
-      { name: 'Menü', icon: MenuIcon } // More for tenant
     ]
   }
 
-  // Admin / Manager / DataEntry
+  if (role === 'owner') {
+    return [
+      { name: 'Mülklerim', path: '/my-properties', icon: BuildingIcon },
+      { name: 'Bildirimler', path: '/notifications', icon: BellIcon },
+      { name: 'Profil', path: '/profile', icon: UserIcon },
+    ]
+  }
+
+  // Admin / Manager / DataEntry / Observer
   return [
     { name: 'Özet', path: '/dashboard', icon: DashboardIcon },
     { name: 'Kiracılar', path: '/tenants', icon: UsersIcon },
-    { name: 'Finans', path: '/payments', icon: WalletIcon }, // Ana finans öğesi ödemelere gitsin
+    { name: 'Finans', path: '/payments', icon: WalletIcon },
     { name: 'Raporlar', path: '/reports', icon: ChartIcon },
     { name: 'Menü', icon: MenuIcon }
   ]
 })
 
 const moreItems = computed(() => {
-  const role = (authStore.user?.role || '').toLowerCase()
-  
+  const role = (authStore.role || '').toLowerCase()
+
   if (role === 'tenant') {
     return [
-      { name: 'Şifre Değiştir', path: '/change-password', icon: LockIcon },
       { name: 'Çıkış Yap', action: logout, icon: LogoutIcon }
     ]
   }
 
-  // Admin / Manager
+  if (role === 'owner') {
+    return [
+      { name: 'Çıkış Yap', action: logout, icon: LogoutIcon }
+    ]
+  }
+
+  // Admin / Manager / DataEntry
   const items = [
     { name: 'Giderler', path: '/expenses', icon: ExpenseIcon },
     { name: 'Borçlar', path: '/utilities', icon: BoltIcon },
