@@ -68,7 +68,7 @@ import ErrorNotification from './components/common/ErrorNotification.vue'
 import SuccessNotification from './components/common/SuccessNotification.vue'
 import ScrollToTop from './components/common/ScrollToTop.vue'
 import { useAuthStore } from '@/stores/auth'
-import { onMounted, watchEffect, watch, computed, onErrorCaptured } from 'vue'
+import { ref, onMounted, watchEffect, watch, computed, onErrorCaptured } from 'vue'
 
 const route = useRoute()
 const authStore = useAuthStore()
