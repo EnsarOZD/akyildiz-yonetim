@@ -1,5 +1,4 @@
-import { ref, watch, onBeforeUnmount } from 'vue'
-import { onBeforeRouteLeave } from 'vue-router'
+import { ref, watch } from 'vue'
 
 export function useDirtyGuard(getData) {
     const isDirty = ref(false)
@@ -20,22 +19,6 @@ export function useDirtyGuard(getData) {
         }
         isDirty.value = JSON.stringify(current) !== initialState.value
     }, { deep: true })
-
-    // Route protection
-    onBeforeRouteLeave((to, from, next) => {
-        if (isDirty.value) {
-            const answer = window.confirm(
-                'Kaydedilmemiş değişiklikleriniz var. Ayrılmak istediğinizden emin misiniz?'
-            )
-            if (answer) {
-                next()
-            } else {
-                next(false)
-            }
-        } else {
-            next()
-        }
-    })
 
     const resetDirty = () => {
         init()

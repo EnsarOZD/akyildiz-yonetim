@@ -99,6 +99,7 @@ const tabComponents = {
 const tabs = computed(() => [
   { key: 'dues',      label: 'Aidat Tanımlama',    icon: '📆', badge: tabCounts.dues },
   { key: 'ownerDues', label: 'Mal Sahibi Aidatları', icon: '🏠', badge: tabCounts.ownerDues },
+  { key: 'owners',    label: 'Mal Sahipleri',       icon: '🏢', badge: tabCounts.owners },
   { key: 'users',     label: 'Kullanıcı Yönetimi', icon: '👥',  badge: tabCounts.users },
 ])
 
