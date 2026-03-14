@@ -274,8 +274,12 @@ const handleLogin = async () => {
 
       showSuccess('Başarıyla giriş yapıldı!')
       
+      // Ensure pinia state is fully downloaded before navigating to the next page layout
+      const authStore = (await import('@/stores/auth')).useAuthStore()
+      await authStore.fetchUserProfile()
+      
       // Role göre yönlendirme
-      const role = (response.role || '').toLowerCase()
+      const role = (authStore.role || response.role || '').toLowerCase()
       if (role === 'admin') {
         router.push('/admin')
       } else if (role === 'manager') {

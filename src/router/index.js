@@ -92,6 +92,12 @@ router.beforeEach(async (to, from, next) => {
   const requiresAuth = to.meta.requiresAuth;
   const isPublic = to.meta.public;
 
+  // Clear chunk retry logic on successful navigation
+  const retryKey = 'chunk_load_retry_' + to.path;
+  if (window.sessionStorage.getItem(retryKey)) {
+    window.sessionStorage.removeItem(retryKey);
+  }
+
   // PWA Modunda Landing'den Login'e yönlendir
   if (to.path === '/' && isStandalone()) {
     return next('/login');
@@ -164,11 +170,24 @@ router.beforeEach(async (to, from, next) => {
 });
 
 router.onError((error, to) => {
-  if (error.message.includes('Failed to fetch dynamically imported module') || 
-      error.message.includes('Importing a zipped bundle') ||
-      error.message.includes('chunk')) {
-    console.error('🚀 Chunk Load Factor detected. Forcing page reload to clear cache...', error);
-    window.location.reload();
+  const isChunkError = error.message.includes('Failed to fetch dynamically imported module') || 
+                       error.message.includes('Importing a zipped bundle') ||
+                       error.message.includes('chunk') ||
+                       error.message.includes('Failed to load module script') ||
+                       error.message.includes('expected a JavaScript module');
+
+  if (isChunkError) {
+    console.error('🚀 Chunk Load Failure detected. Forcing page reload to clear cache...', error);
+    const retryKey = 'chunk_load_retry_' + to.path;
+    if (!window.sessionStorage.getItem(retryKey)) {
+      window.sessionStorage.setItem(retryKey, 'true');
+      window.location.reload(true);
+    } else {
+      console.error('Chunk load retry limit reached for', to.path, '. Please clear your cache.');
+      window.sessionStorage.removeItem(retryKey);
+    }
+  } else {
+    console.error('Router navigation error:', error);
   }
 });
 
