@@ -90,11 +90,46 @@
 
       <!-- Aidat Kayıtları -->
       <div class="bg-white dark:bg-gray-800 mt-6 p-6 rounded-xl shadow-md border border-gray-200 dark:border-gray-700">
-        <div class="flex items-center justify-between mb-4">
-          <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Borç Listesi</h2>
-          <div class="text-sm text-gray-500 dark:text-gray-400">
-            {{ filteredDues.length }} kayıt
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-4">
+          <div class="flex items-center gap-4">
+            <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Borç Listesi</h2>
+            <div class="text-sm text-gray-500 dark:text-gray-400">
+              {{ filteredDues.length }} kayıt
+            </div>
           </div>
+          <!-- Toplu İşlem Butonları -->
+          <Transition
+            enter-active-class="transition duration-200 ease-out"
+            enter-from-class="opacity-0 translate-y-2 sm:translate-y-0 sm:translate-x-2"
+            enter-to-class="opacity-100 translate-y-0 sm:translate-x-0"
+            leave-active-class="transition duration-150 ease-in"
+            leave-from-class="opacity-100 translate-y-0 sm:translate-x-0"
+            leave-to-class="opacity-0 translate-y-2 sm:translate-y-0 sm:translate-x-2"
+          >
+            <div v-if="selectedIds.length > 0" class="flex items-center gap-2">
+              <span class="text-sm font-medium text-gray-600 dark:text-gray-300">
+                {{ selectedIds.length }} kayıt seçildi
+              </span>
+              <button @click="showBulkDeleteConfirm = true" class="btn btn-error btn-sm text-white">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+                Seçilenleri Sil
+              </button>
+            </div>
+          </Transition>
+        </div>
+
+        <!-- Seçim Başlığı / Satırı -->
+        <div v-if="filteredDues.length > 0" class="flex items-center gap-3 px-4 py-3 bg-gray-50 dark:bg-gray-700/50 rounded-t-lg border-b border-gray-200 dark:border-gray-600">
+          <input 
+            type="checkbox" 
+            class="checkbox checkbox-sm checkbox-primary rounded"
+            :checked="isAllSelected"
+            :indeterminate="isPartiallySelected"
+            @change="toggleSelectAll"
+          />
+          <span class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Tümünü Seç</span>
         </div>
 
         <div v-if="filteredDues.length === 0" class="text-center py-10 text-gray-500 dark:text-gray-400">
@@ -105,8 +140,22 @@
           <div
             v-for="d in duesPaged"
             :key="d.id || (d.flatId + '-' + d.periodYear + '-' + d.periodMonth)"
-            class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center p-4 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-200 border-b dark:border-gray-700/50"
+            :class="[
+              'grid grid-cols-1 md:grid-cols-12 gap-4 items-center p-4 transition-colors duration-200 border-b dark:border-gray-700/50',
+              selectedIds.includes(d.id) ? 'bg-blue-50/50 dark:bg-blue-900/10' : 'hover:bg-gray-50 dark:hover:bg-gray-700/50'
+            ]"
           >
+            <!-- Seçim Kutusu (Sadece ID varsa göster, geçmiş dönem mantıksal satırları engelle) -->
+            <div class="md:col-span-1 flex items-center justify-center md:justify-start">
+              <input 
+                v-if="d.id"
+                type="checkbox" 
+                class="checkbox checkbox-sm checkbox-primary rounded"
+                :value="d.id"
+                v-model="selectedIds"
+              />
+            </div>
+
             <div class="md:col-span-3">
               <p class="font-bold text-gray-800 dark:text-gray-100">
                 {{ d.tenantCompany || d.flatNumber || '-' }}
@@ -173,7 +222,7 @@
       </div>
     </div>
 
-    <!-- Modal Bileşenleri -->
+    <!-- AidatDeleteModal & Diğer Modallar -->
     <AidatEditModal
       v-if="showAidatEditModal && selectedDue"
       :record="selectedDue"
@@ -186,6 +235,24 @@
       @close="handleClose"
       @deleted="refreshAll"
     />
+
+    <!-- Toplu Silme Onay Modal -->
+    <dialog v-if="showBulkDeleteConfirm" class="modal modal-bottom sm:modal-middle" open>
+      <div class="modal-box">
+        <h3 class="font-bold text-lg text-red-600">Toplu Silme Onayı</h3>
+        <p class="py-4">Seçili <strong>{{ selectedIds.length }}</strong> borç/aidat kaydını silmek istediğinize emin misiniz? Bu işlem geri alınamaz ve ilişkili ödemelerdeki dağılımları etkileyebilir.</p>
+        <div class="modal-action">
+          <button class="btn btn-ghost" @click="showBulkDeleteConfirm = false" :disabled="isBulkDeleting">Vazgeç</button>
+          <button class="btn btn-error text-white" @click="confirmBulkDelete" :disabled="isBulkDeleting">
+            <span v-if="isBulkDeleting" class="loading loading-spinner loading-sm"></span>
+            Evet, Sil
+          </button>
+        </div>
+      </div>
+      <form method="dialog" class="modal-backdrop">
+        <button @click="showBulkDeleteConfirm = false" :disabled="isBulkDeleting">Kapat</button>
+      </form>
+    </dialog>
 
     <!-- Manuel Borç Modalı -->
     <ManualDebtModal
@@ -261,6 +328,10 @@ const PAGE_SIZE_DEFAULT = 10
 const duesPage = ref(1)
 const pageSize = ref(PAGE_SIZE_DEFAULT)
 
+// Seçim State'i
+const selectedIds = ref([])
+const showBulkDeleteConfirm = ref(false)
+const isBulkDeleting = ref(false)
 
 /* ---------- Computed (filters) ---------- */
 
@@ -269,6 +340,27 @@ const duesPaged = computed(() => {
   const start = (duesPage.value - 1) * pageSize.value
   return filteredDues.value.slice(start, start + pageSize.value)
 })
+
+const isAllSelected = computed(() => {
+  const validDues = duesPaged.value.filter(d => d.id)
+  return validDues.length > 0 && validDues.every(d => selectedIds.value.includes(d.id))
+})
+
+const isPartiallySelected = computed(() => {
+  const validDues = duesPaged.value.filter(d => d.id)
+  const selectedCount = validDues.filter(d => selectedIds.value.includes(d.id)).length
+  return selectedCount > 0 && selectedCount < validDues.length
+})
+
+const toggleSelectAll = (e) => {
+  const validDues = duesPaged.value.filter(d => d.id)
+  if (e.target.checked) {
+    const toAdd = validDues.map(d => d.id).filter(id => !selectedIds.value.includes(id))
+    selectedIds.value.push(...toAdd)
+  } else {
+    selectedIds.value = selectedIds.value.filter(id => !validDues.map(d => d.id).includes(id))
+  }
+}
 
 const filteredDues = computed(() => {
   return dues.value
@@ -321,6 +413,22 @@ const openManualDebt = (type) => {
   manualType.value = type
   selectedDue.value = null
   showManualModal.value = true
+}
+
+const confirmBulkDelete = async () => {
+  if (selectedIds.value.length === 0) return
+  isBulkDeleting.value = true
+  try {
+    await utilityDebtsService.bulkDeleteDebts(selectedIds.value)
+    showSuccess(`${selectedIds.value.length} kayıt başarıyla silindi.`)
+    selectedIds.value = []
+    showBulkDeleteConfirm.value = false
+    await refreshAll()
+  } catch (err) {
+    handleNetworkError(err)
+  } finally {
+    isBulkDeleting.value = false
+  }
 }
 
 // Excel aktarımı modal aracılığıyla yönetiliyor

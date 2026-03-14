@@ -148,20 +148,58 @@
 
       <!-- Filtreler ve Liste -->
       <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md border border-gray-200 dark:border-gray-700">
-        <CustomFilterBar
-          :search="filters.searchTerm"
-          search-placeholder="Firma, tutar, tip veya banka ara..."
-          :period="filters.period"
-          :select-type="filters.type"
-          :select-type-options="paymentTypeFilterOptions"
-          @update:search="val => (filters.searchTerm = val)"
-          @update:period="val => (filters.period = val)"
-          @update:selectType="val => (filters.type = val)"
-          @clearFilters="handleClearFilters"
-        />
+        <!-- Filtreler ve Toplu İşlemler -->
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4">
+          <CustomFilterBar
+            class="flex-1"
+            :search="filters.searchTerm"
+            search-placeholder="Firma, tutar, tip veya banka ara..."
+            :period="filters.period"
+            :select-type="filters.type"
+            :select-type-options="paymentTypeFilterOptions"
+            @update:search="val => (filters.searchTerm = val)"
+            @update:period="val => (filters.period = val)"
+            @update:selectType="val => (filters.type = val)"
+            @clearFilters="handleClearFilters"
+          />
+
+          <!-- Seçili Ödemeleri Sil Butonu -->
+          <Transition
+            enter-active-class="transition duration-200 ease-out"
+            enter-from-class="opacity-0 translate-y-2 sm:translate-y-0 sm:translate-x-2"
+            enter-to-class="opacity-100 translate-y-0 sm:translate-x-0"
+            leave-active-class="transition duration-150 ease-in"
+            leave-from-class="opacity-100 translate-y-0 sm:translate-x-0"
+            leave-to-class="opacity-0 translate-y-2 sm:translate-y-0 sm:translate-x-2"
+          >
+            <div v-if="selectedIds.length > 0" class="flex items-center gap-2 mt-2 sm:mt-0">
+              <span class="text-sm font-medium text-gray-600 dark:text-gray-300">
+                {{ selectedIds.length }} kayıt seçildi
+              </span>
+              <button @click="showBulkDeleteConfirm = true" class="btn btn-error btn-sm text-white">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+                Seçilenleri Sil
+              </button>
+            </div>
+          </Transition>
+        </div>
+
+        <!-- Seçim Başlığı / Satırı -->
+        <div v-if="filteredPayments.length > 0" class="flex items-center gap-3 px-4 py-3 bg-gray-50 dark:bg-gray-700/50 rounded-t-lg border-b border-gray-200 dark:border-gray-600 mt-2">
+          <input 
+            type="checkbox" 
+            class="checkbox checkbox-sm checkbox-primary rounded"
+            :checked="isAllSelected"
+            :indeterminate="isPartiallySelected"
+            @change="toggleSelectAll"
+          />
+          <span class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Tümünü Seç</span>
+        </div>
 
         <!-- Ödeme Kart Listesi -->
-        <div class="mt-6 space-y-2">
+        <div class="mt-2 space-y-2">
           <div v-if="filteredPayments.length === 0" class="text-center py-16">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-4 text-gray-300 dark:text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
               <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a2.25 2.25 0 00-2.25-2.25H15a3 3 0 11-6 0H5.25A2.25 2.25 0 003 12m18 0v6a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 18v-6m18 0V9M3 12V9m18 0a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 9m18 0V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v3" />
@@ -174,9 +212,22 @@
               <div 
                 v-for="p in paymentsView" 
                 :key="p.id"
-                class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center p-4 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-200 border-b dark:border-gray-700/50"
+                :class="[
+                  'grid grid-cols-1 md:grid-cols-12 gap-4 items-center p-4 transition-colors duration-200 border-b dark:border-gray-700/50',
+                  selectedIds.includes(p.id) ? 'bg-blue-50/50 dark:bg-blue-900/10' : 'hover:bg-gray-50 dark:hover:bg-gray-700/50'
+                ]"
               >
-                <div class="md:col-span-5 flex items-center gap-4">
+                <!-- Seçim Kutusu -->
+                <div class="md:col-span-1 flex items-center justify-center md:justify-start">
+                  <input 
+                    type="checkbox" 
+                    class="checkbox checkbox-sm checkbox-primary rounded"
+                    :value="p.id"
+                    v-model="selectedIds"
+                  />
+                </div>
+
+                <div class="md:col-span-4 flex items-center gap-4">
                   <div class="flex-shrink-0 h-12 w-12 flex items-center justify-center text-white rounded-full text-xl font-bold" :class="getAvatarColor(p.company)">
                      {{ getAvatarInitial(p.company) }}
                   </div>
@@ -239,6 +290,24 @@
           <button class="btn btn-primary" @click="confirmClose">Devam Et</button>
         </div>
       </div>
+    </dialog>
+
+    <!-- Toplu Silme Onay Modal -->
+    <dialog v-if="showBulkDeleteConfirm" class="modal modal-bottom sm:modal-middle" open>
+      <div class="modal-box">
+        <h3 class="font-bold text-lg text-red-600">Toplu Silme Onayı</h3>
+        <p class="py-4">Seçili <strong>{{ selectedIds.length }}</strong> ödeme kaydını silmek istediğinize emin misiniz? Bu ödemelere bağlı tahsilat ve avans kullanım durumları da geri alınacaktır.</p>
+        <div class="modal-action">
+          <button class="btn btn-ghost" @click="showBulkDeleteConfirm = false" :disabled="isBulkDeleting">Vazgeç</button>
+          <button class="btn btn-error text-white" @click="confirmBulkDelete" :disabled="isBulkDeleting">
+            <span v-if="isBulkDeleting" class="loading loading-spinner loading-sm"></span>
+            Evet, Sil
+          </button>
+        </div>
+      </div>
+      <form method="dialog" class="modal-backdrop">
+        <button @click="showBulkDeleteConfirm = false" :disabled="isBulkDeleting">Kapat</button>
+      </form>
     </dialog>
 
     <!-- Avans Hesabı Yönetimi Modal -->
@@ -440,6 +509,32 @@ const filteredPayments = computed(() => {
   return filtered.sort((a, b) => new Date(getPaymentDate(b)) - new Date(getPaymentDate(a)))
 })
 
+/* ---- Bulk Seçim ---- */
+const selectedIds = ref([])
+const showBulkDeleteConfirm = ref(false)
+const isBulkDeleting = ref(false)
+
+const isAllSelected = computed(() => {
+  const valid = paginatedPayments.value.filter(p => p.id)
+  return valid.length > 0 && valid.every(p => selectedIds.value.includes(p.id))
+})
+
+const isPartiallySelected = computed(() => {
+  const valid = paginatedPayments.value.filter(p => p.id)
+  const selectedCount = valid.filter(p => selectedIds.value.includes(p.id)).length
+  return selectedCount > 0 && selectedCount < valid.length
+})
+
+const toggleSelectAll = (e) => {
+  const valid = paginatedPayments.value.filter(p => p.id)
+  if (e.target.checked) {
+    const toAdd = valid.map(p => p.id).filter(id => !selectedIds.value.includes(id))
+    selectedIds.value.push(...toAdd)
+  } else {
+    selectedIds.value = selectedIds.value.filter(id => !valid.map(p => p.id).includes(id))
+  }
+}
+
 /* ---- Pagination ---- */
 const currentPage = ref(1)
 const pageSize = ref(10)
@@ -521,6 +616,22 @@ const deletePayment = async (id) => {
   } catch (error) {
     notifyError('Ödeme silinemedi.')
     handleNetworkError(error, { component: 'Payments', action: 'deletePayment' })
+  }
+}
+
+const confirmBulkDelete = async () => {
+  if (selectedIds.value.length === 0) return
+  isBulkDeleting.value = true
+  try {
+    await paymentsStore.bulkDeletePayments(selectedIds.value)
+    notifySuccess(`${selectedIds.value.length} ödeme başarıyla silindi.`)
+    selectedIds.value = []
+    showBulkDeleteConfirm.value = false
+  } catch (err) {
+    notifyError('Toplu silme sırasında hata oluştu.')
+    handleNetworkError(err)
+  } finally {
+    isBulkDeleting.value = false
   }
 }
 
