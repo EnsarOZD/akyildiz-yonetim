@@ -14,7 +14,7 @@ export default defineConfig({
       injectRegister: 'auto',
       includeAssets: ['favicon.ico', 'logo-default.svg', 'apple-touch-icon.png'],
       manifest: {
-        name: 'Akyıldız İş Merkezi Yönetim Sistemi',
+        name: 'Akyıldız Yönetim',
         short_name: 'Akyıldız',
         description: 'Profesyonel apartman ve site yönetim sistemi',
         theme_color: '#0b1220',
