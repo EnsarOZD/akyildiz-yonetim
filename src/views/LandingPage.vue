@@ -57,7 +57,7 @@
 
     <!-- Hero Section -->
     <section class="relative overflow-hidden py-20 px-4 sm:px-6 lg:px-8">
-      <div class="max-w-7xl mx-auto">
+      <div class="relative z-10 max-w-7xl mx-auto">
         <div class="text-center">
           <h1 class="text-4xl md:text-6xl font-bold text-white mb-6">
             {{ appName }}
@@ -87,9 +87,9 @@
       </div>
 
       <!-- Floating elements -->
-      <div class="absolute top-20 left-20 w-72 h-72 bg-blue-600 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
-      <div class="absolute top-40 right-20 w-72 h-72 bg-purple-600 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
-      <div class="absolute -bottom-8 left-40 w-72 h-72 bg-pink-600 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
+      <div class="pointer-events-none absolute top-20 left-20 w-72 h-72 bg-blue-600 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
+      <div class="pointer-events-none absolute top-40 right-20 w-72 h-72 bg-purple-600 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
+      <div class="pointer-events-none absolute -bottom-8 left-40 w-72 h-72 bg-pink-600 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
     </section>
 
     <!-- Services Section -->
