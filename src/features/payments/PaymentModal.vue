@@ -352,7 +352,8 @@ const props = defineProps({
   },
   tenants: { type: Array, default: () => [] },
   banks:   { type: Array, default: () => [] },
-  editMode: { type: Boolean, default: false }
+  editMode: { type: Boolean, default: false },
+  debtRefreshKey: { type: Number, default: 0 }
 })
 const emit = defineEmits(['save', 'cancel', 'close'])
 
@@ -394,6 +395,11 @@ const loadingDebts   = ref(false)
 const selectedDebts  = ref([])
 const autoAllocate   = ref(true)
 const debtAllocations = ref({})
+
+// Re-fetch debts when advance account usage changes debt status
+watch(() => props.debtRefreshKey, (newKey, oldKey) => {
+  if (newKey !== oldKey && props.visible) fetchDebts()
+})
 
 const setAutoAllocation = (v) => {
   autoAllocate.value = v

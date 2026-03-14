@@ -91,6 +91,8 @@ const formData = ref({
   phone: '',
   email: '',
   units: [],
+  isActive: true,
+  monthlyDues: 0,
 });
 
 const allUnitOptions = UNIT_OPTIONS;
@@ -111,7 +113,9 @@ watch(() => props.visible, (newVal) => {
       name: props.initialData.name,
       phone: props.initialData.phoneNumber || '',
       email: props.initialData.email || '',
-      units: [...(props.initialData.allUnits || [])]
+      units: [...(props.initialData.allUnits || [])],
+      isActive: props.initialData.isActive ?? true,
+      monthlyDues: props.initialData.monthlyDues ?? 0,
     };
   }
 });
@@ -130,7 +134,9 @@ const submitForm = () => {
     phoneNumber: formData.value.phone,
     email: formData.value.email,
     apartmentNumber: formData.value.units[0] || '',
-    flats: formData.value.units
+    flats: formData.value.units,
+    isActive: formData.value.isActive,
+    monthlyDues: formData.value.monthlyDues,
   };
 
   emit('save', updateData);

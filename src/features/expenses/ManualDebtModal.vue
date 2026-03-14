@@ -83,9 +83,15 @@
             </div>
           </div>
 
-          <div class="form-control">
-            <label class="label"><span class="label-text font-semibold">Açıklama</span></label>
-            <textarea v-model="form.description" class="textarea textarea-bordered h-20" placeholder="Opsiyonel notlar..."></textarea>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="form-control">
+              <label class="label"><span class="label-text font-semibold">Fatura Numarası</span></label>
+              <input v-model="form.invoiceNumber" type="text" class="input input-bordered w-full" placeholder="Opsiyonel fatura no..." />
+            </div>
+            <div class="form-control">
+              <label class="label"><span class="label-text font-semibold">Açıklama</span></label>
+              <input v-model="form.description" type="text" class="input input-bordered w-full" placeholder="Opsiyonel not..." />
+            </div>
           </div>
 
           <div class="flex justify-end gap-3 pt-6 border-t border-gray-200 dark:border-gray-700">
@@ -193,7 +199,8 @@ const form = ref({
   periodMonth: new Date().getMonth() + 1,
   amount: 0,
   dueDate: new Date(new Date().getFullYear(), new Date().getMonth() + 1, 15).toISOString().split('T')[0],
-  description: ''
+  description: '',
+  invoiceNumber: ''
 })
 
 // Toplu Form State

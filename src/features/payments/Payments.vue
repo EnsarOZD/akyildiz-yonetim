@@ -275,6 +275,7 @@
       :tenants="tenants"
       :banks="banks"
       :editMode="editMode"
+      :debtRefreshKey="debtRefreshKey"
       @save="handlePaymentSave"
       @cancel="handleModalClose"
       @dirty-changed="v => (isPaymentModalDirty = v)"
@@ -385,6 +386,7 @@ const banks = ref(['Ziraat', 'İş Bankası', 'Garanti', 'Yapı Kredi', 'Halkban
 
 const showModal = ref(false)
 const showAdvanceManager = ref(false)
+const debtRefreshKey = ref(0)
 const showFinancialReports = ref(false)
 const showAuditLogs = ref(false)
 const loading = computed(() => paymentsStore.loading || tenantsStore.loading)
@@ -681,7 +683,9 @@ const handlePaymentSave = async () => {
 
 const handleAdvanceSuccess = () => {
   showAdvanceManager.value = false
+  debtRefreshKey.value++  // trigger PaymentModal to re-fetch debts
   paymentsStore.fetchAdvanceAccounts()
+  paymentsStore.fetchPayments(true)
   notifySuccess('Avans hesabı işlemi başarıyla tamamlandı.')
 }
 

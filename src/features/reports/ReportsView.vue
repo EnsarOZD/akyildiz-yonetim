@@ -111,6 +111,7 @@
                 <th scope="col">Kiracı / Ünite</th>
                 <th scope="col">İşlem</th>
                 <th scope="col">Açıklama</th>
+                <th scope="col">Fatura No</th>
                 <th scope="col" class="text-right">Borç(-)</th>
                 <th scope="col" class="text-right">Alacak(+)</th>
                 <th scope="col" class="text-center">Durum</th>
@@ -130,6 +131,7 @@
                   </span>
                 </td>
                 <td class="max-w-xs truncate">{{ item.description }}</td>
+                <td class="text-xs font-mono text-gray-500 dark:text-gray-400">{{ item.invoiceNumber || '-' }}</td>
                 <td class="text-right font-semibold" :class="{'text-error': !item.isPayment}">
                   {{ !item.isPayment ? formatCurrency(item.amount) : '-' }}
                 </td>
@@ -145,7 +147,7 @@
                 </td>
               </tr>
               <tr v-if="reportItems.length === 0">
-                <td colspan="8" class="text-center py-12 text-gray-500 italic">
+                <td colspan="9" class="text-center py-12 text-gray-500 italic">
                   {{ loading ? 'Veriler yükleniyor...' : 'Kritere uygun kayıt bulunamadı.' }}
                 </td>
               </tr>
@@ -331,6 +333,7 @@ const reportItems = computed(() => {
         tenantName: d.tenantName || 'Bilinmiyor',
         unitCode: d.flatInfo || d.unit || '-',
         description: d.description || `${d.type === 'Electricity' ? 'Elektrik' : d.type === 'Water' ? 'Su' : 'Aidat'} faturası`,
+        invoiceNumber: d.invoiceNumber || null,
         amount: Number(d.amount ?? 0),
         isPayment: false,
         isPaid: d.status === 'Paid'
@@ -348,6 +351,7 @@ const reportItems = computed(() => {
         tenantName: p.tenantName || p.ownerName || 'Bilinmiyor',
         unitCode: p.flatInfo || '-',
         description: p.description || p.Type || 'Tahsilat kaydı',
+        invoiceNumber: p.receiptNumber || null,
         amount: Number(p.amount ?? 0),
         isPayment: true,
         isPaid: true
@@ -428,6 +432,7 @@ const exportToExcel = () => {
     'Ünite': i.unitCode,
     'Tür': i.isPayment ? 'Tahsilat' : 'Borç Tahakkuku',
     'Açıklama': i.description,
+    'Fatura No': i.invoiceNumber || '',
     'Borç (-)': !i.isPayment ? i.amount : 0,
     'Tahsilat (+)': i.isPayment ? i.amount : 0,
     'Durum': i.isPaid ? 'Ödendi' : 'Bekliyor'

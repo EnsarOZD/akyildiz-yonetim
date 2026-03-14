@@ -105,17 +105,30 @@
           </label>
         </div>
 
-        <!-- Açıklama -->
-        <div class="form-control">
-          <label class="label">
-            <span class="label-text font-semibold text-gray-700 dark:text-gray-300">Açıklama</span>
-          </label>
-          <textarea 
-            v-model="expense.description" 
-            class="textarea textarea-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400" 
-            placeholder="Gider açıklaması giriniz" 
-            rows="3"
-          ></textarea>
+        <!-- Açıklama ve Fatura No -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text font-semibold text-gray-700 dark:text-gray-300">Açıklama</span>
+            </label>
+            <textarea
+              v-model="expense.description"
+              class="textarea textarea-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400"
+              placeholder="Gider açıklaması giriniz"
+              rows="3"
+            ></textarea>
+          </div>
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text font-semibold text-gray-700 dark:text-gray-300">Fatura / Makbuz No</span>
+            </label>
+            <input
+              v-model="expense.receiptNumber"
+              type="text"
+              class="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400"
+              placeholder="Opsiyonel fatura numarası"
+            />
+          </div>
         </div>
 
         <!-- Önizleme -->

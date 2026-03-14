@@ -78,6 +78,18 @@ button:focus-visible {
   }
 }
 
+/* Light mode: soft blue-gray background so white cards/boxes pop */
+:root:not(.dark) body,
+[data-theme="light"] body {
+  background-color: #e8ecf2;
+}
+
+/* Page-level gray-50 backgrounds get the same soft tone */
+:root:not(.dark) .bg-gray-50,
+[data-theme="light"] .bg-gray-50 {
+  background-color: #f5f7fa !important;
+}
+
 /* Tactile feedback for mobile/touch */
 .btn:active, button:active {
   transform: scale(0.95);
