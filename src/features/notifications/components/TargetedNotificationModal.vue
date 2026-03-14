@@ -86,6 +86,14 @@
               <input v-model="form.delayDays" type="number" class="input input-sm input-bordered w-20 rounded-lg text-center font-bold" min="1" />
               <span class="text-sm">gün gecikenlere gönder.</span>
             </div>
+            <!-- E-posta seçeneği -->
+            <label class="flex items-center gap-3 cursor-pointer pt-2">
+              <input type="checkbox" v-model="form.sendEmail" class="checkbox checkbox-warning checkbox-sm" />
+              <span class="text-sm font-semibold text-amber-900 dark:text-amber-200">
+                📧 Ayrıca e-posta ile de gönder
+                <span class="text-xs font-normal opacity-70 ml-1">(kiracının kayıtlı e-postasına)</span>
+              </span>
+            </label>
           </div>
         </transition>
 
@@ -172,7 +180,8 @@ const form = reactive({
   targetId: null,
   delayDays: 5,
   title: '',
-  message: ''
+  message: '',
+  sendEmail: false
 })
 
 const isFormValid = computed(() => {
@@ -208,8 +217,9 @@ const handleSubmit = async () => {
       message: form.message,
       type: form.type,
       targetType: form.targetType,
-      targetId: form.targetId,
-      delayDays: form.type === 'debt' ? form.delayDays : null
+      targetId: form.targetId ? String(form.targetId) : null,
+      delayDays: form.type === 'debt' ? form.delayDays : null,
+      sendEmail: form.type === 'debt' && form.sendEmail
     })
     
     notify('Bildirim başarıyla kuyruğa alındı ve iletiliyor', 'success')
@@ -222,7 +232,8 @@ const handleSubmit = async () => {
       targetId: null,
       delayDays: 5,
       title: '',
-      message: ''
+      message: '',
+      sendEmail: false
     })
   } catch (error) {
     notify('Bildirim gönderilirken bir hata oluştu', 'error')

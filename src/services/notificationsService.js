@@ -18,7 +18,11 @@ export const notificationsService = {
     },
 
     async sendTargeted(payload) {
-        // payload: { title, message, type, targetType, targetId, delayDays }
-        await apiService.post('/notifications/targeted', payload)
+        // payload: { title, message, type, targetType, targetId, delayDays, sendEmail }
+        return await apiService.post('/notifications/targeted', payload)
+    },
+
+    async sendOverdueEmail(tenantId, ownerId) {
+        return await apiService.post('/notifications/send-overdue-email', { tenantId, ownerId })
     }
 }

@@ -424,7 +424,8 @@ const newExpense = ref({
   title: '',
   amount: '',
   type: 'Other',
-  description: ''
+  description: '',
+  receiptNumber: ''
 })
 
 /** API çağrıları */
@@ -479,7 +480,8 @@ const openNewExpenseModal = () => {
     title: '',
     amount: '',
     type: 'Other',
-    description: ''
+    description: '',
+    receiptNumber: ''
   }
   editMode.value = false
   selectedExpenseId.value = null
@@ -491,7 +493,8 @@ const cancelEdit = () => {
     title: '',
     amount: '',
     type: 'Other',
-    description: ''
+    description: '',
+    receiptNumber: ''
   }
   editMode.value = false
   selectedExpenseId.value = null
@@ -540,7 +543,8 @@ const saveExpense = async (expenseData) => {
       amount,
       type: getExpenseTypeString(expenseData.type),
       expenseDate: new Date(expenseData.expenseDate).toISOString(),
-      description: expenseData.description?.trim() || ''
+      description: expenseData.description?.trim() || '',
+      receiptNumber: expenseData.receiptNumber?.trim() || null
     }
 
     if (editMode.value && selectedExpenseId.value) {

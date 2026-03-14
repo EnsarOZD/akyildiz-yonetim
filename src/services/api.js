@@ -62,7 +62,7 @@ class ApiService {
           if (text) {
             try {
               errorData = JSON.parse(text);
-              errorMessage = errorData.errorMessage || errorData.message || errorMessage;
+              errorMessage = errorData.errorMessage || errorData.message || errorData.errors?.[0] || errorMessage;
             } catch {
               errorData = text;
             }
