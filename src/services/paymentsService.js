@@ -44,6 +44,13 @@ class PaymentsService {
     return apiService.delete(`/payments/${id}`)
   }
 
+  // Toplu ödeme sil
+  async bulkDeletePayments(ids) {
+    return apiService.delete('/payments/bulk', {
+      body: JSON.stringify(ids)
+    })
+  }
+
   // Avans hesaplarını getir
   async getAdvanceAccounts(filters = {}) {
     const params = {}

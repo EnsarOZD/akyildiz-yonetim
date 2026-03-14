@@ -55,6 +55,17 @@ export const usePaymentsStore = defineStore('payments', {
             } catch (err) {
                 throw err
             }
+        },
+
+        async bulkDeletePayments(ids) {
+            try {
+                await paymentsService.bulkDeletePayments(ids)
+                this.payments = this.payments.filter(p => !ids.includes(p.id))
+                await this.fetchAdvanceAccounts()
+            } catch (err) {
+                errorHandler.logError(err, { component: 'PaymentsStore', action: 'bulkDeletePayments' })
+                throw err
+            }
         }
     }
 })
