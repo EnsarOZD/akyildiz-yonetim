@@ -26,7 +26,7 @@
     <template v-else>
       <!-- Landing page ve login için farklı layout -->
       <template v-if="route.meta.hideLayout">
-        <router-view />
+        <router-view key="public-view" />
       </template>
       
       <!-- Normal sayfalar için layout -->
@@ -40,7 +40,7 @@
           
           <div class="w-full max-w-7xl mx-auto bg-base-100 md:shadow-lg md:rounded-xl overflow-hidden mb-20 md:mb-0">
             <!-- İçerik -->
-            <router-view class="p-4 sm:p-6 shadow-none" />
+            <router-view key="private-view" class="p-4 sm:p-6 shadow-none" />
           </div>
         </div>
         
