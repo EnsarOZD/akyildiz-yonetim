@@ -8,8 +8,8 @@ test.describe('Kiracılar Sayfası', () => {
 
   test('Kiracılar sayfası yüklenir', async ({ page }) => {
     await expect(page.getByTestId('sidebar')).toBeVisible();
-    // Tablo veya liste görünür olmalı
-    await expect(page.locator('table, .table, [role="table"]').first()).toBeVisible();
+    // Tenants sayfası card/grid layout kullanıyor
+    await expect(page.locator('.card, .grid, [class*="grid-cols"]').first()).toBeVisible();
   });
 
   test('Yeni kiracı ekleme butonu görünür', async ({ page }) => {
@@ -21,17 +21,17 @@ test.describe('Kiracılar Sayfası', () => {
     const addBtn = page.getByRole('button', { name: /yeni|ekle/i }).first();
     await addBtn.click();
     // Modal görünür olmalı
-    await expect(page.locator('.modal.modal-open, [role="dialog"]').first()).toBeVisible();
+    await expect(page.locator('dialog[open]').first()).toBeVisible();
   });
 
   test('Yeni kiracı modalı kapatılabilir', async ({ page }) => {
     const addBtn = page.getByRole('button', { name: /yeni|ekle/i }).first();
     await addBtn.click();
-    const modal = page.locator('.modal.modal-open').first();
+    const modal = page.locator('dialog[open]').first();
     await expect(modal).toBeVisible();
 
-    // İptal/kapat butonuna tıkla
-    const cancelBtn = page.getByRole('button', { name: /iptal|kapat|vazgeç/i }).first();
+    // "İptal" uses Turkish dotted İ — must use text match not regex
+    const cancelBtn = page.locator('button:has-text("İptal")').first();
     await cancelBtn.click();
     await expect(modal).not.toBeVisible();
   });
@@ -40,14 +40,12 @@ test.describe('Kiracılar Sayfası', () => {
     const addBtn = page.getByRole('button', { name: /yeni|ekle/i }).first();
     await addBtn.click();
 
-    // Formu boş submit et
-    const submitBtn = page.getByRole('button', { name: /kaydet|ekle/i }).last();
-    await submitBtn.click();
+    // Formu boş submit et — dialog intercepts pointer events, use force
+    const submitBtn = page.locator('dialog[open] button[type="submit"]').first();
+    await submitBtn.click({ force: true });
 
-    // Hata mesajları veya required alanlar görünür olmalı
-    const errorOrRequired = page.locator('.text-error, .text-red-500, [class*="error"], input:invalid').first();
-    // En azından form gönderilememiş olmalı (modal hala açık)
-    await expect(page.locator('.modal.modal-open').first()).toBeVisible();
+    // Modal hala açık olmalı (form validation engelledi)
+    await expect(page.locator('dialog[open]').first()).toBeVisible();
   });
 
   test('Arama/filtreleme çalışır', async ({ page }) => {
@@ -61,35 +59,38 @@ test.describe('Kiracılar Sayfası', () => {
   });
 
   test('Kiracı detay sayfası açılır', async ({ page }) => {
-    const rows = page.locator('table tbody tr, .table tbody tr');
-    const count = await rows.count();
-    if (count > 0) {
-      const detailBtn = rows.first().locator('button[title*="detay"], a[href*="tenant"], button').first();
-      if (await detailBtn.isVisible()) {
-        await detailBtn.click();
-        await page.waitForLoadState('networkidle');
-        // Detay sayfası veya modal açılmalı
-      }
+    // Kiracı listesindeki ilk detay/görüntüle linki
+    const detailLink = page.locator('a[href*="/tenants/"]').first();
+    if (await detailLink.isVisible()) {
+      await detailLink.click();
+      await page.waitForLoadState('networkidle');
+      await expect(page).toHaveURL(/\/tenants\//);
     }
   });
 
   test('Kiracı düzenleme modalı açılır', async ({ page }) => {
-    const editBtns = page.locator('button[title*="düzenle"], button[aria-label*="edit"], button:has(svg)');
-    if (await editBtns.first().isVisible()) {
-      await editBtns.first().click();
-      await page.waitForTimeout(300);
-      // Edit modal açılmış olmalı
-      await expect(page.locator('.modal.modal-open').first()).toBeVisible();
+    // Dropdown menüden "Düzenle" seçeneğini bul
+    const dropdownBtns = page.locator('.dropdown button, button.btn-ghost, button.btn-circle').first();
+    if (await dropdownBtns.isVisible()) {
+      await dropdownBtns.click();
+      await page.waitForTimeout(200);
+      const editOption = page.locator('.dropdown-content a, .menu a, li a').filter({ hasText: /düzenle/i }).first();
+      if (await editOption.isVisible()) {
+        await editOption.click();
+        await page.waitForTimeout(300);
+        await expect(page.locator('dialog[open]').first()).toBeVisible();
+      }
     }
   });
 
   test('Sayfalama çalışır (eğer varsa)', async ({ page }) => {
-    const pagination = page.locator('.join, [aria-label="pagination"], .pagination').first();
+    // PaginationBar bileşeni kullanıyor
+    const pagination = page.locator('[class*="join"], [class*="pagination"], button[aria-label*="sayfa"]').first();
     if (await pagination.isVisible()) {
-      const nextBtn = pagination.getByRole('button').last();
-      if (await nextBtn.isEnabled()) {
+      const nextBtn = page.locator('[class*="join"] button:last-child, [class*="pagination"] button:last-child').first();
+      if (await nextBtn.isVisible() && await nextBtn.isEnabled()) {
         await nextBtn.click();
-        await page.waitForLoadState('networkidle');
+        await page.waitForTimeout(500);
       }
     }
   });

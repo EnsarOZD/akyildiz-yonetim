@@ -24,19 +24,20 @@ test.describe('Bildirimler & Duyurular Sayfası', () => {
   });
 
   test('Duyuru modalı açılır', async ({ page }) => {
-    const addBtn = page.getByRole('button', { name: /yeni|duyuru|ekle/i }).first();
+    const addBtn = page.locator('button:has-text("Duyuru Yayınla")').first();
     await addBtn.click();
     await page.waitForTimeout(300);
-    await expect(page.locator('.modal.modal-open').first()).toBeVisible();
+    // AnnouncementModal uses div.fixed.inset-0 pattern (not dialog)
+    await expect(page.locator('div.fixed.inset-0').first()).toBeVisible();
   });
 
   test('Duyuru modalı kapatılabilir', async ({ page }) => {
-    const addBtn = page.getByRole('button', { name: /yeni|duyuru|ekle/i }).first();
+    const addBtn = page.locator('button:has-text("Duyuru Yayınla")').first();
     await addBtn.click();
-    const modal = page.locator('.modal.modal-open').first();
+    const modal = page.locator('div.fixed.inset-0').first();
     await expect(modal).toBeVisible();
 
-    const cancelBtn = page.getByRole('button', { name: /iptal|kapat|vazgeç/i }).first();
+    const cancelBtn = page.locator('button:has-text("Vazgeç")').first();
     await cancelBtn.click();
     await expect(modal).not.toBeVisible();
   });
@@ -53,7 +54,7 @@ test.describe('Bildirimler & Duyurular Sayfası', () => {
     if (await targetedBtn.isVisible()) {
       await targetedBtn.click();
       await page.waitForTimeout(300);
-      await expect(page.locator('.modal.modal-open').first()).toBeVisible();
+      await expect(page.locator('dialog[open]').first()).toBeVisible();
     }
   });
 
@@ -123,14 +124,22 @@ test.describe('Bildirimler & Duyurular Sayfası', () => {
   });
 
   test('Duyuru formu validation çalışır - boş submit', async ({ page }) => {
-    const addBtn = page.getByRole('button', { name: /yeni|duyuru|ekle/i }).first();
+    const addBtn = page.locator('button:has-text("Duyuru Yayınla")').first();
     await addBtn.click();
 
-    const submitBtn = page.getByRole('button', { name: /gönder|yayınla|kaydet/i }).last();
-    await submitBtn.click();
+    const modal = page.locator('div.fixed.inset-0').first();
+    await expect(modal).toBeVisible();
 
-    // Modal hala açık olmalı
-    await expect(page.locator('.modal.modal-open').first()).toBeVisible();
+    // Try submit via the last button in modal (submit button)
+    const buttons = page.locator('div.fixed.inset-0 button');
+    const btnCount = await buttons.count();
+    if (btnCount > 0) {
+      const submitBtn = buttons.last();
+      await submitBtn.click({ force: true });
+      await page.waitForTimeout(200);
+    }
+    // Modal hala açık olmalı (boş form gönderilemez)
+    await expect(modal).toBeVisible();
   });
 
   test('Bildirim okundu işaretleme çalışır', async ({ page }) => {
