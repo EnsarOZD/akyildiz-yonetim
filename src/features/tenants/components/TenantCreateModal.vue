@@ -320,6 +320,13 @@ function validateForm () {
   return Object.keys(errs).length === 0
 }
 
+// --- Cancel
+function handleClose () {
+  tenant.value = emptyTenant()
+  resetDirty()
+  emit('close')
+}
+
 // --- Submit
 function handleSave () {
   if (!validateForm()) return

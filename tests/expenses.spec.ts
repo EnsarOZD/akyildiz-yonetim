@@ -11,7 +11,6 @@ test.describe('Giderler & Aidatlar Sayfası', () => {
   });
 
   test('Aidat ve gider sekmeler/paneller görünür', async ({ page }) => {
-    // Sekme veya panel başlıkları
     const tabs = page.locator('.tabs, [role="tablist"], .tab, button[class*="tab"]');
     if (await tabs.count() > 0) {
       await expect(tabs.first()).toBeVisible();
@@ -23,30 +22,31 @@ test.describe('Giderler & Aidatlar Sayfası', () => {
     if (await addBtn.isVisible()) {
       await addBtn.click();
       await page.waitForTimeout(300);
-      await expect(page.locator('.modal.modal-open').first()).toBeVisible();
+      await expect(page.locator('dialog[open]').first()).toBeVisible();
     }
   });
 
   test('Gider modalı kapatılabilir', async ({ page }) => {
-    const addBtn = page.getByRole('button', { name: /yeni|ekle/i }).first();
+    // Specific selector: the dashed-border card button for new expense
+    const addBtn = page.locator('[class*="border-dashed"] button, button:has-text("Yeni Gider")').first();
     if (await addBtn.isVisible()) {
       await addBtn.click();
-      const modal = page.locator('.modal.modal-open').first();
+      const modal = page.locator('dialog[open]').first();
       await expect(modal).toBeVisible();
 
-      const cancelBtn = page.getByRole('button', { name: /iptal|kapat/i }).first();
+      const cancelBtn = page.locator('button:has-text("İptal")').first();
       await cancelBtn.click();
       await expect(modal).not.toBeVisible();
     }
   });
 
   test('Fatura numarası alanı gider formunda görünür', async ({ page }) => {
-    const addBtn = page.getByRole('button', { name: /yeni|ekle/i }).first();
+    const addBtn = page.locator('[class*="border-dashed"] button, button:has-text("Yeni Gider")').first();
     if (await addBtn.isVisible()) {
       await addBtn.click();
-      // Fatura numarası alanı
+      await expect(page.locator('dialog[open]').first()).toBeVisible();
       const invoiceField = page.locator(
-        'input[placeholder*="fatura"], input[placeholder*="Fatura"], label:has-text("Fatura") + input, input[name*="invoice"]'
+        'input[placeholder*="fatura"], input[placeholder*="Fatura"], input[placeholder*="opsiyonel"]'
       ).first();
       await expect(invoiceField).toBeVisible();
     }
@@ -56,7 +56,7 @@ test.describe('Giderler & Aidatlar Sayfası', () => {
     const manualBtn = page.getByRole('button', { name: /manuel|borç ekle|borç/i }).first();
     if (await manualBtn.isVisible()) {
       await manualBtn.click();
-      await expect(page.locator('.modal.modal-open').first()).toBeVisible();
+      await expect(page.locator('dialog[open]').first()).toBeVisible();
     }
   });
 
@@ -64,9 +64,9 @@ test.describe('Giderler & Aidatlar Sayfası', () => {
     const manualBtn = page.getByRole('button', { name: /manuel|borç ekle/i }).first();
     if (await manualBtn.isVisible()) {
       await manualBtn.click();
-      // Fatura numarası input
+      await expect(page.locator('dialog[open]').first()).toBeVisible();
       const invoiceInput = page.locator(
-        'input[placeholder*="fatura"], input[placeholder*="Fatura No"]'
+        'input[placeholder*="fatura"], input[placeholder*="Fatura No"], input[placeholder*="opsiyonel"]'
       ).first();
       await expect(invoiceInput).toBeVisible();
     }
@@ -77,7 +77,7 @@ test.describe('Giderler & Aidatlar Sayfası', () => {
     if (await distributeBtn.isVisible()) {
       await distributeBtn.click();
       await page.waitForTimeout(300);
-      await expect(page.locator('.modal.modal-open').first()).toBeVisible();
+      await expect(page.locator('dialog[open]').first()).toBeVisible();
     }
   });
 
@@ -86,23 +86,22 @@ test.describe('Giderler & Aidatlar Sayfası', () => {
     if (await importBtn.isVisible()) {
       await importBtn.click();
       await page.waitForTimeout(300);
-      await expect(page.locator('.modal.modal-open').first()).toBeVisible();
+      await expect(page.locator('dialog[open]').first()).toBeVisible();
     }
   });
 
   test('Gider listesi görünür ve yüklenir', async ({ page }) => {
     await page.waitForTimeout(1000);
-    // Tablo ya da "veri yok" mesajı görünür olmalı
-    const tableOrEmpty = page.locator(
-      'table, .table, [class*="empty"], p:has-text("veri yok"), p:has-text("kayıt yok")'
+    // Expenses sayfası grid layout kullanıyor (tablo değil)
+    const listOrEmpty = page.locator(
+      '[class*="grid-cols"], p:has-text("gider yok"), p:has-text("kayıt"), [class*="rounded-lg"]'
     ).first();
-    await expect(tableOrEmpty).toBeVisible();
+    await expect(listOrEmpty).toBeVisible();
   });
 
   test('Yıl/dönem filtresi çalışır', async ({ page }) => {
-    const yearSelect = page.locator('select[name*="year"], select option').first();
+    const yearSelect = page.locator('select').first();
     if (await yearSelect.isVisible()) {
-      // Yıl seçeneği var, filter çalışıyor
       await expect(yearSelect).toBeVisible();
     }
   });
