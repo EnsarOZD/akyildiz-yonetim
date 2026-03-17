@@ -162,7 +162,7 @@ import { useNotify } from '@/composables/useNotify'
 
 const props = defineProps({ show: Boolean })
 const emit = defineEmits(['close', 'success'])
-const { notify } = useNotify()
+const { notifySuccess, notifyError } = useNotify()
 
 const loading = ref(false)
 const tenants = ref([])
@@ -222,7 +222,7 @@ const handleSubmit = async () => {
       sendEmail: form.type === 'debt' && form.sendEmail
     })
     
-    notify('Bildirim başarıyla kuyruğa alındı ve iletiliyor', 'success')
+    notifySuccess('Bildirim başarıyla kuyruğa alındı ve iletiliyor', 'success')
     emit('success')
     emit('close')
     // Reset form
@@ -236,7 +236,7 @@ const handleSubmit = async () => {
       sendEmail: false
     })
   } catch (error) {
-    notify('Bildirim gönderilirken bir hata oluştu', 'error')
+    notifyError('Bildirim gönderilirken bir hata oluştu', 'error')
   } finally {
     loading.value = false
   }
