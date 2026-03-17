@@ -13,10 +13,24 @@ class PaymentsService {
     if (filters.endDate) params.endDate = filters.endDate
     if (filters.utilityType) params.utilityType = filters.utilityType
     if (filters.excludeAdvanceUse !== undefined) params.excludeAdvanceUse = filters.excludeAdvanceUse
-    params.pageSize = 100
 
-    const response = await apiService.get('/payments', params)
-    return Array.isArray(response) ? response : (response?.items ?? [])
+    params.pageSize = 1000
+    let pageNumber = 1
+    const allItems = []
+
+    while (true) {
+      const requestParams = { ...params, pageNumber }
+      const response = await apiService.get('/payments', requestParams)
+      const items = Array.isArray(response) ? response : (response?.items ?? [])
+      
+      if (items.length === 0) break
+      allItems.push(...items)
+      
+      if (items.length < params.pageSize) break // Son sayfa
+      pageNumber++
+    }
+
+    return allItems
   }
 
   // ID'ye göre ödeme getir

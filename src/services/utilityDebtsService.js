@@ -20,10 +20,23 @@ class UtilityDebtsService {
     if (filters.startDate) params.startDate = filters.startDate
     if (filters.endDate) params.endDate = filters.endDate
 
-    // Backend now returns PagedResult<T>; fetch max page and unwrap so callers receive a plain array.
-    params.pageSize = 100
-    const response = await apiService.get('/UtilityDebts', params)
-    return Array.isArray(response) ? response : (response?.items ?? [])
+    params.pageSize = 1000
+    let pageNumber = 1
+    const allItems = []
+
+    while (true) {
+      const requestParams = { ...params, pageNumber }
+      const response = await apiService.get('/UtilityDebts', requestParams)
+      const items = Array.isArray(response) ? response : (response?.items ?? [])
+      
+      if (items.length === 0) break
+      allItems.push(...items)
+      
+      if (items.length < params.pageSize) break // Son sayfa
+      pageNumber++
+    }
+
+    return allItems
   }
 
   // ID'ye göre utility debt getir
