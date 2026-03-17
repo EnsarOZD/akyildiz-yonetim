@@ -1,5 +1,5 @@
 <template>
-  <BaseModal title="Excel'den Borç Aktarımı" @close="$emit('close')">
+  <BaseModal :modelValue="true" title="Excel'den Borç Aktarımı" @close="$emit('close')">
     <div class="space-y-6">
       <!-- Bilgilendirme -->
       <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 p-4 rounded-xl">

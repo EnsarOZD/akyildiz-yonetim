@@ -46,9 +46,7 @@ class PaymentsService {
 
   // Toplu ödeme sil
   async bulkDeletePayments(ids) {
-    return apiService.delete('/payments/bulk', {
-      body: JSON.stringify({ ids: ids })
-    })
+    return apiService.post('/payments/bulk-delete', { ids: ids })
   }
 
   // Avans hesaplarını getir

@@ -63,9 +63,7 @@ class UtilityDebtsService {
 
   // Toplu utility debt sil
   async bulkDeleteDebts(ids) {
-    return apiService.delete('/utilitydebts/bulk', {
-      body: JSON.stringify({ ids: ids })
-    })
+    return apiService.post('/utilitydebts/bulk-delete', { ids: ids })
   }
 
   // Döneme göre utility debt'leri sil
@@ -86,10 +84,9 @@ class UtilityDebtsService {
     const formData = new FormData()
     formData.append('file', file)
     
-    return apiService.post('/UtilityDebts/import', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
+    return apiService.request('/UtilityDebts/import', {
+      method: 'POST',
+      body: formData
     })
   }
 }

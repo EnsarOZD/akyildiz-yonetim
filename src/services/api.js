@@ -31,10 +31,11 @@ class ApiService {
     const url = `${this.baseURL}${endpoint}`
 
     // Authentication token'ını ekle
-    const headers = {
-      'Content-Type': 'application/json',
-      ...options.headers
+    const headers = {}
+    if (!(options.body instanceof FormData)) {
+      headers['Content-Type'] = 'application/json'
     }
+    Object.assign(headers, options.headers)
 
     const token = this.getAuthToken()
     if (token) {
