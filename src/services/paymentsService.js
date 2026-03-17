@@ -22,11 +22,12 @@ class PaymentsService {
       const requestParams = { ...params, pageNumber }
       const response = await apiService.get('/payments', requestParams)
       const items = Array.isArray(response) ? response : (response?.items ?? [])
-      
+      const actualPageSize = response?.pageSize ?? params.pageSize
+
       if (items.length === 0) break
       allItems.push(...items)
       
-      if (items.length < params.pageSize) break // Son sayfa
+      if (items.length < actualPageSize) break // Son sayfa
       pageNumber++
     }
 

@@ -471,7 +471,12 @@ const fetchDues = async () => {
       return {
         id: d.id,
         flatId: d.flatId,
-        type: d.type ?? 0,
+        type: (() => {
+          if (d.type === 'Aidat' || d.type === 0) return 0;
+          if (d.type === 'Electricity' || d.type === 'Elektrik' || d.type === 1) return 1;
+          if (d.type === 'Water' || d.type === 'Su' || d.type === 2) return 2;
+          return 0; // Default
+        })(),
         flatNumber: d.flatNumber ?? d.flat_code ?? d.FlatCode ?? flat?.code ?? '-',
         tenantCompany: d.tenantName ?? d.TenantCompanyName ?? tenant?.companyName ?? tenant?.company ?? tenant?.fullName ?? flat?.tenantCompanyName ?? null,
         periodYear: y,
