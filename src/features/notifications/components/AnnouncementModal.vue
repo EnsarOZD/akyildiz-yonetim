@@ -81,7 +81,7 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['close', 'success'])
-const { notify } = useNotify()
+const { notifySuccess, notifyError } = useNotify()
 
 const loading = ref(false)
 const form = reactive({
@@ -99,13 +99,13 @@ const handleSubmit = async () => {
   loading.value = true
   try {
     await notificationsService.broadcast(form.title, form.message)
-    notify('Duyuru başarıyla tüm kullanıcılara iletildi', 'success')
+    notifySuccess('Duyuru başarıyla tüm kullanıcılara iletildi', 'success')
     emit('success')
     form.title = ''
     form.message = ''
     emit('close')
   } catch (error) {
-    notify('Duyuru yayınlanırken bir hata oluştu', 'error')
+    notifyError('Duyuru yayınlanırken bir hata oluştu', 'error')
   } finally {
     loading.value = false
   }

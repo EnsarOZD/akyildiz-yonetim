@@ -61,6 +61,13 @@ class UtilityDebtsService {
     return apiService.delete(`/utilitydebts/${id}`)
   }
 
+  // Toplu utility debt sil
+  async bulkDeleteDebts(ids) {
+    return apiService.delete('/utilitydebts/bulk', {
+      body: JSON.stringify(ids)
+    })
+  }
+
   // Döneme göre utility debt'leri sil
   async deleteUtilityDebtsByPeriod(period) {
     return apiService.delete(`/utilitydebts/period/${period}`)
