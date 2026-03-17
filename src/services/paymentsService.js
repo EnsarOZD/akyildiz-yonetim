@@ -47,7 +47,7 @@ class PaymentsService {
   // Toplu ödeme sil
   async bulkDeletePayments(ids) {
     return apiService.delete('/payments/bulk', {
-      body: JSON.stringify(ids)
+      body: JSON.stringify({ ids: ids })
     })
   }
 

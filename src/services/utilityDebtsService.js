@@ -64,7 +64,7 @@ class UtilityDebtsService {
   // Toplu utility debt sil
   async bulkDeleteDebts(ids) {
     return apiService.delete('/utilitydebts/bulk', {
-      body: JSON.stringify(ids)
+      body: JSON.stringify({ ids: ids })
     })
   }
 
