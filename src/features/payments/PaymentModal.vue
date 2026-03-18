@@ -420,10 +420,11 @@ const fetchDebts = async () => {
   loadingDebts.value = true
   tenantDebts.value = []
   try {
+    const filterType = form.type !== '' ? parseInt(form.type) : undefined
     if (paymentType.value === 'tenant' && form.tenantId) {
-      tenantDebts.value = await utilityDebtsService.getUtilityDebts({ tenantId: form.tenantId, status: 'Unpaid' }) || []
+      tenantDebts.value = await utilityDebtsService.getUtilityDebts({ tenantId: form.tenantId, status: 'Unpaid', type: filterType }) || []
     } else if (paymentType.value === 'owner' && form.ownerId) {
-      tenantDebts.value = await utilityDebtsService.getUtilityDebts({ ownerId: form.ownerId, status: 'Unpaid' }) || []
+      tenantDebts.value = await utilityDebtsService.getUtilityDebts({ ownerId: form.ownerId, status: 'Unpaid', type: filterType }) || []
     }
   } catch (e) {
     handleNetworkError(e, { component: 'PaymentModal', action: 'fetchDebts' })
@@ -484,13 +485,15 @@ const handleSave = async () => {
   isLoading.value = true
   errorMessage.value = ''
   try {
+    const fType = parseInt(form.type)
     const payload = {
       tenantId: paymentType.value === 'tenant' ? form.tenantId : null,
       ownerId:  paymentType.value === 'owner'  ? form.ownerId  : null,
       amount: Number(form.amount),
       paymentDate: form.date,
-      type: parseInt(form.type) || 0,
-      targetDebtType: parseInt(form.type) < 3 ? parseInt(form.type) : null,
+      // 0->1(Dues), 1&2->2(Utility), o.w->3(Other)
+      type: fType === 0 ? 1 : (fType === 1 || fType === 2 ? 2 : 3), 
+      targetDebtType: fType < 3 ? fType : null,
       bank: form.bank,
       description: form.description || '',
       autoAllocate: autoAllocate.value,
