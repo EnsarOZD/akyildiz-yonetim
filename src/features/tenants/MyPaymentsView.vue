@@ -23,7 +23,7 @@
       <!-- Filters Card -->
       <div class="card bg-white dark:bg-gray-800 shadow-xl mb-8 overflow-visible border border-gray-100 dark:border-gray-700">
         <div class="card-body p-6">
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
             <!-- Tarih Aralığı -->
             <div class="form-control">
               <label class="label"><span class="label-text font-semibold">Başlangıç Tarihi</span></label>
@@ -41,6 +41,16 @@
                 <option value="all">Tümü (Borç & Ödeme)</option>
                 <option value="debt">Sadece Borçlar</option>
                 <option value="payment">Sadece Ödemeler</option>
+              </select>
+            </div>
+
+            <!-- Ödeme Durumu -->
+            <div class="form-control">
+              <label class="label"><span class="label-text font-semibold">Ödeme Durumu</span></label>
+              <select v-model="filters.status" class="select select-bordered w-full bg-white dark:bg-gray-700" :disabled="filters.type === 'payment'">
+                <option value="all">Tümü</option>
+                <option value="unpaid">Ödenmeyenler</option>
+                <option value="paid">Ödenenler</option>
               </select>
             </div>
           </div>
@@ -174,6 +184,7 @@
 
 <script setup>
 import { ref, reactive, computed, onMounted, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import utilityDebtsService from '@/services/utilityDebtsService'
 import paymentsService from '@/services/paymentsService'
@@ -182,6 +193,7 @@ import { jsPDF } from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import { arialBase64 } from '../reports/utils/pdfFonts'
 
+const route = useRoute()
 const authStore = useAuthStore()
 const loading = ref(false)
 const debtsData = ref([])
@@ -190,11 +202,18 @@ const paymentsData = ref([])
 const filters = reactive({
   startDate: '',
   endDate: '',
-  type: 'all'
+  type: 'all',
+  status: 'all' // 'all', 'unpaid', 'paid'
 })
 
 // Lifecycle
 onMounted(async () => {
+  // Deep-link / Bildirim filtrelerini oku
+  if (route.query.type) filters.type = route.query.type
+  if (route.query.status) filters.status = route.query.status
+  if (route.query.startDate) filters.startDate = route.query.startDate
+  if (route.query.endDate) filters.endDate = route.query.endDate
+
   await fetchData()
 })
 
@@ -240,6 +259,10 @@ const reportItems = computed(() => {
   
   if (filters.type === 'all' || filters.type === 'debt') {
     debtsData.value.forEach(d => {
+      const isPaid = d.status === 'Paid'
+      if (filters.status === 'unpaid' && isPaid) return
+      if (filters.status === 'paid' && !isPaid) return
+
       items.push({
         date: d.date || d.createdAt || d.dueDate,
         periodYear: d.periodYear,
@@ -247,13 +270,16 @@ const reportItems = computed(() => {
         description: d.description || `${d.type === 'Electricity' ? 'Elektrik' : d.type === 'Water' ? 'Su' : 'Aidat'} faturası`,
         amount: Number(d.amount ?? 0),
         isPayment: false,
-        isPaid: d.status === 'Paid'
+        isPaid: isPaid
       })
     })
   }
   
   if (filters.type === 'all' || filters.type === 'payment') {
     paymentsData.value.forEach(p => {
+      // Ödemeler zaten ödenmiş sayılır, ama filtre 'unpaid' ise listelenmemelidir!
+      if (filters.status === 'unpaid') return
+
       items.push({
         date: p.paymentDate,
         periodYear: p.periodYear,
