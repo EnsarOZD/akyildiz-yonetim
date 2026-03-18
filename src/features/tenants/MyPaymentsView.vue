@@ -8,7 +8,13 @@
             <span class="text-4xl">💳</span>
             Ödemelerim ve Borçlarım
           </h1>
-          <p class="text-gray-500 dark:text-gray-400 mt-1">Geçmiş ödemelerinizi ve güncel borç durumunuzu takip edin</p>
+          <p v-if="tenantInfo" class="text-sm font-semibold text-blue-600 dark:text-blue-400 mt-1">
+            {{ tenantInfo.companyName }}
+            <span v-if="tenantInfo.flats && tenantInfo.flats.length" class="text-gray-400 font-normal">
+              — Ünite: {{ tenantInfo.flats.map(f => f.code).join(', ') }}
+            </span>
+          </p>
+          <p class="text-gray-500 dark:text-gray-400 mt-0.5 text-xs">Geçmiş ödemelerinizi ve güncel borç durumunuzu takip edin</p>
         </div>
         <div class="flex gap-2">
           <button @click="exportToExcel" class="btn btn-success text-white shadow-md normal-case btn-sm sm:btn-md" :disabled="loading || reportItems.length === 0">
@@ -188,6 +194,7 @@ import { useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import utilityDebtsService from '@/services/utilityDebtsService'
 import paymentsService from '@/services/paymentsService'
+import tenantsService from '@/services/tenantsService'
 import * as XLSX from 'xlsx'
 import { jsPDF } from 'jspdf'
 import autoTable from 'jspdf-autotable'
@@ -198,6 +205,7 @@ const authStore = useAuthStore()
 const loading = ref(false)
 const debtsData = ref([])
 const paymentsData = ref([])
+const tenantInfo = ref(null)
 
 const filters = reactive({
   startDate: '',
@@ -220,25 +228,27 @@ onMounted(async () => {
 const fetchData = async () => {
   loading.value = true
   try {
-    // Kiracı ID'sini auth store'dan alıyoruz
     const tenantId = authStore.role.toLowerCase() === 'tenant' ? authStore.companyId : undefined
-    
-    const [debts, payments] = await Promise.all([
+
+    const promises = [
       utilityDebtsService.getUtilityDebts({
         tenantId,
         startDate: filters.startDate || undefined,
         endDate: filters.endDate || undefined
-      }),
+      }).then(d => { debtsData.value = d || [] }),
       paymentsService.getPayments({
         tenantId,
         startDate: filters.startDate || undefined,
         endDate: filters.endDate || undefined,
         excludeAdvanceUse: true
-      })
-    ])
-    
-    debtsData.value = debts || []
-    paymentsData.value = payments || []
+      }).then(p => { paymentsData.value = p || [] })
+    ]
+
+    if (tenantId && !tenantInfo.value) {
+      promises.push(tenantsService.getTenantById(tenantId).then(t => { tenantInfo.value = t }))
+    }
+
+    await Promise.allSettled(promises)
   } catch (e) {
     console.error('Veri çekme hatası:', e)
   } finally {
@@ -248,6 +258,7 @@ const fetchData = async () => {
 
 const clearFilters = () => {
   filters.type = 'all'
+  filters.status = 'all'
   filters.startDate = ''
   filters.endDate = ''
   fetchData()
@@ -256,10 +267,10 @@ const clearFilters = () => {
 // Data Processing
 const reportItems = computed(() => {
   const items = []
-  
+
   if (filters.type === 'all' || filters.type === 'debt') {
     debtsData.value.forEach(d => {
-      const isPaid = d.status === 'Paid'
+      const isPaid = d.status?.toLowerCase() === 'paid'
       if (filters.status === 'unpaid' && isPaid) return
       if (filters.status === 'paid' && !isPaid) return
 
@@ -268,46 +279,48 @@ const reportItems = computed(() => {
         periodYear: d.periodYear,
         periodMonth: d.periodMonth,
         description: d.description || `${d.type === 'Electricity' ? 'Elektrik' : d.type === 'Water' ? 'Su' : 'Aidat'} faturası`,
-        amount: Number(d.amount ?? 0),
+        amount: Number(d.remainingAmount ?? d.amount ?? 0),
         isPayment: false,
-        isPaid: isPaid
+        isPaid
       })
     })
   }
-  
-  if (filters.type === 'all' || filters.type === 'payment') {
-    paymentsData.value.forEach(p => {
-      // Ödemeler zaten ödenmiş sayılır, ama filtre 'unpaid' ise listelenmemelidir!
-      if (filters.status === 'unpaid') return
 
-      items.push({
-        date: p.paymentDate,
-        periodYear: p.periodYear,
-        periodMonth: p.periodMonth,
-        description: p.description || p.Type || 'Tahsilat kaydı',
-        amount: Number(p.amount ?? 0),
-        isPayment: true,
-        isPaid: true
+  if (filters.type === 'all' || filters.type === 'payment') {
+    if (filters.status !== 'unpaid') {
+      paymentsData.value.forEach(p => {
+        items.push({
+          date: p.paymentDate || p.createdAt || p.date,
+          periodYear: p.periodYear,
+          periodMonth: p.periodMonth,
+          description: p.description || p.Type || 'Tahsilat kaydı',
+          amount: Number(p.amount ?? 0),
+          isPayment: true,
+          isPaid: true
+        })
       })
-    })
+    }
   }
-  
+
   return items.sort((a, b) => {
-    const pA = (a.periodYear || 0) * 100 + (a.periodMonth || 0)
-    const pB = (b.periodYear || 0) * 100 + (b.periodMonth || 0)
-    if (pA !== pB) return pB - pA
-    return new Date(b.date) - new Date(a.date)
+    const dA = a.date ? new Date(a.date) : new Date(0)
+    const dB = b.date ? new Date(b.date) : new Date(0)
+    return dB - dA
   })
 })
 
+// Güncel bakiye her zaman ham veriden hesaplanır — filtre etkilemez
+const rawSummary = computed(() => {
+  const totalDebt = debtsData.value.reduce((s, d) => s + Number(d.remainingAmount ?? d.amount ?? 0), 0)
+  const totalPayment = paymentsData.value.reduce((s, p) => s + Number(p.amount ?? 0), 0)
+  return { totalDebt, totalPayment, balance: totalPayment - totalDebt }
+})
+
+// Tabloda gösterilen satırların toplamları (filtre uygulanmış)
 const summary = computed(() => {
   const totalDebt = reportItems.value.filter(i => !i.isPayment).reduce((s, i) => s + i.amount, 0)
   const totalPayment = reportItems.value.filter(i => i.isPayment).reduce((s, i) => s + i.amount, 0)
-  return {
-    totalDebt,
-    totalPayment,
-    balance: totalPayment - totalDebt
-  }
+  return { totalDebt, totalPayment, balance: rawSummary.value.balance }
 })
 
 /** Pagination */
@@ -355,69 +368,250 @@ const formatPeriod = (year, month) => {
 
 // EXPORTS
 const exportToExcel = () => {
-  const data = reportItems.value.map(i => ({
-    'Tarih': formatDate(i.date),
-    'Dönem': formatPeriod(i.periodYear, i.periodMonth),
-    'Tür': i.isPayment ? 'Ödeme' : 'Borç Tahakkuku',
-    'Açıklama': i.description,
-    'Borç (-)': !i.isPayment ? i.amount : 0,
-    'Ödeme (+)': i.isPayment ? i.amount : 0,
-    'Durum': i.isPaid ? 'Ödendi' : 'Bekliyor'
-  }))
-  
-  const ws = XLSX.utils.json_to_sheet(data)
+  const dateStr = new Date().toISOString().split('T')[0]
+  const companyName = tenantInfo.value?.companyName || authStore.fullName
+
   const wb = XLSX.utils.book_new()
-  XLSX.utils.book_append_sheet(wb, ws, "Odemelerim ve Borclarim")
-  XLSX.writeFile(wb, `Akyildiz_Finansal_Durum_${new Date().toISOString().split('T')[0]}.xlsx`)
+  const wsData = []
+
+  // Başlık satırları
+  wsData.push(['AKYILDIZ IS MERKEZI - KIRACI BORC VE ODEME EKSTRESI'])
+  wsData.push([`Kiraci: ${companyName}`])
+  wsData.push([`Olusturulma: ${new Date().toLocaleString('tr-TR')}`])
+  wsData.push([]) // boş satır
+
+  // Tablo başlığı
+  wsData.push(['Tarih', 'Donem', 'Tur', 'Aciklama', 'Borc (-)', 'Odeme (+)', 'Durum'])
+
+  // Veri satırları
+  reportItems.value.forEach(i => {
+    wsData.push([
+      formatDate(i.date),
+      formatPeriod(i.periodYear, i.periodMonth),
+      i.isPayment ? 'Odeme' : 'Borc Tahakkuku',
+      i.description,
+      !i.isPayment ? i.amount : '',
+      i.isPayment ? i.amount : '',
+      i.isPayment ? 'Odendi' : (i.isPaid ? 'Odendi' : 'Bekliyor')
+    ])
+  })
+
+  // Özet satırları
+  wsData.push([])
+  wsData.push(['', '', '', 'TOPLAM BORC TAHAKKUKU', rawSummary.value.totalDebt, '', ''])
+  wsData.push(['', '', '', 'TOPLAM ODEME', '', rawSummary.value.totalPayment, ''])
+  wsData.push(['', '', '', 'NET BAKIYE', '', rawSummary.value.balance, ''])
+
+  const ws = XLSX.utils.aoa_to_sheet(wsData)
+
+  // Sütun genişlikleri
+  ws['!cols'] = [
+    { wch: 14 }, { wch: 10 }, { wch: 18 }, { wch: 40 },
+    { wch: 16 }, { wch: 16 }, { wch: 12 }
+  ]
+
+  // Başlık satırı birleştirme (A1:G1)
+  ws['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 6 } }]
+
+  XLSX.utils.book_append_sheet(wb, ws, 'Borc ve Odeme Ekstresi')
+  XLSX.writeFile(wb, `Akyildiz_Ekstresi_${dateStr}.xlsx`)
 }
 
 const exportToPDF = () => {
-  const doc = new jsPDF()
+  const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' })
   doc.addFileToVFS('arial.ttf', arialBase64)
   doc.addFont('arial.ttf', 'Arial', 'normal')
-  doc.setFont('Arial')
-  
-  doc.setFontSize(18)
-  doc.text("AKYILDIZ IS MERKEZI - Odemelerim ve Borclarim", 15, 20)
-  
-  doc.setFontSize(10)
-  doc.text(`Kiracı: ${authStore.fullName}`, 15, 28)
-  doc.text(`Rapor Tarihi: ${new Date().toLocaleString('tr-TR')}`, 15, 34)
-  
-  const columns = [
-    { header: 'Tarih', dataKey: 'date' },
-    { header: 'Donem', dataKey: 'period' },
-    { header: 'Aciklama', dataKey: 'desc' },
-    { header: 'Borc', dataKey: 'debt' },
-    { header: 'Odeme', dataKey: 'payment' },
-    { header: 'Durum', dataKey: 'status' }
-  ]
-  
+  doc.setFont('Arial', 'normal')
+
+  const pageW  = doc.internal.pageSize.getWidth()
+  const pageH  = doc.internal.pageSize.getHeight()
+  const margin = 14
+  const genDate = new Date().toLocaleString('tr-TR')
+  const dateStr = new Date().toISOString().split('T')[0]
+  const companyName = tenantInfo.value?.companyName || authStore.fullName
+
+  const NAVY  = [15,  52,  96]
+  const GOLD  = [180, 145, 40]
+  const WHITE = [255, 255, 255]
+  const RED   = [200, 30,  30]
+  const GREEN = [22,  140, 60]
+  const GRAY  = [110, 110, 110]
+
+  const drawPageHeader = (isFirstPage) => {
+    doc.setFillColor(...NAVY)
+    doc.rect(0, 0, pageW, isFirstPage ? 40 : 24, 'F')
+    doc.setFillColor(...GOLD)
+    doc.rect(0, isFirstPage ? 40 : 24, pageW, 1.5, 'F')
+
+    doc.setTextColor(...WHITE)
+    doc.setFontSize(isFirstPage ? 15 : 10)
+    doc.text('AKYILDIZ IS MERKEZI', margin, isFirstPage ? 12 : 10)
+
+    if (isFirstPage) {
+      doc.setFontSize(8)
+      doc.text('Yonetim ve Isletme Sistemi', margin, 20)
+      doc.setFontSize(9.5)
+      doc.text(`Kiraci: ${companyName}`, margin, 28)
+      if (tenantInfo.value?.flats?.length) {
+        doc.setFontSize(7.5)
+        doc.text(`Unite: ${tenantInfo.value.flats.map(f => f.code).join(', ')}`, margin, 35)
+      }
+    }
+
+    doc.setFontSize(isFirstPage ? 17 : 10)
+    doc.text('KIRACI BORC VE ODEME EKSTRESI', pageW - margin, isFirstPage ? 15 : 10, { align: 'right' })
+
+    if (isFirstPage) {
+      doc.setFontSize(7.5)
+      doc.text(`Olusturulma: ${genDate}`, pageW - margin, 24, { align: 'right' })
+      const periStr =
+        filters.startDate && filters.endDate
+          ? `${formatDate(filters.startDate)} - ${formatDate(filters.endDate)}`
+          : 'Tum Donemler'
+      doc.text(`Donem: ${periStr}`, pageW - margin, 31, { align: 'right' })
+    }
+  }
+
+  const drawPageFooter = (pageNum, pageTotal) => {
+    doc.setFillColor(243, 244, 246)
+    doc.rect(0, pageH - 11, pageW, 11, 'F')
+    doc.setDrawColor(210, 215, 220)
+    doc.setLineWidth(0.3)
+    doc.line(0, pageH - 11, pageW, pageH - 11)
+    doc.setTextColor(...GRAY)
+    doc.setFontSize(7)
+    doc.text('Akyildiz Is Merkezi | Yonetim Sistemi | Gizli ve Kuruma Ozel', margin, pageH - 4)
+    doc.text(`Sayfa ${pageNum} / ${pageTotal}`, pageW / 2, pageH - 4, { align: 'center' })
+    doc.text(`Olusturulma: ${genDate}`, pageW - margin, pageH - 4, { align: 'right' })
+  }
+
+  drawPageHeader(true)
+
+  // Özet kartlar
+  const boxY = 46
+  const boxH = 22
+  const gap  = 5
+  const boxW = (pageW - margin * 2 - gap * 2) / 3
+
+  const drawCard = (x, label, value, bg, border, textColor) => {
+    doc.setFillColor(...bg)
+    doc.setDrawColor(...border)
+    doc.setLineWidth(0.6)
+    doc.roundedRect(x, boxY, boxW, boxH, 2, 2, 'FD')
+    doc.setTextColor(...border)
+    doc.setFontSize(6.5)
+    doc.text(label, x + boxW / 2, boxY + 7, { align: 'center' })
+    doc.setTextColor(...textColor)
+    doc.setFontSize(12)
+    doc.text(formatCurrency(value), x + boxW / 2, boxY + 17, { align: 'center' })
+  }
+
+  drawCard(margin,                      'TOPLAM BORC TAHAKKUKU',
+    rawSummary.value.totalDebt,   [254,242,242], RED,   [160,20,20])
+  drawCard(margin + boxW + gap,         'TOPLAM ODEME',
+    rawSummary.value.totalPayment,[240,253,244], GREEN, [16,90,40])
+  const isPos = rawSummary.value.balance >= 0
+  drawCard(margin + (boxW + gap) * 2,   'GUNCEL BAKIYE',
+    rawSummary.value.balance,
+    isPos ? [239,246,255] : [254,242,242],
+    isPos ? [37,99,235]   : RED,
+    isPos ? [20,70,180]   : [160,20,20])
+
+  doc.setTextColor(...NAVY)
+  doc.setFontSize(8)
+  doc.text('ISLEM DETAYLARI', margin, boxY + boxH + 8)
+  doc.setDrawColor(...NAVY)
+  doc.setLineWidth(0.4)
+  doc.line(margin, boxY + boxH + 10, pageW - margin, boxY + boxH + 10)
+
   const rows = reportItems.value.map(i => ({
-    date: formatDate(i.date),
-    period: formatPeriod(i.periodYear, i.periodMonth),
-    desc: i.description,
-    debt: !i.isPayment ? formatCurrency(i.amount) : '-',
-    payment: i.isPayment ? formatCurrency(i.amount) : '-',
-    status: i.isPayment ? '-' : (i.isPaid ? 'Odendi' : 'Bekliyor')
+    date:    formatDate(i.date),
+    period:  formatPeriod(i.periodYear, i.periodMonth),
+    desc:    (i.description || '-').length > 48
+               ? (i.description || '').substring(0, 48) + '...'
+               : (i.description || '-'),
+    debt:    !i.isPayment ? formatCurrency(i.amount) : '-',
+    payment: i.isPayment  ? formatCurrency(i.amount) : '-',
+    status:  i.isPayment  ? 'Odeme' : (i.isPaid ? 'Odendi' : 'Bekliyor')
   }))
-  
+
   autoTable(doc, {
-    columns,
+    columns: [
+      { header: 'Tarih',     dataKey: 'date'    },
+      { header: 'Donem',     dataKey: 'period'  },
+      { header: 'Aciklama',  dataKey: 'desc'    },
+      { header: 'Borc (-)',  dataKey: 'debt'    },
+      { header: 'Odeme (+)', dataKey: 'payment' },
+      { header: 'Durum',     dataKey: 'status'  },
+    ],
     body: rows,
-    startY: 40,
-    styles: { fontSize: 8, font: 'Arial' },
-    headStyles: { fillColor: [41, 128, 185], textColor: 255, fontStyle: 'normal' },
-    alternateRowStyles: { fillColor: [245, 245, 245] }
+    startY: boxY + boxH + 13,
+    margin: { left: margin, right: margin, bottom: 18 },
+    styles: {
+      fontSize: 7.5, font: 'Arial',
+      cellPadding: { top: 2.5, right: 3, bottom: 2.5, left: 3 },
+      textColor: [30, 30, 30], lineColor: [215, 220, 228], lineWidth: 0.1,
+    },
+    headStyles: {
+      fillColor: NAVY, textColor: WHITE, fontSize: 7.5, fontStyle: 'normal',
+      cellPadding: { top: 4, right: 3, bottom: 4, left: 3 }, halign: 'center',
+    },
+    alternateRowStyles: { fillColor: [248, 250, 252] },
+    columnStyles: {
+      date:    { halign: 'center', cellWidth: 24 },
+      period:  { halign: 'center', cellWidth: 20 },
+      desc:    { cellWidth: 'auto' },
+      debt:    { halign: 'right', cellWidth: 32, textColor: RED },
+      payment: { halign: 'right', cellWidth: 32, textColor: GREEN },
+      status:  { halign: 'center', cellWidth: 26 },
+    },
+    didParseCell(data) {
+      if (data.section !== 'body' || data.column.dataKey !== 'status') return
+      if (data.cell.raw === 'Odeme') {
+        data.cell.styles.textColor = [16, 100, 45]
+        data.cell.styles.fillColor = [240, 253, 244]
+      } else if (data.cell.raw === 'Bekliyor') {
+        data.cell.styles.textColor = [146, 60, 14]
+        data.cell.styles.fillColor = [255, 251, 235]
+      }
+    },
+    willDrawPage(data) {
+      if (data.pageNumber > 1) drawPageHeader(false)
+    },
+    didDrawPage(data) {
+      drawPageFooter(data.pageNumber, data.pageCount ?? doc.internal.getNumberOfPages())
+    }
   })
-  
-  const finalY = doc.lastAutoTable.finalY + 10
-  doc.setFontSize(11)
-  doc.text(`Toplam Borc: ${formatCurrency(summary.value.totalDebt)}`, 140, finalY)
-  doc.text(`Toplam Odeme: ${formatCurrency(summary.value.totalPayment)}`, 140, finalY + 7)
-  doc.text(`NET BAKIYE: ${formatCurrency(Math.abs(summary.value.balance))} ${summary.value.balance < 0 ? '(Borclu)' : '(Alacakli)'}`, 140, finalY + 14)
-  
-  doc.save(`Akyildiz_Finansal_Extre_${new Date().getTime()}.pdf`)
+
+  // Son sayfada özet kutusu
+  const finalY = doc.lastAutoTable.finalY + 6
+  if (finalY < pageH - 38) {
+    const tbW = 80
+    const tbX = pageW - margin - tbW
+
+    doc.setFillColor(...NAVY)
+    doc.roundedRect(tbX, finalY, tbW, 30, 2, 2, 'F')
+    doc.setTextColor(...GOLD)
+    doc.setFontSize(8)
+    doc.text('EKSTRESI OZETI', tbX + tbW / 2, finalY + 8, { align: 'center' })
+    doc.setDrawColor(...GOLD)
+    doc.setLineWidth(0.4)
+    doc.line(tbX + 5, finalY + 10, tbX + tbW - 5, finalY + 10)
+    doc.setTextColor(...WHITE)
+    doc.setFontSize(7.5)
+    doc.text('Toplam Borc:',  tbX + 5, finalY + 17)
+    doc.text(formatCurrency(rawSummary.value.totalDebt), tbX + tbW - 5, finalY + 17, { align: 'right' })
+    doc.text('Toplam Odeme:', tbX + 5, finalY + 23)
+    doc.text(formatCurrency(rawSummary.value.totalPayment), tbX + tbW - 5, finalY + 23, { align: 'right' })
+    doc.setDrawColor(200, 200, 200)
+    doc.line(tbX + 5, finalY + 25, tbX + tbW - 5, finalY + 25)
+    doc.setTextColor(...GOLD)
+    doc.setFontSize(8.5)
+    doc.text('Net Bakiye:', tbX + 5, finalY + 30)
+    doc.text(formatCurrency(rawSummary.value.balance), tbX + tbW - 5, finalY + 30, { align: 'right' })
+  }
+
+  doc.save(`Akyildiz_Ekstresi_${dateStr}.pdf`)
 }
 </script>
 

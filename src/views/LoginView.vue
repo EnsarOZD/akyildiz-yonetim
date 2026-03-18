@@ -131,13 +131,19 @@
           <button
             type="submit"
             data-testid="login-btn"
-            class="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-3 px-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-800 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
+            :disabled="loading"
+            class="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold py-3 px-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-800 transition-all duration-200 shadow-lg disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none"
+            :class="loading ? '' : 'hover:from-blue-700 hover:to-purple-700 hover:scale-105 hover:shadow-xl transform'"
           >
             <span class="flex items-center justify-center space-x-2">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg v-if="loading" class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+              </svg>
+              <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
               </svg>
-              <span>Giriş Yap</span>
+              <span>{{ loading ? 'Giriş yapılıyor...' : 'Giriş Yap' }}</span>
             </span>
           </button>
         </form>
@@ -196,11 +202,17 @@
         </div>
 
         <div class="flex space-x-3 mt-6">
-          <button 
+          <button
             @click="handlePasswordReset"
-            class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200"
+            :disabled="resetLoading"
+            class="flex-1 bg-blue-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            :class="resetLoading ? '' : 'hover:bg-blue-700'"
           >
-            Gönder
+            <svg v-if="resetLoading" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+            </svg>
+            {{ resetLoading ? 'Gönderiliyor...' : 'Gönder' }}
           </button>
           <button 
             @click="showResetModal = false"
@@ -233,10 +245,12 @@ const password = ref('')
 const errorMessage = ref('')
 const rememberMe = ref(false)
 const showPassword = ref(false)
+const loading = ref(false)
 const showResetModal = ref(false)
 const resetEmail = ref('')
 const resetMessage = ref('')
 const resetError = ref('')
+const resetLoading = ref(false)
 
 const router = useRouter()
 
@@ -253,13 +267,15 @@ const togglePasswordVisibility = () => {
 }
 
 const handleLogin = async () => {
+  if (loading.value) return
   errorMessage.value = ''
-  
+
   if (!email.value || !password.value) {
     errorMessage.value = 'E-posta ve şifre alanları zorunludur.'
     return
   }
 
+  loading.value = true
   try {
     const response = await authService.login(email.value, password.value)
     console.log('Backend login response:', response)
@@ -298,18 +314,22 @@ const handleLogin = async () => {
     console.error('Login error:', error)
     handleNetworkError(error, { component: 'LoginView', action: 'login' })
     errorMessage.value = getErrorMessage(error)
+  } finally {
+    loading.value = false
   }
 }
 
 const handlePasswordReset = async () => {
+  if (resetLoading.value) return
   resetMessage.value = ''
   resetError.value = ''
-  
+
   if (!resetEmail.value) {
     resetError.value = 'Lütfen e-posta adresinizi girin.'
     return
   }
 
+  resetLoading.value = true
   try {
     await authService.resetPassword(resetEmail.value)
     resetMessage.value = 'Şifre sıfırlama bağlantısı e-posta adresinize gönderildi.'
@@ -322,6 +342,8 @@ const handlePasswordReset = async () => {
     console.error('Password reset error:', error)
     handleNetworkError(error, { component: 'LoginView', action: 'passwordReset' })
     resetError.value = 'Şifre sıfırlama işlemi başarısız oldu.'
+  } finally {
+    resetLoading.value = false
   }
 }
 

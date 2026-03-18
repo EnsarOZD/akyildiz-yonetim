@@ -97,9 +97,9 @@
       </div>
 
       <!-- Özet Kartları -->
-      <!-- Finansal Durum & Özet (Sadece Yönetici ve Manager Görür) -->
+      <!-- Finansal Durum & Özet (Admin / Manager) -->
       <section v-if="userRole === 'admin' || userRole === 'manager'" class="grid grid-cols-1 md:grid-cols-12 gap-6 mb-8">
-        
+
         <!-- Sol Kolon: Finansal Özet (Bakiye, Gelir, Gider) -->
         <div class="md:col-span-8 grid grid-cols-1 sm:grid-cols-3 gap-4">
           <!-- Kasa Bakiyesi -->
@@ -159,8 +159,7 @@
 
         <!-- Sağ Kolon: İstatistikler & Aidat Durumu -->
         <div class="md:col-span-4 grid grid-cols-1 gap-4">
-          <!-- Geciken Ödeme Widget'ı (Yeni) -->
-          <OverdueWidget 
+          <OverdueWidget
             v-if="overdueItems.length > 0"
             :count="overdueItems.length"
             :total-amount="overdueTotalAmount"
@@ -174,43 +173,80 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
               </svg>
             </div>
-            
             <h4 class="text-base font-semibold text-gray-800 dark:text-gray-100 mb-3 flex items-center gap-2">
               <span class="w-2 h-6 bg-orange-500 rounded-full"></span>
-              {{ userRole === 'tenant' ? 'Borç ve Ödeme Durumum' : 'Bekleyen Alacaklar' }}
+              Bekleyen Alacaklar
             </h4>
-            
             <div class="space-y-3">
-              <!-- Aidat -->
               <div class="flex items-center justify-between">
                 <span class="text-sm text-gray-600 dark:text-gray-300 flex items-center gap-2">
                   <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Aidat
                 </span>
                 <span class="font-bold text-gray-800 dark:text-gray-100">{{ formatCurrency(totalAidatDebt) }}</span>
               </div>
-              <!-- Elektrik -->
               <div class="flex items-center justify-between">
                 <span class="text-sm text-gray-600 dark:text-gray-300 flex items-center gap-2">
                    <span class="w-2 h-2 rounded-full bg-amber-500"></span> Elektrik
                 </span>
                 <span class="font-bold text-gray-800 dark:text-gray-100">{{ formatCurrency(totalElectricityDebt) }}</span>
               </div>
-              <!-- Su -->
               <div class="flex items-center justify-between">
                 <span class="text-sm text-gray-600 dark:text-gray-300 flex items-center gap-2">
                    <span class="w-2 h-2 rounded-full bg-blue-500"></span> Su
                 </span>
                 <span class="font-bold text-gray-800 dark:text-gray-100">{{ formatCurrency(totalWaterDebt) }}</span>
               </div>
-              
               <div class="h-px bg-gray-100 dark:bg-gray-700 my-2"></div>
-              
               <div class="flex items-center justify-between">
                 <span class="text-sm font-medium text-gray-500">Toplam</span>
                 <span class="text-lg font-bold text-orange-600">{{ formatCurrency(totalUtilityDebts) }}</span>
               </div>
             </div>
           </router-link>
+        </div>
+      </section>
+
+      <!-- Observer Özet (Sadece Borç & Ödeme verileri) -->
+      <section v-else-if="userRole?.toLowerCase() === 'observer'" class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <!-- Toplam Bekleyen Borç -->
+        <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl shadow-sm border border-orange-100 dark:border-orange-900/30">
+          <p class="text-xs font-bold uppercase tracking-wider text-orange-500 mb-1">Toplam Bekleyen Borç</p>
+          <p class="text-3xl font-black text-gray-800 dark:text-white">{{ formatCurrency(totalUtilityDebts) }}</p>
+          <div class="mt-3 space-y-1.5 text-sm">
+            <div class="flex justify-between text-gray-500 dark:text-gray-400">
+              <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-500"></span>Aidat</span>
+              <span class="font-semibold">{{ formatCurrency(totalAidatDebt) }}</span>
+            </div>
+            <div class="flex justify-between text-gray-500 dark:text-gray-400">
+              <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-amber-500"></span>Elektrik</span>
+              <span class="font-semibold">{{ formatCurrency(totalElectricityDebt) }}</span>
+            </div>
+            <div class="flex justify-between text-gray-500 dark:text-gray-400">
+              <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-blue-500"></span>Su</span>
+              <span class="font-semibold">{{ formatCurrency(totalWaterDebt) }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Geciken Borç -->
+        <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl shadow-sm border dark:border-gray-700"
+             :class="overdueItems.length > 0 ? 'border-red-100 dark:border-red-900/30' : 'border-gray-200'">
+          <p class="text-xs font-bold uppercase tracking-wider mb-1"
+             :class="overdueItems.length > 0 ? 'text-red-500' : 'text-gray-400'">Geciken Borçlar</p>
+          <p class="text-3xl font-black text-gray-800 dark:text-white">{{ formatCurrency(overdueTotalAmount) }}</p>
+          <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">
+            <span :class="overdueItems.length > 0 ? 'text-red-500 font-bold' : ''">{{ overdueItems.length }}</span>
+            adet geciken kalem
+          </p>
+        </div>
+
+        <!-- Tahsilat (bu dönem) -->
+        <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl shadow-sm border border-green-100 dark:border-green-900/30">
+          <p class="text-xs font-bold uppercase tracking-wider text-green-500 mb-1">Toplam Tahsilat</p>
+          <p class="text-3xl font-black text-gray-800 dark:text-white">{{ formatCurrency(totalIncome) }}</p>
+          <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">
+            +{{ formatCurrency(thisMonthTenantPayments) }} bu ay
+          </p>
         </div>
       </section>
 
@@ -411,7 +447,7 @@
             >
               <option value="">Tümü</option>
               <option value="income">Gelir</option>
-              <option value="expense">Gider</option>
+              <option v-if="userRole !== 'observer'" value="expense">Gider</option>
               <option value="debt">Borç</option>
             </select>
           </div>
@@ -829,17 +865,19 @@ const overdueItems = computed(() => {
 })
 
 const recentActivities = computed(() => {
+  const isObserver = userRole.value?.toLowerCase() === 'observer'
   const items = [
-    ...payments.value.map(p => ({ 
-      ...p, 
+    ...payments.value.map(p => ({
+      ...p,
       type: 'income',
       payer: p.tenantName || p.ownerName || p.description || 'Tahsilat'
     })),
-    ...expenses.value.map(e => ({ 
-      ...e, 
+    // Observer gider görmez
+    ...(isObserver ? [] : expenses.value.map(e => ({
+      ...e,
       type: 'expense',
       payer: e.description || 'Gider'
-    })),
+    }))),
     ...debts.value.map(d => {
       const tenant = tenants.value.find(t => t.id === d.tenantId)
       const owner = d.ownerId ? owners.value.find(o => o.id === d.ownerId) : null

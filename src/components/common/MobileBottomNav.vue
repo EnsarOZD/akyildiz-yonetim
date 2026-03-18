@@ -146,7 +146,16 @@ const visibleNavItems = computed(() => {
     ]
   }
 
-  // Admin / Manager / DataEntry / Observer
+  if (role === 'observer') {
+    return [
+      { name: 'Özet', path: '/dashboard', icon: DashboardIcon },
+      { name: 'Raporlar', path: '/reports', icon: ChartIcon },
+      { name: 'Bildirimler', path: '/notifications', icon: BellIcon },
+      { name: 'Profil', path: '/profile', icon: UserIcon },
+    ]
+  }
+
+  // Admin / Manager / DataEntry
   return [
     { name: 'Özet', path: '/dashboard', icon: DashboardIcon },
     { name: 'Kiracılar', path: '/tenants', icon: UsersIcon },
@@ -167,6 +176,13 @@ const moreItems = computed(() => {
 
   if (role === 'owner') {
     return [
+      { name: 'Çıkış Yap', action: logout, icon: LogoutIcon }
+    ]
+  }
+
+  if (role === 'observer') {
+    return [
+      { name: 'Profil', path: '/profile', icon: UserIcon },
       { name: 'Çıkış Yap', action: logout, icon: LogoutIcon }
     ]
   }

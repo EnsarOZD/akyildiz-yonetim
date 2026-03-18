@@ -92,6 +92,38 @@
         </div>
       </div>
 
+      <!-- Firma Bilgi Kartı -->
+      <div v-if="tenantInfo" class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-5 mb-6">
+        <div class="flex flex-col sm:flex-row sm:items-center gap-4">
+          <div class="flex items-center gap-3 flex-1">
+            <div class="w-10 h-10 bg-blue-50 dark:bg-blue-900/20 rounded-xl flex items-center justify-center text-blue-600 dark:text-blue-400 shrink-0">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+              </svg>
+            </div>
+            <div>
+              <p class="text-xs text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wide">Firma Bilgileri</p>
+              <p class="text-base font-bold text-gray-800 dark:text-white">{{ tenantInfo.companyName }}</p>
+            </div>
+          </div>
+          <div class="flex flex-wrap gap-x-6 gap-y-2 text-sm text-gray-500 dark:text-gray-400">
+            <span v-if="tenantInfo.taxNumber" class="flex items-center gap-1">
+              <span class="font-medium text-gray-600 dark:text-gray-300">VKN:</span> {{ tenantInfo.taxNumber }}
+            </span>
+            <span v-if="tenantInfo.phone" class="flex items-center gap-1">
+              <span class="font-medium text-gray-600 dark:text-gray-300">Tel:</span> {{ tenantInfo.phone }}
+            </span>
+            <span v-if="tenantInfo.email" class="flex items-center gap-1">
+              <span class="font-medium text-gray-600 dark:text-gray-300">E-posta:</span> {{ tenantInfo.email }}
+            </span>
+            <span v-if="tenantInfo.flats && tenantInfo.flats.length > 0" class="flex items-center gap-1">
+              <span class="font-medium text-gray-600 dark:text-gray-300">Ünite:</span>
+              {{ tenantInfo.flats.map(f => f.code).join(', ') }}
+            </span>
+          </div>
+        </div>
+      </div>
+
       <!-- Bekleyen Borç Listesi -->
       <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
         <div class="px-6 py-4 border-b border-gray-50 dark:border-gray-700 flex justify-between items-center">
@@ -115,7 +147,7 @@
                 </div>
               </div>
               <div class="text-right">
-                <p class="text-lg font-black text-gray-800 dark:text-white">{{ formatCurrency(debt.remainingAmount) }}</p>
+                <p class="text-lg font-black text-gray-800 dark:text-white">{{ formatCurrency(debt.remainingAmount ?? debt.amount ?? 0) }}</p>
                 <span class="badge badge-sm badge-ghost">{{ debt.periodMonth }}/{{ debt.periodYear }}</span>
               </div>
             </div>
@@ -162,21 +194,26 @@ const debts = ref([])
 const payments = ref([])
 const tenantInfo = ref(null)
 
-const totalDebt = computed(() => 
-  debts.value.reduce((sum, d) => sum + Number(d.remainingAmount || 0), 0)
+const totalDebt = computed(() =>
+  debts.value
+    .filter(d => d.status?.toLowerCase() !== 'paid')
+    .reduce((sum, d) => sum + Number(d.remainingAmount ?? d.amount ?? 0), 0)
 )
 
 const overdueItems = computed(() => {
   const now = new Date()
-  return debts.value.filter(d => d.dueDate && new Date(d.dueDate) < now && d.status !== 'paid')
+  return debts.value.filter(d => d.dueDate && new Date(d.dueDate) < now && d.status?.toLowerCase() !== 'paid')
 })
 
-const overdueDebt = computed(() => 
-  overdueItems.value.reduce((sum, d) => sum + Number(d.remainingAmount || 0), 0)
+const overdueDebt = computed(() =>
+  overdueItems.value.reduce((sum, d) => sum + Number(d.remainingAmount ?? d.amount ?? 0), 0)
 )
 
-const pendingDebts = computed(() => 
-  debts.value.filter(d => d.status !== 'paid').sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate)).slice(0, 5)
+const pendingDebts = computed(() =>
+  debts.value
+    .filter(d => d.status?.toLowerCase() !== 'paid')
+    .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))
+    .slice(0, 5)
 )
 
 const lastPayment = computed(() => 

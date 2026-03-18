@@ -67,6 +67,9 @@
                   <li>
                     <a @click="triggerPasswordReset(user)" class="text-warning">Şifre Sıfırla</a>
                   </li>
+                  <li>
+                    <a @click="confirmDelete(user)" class="text-error">Sil</a>
+                  </li>
                   <li v-if="user.isActive !== false">
                     <a @click="deactivateUser(user.id)" class="text-error">Pasif Yap</a>
                   </li>
@@ -105,7 +108,7 @@
     <!-- Yeni Kullanıcı Ekleme Modal -->
     <div v-if="showAddUserModal" class="modal modal-open">
       <div class="modal-box max-w-2xl">
-        <h3 class="font-bold text-lg mb-4">Yeni Kullanıcı Ekle</h3>
+        <h3 class="font-bold text-lg mb-4">{{ isEditMode ? 'Kullanıcıyı Düzenle' : 'Yeni Kullanıcı Ekle' }}</h3>
         
         <div v-if="notification.message" :class="notification.type" class="p-4 rounded-md text-sm font-medium mb-4">
           {{ notification.message }}
@@ -177,7 +180,7 @@
             <button type="button" @click="closeModal" class="btn btn-ghost">İptal</button>
             <button type="submit" class="btn btn-primary" :disabled="loading">
               <span v-if="loading" class="loading loading-spinner"></span>
-              {{ loading ? 'Kullanıcı Oluşturuluyor...' : 'Kullanıcıyı Oluştur' }}
+              {{ loading ? 'Kaydediliyor...' : (isEditMode ? 'Değişiklikleri Kaydet' : 'Kullanıcıyı Oluştur') }}
             </button>
           </div>
         </form>
@@ -196,6 +199,18 @@
     @confirm="onConfirmPasswordReset"
     @cancel="confirmResetUser = null"
   />
+  
+  <!-- Silme Onay Modalı -->
+  <ConfirmModal
+    :isOpen="!!confirmDeleteUser"
+    :title="`${confirmDeleteUser?.firstName} ${confirmDeleteUser?.lastName} — Sil`"
+    message="Bu kullanıcıyı tamamen silmek istediğinize emin misiniz? Bu işlem geri alınamaz."
+    confirmLabel="Evet, Sil"
+    confirmClass="btn-error"
+    :loading="loading"
+    @confirm="onConfirmDelete"
+    @cancel="confirmDeleteUser = null"
+  />
 </template>
 
 <script setup>
@@ -212,6 +227,8 @@ const users = ref([])
 const tenants = ref([])
 const search = ref('')
 const showAddUserModal = ref(false)
+const isEditMode = ref(false)
+const selectedUser = ref(null)
 const loading = ref(false)
 const availableRoles = ref([])
 
@@ -266,6 +283,8 @@ const activateUser = async (userId) => {
 
 const closeModal = () => {
   showAddUserModal.value = false
+  isEditMode.value = false
+  selectedUser.value = null
   resetForm()
 }
 
@@ -290,8 +309,34 @@ const onConfirmPasswordReset = async () => {
 }
 
 const editUser = (user) => {
-  // Düzenleme mantığı buraya eklenebilir
-  console.log('Düzenle:', user)
+  isEditMode.value = true
+  selectedUser.value = user
+  newUser.firstName = user.firstName
+  newUser.lastName = user.lastName
+  newUser.email = user.email
+  newUser.role = user.role
+  newUser.companyId = user.companyId || null
+  showAddUserModal.value = true
+}
+
+const confirmDeleteUser = ref(null)
+const confirmDelete = (user) => {
+  confirmDeleteUser.value = user
+}
+
+const onConfirmDelete = async () => {
+  const user = confirmDeleteUser.value
+  confirmDeleteUser.value = null
+  try {
+    loading.value = true
+    await usersService.deleteUser(user.id)
+    await fetchUsers()
+    showSuccess('Kullanıcı başarıyla silindi.')
+  } catch (error) {
+    handleValidationError(error)
+  } finally {
+    loading.value = false
+  }
 }
 
 const resetForm = () => {
@@ -325,15 +370,25 @@ const createUser = async () => {
   loading.value = true
   
   try {
-    await usersService.createUser({
-      firstName: newUser.firstName,
-      lastName: newUser.lastName,
-      email: newUser.email,
-      role: newUser.role,
-      companyId: newUser.role === ROLES.TENANT ? newUser.companyId : null
-    })
-    
-    showSuccess(`Kullanıcı başarıyla oluşturuldu! Şifre belirleme bağlantısı ${newUser.email} adresine gönderildi.`)
+    if (isEditMode.value && selectedUser.value) {
+      await usersService.updateUser(selectedUser.value.id, {
+        firstName: newUser.firstName,
+        lastName: newUser.lastName,
+        email: newUser.email,
+        role: newUser.role,
+        companyId: newUser.role === ROLES.TENANT ? newUser.companyId : null
+      })
+      showSuccess('Kullanıcı başarıyla güncellendi.')
+    } else {
+      await usersService.createUser({
+        firstName: newUser.firstName,
+        lastName: newUser.lastName,
+        email: newUser.email,
+        role: newUser.role,
+        companyId: newUser.role === ROLES.TENANT ? newUser.companyId : null
+      })
+      showSuccess(`Kullanıcı başarıyla oluşturuldu! Şifre belirleme bağlantısı ${newUser.email} adresine gönderildi.`)
+    }
     
     closeModal()
     await fetchUsers()

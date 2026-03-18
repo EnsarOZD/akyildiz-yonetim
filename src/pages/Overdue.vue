@@ -25,10 +25,7 @@
             </label>
             <select v-model="filterType" class="select select-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300">
               <option value="">Tüm Tipler</option>
-              <option value="Rent">Kira</option>
-              <option value="Dues">Aidat</option>
-              <option value="Utility">Fatura</option>
-              <option value="Other">Diğer</option>
+              <option v-for="type in debtTypesList" :key="type.value" :value="type.value">{{ type.label }}</option>
             </select>
           </div>
 
@@ -158,6 +155,10 @@
 import { ref, onMounted, computed } from 'vue'
 import apiService from '@/services/api'
 import { useAuthStore } from '@/stores/auth'
+import utilityDebtsService from '@/services/utilityDebtsService'
+import { getDebtTypeLabel, DEBT_TYPES } from '@/constants/enums'
+
+const debtTypesList = DEBT_TYPES
 
 const overduePayments = ref([])
 const tenants = ref([])
@@ -198,7 +199,7 @@ const filteredOverdueItems = computed(() => {
     const matchesTenant = !filterTenant.value || item.company === filterTenant.value
     
     // Tip filtresi
-    const matchesType = !filterType.value || item.type === filterType.value
+    const matchesType = !filterType.value || String(item.type) === String(filterType.value)
     
     // Dönem filtresi
     const matchesPeriod = !filterPeriod.value || item.period === filterPeriod.value
@@ -267,27 +268,42 @@ const fetchTenants = async () => {
 const fetchOverduePayments = async () => {
   loading.value = true
   try {
-    const response = await apiService.get('/payments', { status: 'Pending', pageSize: 100 })
+    const response = await utilityDebtsService.getUtilityDebts({ excludePaid: true })
     const items = Array.isArray(response) ? response : (response?.items ?? [])
-    overduePayments.value = items.map(payment => {
-      const period = payment.periodYear && payment.periodMonth
-        ? `${payment.periodYear}-${String(payment.periodMonth).padStart(2, '0')}`
+    const now = new Date()
+    
+    const overdueItems = items.filter(d => {
+      const isOverdue = d.dueDate && new Date(d.dueDate) < now
+      const hasUnpaidAmount = d.status !== 'Paid' && Number(d.remainingAmount || 0) > 0
+      return isOverdue && hasUnpaidAmount
+    })
+
+    overduePayments.value = overdueItems.map(debt => {
+      const period = debt.periodYear && debt.periodMonth
+        ? `${debt.periodYear}-${String(debt.periodMonth).padStart(2, '0')}`
         : null
+      
+      const mapStatus = (s) => {
+        if (s === 'Paid') return { status: 'paid', label: 'Ödendi' }
+        if (s === 'Partial') return { status: 'partial', label: 'Kısmi Ödendi' }
+        return { status: 'unpaid', label: 'Ödenmedi' }
+      }
+
       return {
-        ...payment,
-        company: payment.tenantName || payment.ownerName || 'Bilinmiyor',
-        unit: payment.flatInfo || '-',
-        typeLabel: TYPE_LABELS[payment.type] || payment.type,
+        ...debt,
+        company: debt.tenantName || (debt.ownerName ? `${debt.ownerName} (Mal Sahibi)` : 'Bilinmiyor'),
+        unit: debt.flatInfo || '-',
+        typeLabel: getDebtTypeLabel(debt.type),
         period,
-        dueDate: payment.paymentDate,
-        dueDateFormatted: formatDate(payment.paymentDate),
-        paymentStatus: { status: 'unpaid', label: 'Ödenmedi' },
-        unpaidAmount: payment.amount,
-        paidAmount: 0,
+        dueDate: debt.dueDate,
+        dueDateFormatted: formatDate(debt.dueDate),
+        paymentStatus: mapStatus(debt.status),
+        unpaidAmount: Number(debt.remainingAmount ?? debt.amount ?? 0),
+        paidAmount: Number((debt.amount ?? 0) - (debt.remainingAmount ?? 0)),
       }
     })
   } catch (error) {
-    console.error('Geciken ödemeler yüklenirken hata:', error)
+    console.error('Geciken borçlar yüklenirken hata:', error)
     overduePayments.value = []
   } finally {
     loading.value = false

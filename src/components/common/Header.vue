@@ -254,7 +254,6 @@ const setTabsBasedOnRole = (role) => {
   } else if (normalizedRole === ROLES.OBSERVER) {
     tabs.value = [
       { label: 'Özet', value: 'dashboard', route: '/dashboard' },
-      { label: 'Ödemeler', value: 'payments', route: '/payments' },
       { label: 'Raporlar', value: 'reports', route: '/reports' }
     ]
   } else {
