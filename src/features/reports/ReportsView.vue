@@ -361,11 +361,11 @@ const reportItems = computed(() => {
   }
   
   // Sıralama: Dönem (Yıl-Ay) -> Tarih (Giriş sırası)
+  // Sıralama: Sadece Tarih (Yeniden Eskiye - Descending)
   return items.sort((a, b) => {
-    const pA = (a.periodYear || 0) * 100 + (a.periodMonth || 0)
-    const pB = (b.periodYear || 0) * 100 + (b.periodMonth || 0)
-    if (pA !== pB) return pB - pA
-    return new Date(b.date) - new Date(a.date)
+    const dA = a.date ? new Date(a.date) : new Date(0)
+    const dB = b.date ? new Date(b.date) : new Date(0)
+    return dB - dA
   })
 })
 
