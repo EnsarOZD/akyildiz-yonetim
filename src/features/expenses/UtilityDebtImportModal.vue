@@ -164,11 +164,11 @@ const startImport = async () => {
       emit('refresh')
       emit('close')
     } else {
-      importError.value = response.message || 'Veri okuma hatası oluştu.'
+      importError.value = response.errorMessage || response.message || 'Veri okuma hatası oluştu.'
     }
   } catch (error) {
     handleNetworkError(error)
-    importError.value = error.response?.data?.message || 'Beklenmedik bir ağ hatası oluştu.'
+    importError.value = error.response?.data?.errorMessage || error.response?.data?.message || error.message || 'Beklenmedik bir ağ hatası oluştu.'
   } finally {
     isImporting.value = false
   }

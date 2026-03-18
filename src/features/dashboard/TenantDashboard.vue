@@ -2,9 +2,20 @@
   <div class="p-4 sm:p-6 bg-gray-50 dark:bg-gray-900 min-h-screen">
     <div class="max-w-7xl mx-auto">
       <!-- Başlık -->
-      <div class="mb-8">
-        <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Hoş Geldiniz, {{ authStore.fullName }}</h1>
-        <p class="text-gray-500 dark:text-gray-400 mt-1">Mülkünüzün özet finansal durumu aşağıdadır.</p>
+      <div class="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Hoş Geldiniz, {{ authStore.fullName }}</h1>
+          <p v-if="tenantInfo" class="text-sm font-semibold text-blue-600 dark:text-blue-400 mt-1 flex items-center gap-1">
+            <span>🏢</span> {{ tenantInfo.companyName }}
+          </p>
+          <p class="text-gray-500 dark:text-gray-400 mt-1 text-xs">Mülkünüzün özet finansal durumu aşağıdadır.</p>
+        </div>
+        
+        <div v-if="tenantInfo && tenantInfo.flats && tenantInfo.flats.length > 0" class="flex flex-wrap gap-2">
+          <div v-for="flat in tenantInfo.flats" :key="flat.id" class="bg-white dark:bg-gray-800 px-3 py-1.5 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 text-xs text-gray-600 dark:text-gray-400 flex items-center gap-2">
+            <span class="text-base">🔑</span> <b>Daire:</b> {{ flat.code }}
+          </div>
+        </div>
       </div>
 
       <!-- Özet Kartları -->
@@ -142,12 +153,14 @@ import { ref, onMounted, computed } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import utilityDebtsService from '@/services/utilityDebtsService'
 import paymentsService from '@/services/paymentsService'
+import tenantsService from '@/services/tenantsService'
 import { formatCurrency } from '@/utils/currencyUtils'
 
 const authStore = useAuthStore()
 const loading = ref(true)
 const debts = ref([])
 const payments = ref([])
+const tenantInfo = ref(null)
 
 const totalDebt = computed(() => 
   debts.value.reduce((sum, d) => sum + Number(d.remainingAmount || 0), 0)
@@ -181,15 +194,18 @@ const loadData = async () => {
   loading.value = true
   try {
     const tenantId = authStore.companyId
+    
+    // Gelişmiş Bilgi Sorğuları
+    const promises = [
+      utilityDebtsService.getUtilityDebts({ tenantId }).then(d => debts.value = d || []),
+      paymentsService.getPayments({ tenantId }).then(p => payments.value = p || [])
+    ]
+
     if (tenantId) {
-      // Borçları çek
-      const debtData = await utilityDebtsService.getUtilityDebts({ tenantId })
-      debts.value = debtData || []
-      
-      // Ödemeleri çek
-      const paymentData = await paymentsService.getPayments({ tenantId })
-      payments.value = paymentData || []
+      promises.push(tenantsService.getTenantById(tenantId).then(t => tenantInfo.value = t))
     }
+
+    await Promise.allSettled(promises)
   } catch (error) {
     console.error('Veri yükleme hatası:', error)
   } finally {
