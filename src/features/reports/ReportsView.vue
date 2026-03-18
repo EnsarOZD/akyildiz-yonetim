@@ -326,11 +326,12 @@ const reportItems = computed(() => {
   // Borçlar (Expense context)
   if (filters.type === 'all' || filters.type === 'debt') {
     debtsData.value.forEach(d => {
+      const owner = owners.value.find(o => o.id === d.ownerId)
       items.push({
         date: d.date || d.createdAt || d.dueDate,
         periodYear: d.periodYear,
         periodMonth: d.periodMonth,
-        tenantName: d.tenantName || 'Bilinmiyor',
+        tenantName: d.tenantName || (owner ? `${owner.firstName} ${owner.lastName} (M. Sahibi)` : 'Bilinmiyor'),
         unitCode: d.flatInfo || d.unit || '-',
         description: d.description || `${d.type === 'Electricity' ? 'Elektrik' : d.type === 'Water' ? 'Su' : 'Aidat'} faturası`,
         invoiceNumber: d.invoiceNumber || null,

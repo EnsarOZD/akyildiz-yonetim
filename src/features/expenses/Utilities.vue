@@ -446,15 +446,17 @@ const editDebt = (d) => {
 
 const fetchDues = async () => {
   try {
-    const [duesRes, flatsRes, tenantsRes] = await Promise.all([
+    const [duesRes, flatsRes, tenantsRes, ownersRes] = await Promise.all([
       utilityDebtsService.getUtilityDebts({ period: selectedPeriod.value || undefined }),
       api.get('/Flats?pageSize=100'),
       api.get('/Tenants?pageSize=100'),
+      api.get('/Owners?pageSize=100'),
     ])
 
     const toArray = (r) => Array.isArray(r) ? r : (r?.items ?? [])
     const flatById = new Map(toArray(flatsRes).map(f => [f.id, f]))
     const tenantById = new Map(toArray(tenantsRes).map(t => [t.id, t]))
+    const ownerById = new Map(toArray(ownersRes).map(o => [o.id, o]))
 
     const normStatus = (s) => {
       if (typeof s === 'number') { // 0:Unpaid 1:Partial 2:Paid
@@ -466,6 +468,7 @@ const fetchDues = async () => {
     dues.value = (duesRes || []).map(d => {
       const flat   = flatById.get(d.flatId)
       const tenant = tenantById.get(d.tenantId)
+      const owner  = ownerById.get(d.ownerId)
       const { y, m } = getYearMonth(d)
 
       return {
@@ -478,7 +481,7 @@ const fetchDues = async () => {
           return 0; // Default
         })(),
         flatNumber: d.flatNumber ?? d.flat_code ?? d.FlatCode ?? flat?.code ?? '-',
-        tenantCompany: d.tenantName ?? d.TenantCompanyName ?? tenant?.companyName ?? tenant?.company ?? tenant?.fullName ?? flat?.tenantCompanyName ?? null,
+        tenantCompany: d.tenantName ?? d.TenantCompanyName ?? tenant?.companyName ?? (owner ? `${owner.firstName} ${owner.lastName} (M. Sahibi)` : null) ?? tenant?.company ?? tenant?.fullName ?? flat?.tenantCompanyName ?? null,
         periodYear: y,
         periodMonth: m,
         amount: Number(d.amount ?? d.value ?? d.total ?? 0),
