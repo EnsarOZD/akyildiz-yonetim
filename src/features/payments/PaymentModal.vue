@@ -423,9 +423,9 @@ const fetchDebts = async () => {
   try {
     const filterType = form.type !== '' ? parseInt(form.type) : undefined
     if (paymentType.value === 'tenant' && form.tenantId) {
-      tenantDebts.value = await utilityDebtsService.getUtilityDebts({ tenantId: form.tenantId, status: 'Unpaid', type: filterType }) || []
+      tenantDebts.value = await utilityDebtsService.getUtilityDebts({ tenantId: form.tenantId, excludePaid: true, type: filterType }) || []
     } else if (paymentType.value === 'owner' && form.ownerId) {
-      tenantDebts.value = await utilityDebtsService.getUtilityDebts({ ownerId: form.ownerId, status: 'Unpaid', type: filterType }) || []
+      tenantDebts.value = await utilityDebtsService.getUtilityDebts({ ownerId: form.ownerId, excludePaid: true, type: filterType }) || []
     }
   } catch (e) {
     handleNetworkError(e, { component: 'PaymentModal', action: 'fetchDebts' })

@@ -15,6 +15,7 @@ class UtilityDebtsService {
     if (filters.periodYear) params.periodYear = filters.periodYear
     if (filters.periodMonth) params.periodMonth = filters.periodMonth
     if (filters.status) params.status = filters.status
+    if (filters.excludePaid) params.excludePaid = filters.excludePaid
     if (filters.tenantId) params.tenantId = filters.tenantId
     if (filters.ownerId) params.ownerId = filters.ownerId
     if (filters.startDate) params.startDate = filters.startDate
