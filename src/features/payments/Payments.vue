@@ -233,7 +233,15 @@
                   </div>
                   <div>
                     <p class="font-bold text-gray-800 dark:text-gray-100">{{ p.company }}</p>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ formatDate(getPaymentDate(p)) }}</p>
+                    <div class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                      <span>{{ formatDate(getPaymentDate(p)) }}</span>
+                      <span v-if="p.periodYear && p.periodYear > 2000" class="badge badge-outline badge-xs text-xs">
+                        {{ p.periodYear }}-{{ String(p.periodMonth).padStart(2, '0') }}
+                      </span>
+                    </div>
+                    <p v-if="p.description" class="text-xs text-gray-400 dark:text-gray-500 mt-1 truncate max-w-xs" :title="p.description">
+                      {{ p.description }}
+                    </p>
                   </div>
                 </div>
               <div class="md:col-span-3 text-left md:text-center text-2xl font-semibold text-green-600 dark:text-green-400">
@@ -241,8 +249,8 @@
               </div>
               <div class="md:col-span-2 text-left md:text-center text-sm text-gray-600 dark:text-gray-300">
                 <p class="font-semibold text-gray-800 dark:text-gray-100 flex items-center gap-2">
-                  <span>{{ getPaymentTypeIcon(p.type) }}</span>
-                  <span>{{ getPaymentTypeLabel(p.type) }}</span>
+                  <span>{{ getPaymentDisplayIcon(p) }}</span>
+                  <span>{{ getPaymentDisplayLabel(p) }}</span>
                 </p>
                 <p>{{ p.bank }}</p>
               </div>
@@ -424,9 +432,30 @@ const paymentTypeOptions = computed(() =>
     icon: getPaymentTypeIcon(Number(k))
   }))
 )
+const getPaymentDisplayLabel = (p) => {
+  const baseLabel = getPaymentTypeLabel(p.type)
+  // Eski kayıtlarda debtTypes boş olabilir
+  if (p.debtTypes && p.debtTypes.length > 0) {
+    const types = p.debtTypes.map(t => getDebtTypeLabel(t)).join(', ')
+    return `${baseLabel} (${types})`
+  }
+  return baseLabel
+}
+
+const getPaymentDisplayIcon = (p) => {
+  if (p.debtTypes && p.debtTypes.length === 1) {
+    return getDebtTypeIcon(p.debtTypes[0])
+  }
+  return getPaymentTypeIcon(p.type)
+}
+
+import { getDebtTypeLabel, getDebtTypeIcon } from '@/constants/enums'
+
 const paymentTypeFilterOptions = computed(() => [
   { value: '', label: 'Tüm Tipler', icon: '📦' },
-  ...paymentTypeOptions.value
+  ...paymentTypeOptions.value,
+  { value: 'debt:1', label: 'Elektrik', icon: '⚡️' },
+  { value: 'debt:2', label: 'Su', icon: '💧' }
 ])
 
 const getPaymentDate = (p) => p?.date || p?.paymentDate || p?.createdAt || ''
@@ -481,9 +510,15 @@ const filteredPayments = computed(() => {
   let filtered = payments.value
   const searchTerm = (filters.value.searchTerm || '').toLowerCase()
 
-  const fType = normalizePaymentType(filters.value.type)
-  if (fType !== '' && fType !== undefined) {
-    filtered = filtered.filter(p => normalizePaymentType(p.type) === fType)
+  const filterType = filters.value.type
+  if (filterType && String(filterType).startsWith('debt:')) {
+    const debtTypeIdx = parseInt(filterType.split(':')[1])
+    filtered = filtered.filter(p => p.debtTypes && p.debtTypes.includes(debtTypeIdx))
+  } else {
+    const fType = normalizePaymentType(filterType)
+    if (fType !== '' && fType !== undefined) {
+      filtered = filtered.filter(p => normalizePaymentType(p.type) === fType)
+    }
   }
 
   if (filters.value.period) {

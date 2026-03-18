@@ -453,57 +453,276 @@ const exportToExcel = () => {
 }
 
 const exportToPDF = () => {
-  const doc = new jsPDF()
-  
-  // Türkçe karakter desteği için Arial fontunu ekle
+  const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' })
+
   doc.addFileToVFS('arial.ttf', arialBase64)
   doc.addFont('arial.ttf', 'Arial', 'normal')
-  doc.setFont('Arial')
-  
-  doc.setFontSize(20)
-  doc.text("AKYILDIZ IS MERKEZI FINANSAL RAPORU", 15, 20)
-  
-  doc.setFontSize(10)
-  doc.text(`Rapor Tarihi: ${new Date().toLocaleString('tr-TR')}`, 15, 28)
-  doc.text(`Filtre: ${filters.startDate} / ${filters.endDate}`, 15, 34)
-  
-  const columns = [
-    { header: 'Tarih', dataKey: 'date' },
-    { header: 'Donem', dataKey: 'period' },
-    { header: 'Kiraci', dataKey: 'tenant' },
-    { header: 'Unit', dataKey: 'unit' },
-    { header: 'Aciklama', dataKey: 'desc' },
-    { header: 'Borc', dataKey: 'debt' },
-    { header: 'Tahsilat', dataKey: 'payment' }
-  ]
-  
+  doc.setFont('Arial', 'normal')
+
+  const pageW  = doc.internal.pageSize.getWidth()   // 297 mm
+  const pageH  = doc.internal.pageSize.getHeight()  // 210 mm
+  const margin = 14
+  const genDate = new Date().toLocaleString('tr-TR')
+  const dateStr = new Date().toISOString().split('T')[0]
+
+  // ── Renk Paleti ────────────────────────────────────────────────────────────
+  const NAVY  = [15,  52,  96]
+  const GOLD  = [180, 145, 40]
+  const WHITE = [255, 255, 255]
+  const RED   = [200, 30,  30]
+  const GREEN = [22,  140, 60]
+  const GRAY  = [110, 110, 110]
+
+  // ── Sayfa başlığı (header band) ────────────────────────────────────────────
+  const drawPageHeader = (isFirstPage) => {
+    // Navy band
+    doc.setFillColor(...NAVY)
+    doc.rect(0, 0, pageW, isFirstPage ? 36 : 24, 'F')
+
+    // Gold accent strip
+    doc.setFillColor(...GOLD)
+    doc.rect(0, isFirstPage ? 36 : 24, pageW, 1.5, 'F')
+
+    // Sol: Şirket adı
+    doc.setTextColor(...WHITE)
+    doc.setFontSize(isFirstPage ? 15 : 10)
+    doc.text('AKYILDIZ IS MERKEZI', margin, isFirstPage ? 13 : 10)
+
+    if (isFirstPage) {
+      doc.setFontSize(8)
+      doc.text('Yonetim ve Isletme Sistemi', margin, 21)
+    }
+
+    // Sağ: Rapor etiketi
+    doc.setFontSize(isFirstPage ? 19 : 10)
+    doc.text('FINANSAL RAPOR', pageW - margin, isFirstPage ? 17 : 10, { align: 'right' })
+
+    if (isFirstPage) {
+      doc.setFontSize(7.5)
+      doc.text(`Olusturulma: ${genDate}`, pageW - margin, 25, { align: 'right' })
+
+      const periStr =
+        filters.startDate && filters.endDate
+          ? `${formatDate(filters.startDate)} - ${formatDate(filters.endDate)}`
+          : filters.startDate
+            ? `${formatDate(filters.startDate)} tarihinden itibaren`
+            : filters.endDate
+              ? `${formatDate(filters.endDate)} tarihine kadar`
+              : 'Tum Donemler'
+      doc.text(`Donem: ${periStr}`, pageW - margin, 31, { align: 'right' })
+    }
+  }
+
+  // ── Her sayfanın altbilgisi ────────────────────────────────────────────────
+  const drawPageFooter = (pageNum, pageTotal) => {
+    doc.setFillColor(243, 244, 246)
+    doc.rect(0, pageH - 11, pageW, 11, 'F')
+    doc.setDrawColor(210, 215, 220)
+    doc.setLineWidth(0.3)
+    doc.line(0, pageH - 11, pageW, pageH - 11)
+
+    doc.setTextColor(...GRAY)
+    doc.setFontSize(7)
+    doc.text('Akyildiz Is Merkezi | Yonetim Sistemi | Gizli ve Kuruma Ozel', margin, pageH - 4)
+    doc.text(`Sayfa ${pageNum} / ${pageTotal}`, pageW / 2, pageH - 4, { align: 'center' })
+    doc.text(`Olusturulma: ${genDate}`, pageW - margin, pageH - 4, { align: 'right' })
+  }
+
+  // ── Sayfa 1: header + filtre bilgisi + özet kartlar ───────────────────────
+  drawPageHeader(true)
+
+  // Aktif filtreler
+  const filterParts = []
+  if (filters.tenantId) {
+    const t = tenants.value.find(t => t.id == filters.tenantId)
+    if (t) filterParts.push(`Kiraci: ${t.companyName}`)
+  }
+  if (filters.ownerId) {
+    const o = owners.value.find(o => o.id == filters.ownerId)
+    if (o) filterParts.push(`Mal Sahibi: ${o.firstName} ${o.lastName}`)
+  }
+  if (filters.utilityType) filterParts.push(`Kategori: ${filters.utilityType}`)
+  if (filters.type !== 'all') filterParts.push(`Tur: ${filters.type === 'debt' ? 'Borclar' : 'Tahsilatlar'}`)
+
+  doc.setTextColor(...GRAY)
+  doc.setFontSize(7.5)
+  doc.text(
+    `Filtreler: ${filterParts.length ? filterParts.join('  |  ') : 'Filtre uygulanmamis - tum kayitlar'}`,
+    margin, 43
+  )
+
+  // Özet kartlar
+  const boxY = 47
+  const boxH = 23
+  const gap  = 5
+  const boxW = (pageW - margin * 2 - gap * 2) / 3
+
+  const drawSummaryCard = (x, label, value, bg, border, textColor) => {
+    doc.setFillColor(...bg)
+    doc.setDrawColor(...border)
+    doc.setLineWidth(0.6)
+    doc.roundedRect(x, boxY, boxW, boxH, 2, 2, 'FD')
+    doc.setTextColor(...border)
+    doc.setFontSize(6.5)
+    doc.text(label, x + boxW / 2, boxY + 7, { align: 'center' })
+    doc.setTextColor(...textColor)
+    doc.setFontSize(12)
+    doc.text(formatCurrency(value), x + boxW / 2, boxY + 18, { align: 'center' })
+  }
+
+  drawSummaryCard(margin,                      'TOPLAM TAHAKKUK (BORC)',
+    summary.value.totalDebt,   [254,242,242], RED,   [160,20,20])
+  drawSummaryCard(margin + boxW + gap,         'TOPLAM TAHSILAT',
+    summary.value.totalPayment,[240,253,244], GREEN, [16,90,40])
+  const isPos = summary.value.balance >= 0
+  drawSummaryCard(margin + (boxW + gap) * 2,   'NET BAKIYE',
+    summary.value.balance,
+    isPos ? [239,246,255] : [254,242,242],
+    isPos ? [37,99,235]   : RED,
+    isPos ? [20,70,180]   : [160,20,20])
+
+  // Bölüm başlığı
+  doc.setTextColor(...NAVY)
+  doc.setFontSize(8)
+  doc.text('ISLEM DETAYLARI', margin, boxY + boxH + 8)
+  doc.setDrawColor(...NAVY)
+  doc.setLineWidth(0.4)
+  doc.line(margin, boxY + boxH + 10, pageW - margin, boxY + boxH + 10)
+
+  // ── Tablo ─────────────────────────────────────────────────────────────────
+  const tableStartY = boxY + boxH + 14
+
   const rows = reportItems.value.map(i => ({
-    date: formatDate(i.date),
-    period: formatPeriod(i.periodYear, i.periodMonth),
-    tenant: i.tenantName,
-    unit: i.unitCode,
-    desc: i.description,
-    debt: !i.isPayment ? formatCurrency(i.amount) : '-',
-    payment: i.isPayment ? formatCurrency(i.amount) : '-'
+    date:    formatDate(i.date),
+    period:  formatPeriod(i.periodYear, i.periodMonth),
+    tenant:  i.tenantName || '-',
+    unit:    i.unitCode   || '-',
+    desc:    (i.description || '-').length > 42
+               ? (i.description || '').substring(0, 42) + '...'
+               : (i.description || '-'),
+    invoice: i.invoiceNumber || '-',
+    debt:    !i.isPayment ? formatCurrency(i.amount) : '-',
+    payment: i.isPayment  ? formatCurrency(i.amount) : '-',
+    status:  i.isPayment  ? 'Tahsilat' : (i.isPaid ? 'Odendi' : 'Bekliyor')
   }))
-  
+
+  let totalPages = 1
+
   autoTable(doc, {
-    columns,
+    columns: [
+      { header: 'Tarih',              dataKey: 'date'    },
+      { header: 'Donem',              dataKey: 'period'  },
+      { header: 'Kiraci / Mal Sahibi',dataKey: 'tenant'  },
+      { header: 'Unite',              dataKey: 'unit'    },
+      { header: 'Aciklama',           dataKey: 'desc'    },
+      { header: 'Fatura No',          dataKey: 'invoice' },
+      { header: 'Borc (-)',           dataKey: 'debt'    },
+      { header: 'Tahsilat (+)',       dataKey: 'payment' },
+      { header: 'Durum',              dataKey: 'status'  },
+    ],
     body: rows,
-    startY: 40,
-    styles: { fontSize: 8, font: 'Arial' },
-    headStyles: { fillColor: [41, 128, 185], textColor: 255, fontStyle: 'normal' },
-    alternateRowStyles: { fillColor: [245, 245, 245] }
+    startY: tableStartY,
+    margin: { left: margin, right: margin, bottom: 18 },
+    styles: {
+      fontSize:    7.5,
+      font:        'Arial',
+      cellPadding: { top: 2.5, right: 3, bottom: 2.5, left: 3 },
+      textColor:   [30, 30, 30],
+      lineColor:   [215, 220, 228],
+      lineWidth:   0.1,
+    },
+    headStyles: {
+      fillColor:   NAVY,
+      textColor:   WHITE,
+      fontSize:    7.5,
+      fontStyle:   'normal',
+      cellPadding: { top: 4, right: 3, bottom: 4, left: 3 },
+      halign:      'center',
+    },
+    alternateRowStyles: { fillColor: [248, 250, 252] },
+    columnStyles: {
+      date:    { halign: 'center', cellWidth: 22 },
+      period:  { halign: 'center', cellWidth: 18 },
+      tenant:  { cellWidth: 44 },
+      unit:    { halign: 'center', cellWidth: 20 },
+      desc:    { cellWidth: 'auto' },
+      invoice: { halign: 'center', cellWidth: 24, fontSize: 7 },
+      debt:    { halign: 'right',  cellWidth: 28, textColor: RED },
+      payment: { halign: 'right',  cellWidth: 28, textColor: GREEN },
+      status:  { halign: 'center', cellWidth: 22 },
+    },
+    didParseCell(data) {
+      if (data.section !== 'body' || data.column.dataKey !== 'status') return
+      if (data.cell.raw === 'Tahsilat') {
+        data.cell.styles.textColor   = [16, 100, 45]
+        data.cell.styles.fillColor   = [240, 253, 244]
+      } else if (data.cell.raw === 'Bekliyor') {
+        data.cell.styles.textColor   = [146, 60, 14]
+        data.cell.styles.fillColor   = [255, 251, 235]
+      } else if (data.cell.raw === 'Odendi') {
+        data.cell.styles.textColor   = [16, 100, 45]
+      }
+    },
+    willDrawPage(data) {
+      if (data.pageNumber > 1) {
+        drawPageHeader(false)
+      }
+    },
+    didDrawPage(data) {
+      totalPages = data.pageCount ?? doc.internal.getNumberOfPages()
+      drawPageFooter(data.pageNumber, totalPages)
+    }
   })
-  
-  // Summary at bottom
-  const finalY = doc.lastAutoTable.finalY + 10
-  doc.setFontSize(11)
-  doc.text(`Toplam Borc: ${formatCurrency(summary.value.totalDebt)}`, 140, finalY)
-  doc.text(`Toplam Tahsilat: ${formatCurrency(summary.value.totalPayment)}`, 140, finalY + 7)
-  doc.text(`NET BAKIYE: ${formatCurrency(summary.value.balance)}`, 140, finalY + 14)
-  
-  doc.save(`Akyildiz_Rapor_${new Date().getTime()}.pdf`)
+
+  // ── Son sayfada özet kutu ──────────────────────────────────────────────────
+  const finalY = doc.lastAutoTable.finalY + 6
+
+  if (finalY < pageH - 38) {
+    const tbW = 88
+    const tbX = pageW - margin - tbW
+    const tbH = 32
+
+    // Arka plan
+    doc.setFillColor(...NAVY)
+    doc.roundedRect(tbX, finalY, tbW, tbH, 2, 2, 'F')
+
+    // Gold başlık çizgisi
+    doc.setTextColor(...GOLD)
+    doc.setFontSize(8)
+    doc.text('RAPOR OZETI', tbX + tbW / 2, finalY + 8, { align: 'center' })
+    doc.setDrawColor(...GOLD)
+    doc.setLineWidth(0.4)
+    doc.line(tbX + 5, finalY + 10, tbX + tbW - 5, finalY + 10)
+
+    // Satırlar
+    doc.setTextColor(...WHITE)
+    doc.setFontSize(7.5)
+    doc.text('Toplam Borc:',     tbX + 5,        finalY + 17)
+    doc.text(formatCurrency(summary.value.totalDebt),     tbX + tbW - 5, finalY + 17, { align: 'right' })
+    doc.text('Toplam Tahsilat:', tbX + 5,        finalY + 23)
+    doc.text(formatCurrency(summary.value.totalPayment),  tbX + tbW - 5, finalY + 23, { align: 'right' })
+
+    // Ayraç
+    doc.setDrawColor(200, 200, 200)
+    doc.setLineWidth(0.3)
+    doc.line(tbX + 5, finalY + 25.5, tbX + tbW - 5, finalY + 25.5)
+
+    // Net bakiye
+    doc.setTextColor(...GOLD)
+    doc.setFontSize(8.5)
+    doc.text('NET BAKIYE:', tbX + 5, finalY + 31)
+    doc.text(formatCurrency(summary.value.balance), tbX + tbW - 5, finalY + 31, { align: 'right' })
+
+    // Kayıt adedi
+    doc.setTextColor(...GRAY)
+    doc.setFontSize(7)
+    doc.text(
+      `Toplam ${reportItems.value.length} kayit listelenmistir.`,
+      margin, finalY + 10
+    )
+  }
+
+  doc.save(`Akyildiz_Finansal_Rapor_${dateStr}.pdf`)
 }
 </script>
 
