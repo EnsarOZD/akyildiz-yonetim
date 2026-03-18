@@ -794,22 +794,23 @@ const overdueItems = computed(() => {
   return debts.value
     .filter(debt => {
       const isOverdue = debt.dueDate && new Date(debt.dueDate) < now
-      const hasValidTenant = !!debt.tenantId
+      const hasValidEntity = !!debt.tenantId || !!debt.ownerId
       const hasUnpaidAmount = debt.status !== 'paid' && Number(debt.remainingAmount || 0) > 0
       
       const isOwnTenant = userRole.value === 'tenant'
         ? debt.tenantId === authStore.companyId
         : true
       
-      return isOverdue && hasValidTenant && isOwnTenant && hasUnpaidAmount
+      return isOverdue && hasValidEntity && isOwnTenant && hasUnpaidAmount
     })
     .sort((a, b) => new Date(b.dueDate) - new Date(a.dueDate))
     .map(debt => {
       const tenant = Array.isArray(tenants.value) ? tenants.value.find(t => t.id === debt.tenantId) : null
+      const owner = debt.ownerId && Array.isArray(owners.value) ? owners.value.find(o => o.id === debt.ownerId) : null
       
       return {
         ...debt,
-        company: debt.tenantName || tenant?.companyName || tenant?.company || debt.description || 'Bilinmiyor',
+        company: debt.tenantName || tenant?.companyName || tenant?.company || (owner ? `${owner.firstName} ${owner.lastName} (M)` : null) || debt.description || 'Bilinmiyor',
         floor: debt.unit || '-',
         amount: Number(debt.remainingAmount || 0),
         totalAmount: Number(debt.amount || 0),
@@ -841,12 +842,11 @@ const recentActivities = computed(() => {
     })),
     ...debts.value.map(d => {
       const tenant = tenants.value.find(t => t.id === d.tenantId)
+      const owner = d.ownerId ? owners.value.find(o => o.id === d.ownerId) : null
       return { 
         ...d, 
         type: 'debt',
-        // Debts için company bilgisi overdueItems hesaplamasında ekleniyor ama raw debt verisinde yok.
-        // Burada tenant listesinden bulup ekleyelim.
-        company: d.tenantName || tenant?.companyName || tenant?.company || tenant?.fullName || d.description || 'Bilinmiyor',
+        company: d.tenantName || tenant?.companyName || tenant?.company || tenant?.fullName || (owner ? `${owner.firstName} ${owner.lastName} (M)` : null) || d.description || 'Bilinmiyor',
         typeLabel: d.type === 0 || d.type === 'Aidat' ? 'Aidat' : (d.type === 1 || d.type === 'Electricity' ? 'Elektrik' : 'Su'),
         totalAmount: Number(d.amount || 0)
       }
@@ -964,9 +964,9 @@ const loadDebtsSummary = async () => {
   try {
     if (userRole.value !== 'tenant') {
       const now = new Date()
-      const year = dateFilter.value === 'last_month' && now.getMonth() === 0
-        ? now.getFullYear() - 1
-        : now.getFullYear()
+      const year = dateFilter.value === 'all' 
+        ? null 
+        : (dateFilter.value === 'last_month' && now.getMonth() === 0 ? now.getFullYear() - 1 : now.getFullYear())
       const summaryResult = await dashboardService.getDebtsSummary(year)
       debtsSummary.value = summaryResult || []
     }
