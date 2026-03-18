@@ -490,6 +490,7 @@ const handleSave = async () => {
       amount: Number(form.amount),
       paymentDate: form.date,
       type: parseInt(form.type) || 0,
+      targetDebtType: parseInt(form.type) < 3 ? parseInt(form.type) : null,
       bank: form.bank,
       description: form.description || '',
       autoAllocate: autoAllocate.value,
