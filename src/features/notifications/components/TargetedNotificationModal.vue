@@ -86,16 +86,17 @@
               <input v-model="form.delayDays" type="number" class="input input-sm input-bordered w-20 rounded-lg text-center font-bold" min="1" />
               <span class="text-sm">gün gecikenlere gönder.</span>
             </div>
-            <!-- E-posta seçeneği -->
-            <label class="flex items-center gap-3 cursor-pointer pt-2">
-              <input type="checkbox" v-model="form.sendEmail" class="checkbox checkbox-warning checkbox-sm" />
-              <span class="text-sm font-semibold text-amber-900 dark:text-amber-200">
-                📧 Ayrıca e-posta ile de gönder
-                <span class="text-xs font-normal opacity-70 ml-1">(kiracının kayıtlı e-postasına)</span>
-              </span>
-            </label>
           </div>
         </transition>
+
+        <!-- E-posta seçeneği (tüm tipler için) -->
+        <label class="flex items-center gap-3 cursor-pointer p-4 rounded-2xl border border-blue-100 dark:border-blue-900/30 bg-blue-50 dark:bg-blue-900/20">
+          <input type="checkbox" v-model="form.sendEmail" class="checkbox checkbox-primary checkbox-sm" />
+          <span class="text-sm font-semibold text-blue-900 dark:text-blue-200">
+            📧 Ayrıca e-posta ile de gönder
+            <span class="text-xs font-normal opacity-70 ml-1">(kiracının kayıtlı e-postasına)</span>
+          </span>
+        </label>
 
         <!-- 4. İçerik -->
         <div class="space-y-4">
@@ -219,7 +220,7 @@ const handleSubmit = async () => {
       targetType: form.targetType,
       targetId: form.targetId ? String(form.targetId) : null,
       delayDays: form.type === 'debt' ? form.delayDays : null,
-      sendEmail: form.type === 'debt' && form.sendEmail
+      sendEmail: form.sendEmail
     })
     
     notifySuccess('Bildirim başarıyla kuyruğa alındı ve iletiliyor', 'success')

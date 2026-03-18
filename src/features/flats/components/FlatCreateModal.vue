@@ -239,6 +239,33 @@ function onCodeInput () {
   }
 }
 
+function extractGroupInfo(code, type) {
+  const raw = String(code || '').trim().toUpperCase()
+  if (type === 1) { // Entry
+    const m = raw.match(/^G([A-Z])$/)
+    return {
+      groupStrategy: 1, // SplitIfMultiple
+      groupKey: 'G', 
+      section: m ? m[1] : null
+    }
+  }
+  if (type === 0) { // Floor
+    const m = raw.match(/^(\d{1,2})([A-Z])$/)
+    if (m) {
+      return {
+        groupStrategy: 1, // SplitIfMultiple
+        groupKey: m[1],
+        section: m[2]
+      }
+    }
+  }
+  return {
+    groupStrategy: 0, // None
+    groupKey: null,
+    section: null
+  }
+}
+
 // ---- Kaydet
 async function handleSave () {
   // basit alan kontrolleri
@@ -257,6 +284,8 @@ async function handleSave () {
       return
     }
 
+    const { groupStrategy, groupKey, section } = extractGroupInfo(flat.value.code, Number(flat.value.type))
+
     // 2) payload
     const payload = {
       code: String(flat.value.code || '').trim().toUpperCase(),
@@ -266,7 +295,10 @@ async function handleSave () {
       ownerId: flat.value.ownerId || null,
       monthlyRent: flat.value.monthlyRent ? Number(flat.value.monthlyRent) : null,
       isActive: !!flat.value.isActive,
-      description: (flat.value.description?.trim() || `Oluşturan: UI (${new Date().toLocaleString('tr-TR')})`)
+      description: (flat.value.description?.trim() || `Oluşturan: UI (${new Date().toLocaleString('tr-TR')})`),
+      groupStrategy,
+      groupKey,
+      section
     }
 
     emit('save', payload)

@@ -13,8 +13,8 @@ export const notificationsService = {
         await apiService.post('/notifications/read-all')
     },
 
-    async broadcast(title, message) {
-        await apiService.post('/notifications/broadcast', { title, message })
+    async broadcast(title, message, sendEmail = false) {
+        await apiService.post('/notifications/broadcast', { title, message, sendEmail })
     },
 
     async sendTargeted(payload) {

@@ -25,17 +25,17 @@
                 </div>
                 <div class="form-control">
                   <label class="label"><span class="label-text font-semibold text-gray-700 dark:text-gray-300">Tip *</span></label>
-                  <select v-model="local.type" class="select select-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400" required>
-                    <option value="Floor">Kat</option>
-                    <option value="Entry">Giriş</option>
-                    <option value="Parking">Otopark</option>
+                  <select v-model.number="local.type" class="select select-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400" required>
+                    <option :value="0">Kat</option>
+                    <option :value="1">Giriş</option>
+                    <option :value="2">Otopark</option>
                   </select>
                 </div>
   
-                <div class="form-control" v-if="local.type !== 'Parking'">
+                <div class="form-control" v-if="local.type !== 2">
                   <label class="label"><span class="label-text font-semibold text-gray-700 dark:text-gray-300">Kat (FloorNumber) *</span></label>
-                  <input type="number" v-model.number="local.floorNumber" :disabled="local.type === 'Entry'" class="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400" required />
-                  <small v-if="local.type === 'Entry'" class="text-xs text-gray-500">Giriş için kat = 0 kabul edilir.</small>
+                  <input type="number" v-model.number="local.floorNumber" :disabled="local.type === 1" class="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400" required />
+                  <small v-if="local.type === 1" class="text-xs text-gray-500">Giriş için kat = 0 kabul edilir.</small>
                 </div>
   
   
@@ -117,17 +117,52 @@
   
   watch(() => local.value?.type, (t) => {
     if (!local.value) return
-    if (t === 'Parking') {
+    const n = Number(t)
+    if (n === 2) {
       local.value.floorNumber = null
-    } else if (t === 'Entry') {
+    } else if (n === 1) {
       local.value.floorNumber = 0
     }
   })
   
-  const save = () => {
-    if (!local.value) return
-    const payload = { ...local.value }
-    payload.code = String(payload.code || '').trim().toUpperCase()
-    emit('save', payload)
+function extractGroupInfo(code, type) {
+  const raw = String(code || '').trim().toUpperCase()
+  if (type === 1) { // Entry
+    const m = raw.match(/^G([A-Z])$/)
+    return {
+      groupStrategy: 1, // SplitIfMultiple
+      groupKey: 'G', 
+      section: m ? m[1] : null
+    }
   }
+  if (type === 0) { // Floor
+    const m = raw.match(/^(\d{1,2})([A-Z])$/)
+    if (m) {
+      return {
+        groupStrategy: 1, // SplitIfMultiple
+        groupKey: m[1],
+        section: m[2]
+      }
+    }
+  }
+  return {
+    groupStrategy: 0, // None
+    groupKey: null,
+    section: null
+  }
+}
+
+const save = () => {
+  if (!local.value) return
+  const payload = { ...local.value }
+  payload.code = String(payload.code || '').trim().toUpperCase()
+  payload.type = Number(payload.type)
+  
+  const { groupStrategy, groupKey, section } = extractGroupInfo(payload.code, payload.type)
+  payload.groupStrategy = groupStrategy
+  payload.groupKey = groupKey
+  payload.section = section
+
+  emit('save', payload)
+}
   </script>

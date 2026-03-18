@@ -48,6 +48,15 @@
             Bu duyuru yayınlandığında sistemdeki <strong>tüm kullanıcılara</strong> anlık bildirim olarak iletilecektir.
           </p>
         </div>
+
+        <!-- E-posta seçeneği -->
+        <label class="flex items-center gap-3 cursor-pointer p-3 rounded-xl border border-blue-100 dark:border-blue-900/30 bg-blue-50 dark:bg-blue-900/20">
+          <input type="checkbox" v-model="form.sendEmail" class="checkbox checkbox-primary checkbox-sm" />
+          <span class="text-sm font-semibold text-blue-900 dark:text-blue-200">
+            📧 Ayrıca e-posta ile de gönder
+            <span class="text-xs font-normal opacity-70 ml-1">(kayıtlı e-postalara)</span>
+          </span>
+        </label>
       </div>
 
       <!-- Footer -->
@@ -86,7 +95,8 @@ const { notifySuccess, notifyError } = useNotify()
 const loading = ref(false)
 const form = reactive({
   title: '',
-  message: ''
+  message: '',
+  sendEmail: false
 })
 
 const isFormValid = computed(() => {
@@ -98,11 +108,12 @@ const handleSubmit = async () => {
 
   loading.value = true
   try {
-    await notificationsService.broadcast(form.title, form.message)
+    await notificationsService.broadcast(form.title, form.message, form.sendEmail)
     notifySuccess('Duyuru başarıyla tüm kullanıcılara iletildi', 'success')
     emit('success')
     form.title = ''
     form.message = ''
+    form.sendEmail = false
     emit('close')
   } catch (error) {
     notifyError('Duyuru yayınlanırken bir hata oluştu', 'error')
