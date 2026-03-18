@@ -346,7 +346,7 @@ const reportItems = computed(() => {
   if (filters.type === 'all' || filters.type === 'payment') {
     paymentsData.value.forEach(p => {
       items.push({
-        date: p.paymentDate,
+        date: p.paymentDate || p.createdAt || p.date,
         periodYear: p.periodYear,
         periodMonth: p.periodMonth,
         tenantName: p.tenantName || p.ownerName || 'Bilinmiyor',
