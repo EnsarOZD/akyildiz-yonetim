@@ -242,7 +242,7 @@
               <div class="md:col-span-2 text-left md:text-center text-sm text-gray-600 dark:text-gray-300">
                 <p class="font-semibold text-gray-800 dark:text-gray-100 flex items-center gap-2">
                   <span>{{ getPaymentTypeIcon(p.type) }}</span>
-                  <span>{{ getPaymentTypeLabel(normalizePaymentType(p.type)) }}</span>
+                  <span>{{ getPaymentTypeLabel(p.type) }}</span>
                 </p>
                 <p>{{ p.bank }}</p>
               </div>
@@ -365,7 +365,7 @@ import { useErrorHandler } from '@/composables/useErrorHandler'
 import { useNotify } from '@/composables/useNotify'
 import { usePaymentsStore } from '@/stores/payments.js'
 import { useTenantsStore } from '@/stores/tenants.js'
-import { paymentTypes, getPaymentTypeLabel } from '@/constants/enums'
+import { paymentTypes, getPaymentTypeLabel, paymentTypeToValue } from '@/constants/enums'
 import { safeFormatDate } from '@/utils/dateUtils'
 import { formatCurrency, getAvatarColor, getAvatarInitial } from '@/utils/uiHelpers'
 
@@ -403,11 +403,9 @@ const filters = ref({
 
 /* ---- Tip yardımcıları ---- */
 const normalizePaymentType = (t) => {
-  if (typeof t === 'number') return t
-  if (t === '' || t === null || t === undefined) return ''
-  if (!Number.isNaN(Number(t))) return Number(t)
-  const entry = Object.entries(paymentTypes).find(([, lbl]) => lbl === t)
-  return entry ? Number(entry[0]) : ''
+  if (t === '' || t === null || t === undefined) return '';
+  const v = paymentTypeToValue(t);
+  return v !== null ? v : '';
 }
 
 const paymentTypeIconMap = {

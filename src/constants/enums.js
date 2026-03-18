@@ -76,7 +76,7 @@ const toMaps = (arr) => ({
   byValue: Object.fromEntries(arr.map(x => [String(x.value), x])),
   bySlug: Object.fromEntries(arr.map(x => [String(x.slug ?? x.value).toLowerCase(), x])),
 });
-const normNum = (v) => { const n = Number(v); return Number.isFinite(n) ? n : null; };
+const normNum = (v) => { if (v === '' || v === null || v === undefined) return null; const n = Number(v); return Number.isFinite(n) ? n : null; };
 const normSlug = (v) => String(v ?? '').toLowerCase();
 
 const PT = toMaps(PAYMENT_TYPES);
