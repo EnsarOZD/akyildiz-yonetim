@@ -27,7 +27,7 @@ export const useAuthStore = defineStore('auth', () => {
           user.value = { id: backendUser.id, email: backendUser.email }
           role.value = backendUser.role ? backendUser.role.toLowerCase() : null
           companyId.value = backendUser.companyId
-          fullName.value = `${backendUser.firstName || ''} ${backendUser.lastName || ''}`.trim()
+          fullName.value = backendUser.name || `${backendUser.firstName || ''} ${backendUser.lastName || ''}`.trim()
           email.value = backendUser.email
         } else {
           clearUser()

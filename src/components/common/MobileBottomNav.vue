@@ -132,7 +132,7 @@ const visibleNavItems = computed(() => {
   if (role === 'tenant') {
     return [
       { name: 'Özet', path: '/tenant-dashboard', icon: DashboardIcon },
-      { name: 'Ödemelerim', path: '/my-payments', icon: WalletIcon },
+      { name: 'Raporlar', path: '/my-payments', icon: ChartIcon },
       { name: 'Bildirimler', path: '/notifications', icon: BellIcon },
       { name: 'Profil', path: '/profile', icon: UserIcon },
     ]

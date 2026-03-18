@@ -107,14 +107,14 @@
             </div>
           </div>
           <div class="flex flex-wrap gap-x-6 gap-y-2 text-sm text-gray-500 dark:text-gray-400">
-            <span v-if="tenantInfo.taxNumber" class="flex items-center gap-1">
-              <span class="font-medium text-gray-600 dark:text-gray-300">VKN:</span> {{ tenantInfo.taxNumber }}
+            <span v-if="tenantInfo.identityNumber" class="flex items-center gap-1">
+              <span class="font-medium text-gray-600 dark:text-gray-300">VKN:</span> {{ tenantInfo.identityNumber }}
             </span>
-            <span v-if="tenantInfo.phone" class="flex items-center gap-1">
-              <span class="font-medium text-gray-600 dark:text-gray-300">Tel:</span> {{ tenantInfo.phone }}
+            <span v-if="tenantInfo.contactPersonPhone" class="flex items-center gap-1">
+              <span class="font-medium text-gray-600 dark:text-gray-300">Tel:</span> {{ tenantInfo.contactPersonPhone }}
             </span>
-            <span v-if="tenantInfo.email" class="flex items-center gap-1">
-              <span class="font-medium text-gray-600 dark:text-gray-300">E-posta:</span> {{ tenantInfo.email }}
+            <span v-if="tenantInfo.contactPersonEmail" class="flex items-center gap-1">
+              <span class="font-medium text-gray-600 dark:text-gray-300">E-posta:</span> {{ tenantInfo.contactPersonEmail }}
             </span>
             <span v-if="tenantInfo.flats && tenantInfo.flats.length > 0" class="flex items-center gap-1">
               <span class="font-medium text-gray-600 dark:text-gray-300">Ünite:</span>

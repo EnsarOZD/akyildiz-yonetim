@@ -243,7 +243,8 @@ const setTabsBasedOnRole = (role) => {
     ]
   } else if (normalizedRole === ROLES.TENANT) {
     tabs.value = [
-      { label: 'Özet', value: 'dashboard', route: '/dashboard' },
+      { label: 'Özet', value: 'tenant-dashboard', route: '/tenant-dashboard' },
+      { label: 'Raporlar', value: 'my-payments', route: '/my-payments' },
       { label: 'Profilim', value: 'profile', route: '/profile' }
     ]
   } else if (normalizedRole === ROLES.OWNER) {

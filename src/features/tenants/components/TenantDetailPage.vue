@@ -69,51 +69,104 @@
     <!-- Sekme İçerikleri -->
     <div class="card bg-base-100 shadow-xl min-h-[400px]">
       <div class="card-body">
-        <!-- Timeline Görünümü -->
-        <div v-if="activeTab === 'timeline'" class="space-y-4">
-          <div class="flex justify-between items-center mb-6">
-            <h3 class="text-xl font-bold">Finansal İşlem Geçmişi</h3>
-            <div class="p-2 bg-gray-50 dark:bg-gray-800 rounded-lg text-sm">
-              <span class="inline-block w-3 h-3 bg-error rounded-full mr-1"></span> Borç
-              <span class="inline-block w-3 h-3 bg-success rounded-full ml-3 mr-1"></span> Ödeme
+        <!-- Finansal İşlem Geçmişi -->
+        <div v-if="activeTab === 'timeline'" class="space-y-6">
+          <!-- Özet Kartlar -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-900/30 rounded-2xl p-4">
+              <p class="text-xs font-bold uppercase tracking-widest text-red-400 mb-1">Toplam Tahakkuk</p>
+              <p class="text-xl font-black text-red-600 dark:text-red-400">{{ formatCurrency(timelineSummary.totalDebt) }}</p>
+              <p class="text-xs text-red-400 mt-1">{{ timelineSummary.debtCount }} kalem</p>
+            </div>
+            <div class="bg-green-50 dark:bg-green-900/20 border border-green-100 dark:border-green-900/30 rounded-2xl p-4">
+              <p class="text-xs font-bold uppercase tracking-widest text-green-400 mb-1">Toplam Tahsilat</p>
+              <p class="text-xl font-black text-green-600 dark:text-green-400">{{ formatCurrency(timelineSummary.totalPayment) }}</p>
+              <p class="text-xs text-green-400 mt-1">{{ timelineSummary.paymentCount }} işlem</p>
+            </div>
+            <div class="rounded-2xl p-4 border"
+              :class="timelineSummary.balance > 0
+                ? 'bg-orange-50 dark:bg-orange-900/20 border-orange-100 dark:border-orange-900/30'
+                : 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-100 dark:border-emerald-900/30'">
+              <p class="text-xs font-bold uppercase tracking-widest mb-1"
+                :class="timelineSummary.balance > 0 ? 'text-orange-400' : 'text-emerald-400'">Güncel Bakiye</p>
+              <p class="text-xl font-black"
+                :class="timelineSummary.balance > 0 ? 'text-orange-600 dark:text-orange-400' : 'text-emerald-600 dark:text-emerald-400'">
+                {{ formatCurrency(Math.abs(timelineSummary.balance)) }}
+              </p>
+              <p class="text-xs mt-1"
+                :class="timelineSummary.balance > 0 ? 'text-orange-400' : 'text-emerald-400'">
+                {{ timelineSummary.balance > 0 ? 'Kalan borç' : 'Fazla ödeme' }}
+              </p>
             </div>
           </div>
-          
-          <ul class="timeline timeline-vertical timeline-compact">
-            <li v-for="(item, idx) in timelineItems" :key="idx">
-              <hr v-if="idx > 0" :class="item.isPayment ? 'bg-success/30' : 'bg-error/30'" />
-              <div class="timeline-middle">
-                <div :class="['w-10 h-10 rounded-full flex items-center justify-center shadow-lg text-white', item.isPayment ? 'bg-success' : 'bg-error']">
-                  <span v-if="item.isPayment">💸</span>
-                  <span v-else>📄</span>
-                </div>
-              </div>
-              <div class="timeline-start mb-10 md:text-end pr-4">
-                <time class="font-mono italic text-sm text-gray-500">{{ formatDate(item.date) }}</time>
-                <div class="text-xs uppercase text-gray-400 font-bold tracking-widest mt-1">{{ item.isPayment ? 'Tahsilat' : 'Tahakkuk' }}</div>
-              </div>
-              <div class="timeline-end timeline-box !bg-base-100 border-gray-200 shadow-sm p-4 w-full md:w-auto min-w-[300px]">
-                <div class="flex flex-col gap-1">
-                  <div class="flex justify-between items-center gap-4">
-                    <span class="font-bold text-gray-800 dark:text-gray-200">{{ item.description }}</span>
-                    <span :class="['font-bold text-lg', item.isPayment ? 'text-success' : 'text-error']">
-                      {{ item.isPayment ? '+' : '-' }}{{ formatCurrency(item.amount) }}
+
+          <!-- Filtre -->
+          <div class="flex items-center gap-2 flex-wrap">
+            <button
+              v-for="f in [{val:'all',label:'Tümü'},{val:'debt',label:'Tahakkuklar'},{val:'payment',label:'Tahsilatlar'}]"
+              :key="f.val"
+              @click="timelineFilter = f.val"
+              class="px-4 py-1.5 rounded-full text-sm font-semibold border transition-all"
+              :class="timelineFilter === f.val
+                ? 'bg-gray-800 dark:bg-white text-white dark:text-gray-900 border-transparent'
+                : 'border-gray-200 dark:border-gray-700 text-gray-500 hover:border-gray-400'">
+              {{ f.label }}
+            </button>
+          </div>
+
+          <!-- Tablo -->
+          <div class="overflow-x-auto rounded-2xl border border-gray-100 dark:border-gray-700">
+            <table class="w-full text-sm">
+              <thead>
+                <tr class="bg-gray-50 dark:bg-gray-800/60 text-xs uppercase tracking-widest text-gray-500 dark:text-gray-400">
+                  <th class="px-4 py-3 text-left font-bold rounded-tl-2xl">Tarih</th>
+                  <th class="px-4 py-3 text-left font-bold">Tür</th>
+                  <th class="px-4 py-3 text-left font-bold">Açıklama</th>
+                  <th class="px-4 py-3 text-right font-bold">Tutar</th>
+                  <th class="px-4 py-3 text-center font-bold rounded-tr-2xl">Durum</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(item, idx) in filteredTimelineItems" :key="idx"
+                  class="border-t border-gray-100 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors">
+                  <td class="px-4 py-3 text-gray-500 whitespace-nowrap">{{ formatDate(item.date) }}</td>
+                  <td class="px-4 py-3">
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold"
+                      :class="item.isPayment
+                        ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
+                        : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'">
+                      <span>{{ item.isPayment ? '↑' : '↓' }}</span>
+                      {{ item.isPayment ? 'Tahsilat' : 'Tahakkuk' }}
                     </span>
-                  </div>
-                  <div class="flex justify-between items-center">
-                    <span class="text-xs text-gray-500">{{ item.typeLabel }}</span>
-                    <span v-if="!item.isPayment" class="badge badge-sm" :class="item.isPaid ? 'badge-success' : 'badge-error'">
-                      {{ item.isPaid ? 'Ödendi' : 'Ödenmedi' }}
+                  </td>
+                  <td class="px-4 py-3">
+                    <div class="font-semibold text-gray-800 dark:text-gray-200">{{ item.description }}</div>
+                    <div class="text-xs text-gray-400 mt-0.5">{{ item.typeLabel }}</div>
+                  </td>
+                  <td class="px-4 py-3 text-right font-bold whitespace-nowrap"
+                    :class="item.isPayment ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">
+                    {{ item.isPayment ? '+' : '-' }}{{ formatCurrency(item.amount) }}
+                  </td>
+                  <td class="px-4 py-3 text-center">
+                    <span v-if="item.isPayment" class="inline-block px-2 py-0.5 rounded-full text-xs font-bold bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400">
+                      Alındı
                     </span>
-                  </div>
-                </div>
-              </div>
-              <hr :class="item.isPayment ? 'bg-success/30' : 'bg-error/30'" />
-            </li>
-            <li v-if="timelineItems.length === 0" class="py-12 text-center text-gray-500 italic">
-              Henüz finansal işlem kaydı bulunmuyor.
-            </li>
-          </ul>
+                    <span v-else class="inline-block px-2 py-0.5 rounded-full text-xs font-bold"
+                      :class="item.isPaid
+                        ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
+                        : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'">
+                      {{ item.isPaid ? 'Ödendi' : 'Bekliyor' }}
+                    </span>
+                  </td>
+                </tr>
+                <tr v-if="filteredTimelineItems.length === 0">
+                  <td colspan="5" class="px-4 py-12 text-center text-gray-400 italic">
+                    Henüz finansal işlem kaydı bulunmuyor.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
         <!-- Ödenmemiş Borçlar -->
         <div v-if="activeTab === 'debts'">
@@ -336,6 +389,7 @@ const activeTab = ref('timeline')
 const totalDebt = ref(0)
 const showAdvanceModal = ref(false)
 const showEditModal = ref(false)
+const timelineFilter = ref('all')
 const { notifySuccess } = useNotify()
 
 const filteredPayments = computed(() => {
@@ -362,6 +416,26 @@ const handleAdvanceSuccess = () => {
   showAdvanceModal.value = false
   fetchTenantDetails()
 }
+
+const filteredTimelineItems = computed(() => {
+  if (timelineFilter.value === 'debt') return timelineItems.value.filter(i => !i.isPayment)
+  if (timelineFilter.value === 'payment') return timelineItems.value.filter(i => i.isPayment)
+  return timelineItems.value
+})
+
+const timelineSummary = computed(() => {
+  const debts = timelineItems.value.filter(i => !i.isPayment)
+  const pmts = timelineItems.value.filter(i => i.isPayment)
+  const totalDebt = debts.reduce((s, i) => s + i.amount, 0)
+  const totalPayment = pmts.reduce((s, i) => s + i.amount, 0)
+  return {
+    totalDebt,
+    totalPayment,
+    balance: totalDebt - totalPayment,
+    debtCount: debts.length,
+    paymentCount: pmts.length
+  }
+})
 
 const timelineItems = computed(() => {
   const items = []

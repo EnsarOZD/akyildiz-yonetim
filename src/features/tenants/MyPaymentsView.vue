@@ -311,9 +311,12 @@ const reportItems = computed(() => {
 
 // Güncel bakiye her zaman ham veriden hesaplanır — filtre etkilemez
 const rawSummary = computed(() => {
-  const totalDebt = debtsData.value.reduce((s, d) => s + Number(d.remainingAmount ?? d.amount ?? 0), 0)
+  // Toplam tahakkuk: orijinal borç tutarlarının toplamı (kalan değil)
+  const totalDebt = debtsData.value.reduce((s, d) => s + Number(d.amount ?? 0), 0)
   const totalPayment = paymentsData.value.reduce((s, p) => s + Number(p.amount ?? 0), 0)
-  return { totalDebt, totalPayment, balance: totalPayment - totalDebt }
+  // Güncel bakiye: kalan borçlar - ödemeler
+  const remainingDebt = debtsData.value.reduce((s, d) => s + Number(d.remainingAmount ?? d.amount ?? 0), 0)
+  return { totalDebt, totalPayment, balance: totalPayment - remainingDebt }
 })
 
 // Tabloda gösterilen satırların toplamları (filtre uygulanmış)
