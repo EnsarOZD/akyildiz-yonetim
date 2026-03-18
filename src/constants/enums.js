@@ -2,11 +2,10 @@
 
 // ---------- PAYMENT / DEBT ----------
 export const PAYMENT_TYPES = [
-  { value: 0, slug: 'dues', label: 'Aidat', icon: '🧾' },
-  { value: 1, slug: 'electricity', label: 'Elektrik', icon: '⚡️' },
-  { value: 2, slug: 'water', label: 'Su', icon: '💧' },
-  { value: 3, slug: 'gas', label: 'Doğalgaz', icon: '🔥' },
-  { value: 4, slug: 'other', label: 'Diğer', icon: '📦' },
+  { value: 0, slug: 'rent', label: 'Kira', icon: '🏠' },
+  { value: 1, slug: 'dues', label: 'Aidat', icon: '🧾' },
+  { value: 2, slug: 'utility', label: 'Fatura / Gider', icon: '🧾' },
+  { value: 3, slug: 'other', label: 'Diğer', icon: '📦' },
 ];
 
 export const DEBT_TYPES = [

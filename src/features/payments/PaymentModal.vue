@@ -226,7 +226,7 @@
             <div class="flex-1 min-w-0">
               <div class="flex items-start justify-between gap-2">
                 <div>
-                  <p class="font-semibold text-gray-800 dark:text-gray-100 text-sm">{{ debt.typeLabel || debt.type }}</p>
+                  <p class="font-semibold text-gray-800 dark:text-gray-100 text-sm">{{ getDebtTypeLabel(debt.type) }}</p>
                   <p class="text-xs text-gray-500 dark:text-gray-400">{{ debt.period || debt.dueDateFormatted }}
                     <span v-if="debt.unit && debt.unit !== '-'" class="text-blue-500 ml-1">({{ debt.unit }})</span>
                   </p>
@@ -342,6 +342,7 @@ import ownersService from '@/services/ownersService'
 import utilityDebtsService from '@/services/utilityDebtsService'
 import { useErrorHandler } from '@/composables/useErrorHandler'
 import { useNotify } from '@/composables/useNotify'
+import { getPaymentTypeLabel, getDebtTypeLabel } from '@/constants/enums'
 import { useDirtyGuard } from '@/composables/useDirtyGuard'
 
 const props = defineProps({
