@@ -118,11 +118,14 @@
         <div class="form-control">
           <label class="label"><span class="label-text font-semibold text-gray-700 dark:text-gray-300">Gelen Tutar (₺) *</span></label>
           <input
-            v-model.number="form.amount"
-            type="number"
-            step="0.01"
+            :value="displayAmount"
+            @focus="isAmountFocused = true"
+            @blur="isAmountFocused = false"
+            @input="updateAmount($event.target.value)"
+            type="text"
+            inputmode="decimal"
             placeholder="0.00"
-            class="input input-bordered w-full bg-white dark:bg-gray-700"
+            class="input input-bordered w-full bg-white dark:bg-gray-700 font-bold"
             :class="{ 'border-red-400': step1Touched && !(Number(form.amount) > 0) }"
           />
           <p v-if="step1Touched && !(Number(form.amount) > 0)" class="text-red-500 text-xs mt-1">Geçerli bir tutar girin.</p>
@@ -236,15 +239,18 @@
                   <p class="text-xs text-gray-400">{{ getDaysOverdue(debt.dueDate) }} gün</p>
                 </div>
               </div>
-              <div v-if="selectedDebts.includes(debt.id)" class="mt-2" @click.stop>
+              <div v-if="selectedDebts.includes(debt.id)" class="mt-2 flex items-center gap-2" @click.stop>
                 <input
-                  v-model="debtAllocations[debt.id]"
-                  type="number"
-                  step="0.01"
-                  :max="debt.remainingAmount || debt.amount"
-                  class="input input-sm input-bordered w-32"
-                  placeholder="Tutar"
+                  :value="getDisplayRowAmount(debt.id)"
+                  @focus="isRowFocused[debt.id] = true"
+                  @blur="isRowFocused[debt.id] = false"
+                  @input="updateRowAmount(debt.id, $event.target.value)"
+                  type="text"
+                  inputmode="decimal"
+                  class="input input-sm input-bordered w-full md:w-32 font-medium"
+                  placeholder="Seçilen Tutar"
                 />
+                <button type="button" @click="debtAllocations[debt.id] = (debt.remainingAmount || debt.amount)" class="btn btn-xs btn-ghost text-blue-600">Tamamı</button>
               </div>
             </div>
           </div>
@@ -369,6 +375,31 @@ const step1Touched = ref(false)
 // ── Form state ────────────────────────────────────────────────
 const form = reactive({ tenantId: null, ownerId: null, amount: null, date: '', type: '', bank: '', description: '' })
 watch(() => props.payment, (val) => { Object.assign(form, val || {}) }, { immediate: true, deep: true })
+
+// ── Input Formatters (Thousand Separator) ─────────────────────
+const isAmountFocused = ref(false)
+const displayAmount = computed(() => {
+  if (isAmountFocused.value) return form.amount === null ? '' : form.amount.toString()
+  if (form.amount === null || form.amount === undefined) return ''
+  return form.amount.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+})
+
+const updateAmount = (val) => {
+  const clean = val.replace(/[^0-9,.-]/g, '').replace(/\./g, '').replace(',', '.')
+  form.amount = isNaN(parseFloat(clean)) ? null : parseFloat(clean)
+}
+
+const isRowFocused = reactive({})
+const getDisplayRowAmount = (id) => {
+  if (isRowFocused[id]) return debtAllocations.value[id] === undefined ? '' : debtAllocations.value[id].toString()
+  if (!debtAllocations.value[id]) return ''
+  return Number(debtAllocations.value[id]).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+}
+
+const updateRowAmount = (id, val) => {
+  const clean = val.replace(/[^0-9,.-]/g, '').replace(/\./g, '').replace(',', '.')
+  debtAllocations.value[id] = isNaN(parseFloat(clean)) ? undefined : parseFloat(clean)
+}
 
 // ── Dirty guard ───────────────────────────────────────────────
 const { isDirty, resetDirty } = useDirtyGuard(() => ({ ...form }))
