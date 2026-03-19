@@ -1,171 +1,246 @@
 <template>
-  <header data-testid="sidebar" class="bg-white dark:bg-gray-800 shadow-md sticky top-0 z-50">
+  <header data-testid="sidebar"
+    class="sticky top-0 z-50 bg-white/80 dark:bg-[#0f1623]/90 backdrop-blur-md border-b border-slate-200/60 dark:border-slate-800/60 shadow-sm">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex items-center justify-between h-16">
-        <!-- Logo ve Başlık -->
-        <div class="flex items-center">
-          <router-link to="/" class="flex-shrink-0 flex items-center gap-2">
-            <img :src="logoUrl" class="h-9 w-9 text-blue-600 dark:text-blue-400" :alt="appName" />
-            <span class="text-xl font-semibold font-cormorantSC hidden md:block uppercase">{{ appName }}</span>
-          </router-link>
-        </div>
+      <div class="flex items-center justify-between h-14">
 
-        <!-- Navigasyon Linkleri (Orta Alan - Geniş Ekran) -->
-        <nav class="hidden md:flex md:items-center md:space-x-2">
+        <!-- Logo -->
+        <router-link to="/" class="flex items-center gap-2.5 flex-shrink-0">
+          <img :src="logoUrl" class="h-8 w-8" :alt="appName" />
+          <span class="text-base font-semibold font-cormorantSC uppercase tracking-wide text-slate-800 dark:text-slate-100 hidden md:block">
+            {{ appName }}
+          </span>
+        </router-link>
+
+        <!-- Desktop nav tabs -->
+        <nav v-if="tabs.length" class="hidden md:flex items-center gap-0.5">
           <router-link
             v-for="tab in tabs"
             :key="tab.value"
             :to="tab.route"
-            class="px-3 py-2 rounded-md text-sm font-medium transition-colors"
-            :class="[
-              route.path === tab.route
-                ? 'bg-gray-900 text-white'
-                : 'text-gray-300 hover:bg-gray-700 hover:text-white'
-            ]"
-            :aria-current="route.path === tab.route ? 'page' : undefined"
+            class="px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all duration-150"
+            :class="isActiveTab(tab.route)
+              ? 'bg-blue-600 text-white shadow-sm'
+              : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-800 dark:hover:text-slate-200'"
+            :aria-current="isActiveTab(tab.route) ? 'page' : undefined"
           >
             {{ tab.label }}
           </router-link>
         </nav>
 
-        <!-- Kullanıcı Menüsü ve Mobil Menü Butonu (Sağ Alan) -->
-        <div class="flex items-center">
-          <!-- Bildirimler Zil Butonu -->
-          <div v-if="userInfo" class="relative mr-2" ref="notificationsRef">
+        <!-- Right side actions -->
+        <div class="flex items-center gap-1">
+
+          <!-- Notifications -->
+          <div v-if="userInfo" class="relative" ref="notificationsRef">
             <button
               @click="toggleNotifications"
-              class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition relative"
+              class="relative p-2 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-700 dark:hover:text-slate-300 transition-all duration-150"
               aria-label="Bildirimleri göster"
               :aria-expanded="showNotificationsDropdown"
-              aria-haspopup="true"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75"
+                  d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
               </svg>
-              <span v-if="notificationsStore.unreadCount > 0" class="absolute top-1 right-1 flex h-4 w-4">
-                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                <span class="relative inline-flex rounded-full h-4 w-4 bg-red-500 text-[10px] text-white items-center justify-center font-bold">
+              <!-- Badge -->
+              <transition enter-active-class="animate-scale-in">
+                <span v-if="notificationsStore.unreadCount > 0"
+                  class="absolute top-1 right-1 min-w-[16px] h-4 flex items-center justify-center
+                    bg-red-500 text-white text-[9px] font-bold rounded-full px-0.5 leading-none">
                   {{ notificationsStore.unreadCount > 9 ? '9+' : notificationsStore.unreadCount }}
                 </span>
-              </span>
+              </transition>
             </button>
 
-            <!-- Bildirim Dropdown -->
+            <!-- Notification dropdown -->
             <transition
-              enter-active-class="transition ease-out duration-100"
-              enter-from-class="transform opacity-0 scale-95"
-              enter-to-class="transform opacity-100 scale-100"
-              leave-active-class="transition ease-in duration-75"
-              leave-from-class="transform opacity-100 scale-100"
-              leave-to-class="transform opacity-0 scale-95"
+              enter-active-class="transition ease-out duration-150"
+              enter-from-class="opacity-0 translate-y-1 scale-95"
+              enter-to-class="opacity-100 translate-y-0 scale-100"
+              leave-active-class="transition ease-in duration-100"
+              leave-from-class="opacity-100 translate-y-0 scale-100"
+              leave-to-class="opacity-0 translate-y-1 scale-95"
             >
-              <div v-if="showNotificationsDropdown" class="origin-top-right absolute right-0 mt-2 w-80 rounded-lg shadow-xl py-1 bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 focus:outline-none z-50 overflow-hidden">
-                <div class="px-4 py-2 text-sm font-bold border-b dark:border-gray-700 flex justify-between items-center bg-gray-50 dark:bg-gray-900/50">
-                  <span class="text-gray-900 dark:text-white">Bildirimler</span>
-                  <button @click="notificationsStore.markAllAsRead" class="text-xs text-blue-600 hover:underline font-medium">Tümünü oku</button>
+              <div v-if="showNotificationsDropdown"
+                class="absolute right-0 mt-2 w-80 rounded-xl shadow-card-lg border border-slate-200 dark:border-slate-700
+                  bg-white dark:bg-slate-900 overflow-hidden origin-top-right">
+
+                <!-- Header -->
+                <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100 dark:border-slate-800">
+                  <span class="text-sm font-semibold text-slate-800 dark:text-slate-100">Bildirimler</span>
+                  <button @click="notificationsStore.markAllAsRead"
+                    class="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 font-medium transition-colors">
+                    Tümünü oku
+                  </button>
                 </div>
-                
-                <div class="max-h-96 overflow-y-auto">
-                  <div v-if="notificationsStore.loading && notificationsStore.items.length === 0" class="p-8 text-center">
-                    <span class="loading loading-spinner text-blue-600"></span>
+
+                <!-- Items -->
+                <div class="max-h-80 overflow-y-auto">
+                  <div v-if="notificationsStore.loading && notificationsStore.items.length === 0"
+                    class="py-10 flex justify-center">
+                    <span class="loading loading-spinner loading-sm text-blue-600"></span>
                   </div>
-                  <div v-else-if="notificationsStore.items.length === 0" class="p-8 text-center text-gray-500">
-                    <p class="text-sm">Henüz bildirim bulunmuyor.</p>
+                  <div v-else-if="notificationsStore.items.length === 0"
+                    class="py-10 text-center text-sm text-slate-500 dark:text-slate-400">
+                    Henüz bildirim yok
                   </div>
                   <div v-else>
-                    <div 
-                      v-for="item in notificationsStore.items.slice(0, 5)" 
+                    <div
+                      v-for="item in notificationsStore.items.slice(0, 6)"
                       :key="item.id"
                       @click="handleNotificationClick(item)"
-                      class="px-4 py-3 border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition relative"
-                      :class="{'bg-blue-50/50 dark:bg-blue-900/10': !item.isRead}"
+                      class="relative flex gap-3 px-4 py-3 border-b border-slate-50 dark:border-slate-800/50
+                        hover:bg-slate-50 dark:hover:bg-slate-800/40 cursor-pointer transition-colors"
+                      :class="!item.isRead ? 'bg-blue-50/40 dark:bg-blue-950/20' : ''"
                     >
-                      <div v-if="!item.isRead" class="absolute left-1 top-1/2 -translate-y-1/2 w-1.5 h-1.5 bg-blue-600 rounded-full"></div>
-                      <p class="text-sm font-semibold text-gray-900 dark:text-white line-clamp-1">{{ item.title }}</p>
-                      <p class="text-xs text-gray-600 dark:text-gray-400 line-clamp-2 mt-0.5">{{ item.message }}</p>
-                      <p class="text-[10px] text-gray-400 mt-1">{{ formatDate(item.createdAt) }}</p>
+                      <!-- Unread dot -->
+                      <span v-if="!item.isRead"
+                        class="absolute left-2 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-blue-500 flex-shrink-0" />
+                      <!-- Icon -->
+                      <div class="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center mt-0.5"
+                        :class="notifIconBg(item.type)">
+                        <svg class="w-4 h-4" :class="notifIconColor(item.type)" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="notifIconPath(item.type)" />
+                        </svg>
+                      </div>
+                      <!-- Content -->
+                      <div class="min-w-0 flex-1">
+                        <p class="text-sm font-medium text-slate-800 dark:text-slate-100 line-clamp-1">{{ item.title }}</p>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 mt-0.5 leading-relaxed">{{ item.message }}</p>
+                        <p class="text-[10px] text-slate-400 mt-1">{{ formatDate(item.createdAt) }}</p>
+                      </div>
                     </div>
                   </div>
                 </div>
 
-                <router-link to="/notifications" @click="showNotificationsDropdown = false" class="block w-full text-center py-2 text-sm text-blue-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition font-semibold border-t dark:border-gray-700">
-                  Tüm Bildirimleri Gör
+                <!-- Footer -->
+                <router-link to="/notifications" @click="showNotificationsDropdown = false"
+                  class="flex items-center justify-center gap-1.5 py-2.5 text-xs font-semibold text-blue-600 dark:text-blue-400
+                    hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors border-t border-slate-100 dark:border-slate-800">
+                  Tüm bildirimleri gör
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                  </svg>
                 </router-link>
               </div>
             </transition>
           </div>
 
-          <!-- Tema Değiştir Butonu -->
+          <!-- Theme toggle -->
           <button
             @click="authStore.toggleTheme"
-            class="mr-2 p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition"
+            class="p-2 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-700 dark:hover:text-slate-300 transition-all duration-150"
             :aria-label="authStore.theme === 'dark' ? 'Açık moda geç' : 'Karanlık moda geç'"
           >
-            <svg v-if="authStore.theme === 'dark'" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m8.66-13.66l-.71.71M4.05 19.07l-.71.71M21 12h-1M4 12H3m16.66 5.66l-.71-.71M4.05 4.93l-.71-.71M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+            <svg v-if="authStore.theme === 'dark'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75"
+                d="M12 3v1m0 16v1m8.66-13.66l-.71.71M4.05 19.07l-.71.71M21 12h-1M4 12H3m16.66 5.66l-.71-.71M4.05 4.93l-.71-.71M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
             </svg>
-            <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M21 12.79A9 9 0 1111.21 3a7 7 0 109.79 9.79z" />
+            <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75"
+                d="M21 12.79A9 9 0 1111.21 3a7 7 0 109.79 9.79z" />
             </svg>
           </button>
-          <!-- Kullanıcı Dropdown -->
+
+          <!-- User menu -->
           <div v-if="userInfo" class="relative" ref="userMenuRef">
             <button
               @click="toggleUserDropdown"
-              class="flex items-center gap-2 text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white"
-              aria-label="Kullanıcı menüsünü aç"
+              class="flex items-center gap-2 pl-1.5 pr-2.5 py-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-150"
               :aria-expanded="showUserDropdown"
-              aria-haspopup="true"
             >
-              <span class="sr-only">Kullanıcı menüsünü aç</span>
-              <span class="hidden sm:inline">{{ userInfo.firstName }}</span>
-              <svg class="h-8 w-8 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-5.5-2.5a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0zM10 12a5.5 5.5 0 00-4.52 2.39a.75.75 0 001.33.82a3.5 3.5 0 016.38 0a.75.75 0 001.33-.82A5.5 5.5 0 0010 12z" clip-rule="evenodd" />
+              <!-- Avatar initials -->
+              <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-500 to-violet-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                {{ userInitials }}
+              </div>
+              <span class="hidden sm:block text-sm font-medium text-slate-700 dark:text-slate-300 max-w-[100px] truncate">
+                {{ userInfo.firstName }}
+              </span>
+              <svg class="w-3.5 h-3.5 text-slate-400 flex-shrink-0 transition-transform duration-150"
+                :class="showUserDropdown ? 'rotate-180' : ''"
+                fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
               </svg>
             </button>
+
             <transition
-              enter-active-class="transition ease-out duration-100"
-              enter-from-class="transform opacity-0 scale-95"
-              enter-to-class="transform opacity-100 scale-100"
-              leave-active-class="transition ease-in duration-75"
-              leave-from-class="transform opacity-100 scale-100"
-              leave-to-class="transform opacity-0 scale-95"
+              enter-active-class="transition ease-out duration-150"
+              enter-from-class="opacity-0 translate-y-1 scale-95"
+              enter-to-class="opacity-100 translate-y-0 scale-100"
+              leave-active-class="transition ease-in duration-100"
+              leave-from-class="opacity-100 translate-y-0 scale-100"
+              leave-to-class="opacity-0 translate-y-1 scale-95"
             >
-              <div v-if="showUserDropdown" class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 focus:outline-none">
-                <div class="px-4 py-2 text-xs text-gray-500 border-b">
-                  <p class="font-semibold text-gray-700">{{ userInfo.firstName }} {{ userInfo.lastName }}</p>
-                  <p>{{ userInfo.role }}</p>
+              <div v-if="showUserDropdown"
+                class="absolute right-0 mt-2 w-52 rounded-xl shadow-card-lg border border-slate-200 dark:border-slate-700
+                  bg-white dark:bg-slate-900 py-1.5 origin-top-right overflow-hidden">
+
+                <!-- User info -->
+                <div class="px-3.5 py-2.5 border-b border-slate-100 dark:border-slate-800 mb-1">
+                  <p class="text-sm font-semibold text-slate-800 dark:text-slate-100 truncate">
+                    {{ userInfo.firstName }} {{ userInfo.lastName }}
+                  </p>
+                  <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{{ roleLabel }}</p>
                 </div>
-                <router-link v-if="userInfo.role.toLowerCase() === ROLES.ADMIN" to="/admin" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" @click="showUserDropdown = false">
-                  <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M10.343 3.94c.09-.542.56-.94 1.11-.94h1.094c.55 0 1.02.398 1.11.94l.149.894c.07.424.384.764.78.93.398.164.855.142 1.205-.108l.737-.527a1.125 1.125 0 011.45.12l.773.774c.39.389.44 1.002.12 1.45l-.527.737c-.25.35-.272.806-.107 1.204.165.397.505.71.93.78l.894.15c.542.09.94.56.94 1.109v1.094c0 .55-.398 1.02-.94 1.11l-.894.149c-.424.07-.764.383-.929.78-.165.398-.143.854.107 1.204l.527.738a1.125 1.125 0 01-.12 1.45l-.774.773a1.125 1.125 0 01-1.449.12l-.738-.527c-.35-.25-.806-.272-1.203-.107-.397.165-.71.505-.781.929l-.149.894c-.09.542-.56.94-1.11.94h-1.094c-.55 0-1.019-.398-1.11-.94l-.148-.894c-.071-.424-.384-.764-.781-.93-.398-.164-.854-.142-1.204.108l-.738.527a1.125 1.125 0 01-1.45-.12l-.773-.774a1.125 1.125 0 01-.12-1.45l.527-.737c.25-.35.273-.806.108-1.204-.165-.397-.505-.71-.93-.78l-.894-.15a1.125 1.125 0 01-.94-1.11v-1.094c0-.55.398-1.02.94-1.11l.894-.149c.424-.07.765-.383.93-.78.165-.398.143-.854-.108-1.204l-.526-.738a1.125 1.125 0 01.12-1.45l.774-.773a1.125 1.125 0 011.45-.12l.737.527c.35.25.807.272 1.204.107.397-.165.71-.505.78-.929l.15-.894z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+
+                <router-link
+                  v-if="userInfo.role.toLowerCase() === ROLES.ADMIN"
+                  to="/admin"
+                  @click="showUserDropdown = false"
+                  class="flex items-center gap-2.5 px-3.5 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                >
+                  <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M10.343 3.94c.09-.542.56-.94 1.11-.94h1.094c.55 0 1.02.398 1.11.94l.149.894c.07.424.384.764.78.93.398.164.855.142 1.205-.108l.737-.527a1.125 1.125 0 011.45.12l.773.774c.39.389.44 1.002.12 1.45l-.527.737c-.25.35-.272.806-.107 1.204.165.397.505.71.93.78l.894.15c.542.09.94.56.94 1.109v1.094c0 .55-.398 1.02-.94 1.11l-.894.149c-.424.07-.764.383-.929.78-.165.398-.143.854.107 1.204l.527.738a1.125 1.125 0 01-.12 1.45l-.774.773a1.125 1.125 0 01-1.449.12l-.738-.527c-.35-.25-.806-.272-1.203-.107-.397.165-.71.505-.781.929l-.149.894c-.09.542-.56.94-1.11.94h-1.094c-.55 0-1.019-.398-1.11-.94l-.148-.894c-.071-.424-.384-.764-.781-.93-.398-.164-.854-.142-1.204.108l-.738.527a1.125 1.125 0 01-1.45-.12l-.773-.774a1.125 1.125 0 01-.12-1.45l.527-.737c.25-.35.273-.806.108-1.204-.165-.397-.505-.71-.93-.78l-.894-.15a1.125 1.125 0 01-.94-1.11v-1.094c0-.55.398-1.02.94-1.11l.894-.149c.424-.07.765-.383.93-.78.165-.398.143-.854-.108-1.204l-.526-.738a1.125 1.125 0 01.12-1.45l.774-.773a1.125 1.125 0 011.45-.12l.737.527c.35.25.807.272 1.204.107.397-.165.71-.505.78-.929l.15-.894z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
                   Sistem Ayarları
                 </router-link>
-                <a href="#" @click.prevent="changePassword" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                  <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" /></svg>
+
+                <router-link
+                  to="/profile"
+                  @click="showUserDropdown = false"
+                  class="flex items-center gap-2.5 px-3.5 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                >
+                  <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                  </svg>
+                  Profilim
+                </router-link>
+
+                <button
+                  @click="changePassword"
+                  class="w-full flex items-center gap-2.5 px-3.5 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                >
+                  <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
+                  </svg>
                   Şifre Değiştir
-                </a>
-                <a href="#" @click.prevent="logout" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                  <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" /></svg>
-                  Çıkış Yap
-                </a>
+                </button>
+
+                <div class="border-t border-slate-100 dark:border-slate-800 mt-1 pt-1">
+                  <button
+                    @click="logout"
+                    class="w-full flex items-center gap-2.5 px-3.5 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
+                  >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
+                    </svg>
+                    Çıkış Yap
+                  </button>
+                </div>
               </div>
             </transition>
           </div>
 
-<!-- Mobil Menü Butonu (Kaldırıldı - BottomNav kullanılacak) -->
         </div>
       </div>
     </div>
-
-    <!-- Mobil Menü (Açılır) -->
   </header>
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount, watch, computed } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useNotificationsStore } from '@/stores/notificationsStore'
 import { useBranding } from '@/composables/useBranding'
@@ -181,81 +256,103 @@ import { useBackendMode } from '@/composables/useBackendMode'
 const authStore = useAuthStore()
 const notificationsStore = useNotificationsStore()
 const { logoUrl, appName } = useBranding()
-
-const route = useRoute()
+const route  = useRoute()
 const router = useRouter()
 
 const userInfo = ref(null)
-const tabs = ref([])
-const showUserDropdown = ref(false)
+const tabs     = ref([])
+const showUserDropdown          = ref(false)
 const showNotificationsDropdown = ref(false)
-const isMobileMenuOpen = ref(false)
 
 const { isDemoMode } = useBackendMode()
 const { notifySuccess, notifyError, notifyInfo } = useNotify()
 
-const userMenuRef = ref(null)
+const userMenuRef      = ref(null)
 const notificationsRef = ref(null)
 
-useClickOutside(userMenuRef, () => {
-  showUserDropdown.value = false
+useClickOutside(userMenuRef,      () => { showUserDropdown.value = false })
+useClickOutside(notificationsRef, () => { showNotificationsDropdown.value = false })
+
+// Computed
+const userInitials = computed(() => {
+  if (!userInfo.value) return '?'
+  const f = (userInfo.value.firstName || '')[0] || ''
+  const l = (userInfo.value.lastName  || '')[0] || ''
+  return (f + l).toUpperCase() || '?'
 })
 
-useClickOutside(notificationsRef, () => {
-  showNotificationsDropdown.value = false
-})
+const roleLabels = {
+  admin: 'Yönetici', manager: 'Müdür', dataentry: 'Veri Girişi',
+  tenant: 'Kiracı', owner: 'Mal Sahibi', observer: 'Gözlemci', viewer: 'İzleyici',
+}
+const roleLabel = computed(() => roleLabels[(userInfo.value?.role || '').toLowerCase()] || userInfo.value?.role || '')
 
-// Backend'den kullanıcı bilgilerini yükle
+const isActiveTab = (tabRoute) => {
+  if (tabRoute === '/dashboard' || tabRoute === '/tenant-dashboard') {
+    return route.path === tabRoute
+  }
+  return route.path.startsWith(tabRoute)
+}
+
+// Notification icon helpers
+const notifTypes = {
+  Debt:            { bg: 'bg-red-100 dark:bg-red-900/30',    color: 'text-red-600 dark:text-red-400',    path: 'M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z' },
+  Payment:         { bg: 'bg-emerald-100 dark:bg-emerald-900/30', color: 'text-emerald-600 dark:text-emerald-400', path: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z' },
+  PaymentCreated:  { bg: 'bg-blue-100 dark:bg-blue-900/30',   color: 'text-blue-600 dark:text-blue-400',  path: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1' },
+  Announcement:    { bg: 'bg-amber-100 dark:bg-amber-900/30', color: 'text-amber-600 dark:text-amber-400', path: 'M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z' },
+}
+const notifIconBg    = (type) => (notifTypes[type] || notifTypes.Announcement).bg
+const notifIconColor = (type) => (notifTypes[type] || notifTypes.Announcement).color
+const notifIconPath  = (type) => (notifTypes[type] || notifTypes.Announcement).path
+
 const loadUserFromBackend = async () => {
   try {
     const user = await authService.checkAuthStatus()
     if (user) {
       userInfo.value = {
         firstName: user.firstName || user.name || 'Kullanıcı',
-        lastName: user.lastName || '',
-        role: user.role || 'Bilinmiyor'
+        lastName:  user.lastName  || '',
+        role:      user.role      || 'Bilinmiyor',
       }
       setTabsBasedOnRole(user.role)
     } else {
       userInfo.value = null
       tabs.value = []
     }
-  } catch (error) {
-    console.error('Backend kullanıcı kontrolü hatası:', error)
+  } catch {
     userInfo.value = null
     tabs.value = []
   }
 }
 
-// Rol bazlı tab'ları ayarla
 const setTabsBasedOnRole = (role) => {
-  const normalizedRole = (role || '').toLowerCase();
-  if (normalizedRole === ROLES.ADMIN || normalizedRole === ROLES.MANAGER || normalizedRole === ROLES.DATA_ENTRY) {
+  const r = (role || '').toLowerCase()
+  if ([ROLES.ADMIN, ROLES.MANAGER, ROLES.DATA_ENTRY].includes(r)) {
     tabs.value = [
-      { label: 'Özet', value: 'dashboard', route: '/dashboard' },
-      { label: 'Kiracılar', value: 'tenants', route: '/tenants' },
-      { label: 'Mal Sahipleri', value: 'owners', route: '/owners' },
-      { label: 'Ödemeler', value: 'payments', route: '/payments' },
-      { label: 'Giderler', value: 'expenses', route: '/expenses' },
-      { label: 'Borçlar', value: 'utilities', route: '/utilities' },
-      { label: 'Üniteler', value: 'flats', route: '/flats' },
-      { label: 'Raporlar', value: 'reports', route: '/reports' }
+      { label: 'Özet',        value: 'dashboard', route: '/dashboard'  },
+      { label: 'Kiracılar',   value: 'tenants',   route: '/tenants'    },
+      { label: 'Mal Sahipleri', value: 'owners',  route: '/owners'     },
+      { label: 'Ödemeler',    value: 'payments',  route: '/payments'   },
+      { label: 'Giderler',    value: 'expenses',  route: '/expenses'   },
+      { label: 'Borçlar',     value: 'utilities', route: '/utilities'  },
+      { label: 'Üniteler',    value: 'flats',     route: '/flats'      },
+      { label: 'Raporlar',    value: 'reports',   route: '/reports'    },
     ]
-  } else if (normalizedRole === ROLES.TENANT) {
+  } else if (r === ROLES.TENANT) {
     tabs.value = [
-      { label: 'Özet', value: 'tenant-dashboard', route: '/tenant-dashboard' },
-      { label: 'Raporlar', value: 'my-payments', route: '/my-payments' },
-      { label: 'Profilim', value: 'profile', route: '/profile' }
+      { label: 'Özet',    value: 'tenant-dashboard', route: '/tenant-dashboard' },
+      { label: 'Raporlar', value: 'my-payments',     route: '/my-payments'      },
+      { label: 'Profilim', value: 'profile',         route: '/profile'          },
     ]
-  } else if (normalizedRole === ROLES.OWNER) {
+  } else if (r === ROLES.OWNER) {
     tabs.value = [
-      { label: 'Mülklerim', value: 'my-properties', route: '/my-properties' },
-      { label: 'Bildirimler', value: 'notifications', route: '/notifications' },
+      { label: 'Mülklerim',   value: 'my-properties', route: '/my-properties' },
+      { label: 'Bildirimler', value: 'notifications',  route: '/notifications' },
     ]
-  } else if (normalizedRole === ROLES.OBSERVER) {
+  } else if (r === ROLES.OBSERVER) {
     tabs.value = [
-      { label: 'Özet', value: 'dashboard', route: '/dashboard' },
-      { label: 'Raporlar', value: 'reports', route: '/reports' }
+      { label: 'Özet',    value: 'dashboard', route: '/dashboard' },
+      { label: 'Raporlar', value: 'reports',  route: '/reports'   },
     ]
   } else {
     tabs.value = []
@@ -263,66 +360,35 @@ const setTabsBasedOnRole = (role) => {
 }
 
 onMounted(() => {
-  // Backend API kontrolü
-  const isBackendActive = import.meta.env.VITE_API_BASE_URL && 
-                         import.meta.env.VITE_API_BASE_URL !== 'http://localhost:5000/api'
+  const isBackendActive = import.meta.env.VITE_API_BASE_URL &&
+    import.meta.env.VITE_API_BASE_URL !== 'http://localhost:5000/api'
 
   if (isBackendActive) {
-    // Backend API ile kullanıcı kontrolü
     loadUserFromBackend()
-    
-    // Bildirimleri çek (Sadece giriş yapılmışsa)
-    if (authStore.user) {
-      notificationsStore.refresh()
-    }
+    if (authStore.user) notificationsStore.refresh()
   } else {
-    // Demo modu kontrolü
-    const isDemoMode = !import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_BASE_URL === 'http://localhost:5000/api'
-    
-    if (isDemoMode) {
-      // Demo modu için mock kullanıcı
+    const isDemo = !import.meta.env.VITE_API_BASE_URL ||
+      import.meta.env.VITE_API_BASE_URL === 'http://localhost:5000/api'
+    if (isDemo) {
       setTimeout(() => {
-        userInfo.value = {
-          firstName: 'Demo',
-          lastName: 'Kullanıcı',
-          role: 'admin'
-        }
-        
-        tabs.value = [
-          { label: 'Özet', value: 'dashboard', route: '/dashboard' },
-          { label: 'Kiracılar', value: 'tenants', route: '/tenants' },
-          { label: 'Ödemeler', value: 'payments', route: '/payments' },
-          { label: 'Giderler', value: 'expenses', route: '/expenses' },
-          { label: 'Sayaçlar', value: 'utilities', route: '/utilities' },
-          { label: 'Üniteler', value: 'flats', route: '/flats' },
-          { label: 'Yönetim', value: 'admin', route: '/admin' }
-        ]
-      }, 1000)
-      return
+        userInfo.value = { firstName: 'Demo', lastName: 'Kullanıcı', role: 'admin' }
+        setTabsBasedOnRole('admin')
+      }, 800)
     }
   }
 })
 
-onBeforeUnmount(() => {
-})
-
 watch(() => authStore.user, (newUser) => {
-  if (newUser && import.meta.env.VITE_API_BASE_URL && import.meta.env.VITE_API_BASE_URL !== 'http://localhost:5000/api') {
+  if (newUser && import.meta.env.VITE_API_BASE_URL &&
+      import.meta.env.VITE_API_BASE_URL !== 'http://localhost:5000/api') {
     notificationsStore.refresh()
   }
 })
 
-watch(route, () => {
-  isMobileMenuOpen.value = false;
-});
-
 const toggleUserDropdown = () => {
   showUserDropdown.value = !showUserDropdown.value
-  if (showUserDropdown.value) {
-    showNotificationsDropdown.value = false
-  }
+  if (showUserDropdown.value) showNotificationsDropdown.value = false
 }
-
 const toggleNotifications = () => {
   showNotificationsDropdown.value = !showNotificationsDropdown.value
   if (showNotificationsDropdown.value) {
@@ -332,17 +398,9 @@ const toggleNotifications = () => {
 }
 
 const handleNotificationClick = async (notification) => {
-  if (!notification.isRead) {
-    await notificationsStore.markAsRead(notification.id)
-  }
+  if (!notification.isRead) await notificationsStore.markAsRead(notification.id)
   showNotificationsDropdown.value = false
-  
-  // Route mapping
-  if (notification.type === 'Debt') {
-    router.push('/dashboard')
-  } else {
-    // If we have more specifically mapped routes, add them here
-  }
+  if (notification.type === 'Debt') router.push('/dashboard')
 }
 
 const formatDate = (date) => {
@@ -351,60 +409,34 @@ const formatDate = (date) => {
 }
 
 const logout = async () => {
-  showUserDropdown.value = false;
-  
-  // Backend API kontrolü
-  const isBackendActive = import.meta.env.VITE_API_BASE_URL && 
-                         import.meta.env.VITE_API_BASE_URL !== 'http://localhost:5000/api'
-
-  if (isBackendActive) {
-    // Backend API ile logout
-    try {
-      await authService.logout()
-      userInfo.value = null
-      tabs.value = []
-      router.push('/login')
-    } catch (error) {
-      console.error('Backend logout error:', error)
-      // Hata olsa bile local state'i temizle
-      userInfo.value = null
-      tabs.value = []
-      router.push('/login')
-    }
-  } else {
-    // Demo modu kontrolü
-    const isDemoMode = !import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_BASE_URL === 'http://localhost:5000/api'
-    
-    if (isDemoMode) {
-      console.log('Demo: Çıkış yapılıyor...')
-      userInfo.value = null
-      tabs.value = []
-      router.push('/login')
-      return
-    }
-  }
+  showUserDropdown.value = false
+  const isBackendActive = import.meta.env.VITE_API_BASE_URL &&
+    import.meta.env.VITE_API_BASE_URL !== 'http://localhost:5000/api'
+  try {
+    if (isBackendActive) await authService.logout()
+  } catch { /* ignore */ }
+  userInfo.value = null
+  tabs.value = []
+  router.push('/login')
 }
 
 const changePassword = async () => {
+  showUserDropdown.value = false
   if (isDemoMode.value) {
     notifyInfo('Demo modu: Şifre sıfırlama bağlantısı e-posta adresinize gönderildi.')
-    showUserDropdown.value = false;
     return
   }
-
   try {
     const user = await authService.checkAuthStatus()
-    if (user && user.email) {
+    if (user?.email) {
       await authService.resetPassword(user.email)
       notifySuccess('Şifre sıfırlama bağlantısı e-posta adresinize gönderildi.')
     } else {
       notifyError('Kullanıcı bilgileri bulunamadı.')
     }
-  } catch (error) {
-    console.error("Backend şifre sıfırlama hatası:", error);
-    notifyError("Bir hata oluştu. Lütfen tekrar deneyin.");
+  } catch {
+    notifyError('Bir hata oluştu. Lütfen tekrar deneyin.')
   }
-  showUserDropdown.value = false;
 }
 </script>
 

@@ -1,144 +1,142 @@
 <template>
-  <!-- Ana Sayfa Konteyneri -->
-  <div class="p-4 sm:p-6 bg-gray-50 min-h-screen font-sans dark:bg-gray-900">
-    <div class="max-w-7xl mx-auto">
+  <div class="p-4 sm:p-6 min-h-screen pb-24 md:pb-6">
 
-      <!-- Başlık -->
-      <h1 class="text-3xl font-bold text-gray-800 mb-6 dark:text-gray-100">Mal Sahipleri</h1>
+    <!-- Sayfa Başlığı -->
+    <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <div>
+        <h1 class="page-title">Mal Sahipleri</h1>
+        <p class="page-subtitle">{{ totalOwnersCount }} mal sahibi kayıtlı</p>
+      </div>
+      <button
+        v-if="authStore.role === ROLES.ADMIN || authStore.role === ROLES.MANAGER"
+        @click="createModalVisible = true"
+        class="btn btn-sm btn-primary shrink-0"
+      >
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+        </svg>
+        Yeni Mal Sahibi
+      </button>
+    </div>
 
-      <!-- Özet Bilgi Kartları -->
-      <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <!-- Toplam Mal Sahibi Kartı -->
-        <div class="bg-white dark:bg-gray-800 p-5 rounded-xl shadow-md flex items-center gap-4 border border-gray-200 dark:border-gray-700">
-          <div class="bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 rounded-full p-3">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
-          </div>
-          <div>
-            <p class="text-sm text-gray-500 dark:text-gray-400">Toplam Mal Sahibi</p>
-            <p class="text-2xl font-bold text-gray-800 dark:text-gray-100">{{ totalOwnersCount }}</p>
-          </div>
+    <!-- İstatistik Kartları -->
+    <div class="grid grid-cols-3 gap-3 sm:gap-4 mb-5">
+      <div class="app-card flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-900/20 text-blue-500 flex items-center justify-center shrink-0">
+          <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+          </svg>
         </div>
-        <!-- Toplam Kat Sayısı Kartı -->
-        <div class="bg-white dark:bg-gray-800 p-5 rounded-xl shadow-md flex items-center gap-4 border border-gray-200 dark:border-gray-700">
-          <div class="bg-green-100 dark:bg-green-900/50 text-green-600 dark:text-green-400 rounded-full p-3">
-             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
-          </div>
-          <div>
-            <p class="text-sm text-gray-500 dark:text-gray-400">Sahip Olunan Toplam Kat</p>
-            <p class="text-2xl font-bold text-gray-800 dark:text-gray-100">{{ totalOwnedUnitsCount }}</p>
-          </div>
+        <div class="min-w-0">
+          <p class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 truncate">Mal Sahibi</p>
+          <p class="text-xl font-bold text-slate-800 dark:text-white tabular-nums">{{ totalOwnersCount }}</p>
         </div>
-        <!-- Boş Kat Sayısı Kartı -->
-        <div class="bg-white dark:bg-gray-800 p-5 rounded-xl shadow-md flex items-center gap-4 border border-gray-200 dark:border-gray-700">
-          <div class="bg-orange-100 dark:bg-orange-900/50 text-orange-600 dark:text-orange-400 rounded-full p-3">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
-          </div>
-          <div>
-            <p class="text-sm text-gray-500 dark:text-gray-400">Boşta Olan Kat</p>
-            <p class="text-2xl font-bold text-gray-800 dark:text-gray-100">{{ vacantUnitsCount }}</p>
-          </div>
+      </div>
+      <div class="app-card flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-green-50 dark:bg-green-900/20 text-green-500 flex items-center justify-center shrink-0">
+          <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+          </svg>
         </div>
-        <!-- Yeni Mal Sahibi Ekle Butonu -->
-        <div v-if="authStore.role === ROLES.ADMIN || authStore.role === ROLES.MANAGER" class="bg-white dark:bg-gray-800 p-5 rounded-xl shadow-md flex items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-600 hover:border-blue-500 dark:hover:border-blue-400 transition-colors duration-300" @click="createModalVisible = true">
-           <button class="w-full h-full text-blue-500 dark:text-blue-400 flex items-center justify-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
-            <span class="font-semibold">Yeni Mal Sahibi Ekle</span>
-          </button>
+        <div class="min-w-0">
+          <p class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 truncate">Sahip Ünite</p>
+          <p class="text-xl font-bold text-slate-800 dark:text-white tabular-nums">{{ totalOwnedUnitsCount }}</p>
         </div>
-      </section>
+      </div>
+      <div class="app-card flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-orange-50 dark:bg-orange-900/20 text-orange-500 flex items-center justify-center shrink-0">
+          <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+          </svg>
+        </div>
+        <div class="min-w-0">
+          <p class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 truncate">Boş Ünite</p>
+          <p class="text-xl font-bold text-slate-800 dark:text-white tabular-nums">{{ vacantUnitsCount }}</p>
+        </div>
+      </div>
+    </div>
 
-      <!-- Filtreler ve Liste Alanı -->
-      <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md border border-gray-200 dark:border-gray-700">
+    <!-- Arama + Liste -->
+    <div class="app-card !p-0 overflow-hidden">
+      <!-- Arama -->
+      <div class="px-4 py-3 border-b border-slate-100 dark:border-slate-700/60">
         <FilterBar
-            :search="search"
-            @update:search="val => search = val"
-            search-placeholder="Mal sahibi adı veya kat ara..."
-            @clear-filters="handleClearFilters"
+          :search="search"
+          @update:search="val => search = val"
+          search-placeholder="Mal sahibi adı veya kat ara..."
+          @clear-filters="handleClearFilters"
         />
-        
-        <!-- Mal Sahibi Kart Listesi -->
-        <div class="mt-6 space-y-2">
-          <div v-if="filteredOwnersWithUnits.length === 0" class="text-center py-12 text-gray-500">
-            <p>Mal sahibi bulunamadı.</p>
-          </div>
-          <div v-else>
-            <!-- Liste Başlıkları (Sadece büyük ekranlar için) -->
-            <div class="hidden sm:grid grid-cols-12 gap-4 px-4 py-2 text-sm font-semibold text-gray-500 dark:text-gray-400 border-b dark:border-gray-700">
-              <div class="col-span-5">Mal Sahibi</div>
-              <div class="col-span-4">Sahip Olduğu Katlar</div>
-              <div v-if="authStore.role === ROLES.ADMIN || authStore.role === ROLES.MANAGER" class="col-span-3 text-center">İşlemler</div>
+      </div>
+
+      <!-- Tablo Başlıkları -->
+      <div v-if="filteredOwnersWithUnits.length > 0" class="hidden sm:grid grid-cols-12 gap-4 px-4 py-2.5 bg-slate-50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-700/60">
+        <div class="col-span-5 text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">Mal Sahibi</div>
+        <div class="col-span-4 text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">Üniteler</div>
+        <div v-if="authStore.role === ROLES.ADMIN || authStore.role === ROLES.MANAGER" class="col-span-3 text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 text-right">İşlemler</div>
+      </div>
+
+      <!-- Boş Durum -->
+      <EmptyState v-if="filteredOwnersWithUnits.length === 0" title="Mal sahibi bulunamadı" />
+
+      <!-- Liste -->
+      <div v-else class="divide-y divide-slate-100 dark:divide-slate-700/60">
+        <div
+          v-for="owner in filteredOwnersWithUnits"
+          :key="owner.id"
+          class="table-row-hover grid grid-cols-12 gap-4 items-center px-4 py-3"
+        >
+          <!-- Ad + E-posta -->
+          <div class="col-span-12 sm:col-span-5 flex items-center gap-3">
+            <div class="shrink-0 w-9 h-9 rounded-xl flex items-center justify-center text-sm font-bold text-white" :class="getAvatarColor(owner.name)">
+              {{ getAvatarInitial(owner.name) }}
             </div>
-            <!-- Mal Sahibi Kartı Döngüsü -->
-            <div 
-              v-for="owner in filteredOwnersWithUnits" 
-              :key="owner.id" 
-              class="grid grid-cols-12 gap-4 items-center p-4 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-200 border-b dark:border-gray-700/50"
-            >
-              <div class="col-span-12 sm:col-span-5 flex items-center gap-4">
-                <div class="flex-shrink-0 h-12 w-12 flex items-center justify-center bg-blue-500 text-white rounded-full text-xl font-bold" :class="getAvatarColor(owner.name)">
-                  {{ getAvatarInitial(owner.name) }}
-                </div>
-                <div>
-                  <p class="font-bold text-gray-800 dark:text-gray-100">{{ owner.name }}</p>
-                  <p class="text-sm text-gray-500 dark:text-gray-400">{{ owner.email }}</p>
-                </div>
-              </div>
-              <div class="col-span-12 sm:col-span-4 text-sm text-gray-600 dark:text-gray-300">
-                <span class="sm:hidden font-semibold text-gray-500">Katlar: </span>
-                <div v-if="owner.allUnits && owner.allUnits.length > 0" class="flex flex-wrap gap-1">
-                  <span 
-                    v-for="unit in owner.allUnits" 
-                    :key="unit"
-                    :class="[
-                      'px-2 py-0.5 rounded text-xs font-medium',
-                      owner.vacantUnits.includes(unit) 
-                        ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300' 
-                        : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'
-                    ]"
-                  >
-                    {{ unit }}
-                  </span>
-                </div>
-              </div>
-              <div v-if="authStore.role === ROLES.ADMIN || authStore.role === ROLES.MANAGER" class="col-span-12 sm:col-span-3 flex justify-end items-center">
-                <div class="dropdown dropdown-end">
-                  <label tabindex="0" class="btn btn-ghost btn-sm m-1">İşlemler</label>
-                  <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
-                    <li><a @click="startEdit(owner)">Düzenle</a></li>
-                    <li><a @click="askDelete(owner)" class="text-red-500">Sil</a></li>
-                  </ul>
-                </div>
-              </div>
+            <div class="min-w-0">
+              <p class="text-sm font-semibold text-slate-800 dark:text-slate-100 truncate">{{ owner.name }}</p>
+              <p class="text-xs text-slate-400 dark:text-slate-500 truncate">{{ owner.email }}</p>
+            </div>
+          </div>
+
+          <!-- Üniteler -->
+          <div class="col-span-12 sm:col-span-4">
+            <div v-if="owner.allUnits && owner.allUnits.length > 0" class="flex flex-wrap gap-1">
+              <span
+                v-for="unit in owner.allUnits"
+                :key="unit"
+                :class="[
+                  'px-1.5 py-0.5 rounded text-[10px] font-semibold',
+                  owner.vacantUnits.includes(unit)
+                    ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300'
+                    : 'bg-slate-100 text-slate-600 dark:bg-slate-700/60 dark:text-slate-400'
+                ]"
+              >
+                {{ unit }}
+              </span>
+            </div>
+            <span v-else class="text-xs text-slate-400 dark:text-slate-500">—</span>
+          </div>
+
+          <!-- İşlemler -->
+          <div v-if="authStore.role === ROLES.ADMIN || authStore.role === ROLES.MANAGER" class="col-span-12 sm:col-span-3 flex justify-end">
+            <div class="dropdown dropdown-end">
+              <button tabindex="0" class="btn btn-ghost btn-xs btn-square text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/><circle cx="5" cy="12" r="1.5"/>
+                </svg>
+              </button>
+              <ul tabindex="0" class="dropdown-content menu p-1.5 shadow-card bg-base-100 border border-slate-200 dark:border-slate-700 rounded-xl w-36 z-10 text-xs">
+                <li><a @click="startEdit(owner)" class="rounded-lg">Düzenle</a></li>
+                <li><a @click="askDelete(owner)" class="rounded-lg text-error">Sil</a></li>
+              </ul>
             </div>
           </div>
         </div>
       </div>
     </div>
-    
+
     <!-- Modallar -->
-    <OwnerCreateModal
-      :visible="createModalVisible"
-      :available-units="availableUnitsForCreation"
-      @save="saveOwner"
-      @close="createModalVisible = false"
-    />
-    <ConfirmModal
-      :isOpen="deleteModalVisible"
-      title="Mal Sahibi Silinecek"
-      :message="`'${ownerToDelete?.name}' mal sahibini silmek istediğinizden emin misiniz?`"
-      confirmLabel="Evet, Sil"
-      confirmClass="btn-error"
-      :loading="deleting"
-      @confirm="confirmDelete"
-      @cancel="deleteModalVisible = false"
-    />
-    <OwnerEditModal
-      :visible="editModalVisible"
-      :initial-data="selectedOwner"
-      :available-units="availableUnitsForCreation"
-      @save="updateOwner"
-      @close="editModalVisible = false"
-    />
+    <OwnerCreateModal :visible="createModalVisible" :available-units="availableUnitsForCreation" @save="saveOwner" @close="createModalVisible = false" />
+    <ConfirmModal :isOpen="deleteModalVisible" title="Mal Sahibi Silinecek" :message="`'${ownerToDelete?.name}' mal sahibini silmek istediğinizden emin misiniz?`" confirmLabel="Evet, Sil" confirmClass="btn-error" :loading="deleting" @confirm="confirmDelete" @cancel="deleteModalVisible = false" />
+    <OwnerEditModal :visible="editModalVisible" :initial-data="selectedOwner" :available-units="availableUnitsForCreation" @save="updateOwner" @close="editModalVisible = false" />
   </div>
 </template>
 
@@ -151,6 +149,7 @@ import tenantsService from '@/services/tenantsService'
 import { useErrorHandler } from '@/composables/useErrorHandler'
 import ConfirmModal from '@/components/common/ConfirmModal.vue';
 import FilterBar from '@/components/common/FilterBar.vue';
+import EmptyState from '@/components/ui/EmptyState.vue';
 import OwnerCreateModal from './components/OwnerCreateModal.vue';
 import OwnerEditModal from './components/OwnerEditModal.vue';
 import { useNotification } from '@/composables/useNotification';
