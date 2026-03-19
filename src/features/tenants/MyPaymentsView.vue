@@ -275,7 +275,7 @@ const reportItems = computed(() => {
       if (filters.status === 'paid' && !isPaid) return
 
       items.push({
-        date: d.date || d.createdAt || d.dueDate,
+        date: d.dueDate || d.createdAt || d.date,
         periodYear: d.periodYear,
         periodMonth: d.periodMonth,
         description: d.description || `${d.type === 'Electricity' ? 'Elektrik' : d.type === 'Water' ? 'Su' : 'Aidat'} faturası`,

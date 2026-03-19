@@ -328,7 +328,7 @@ const reportItems = computed(() => {
     debtsData.value.forEach(d => {
       const owner = owners.value.find(o => o.id === d.ownerId)
       items.push({
-        date: d.date || d.createdAt || d.dueDate,
+        date: d.dueDate || d.createdAt || d.date,
         periodYear: d.periodYear,
         periodMonth: d.periodMonth,
         tenantName: d.tenantName || (owner ? `${owner.firstName} ${owner.lastName} (M. Sahibi)` : 'Bilinmiyor'),
