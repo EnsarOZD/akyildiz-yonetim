@@ -1,152 +1,133 @@
 <template>
-  <!-- Ana Sayfa Konteyneri -->
-  <div class="p-4 sm:p-6 bg-gray-50 min-h-screen font-sans dark:bg-gray-900">
-    <div class="max-w-7xl mx-auto">
-      <!-- Başlık ve Kontroller -->
-      <div class="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
-        <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-gray-100 text-center md:text-left">Giderler</h1>
+  <div class="p-4 sm:p-6 min-h-screen pb-24 md:pb-6">
 
-        <div class="flex items-center justify-center md:justify-end gap-3 flex-wrap">
-          <!-- Tarih Filtresi -->
-          <select
-            v-model="dateFilter"
-            @change="fetchExpenses"
-            class="select select-sm select-bordered bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 min-w-[140px]"
-          >
-            <option value="all">Tüm Zamanlar</option>
-            <option value="this_month">Bu Ay</option>
-            <option value="last_month">Geçen Ay</option>
-            <option value="this_year">Bu Yıl</option>
-          </select>
-
-          <!-- Refresh Butonu -->
-          <button
-            @click="fetchExpenses"
-            :disabled="loading"
-            class="btn btn-sm btn-outline btn-primary shadow-sm"
-          >
-            <svg v-if="!loading" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-            </svg>
-            <div v-else class="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-1"></div>
-            Yenile
-          </button>
-        </div>
+    <!-- Sayfa Başlığı -->
+    <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <div>
+        <h1 class="page-title">Giderler</h1>
+        <p class="page-subtitle">İşletme giderlerini takip edin</p>
       </div>
-
-      <!-- Loading durumu -->
-      <div v-if="loading">
-        <SkeletonRows :rows="6" />
-      </div>
-
-      <!-- Error durumu -->
-      <div v-else-if="error" class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-6 mb-6">
-        <div class="flex items-center gap-3">
-          <div class="bg-red-100 dark:bg-red-900/50 text-red-600 dark:text-red-400 rounded-full p-2">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-            </svg>
-          </div>
-          <div>
-            <h3 class="text-lg font-semibold text-red-800 dark:text-red-200">Veri Yükleme Hatası</h3>
-            <p class="text-red-600 dark:text-red-300">{{ error }}</p>
-          </div>
-        </div>
-        <button @click="fetchExpenses" class="btn btn-error btn-sm mt-4">
-          Tekrar Dene
+      <div class="flex gap-2 shrink-0">
+        <select v-model="dateFilter" @change="fetchExpenses" class="select select-sm select-bordered">
+          <option value="all">Tüm Zamanlar</option>
+          <option value="this_month">Bu Ay</option>
+          <option value="last_month">Geçen Ay</option>
+          <option value="this_year">Bu Yıl</option>
+        </select>
+        <button @click="fetchExpenses" :disabled="loading" class="btn btn-sm btn-ghost">
+          <svg v-if="!loading" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+          </svg>
+          <span v-else class="loading loading-spinner loading-xs"></span>
+        </button>
+        <button @click="openNewExpenseModal" class="btn btn-sm btn-primary">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+          </svg>
+          Yeni Gider
         </button>
       </div>
+    </div>
 
-      <!-- Sayfa içeriği -->
-      <div v-else>
-        <!-- Özet Bilgi Kartları -->
-        <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div class="bg-white dark:bg-gray-800 p-5 rounded-xl shadow-md flex items-center gap-4 border border-gray-200 dark:border-gray-700">
-            <div class="bg-red-100 dark:bg-red-900/50 text-red-600 dark:text-red-400 rounded-full p-3">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 17h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>
-            </div>
-            <div>
-              <p class="text-sm text-gray-500 dark:text-gray-400">Bu Ayki Gider</p>
-              <p class="text-2xl font-bold text-gray-800 dark:text-gray-100">{{ formatCurrency(thisMonthExpense) }}</p>
-            </div>
-          </div>
-          <div class="bg-white dark:bg-gray-800 p-5 rounded-xl shadow-md flex items-center gap-4 border border-gray-200 dark:border-gray-700">
-            <div class="bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 rounded-full p-3">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 7h6m0 0v6m0-6L9 13" /></svg>
-            </div>
-            <div>
-              <p class="text-sm text-gray-500 dark:text-gray-400">Toplam Gider</p>
-              <p class="text-2xl font-bold text-gray-800 dark:text-gray-100">{{ formatCurrency(totalExpense) }}</p>
-            </div>
-          </div>
-          <div class="bg-white dark:bg-gray-800 p-5 rounded-xl shadow-md flex items-center gap-4 border border-gray-200 dark:border-gray-700">
-            <div class="bg-amber-100 dark:bg-amber-900/50 text-amber-600 dark:text-amber-400 rounded-full p-3">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z" /></svg>
-            </div>
-            <div>
-              <p class="text-sm text-gray-500 dark:text-gray-400">İşlem Sayısı (Bu Ay)</p>
-              <p class="text-2xl font-bold text-gray-800 dark:text-gray-100">{{ thisMonthCount }}</p>
-            </div>
-          </div>
-          <div class="bg-white dark:bg-gray-800 p-5 rounded-xl shadow-md flex items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-600 hover:border-red-500 dark:hover:border-red-400 transition-colors duration-300" @click="openNewExpenseModal">
-            <button class="w-full h-full text-red-500 dark:text-red-400 flex items-center justify-center gap-2">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
-              <span class="font-semibold">Yeni Gider Ekle</span>
-            </button>
-          </div>
-        </section>
+    <!-- Yükleniyor -->
+    <div v-if="loading" class="space-y-3">
+      <SkeletonRows :rows="6" />
+    </div>
 
-        <!-- Aylık Gider Grafiği -->
-        <section class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 mb-8">
-          <div class="flex items-center justify-between mb-4">
-            <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-100">Aylık Gider Grafiği</h2>
-            <div class="flex items-center gap-4">
-              <div class="flex items-center gap-2">
-                <div class="w-3 h-3 bg-red-500 rounded-full"></div>
-                <span class="text-sm text-gray-600 dark:text-gray-400">Gider</span>
-              </div>
-            </div>
-          </div>
+    <!-- Hata -->
+    <div v-else-if="error" class="app-card border-red-300 dark:border-red-800 bg-red-50 dark:bg-red-900/10 mb-5">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-red-100 dark:bg-red-900/30 text-red-500 flex items-center justify-center shrink-0">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+          </svg>
+        </div>
+        <div>
+          <p class="text-sm font-semibold text-red-800 dark:text-red-200">Veri yüklenemedi</p>
+          <p class="text-xs text-red-600 dark:text-red-300">{{ error }}</p>
+        </div>
+        <button @click="fetchExpenses" class="btn btn-error btn-xs ml-auto">Tekrar Dene</button>
+      </div>
+    </div>
 
-          <div class="h-64 flex items-end justify-between gap-2">
-            <div
-              v-for="(month, index) in monthlyData"
-              :key="index"
-              class="flex-1 flex flex-col items-center gap-2"
-            >
+    <template v-else>
+      <!-- İstatistik Kartları -->
+      <div class="grid grid-cols-3 gap-3 sm:gap-4 mb-5">
+        <div class="app-card flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-500 flex items-center justify-center shrink-0">
+            <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M17 13l-5 5m0 0l-5-5m5 5V6"/>
+            </svg>
+          </div>
+          <div class="min-w-0">
+            <p class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 truncate">Bu Ay</p>
+            <p class="text-sm font-bold text-slate-800 dark:text-white tabular-nums">{{ formatCurrency(thisMonthExpense) }}</p>
+          </div>
+        </div>
+        <div class="app-card flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-900/20 text-blue-500 flex items-center justify-center shrink-0">
+            <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 7h6m0 0v6m0-6L9 13"/>
+            </svg>
+          </div>
+          <div class="min-w-0">
+            <p class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 truncate">Toplam</p>
+            <p class="text-sm font-bold text-slate-800 dark:text-white tabular-nums">{{ formatCurrency(totalExpense) }}</p>
+          </div>
+        </div>
+        <div class="app-card flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl bg-amber-50 dark:bg-amber-900/20 text-amber-500 flex items-center justify-center shrink-0">
+            <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+            </svg>
+          </div>
+          <div class="min-w-0">
+            <p class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 truncate">Bu Ay İşlem</p>
+            <p class="text-xl font-bold text-slate-800 dark:text-white tabular-nums">{{ thisMonthCount }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Grafik + Tip Dağılımı -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-5">
+        <div class="app-card">
+          <h2 class="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-4">Aylık Gider Grafiği</h2>
+          <div class="h-40 flex items-end gap-1.5">
+            <div v-for="(month, index) in monthlyData" :key="index" class="flex-1 flex flex-col items-center gap-1.5">
               <div
-                class="w-full bg-red-500 rounded-t"
-                :style="{ height: `${(month.expense / maxAmount) * 200}px` }"
+                class="w-full bg-red-400 dark:bg-red-500 rounded-t transition-all duration-500"
+                :style="{ height: `${Math.max((month.expense / maxAmount) * 130, month.expense > 0 ? 4 : 2)}px` }"
               ></div>
-              <span class="text-xs text-gray-500 dark:text-gray-400">{{ month.month }}</span>
+              <span class="text-[10px] text-slate-400 dark:text-slate-500 font-medium">{{ month.month }}</span>
             </div>
           </div>
-        </section>
-
-        <!-- Gider Tipi Dağılımı -->
-        <section class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 mb-8">
-          <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-4">Gider Tipi Dağılımı</h2>
-
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            <div
-              v-for="type in expenseTypeStats"
-              :key="type.name"
-              class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600"
-            >
-              <div class="flex items-center gap-3 mb-2">
-                <span class="text-2xl">{{ getExpenseIcon(type.name) }}</span>
+        </div>
+        <div class="app-card">
+          <h2 class="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-4">Tip Dağılımı</h2>
+          <div class="space-y-2.5">
+            <div v-for="type in expenseTypeStats" :key="type.name" class="flex items-center justify-between">
+              <div class="flex items-center gap-2.5">
+                <div class="w-7 h-7 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-500 flex items-center justify-center shrink-0">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M17 13l-5 5m0 0l-5-5m5 5V6"/>
+                  </svg>
+                </div>
                 <div>
-                  <p class="font-semibold text-gray-800 dark:text-gray-100">{{ type.label }}</p>
-                  <p class="text-sm text-gray-500 dark:text-gray-400">{{ type.count }} gider</p>
+                  <p class="text-xs font-semibold text-slate-700 dark:text-slate-200">{{ type.label }}</p>
+                  <p class="text-[10px] text-slate-400 dark:text-slate-500">{{ type.count }} gider</p>
                 </div>
               </div>
-              <p class="text-lg font-bold text-red-600 dark:text-red-400">{{ formatCurrency(type.total) }}</p>
+              <p class="text-sm font-bold text-red-500 dark:text-red-400 tabular-nums">{{ formatCurrency(type.total) }}</p>
             </div>
+            <div v-if="expenseTypeStats.length === 0" class="text-xs text-slate-400 dark:text-slate-500 text-center py-4">Veri yok</div>
           </div>
-        </section>
+        </div>
+      </div>
 
-        <!-- Filtreler ve Liste Alanı -->
-        <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md border border-gray-200 dark:border-gray-700">
+      <!-- Filtreler + Liste -->
+      <div class="app-card !p-0">
+        <!-- Filtreler -->
+        <div class="px-4 py-3 border-b border-slate-100 dark:border-slate-700/60">
           <CustomFilterBar
             :search="filters.searchTerm"
             :period="filters.period"
@@ -157,84 +138,65 @@
             @update:select-type="val => (filters.type = val)"
             @clearFilters="handleClearFilters"
           />
+        </div>
 
-          <!-- Gider Kart Listesi -->
-          <div class="mt-6 space-y-2">
-            <div v-if="filteredExpenses.length === 0" class="text-center py-16">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-4 text-gray-300 dark:text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75H21m0 0v-3.375c0-.621-.504-1.125-1.125-1.125H3.75" />
+        <!-- Boş Durum -->
+        <EmptyState v-if="filteredExpenses.length === 0" title="Gider bulunamadı" description="Seçilen kriterlere uygun gider kaydı yok.">
+          <template #action>
+            <button @click="handleClearFilters" class="btn btn-sm btn-outline">Filtreleri Temizle</button>
+          </template>
+        </EmptyState>
+
+        <!-- Liste -->
+        <div v-else class="divide-y divide-slate-100 dark:divide-slate-700/60">
+          <div
+            v-for="e in paginatedExpenses"
+            :key="e.id"
+            class="table-row-hover flex items-center gap-3 px-4 py-3"
+          >
+            <!-- İkon -->
+            <div class="w-9 h-9 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-500 flex items-center justify-center shrink-0">
+              <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M17 13l-5 5m0 0l-5-5m5 5V6"/>
               </svg>
-              <h3 class="text-base font-semibold text-gray-700 dark:text-gray-300 mb-1">Gider Bulunamadı</h3>
-              <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Seçilen kriterlere uygun gider kaydı yok.</p>
-              <button @click="handleClearFilters" class="btn btn-outline btn-sm">Filtreleri Temizle</button>
             </div>
-            <div v-else>
-              <div
-                v-for="e in paginatedExpenses"
-                :key="e.id"
-                class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center p-4 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-200 border-b dark:border-gray-700/50"
-              >
-                <div class="md:col-span-5 flex items-center gap-4">
-                  <div class="flex-shrink-0 h-12 w-12 flex items-center justify-center bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-full text-2xl">
-                    {{ getExpenseIcon(e.type) }}
-                  </div>
-                  <div>
-                    <p class="font-bold text-gray-800 dark:text-gray-100">{{ e.title || 'Açıklama Yok' }}</p>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ formatDate(e.expenseDate) || 'Tarih Yok' }}</p>
-                  </div>
-                </div>
-                <div class="md:col-span-3 text-left md:text-center text-xl font-semibold text-red-600 dark:text-red-400">
-                  {{ formatCurrency(e.amount) }}
-                </div>
-                <div class="md:col-span-2 text-left md:text-center">
-                  <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800 dark:bg-blue-900/60 dark:text-blue-200">
-                    {{ getExpenseTypeName(e.type) || 'Tip Yok' }}
-                  </span>
-                </div>
-                <div class="md:col-span-2 text-right">
-                  <div class="dropdown dropdown-end">
-                    <label tabindex="0" class="btn btn-ghost btn-sm">İşlemler</label>
-                    <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-200 rounded-box w-32 z-10">
-                      <li><a @click="startEdit(e)">Düzenle</a></li>
-                      <li><a @click="deleteExpense(e)" class="text-red-500">Sil</a></li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
 
-              <PaginationBar
-                v-model:currentPage="currentPage"
-                v-model:pageSize="pageSize"
-                :total-count="filteredExpenses.length"
-              />
+            <!-- Bilgi -->
+            <div class="flex-1 min-w-0">
+              <p class="text-sm font-semibold text-slate-800 dark:text-slate-100 truncate">{{ e.title || 'Açıklama Yok' }}</p>
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="text-xs text-slate-400 dark:text-slate-500">{{ formatDate(e.expenseDate) || 'Tarih yok' }}</span>
+                <span class="badge badge-xs badge-info">{{ getExpenseTypeName(e.type) || 'Tip Yok' }}</span>
+              </div>
+            </div>
+
+            <!-- Tutar -->
+            <p class="text-sm font-bold text-red-500 dark:text-red-400 tabular-nums shrink-0">{{ formatCurrency(e.amount) }}</p>
+
+            <!-- İşlem Menüsü -->
+            <div class="shrink-0 dropdown dropdown-end">
+              <button tabindex="0" class="btn btn-ghost btn-xs btn-square text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/><circle cx="5" cy="12" r="1.5"/>
+                </svg>
+              </button>
+              <ul tabindex="0" class="dropdown-content menu p-1.5 shadow-card bg-base-100 border border-slate-200 dark:border-slate-700 rounded-xl w-32 z-10 text-xs">
+                <li><a @click="startEdit(e)" class="rounded-lg">Düzenle</a></li>
+                <li><a @click="deleteExpense(e)" class="rounded-lg text-error">Sil</a></li>
+              </ul>
             </div>
           </div>
         </div>
-        <!-- /Filtreler ve Liste Alanı -->
+
+        <!-- Sayfalama -->
+        <div v-if="filteredExpenses.length > 0" class="px-4 py-3 border-t border-slate-100 dark:border-slate-700/60">
+          <PaginationBar v-model:currentPage="currentPage" v-model:pageSize="pageSize" :total-count="filteredExpenses.length" />
+        </div>
       </div>
-    </div>
+    </template>
 
-    <ExpenseModal
-      :visible="showModal"
-      :expense="newExpense"
-      :types="expenseTypeOptions"
-      :editMode="editMode"
-      :loading="modalLoading"
-      :error="modalError"
-      @save="saveExpense"
-      @close="cancelEdit"
-    />
-
-    <ConfirmModal
-      :isOpen="showDeleteModal"
-      title="Gider Silinecek"
-      :message="`'${expenseToDelete?.title || 'Seçili gider'}' silinecek. Bu işlem geri alınamaz.`"
-      confirmLabel="Evet, Sil"
-      confirmClass="btn-error"
-      :loading="deleting"
-      @confirm="handleConfirmDelete"
-      @cancel="closeDeleteModal"
-    />
+    <ExpenseModal :visible="showModal" :expense="newExpense" :types="expenseTypeOptions" :editMode="editMode" :loading="modalLoading" :error="modalError" @save="saveExpense" @close="cancelEdit" />
+    <ConfirmModal :isOpen="showDeleteModal" title="Gider Silinecek" :message="`'${expenseToDelete?.title || 'Seçili gider'}' silinecek. Bu işlem geri alınamaz.`" confirmLabel="Evet, Sil" confirmClass="btn-error" :loading="deleting" @confirm="handleConfirmDelete" @cancel="closeDeleteModal" />
   </div>
 </template>
 
@@ -246,6 +208,7 @@ import ConfirmModal from '@/components/common/ConfirmModal.vue'
 import PaginationBar from '@/components/common/PaginationBar.vue'
 import SkeletonRows from '@/components/common/SkeletonRows.vue'
 import CustomFilterBar from '@/components/common/CustomFilterBar.vue'
+import EmptyState from '@/components/ui/EmptyState.vue'
 import { useErrorHandler } from '@/composables/useErrorHandler'
 
 /* ✅ Enums’tan merkezi import */

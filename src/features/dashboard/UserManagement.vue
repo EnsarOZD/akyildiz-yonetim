@@ -1,190 +1,177 @@
 <template>
-  <div class="px-4 sm:px-0 space-y-6">
-    <!-- Başlık ve Yeni Kullanıcı Butonu -->
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-      <div class="text-center md:text-left">
-        <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">Kullanıcı Yönetimi</h2>
-        <p class="text-gray-500 dark:text-gray-400 text-sm">Sistem kullanıcılarını yönetin ve yeni kullanıcılar ekleyin</p>
+  <div class="space-y-5">
+    <!-- Başlık -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div>
+        <h1 class="page-title">Sistem Ayarları</h1>
+        <p class="page-subtitle">Kullanıcıları yönetin ve yetkilendirin</p>
       </div>
-      <button 
-        @click="showAddUserModal = true" 
-        class="btn btn-primary btn-sm sm:btn-md w-full md:w-auto shadow-md"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+      <button @click="showAddUserModal = true" class="btn btn-sm btn-primary shrink-0">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
         </svg>
-        <span>Yeni Kullanıcı Ekle</span>
+        Yeni Kullanıcı
       </button>
     </div>
 
-    <!-- Kullanıcı Listesi -->
-    <div class="card bg-base-100 shadow-xl">
-      <div class="card-body">
-        <h3 class="card-title">Kullanıcı Listesi</h3>
-        
-        <!-- Arama -->
-        <div class="relative mb-4">
-          <input 
-            v-model="search" 
-            class="input input-bordered w-full pl-10" 
-            placeholder="Ad, soyad veya e-posta ile ara..." 
+    <!-- Kullanıcı Listesi Kartı -->
+    <div class="app-card !p-0">
+      <!-- Arama -->
+      <div class="px-4 py-3 border-b border-slate-200 dark:border-slate-700">
+        <div class="relative">
+          <input
+            v-model="search"
+            class="input input-sm input-bordered w-full pl-9"
+            placeholder="Ad, soyad veya e-posta ile ara..."
           />
           <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-            <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/>
             </svg>
           </div>
         </div>
+      </div>
 
-        <!-- Kullanıcı Kartları -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <div 
-            v-for="user in filteredUsers" 
-            :key="user.id" 
-            :class="[
-              'bg-base-200 p-4 rounded-lg shadow transition hover:shadow-md',
-              user.isActive === false ? 'opacity-60 border-l-4 border-error' : ''
-            ]"
-          >
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-3">
-                <div class="avatar placeholder">
-                  <div class="bg-neutral-focus text-neutral-content rounded-full w-12">
-                    <span>{{ user.firstName?.charAt(0) }}{{ user.lastName?.charAt(0) }}</span>
-                  </div>
-                </div>
-                <div>
-                  <p class="font-bold">{{ user.firstName }} {{ user.lastName }}</p>
-                  <p class="text-xs text-base-content/70">{{ user.email }}</p>
-                </div>
-              </div>
-              <div class="dropdown dropdown-end">
-                <label tabindex="0" class="btn btn-ghost btn-sm btn-circle">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" /></svg>
-                </label>
-                <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-36">
-                  <li><a @click="editUser(user)">Düzenle</a></li>
-                  <li>
-                    <a @click="triggerPasswordReset(user)" class="text-warning">Şifre Sıfırla</a>
-                  </li>
-                  <li>
-                    <a @click="confirmDelete(user)" class="text-error">Sil</a>
-                  </li>
-                  <li v-if="user.isActive !== false">
-                    <a @click="deactivateUser(user.id)" class="text-error">Pasif Yap</a>
-                  </li>
-                  <li v-else>
-                    <a @click="activateUser(user.id)" class="text-success">Aktif Yap</a>
-                  </li>
-                </ul>
-              </div>
-            </div>
-            <div class="divider my-2"></div>
-            <div class="flex items-center justify-between text-xs">
-              <div class="flex gap-2">
-                <span :class="getRoleClass(user.role)" class="badge badge-sm font-semibold">
-                  {{ user.roleLabel || ROLE_LABELS[user.role] || user.role }}
-                </span>
-                <span v-if="user.isActive === false" class="badge badge-error badge-sm">
-                  Pasif
-                </span>
-                <span v-else class="badge badge-success badge-sm">
-                  Aktif
-                </span>
-              </div>
-              <span class="text-base-content/70">
-                Firma: {{ user.companyName || 'Belirtilmemiş' }}
-              </span>
-            </div>
-          </div>
+      <!-- Boş Durum -->
+      <div v-if="filteredUsers.length === 0" class="py-12 text-center">
+        <div class="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-700 flex items-center justify-center mx-auto mb-3">
+          <svg class="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+          </svg>
         </div>
+        <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Kullanıcı bulunamadı</p>
+      </div>
 
-        <div v-if="filteredUsers.length === 0" class="text-center py-10">
-          <p class="text-base-content/60">Aramayla eşleşen kullanıcı bulunamadı.</p>
+      <!-- Kullanıcı Listesi -->
+      <div v-else class="divide-y divide-slate-100 dark:divide-slate-700/50">
+        <div
+          v-for="user in filteredUsers"
+          :key="user.id"
+          class="flex items-center gap-3 px-4 py-3 table-row-hover"
+          :class="user.isActive === false ? 'opacity-60' : ''"
+        >
+          <!-- Avatar -->
+          <div class="w-9 h-9 rounded-xl bg-primary/10 text-primary font-bold text-sm flex items-center justify-center shrink-0 uppercase">
+            {{ user.firstName?.charAt(0) }}{{ user.lastName?.charAt(0) }}
+          </div>
+
+          <!-- İsim + Email -->
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-semibold text-slate-800 dark:text-slate-100 truncate">
+              {{ user.firstName }} {{ user.lastName }}
+            </p>
+            <p class="text-xs text-slate-400 truncate">{{ user.email }}</p>
+          </div>
+
+          <!-- Badges -->
+          <div class="hidden sm:flex items-center gap-2 shrink-0">
+            <span :class="getRoleClass(user.role)" class="badge badge-sm font-medium">
+              {{ user.roleLabel || ROLE_LABELS[user.role] || user.role }}
+            </span>
+            <span v-if="user.isActive === false" class="badge-overdue text-xs px-2 py-0.5 rounded-full font-medium">Pasif</span>
+            <span v-else class="badge-active text-xs px-2 py-0.5 rounded-full font-medium">Aktif</span>
+          </div>
+
+          <!-- Firma -->
+          <div class="hidden md:block text-xs text-slate-400 shrink-0 max-w-[120px] truncate">
+            {{ user.companyName || '—' }}
+          </div>
+
+          <!-- Menü -->
+          <div class="dropdown dropdown-end shrink-0">
+            <label tabindex="0" class="btn btn-ghost btn-xs btn-circle">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/>
+              </svg>
+            </label>
+            <ul tabindex="0" class="dropdown-content menu menu-sm p-1.5 shadow-lg bg-base-100 border border-slate-200 dark:border-slate-700 rounded-xl w-40 z-30">
+              <li><a @click="editUser(user)" class="text-sm">Düzenle</a></li>
+              <li><a @click="triggerPasswordReset(user)" class="text-sm text-warning">Şifre Sıfırla</a></li>
+              <li v-if="user.isActive !== false">
+                <a @click="deactivateUser(user.id)" class="text-sm text-error">Pasif Yap</a>
+              </li>
+              <li v-else>
+                <a @click="activateUser(user.id)" class="text-sm text-success">Aktif Yap</a>
+              </li>
+              <li><a @click="confirmDelete(user)" class="text-sm text-error">Sil</a></li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- Yeni Kullanıcı Ekleme Modal -->
+    <!-- Kullanıcı Ekleme / Düzenleme Modal -->
     <div v-if="showAddUserModal" class="modal modal-open">
-      <div class="modal-box max-w-2xl">
-        <h3 class="font-bold text-lg mb-4">{{ isEditMode ? 'Kullanıcıyı Düzenle' : 'Yeni Kullanıcı Ekle' }}</h3>
-        
-        <div v-if="notification.message" :class="notification.type" class="p-4 rounded-md text-sm font-medium mb-4">
+      <div class="modal-box max-w-xl">
+        <div class="flex items-center justify-between mb-5">
+          <h3 class="font-bold text-lg text-slate-800 dark:text-slate-100">
+            {{ isEditMode ? 'Kullanıcıyı Düzenle' : 'Yeni Kullanıcı Ekle' }}
+          </h3>
+          <button @click="closeModal" class="btn btn-ghost btn-sm btn-circle">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+
+        <div v-if="notification.message" :class="notification.type" class="p-3 rounded-lg text-sm font-medium mb-4">
           {{ notification.message }}
         </div>
 
         <form @submit.prevent="createUser" class="space-y-4">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="grid grid-cols-2 gap-4">
             <div class="form-control">
-              <label class="label">
-                <span class="label-text font-semibold">Ad</span>
-              </label>
-              <input type="text" v-model="newUser.firstName" class="input input-bordered w-full" required />
+              <label class="label py-1"><span class="label-text font-semibold text-xs uppercase tracking-wide">Ad</span></label>
+              <input type="text" v-model="newUser.firstName" class="input input-sm input-bordered w-full" required />
             </div>
             <div class="form-control">
-              <label class="label">
-                <span class="label-text font-semibold">Soyad</span>
-              </label>
-              <input type="text" v-model="newUser.lastName" class="input input-bordered w-full" required />
+              <label class="label py-1"><span class="label-text font-semibold text-xs uppercase tracking-wide">Soyad</span></label>
+              <input type="text" v-model="newUser.lastName" class="input input-sm input-bordered w-full" required />
             </div>
           </div>
 
           <div class="form-control">
-            <label class="label">
-              <span class="label-text font-semibold">E-posta</span>
-            </label>
-            <input type="email" v-model="newUser.email" class="input input-bordered w-full" required />
-            <label class="label">
-              <span class="label-text-alt">Şifre sıfırlama bağlantısı bu adrese gönderilecek</span>
+            <label class="label py-1"><span class="label-text font-semibold text-xs uppercase tracking-wide">E-posta</span></label>
+            <input type="email" v-model="newUser.email" class="input input-sm input-bordered w-full" required />
+            <label class="label py-0.5">
+              <span class="label-text-alt text-slate-400">Şifre sıfırlama bağlantısı bu adrese gönderilecek</span>
             </label>
           </div>
-          
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div class="form-control">
-              <label class="label">
-                <span class="label-text font-semibold">Rol</span>
-              </label>
-              <select v-model="newUser.role" class="select select-bordered w-full" required>
+              <label class="label py-1"><span class="label-text font-semibold text-xs uppercase tracking-wide">Rol</span></label>
+              <select v-model="newUser.role" class="select select-sm select-bordered w-full" required>
                 <option disabled value="">Rol Seçiniz</option>
-                <option v-for="role in availableRoles" :key="role.code" :value="role.code">
-                  {{ role.label }}
-                </option>
+                <option v-for="role in availableRoles" :key="role.code" :value="role.code">{{ role.label }}</option>
               </select>
             </div>
-            
             <div v-if="newUser.role === 'tenant'" class="form-control">
-              <label class="label">
-                <span class="label-text font-semibold">İlişkili Firma</span>
-              </label>
-              <select v-model="newUser.companyId" class="select select-bordered w-full" required>
+              <label class="label py-1"><span class="label-text font-semibold text-xs uppercase tracking-wide">İlişkili Firma</span></label>
+              <select v-model="newUser.companyId" class="select select-sm select-bordered w-full" required>
                 <option disabled value="">Firma Seçiniz</option>
-                <option v-for="tenant in tenants" :key="tenant.id" :value="tenant.id">
-                  {{ tenant.companyName }}
-                </option>
+                <option v-for="tenant in tenants" :key="tenant.id" :value="tenant.id">{{ tenant.companyName }}</option>
               </select>
             </div>
           </div>
 
-          <div class="alert alert-info">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          <div class="flex items-start gap-3 p-3 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+            <svg class="w-4 h-4 text-blue-500 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
-            <div>
-              <h3 class="font-bold">Bilgilendirme</h3>
-              <div class="text-xs">Kullanıcı oluşturulduktan sonra, belirtilen e-posta adresine şifre belirleme bağlantısı gönderilecektir.</div>
-            </div>
+            <p class="text-xs text-blue-700 dark:text-blue-300">Kullanıcı oluşturulduktan sonra belirtilen e-posta adresine şifre belirleme bağlantısı gönderilecektir.</p>
           </div>
 
-          <div class="modal-action">
-            <button type="button" @click="closeModal" class="btn btn-ghost">İptal</button>
-            <button type="submit" class="btn btn-primary" :disabled="loading">
-              <span v-if="loading" class="loading loading-spinner"></span>
+          <div class="flex gap-2 justify-end pt-2">
+            <button type="button" @click="closeModal" class="btn btn-sm btn-ghost">İptal</button>
+            <button type="submit" class="btn btn-sm btn-primary" :disabled="loading">
+              <span v-if="loading" class="loading loading-spinner loading-xs"></span>
               {{ loading ? 'Kaydediliyor...' : (isEditMode ? 'Değişiklikleri Kaydet' : 'Kullanıcıyı Oluştur') }}
             </button>
           </div>
         </form>
       </div>
+      <div class="modal-backdrop" @click="closeModal"></div>
     </div>
   </div>
 
@@ -199,7 +186,7 @@
     @confirm="onConfirmPasswordReset"
     @cancel="confirmResetUser = null"
   />
-  
+
   <!-- Silme Onay Modalı -->
   <ConfirmModal
     :isOpen="!!confirmDeleteUser"

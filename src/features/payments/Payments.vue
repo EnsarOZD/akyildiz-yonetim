@@ -148,7 +148,7 @@
     </div>
 
     <!-- Filtreler ve Liste -->
-    <div class="app-card !p-0 overflow-hidden">
+    <div class="app-card !p-0">
       <!-- Filtreler -->
       <div class="px-4 py-3 border-b border-slate-100 dark:border-slate-700/60 flex flex-col sm:flex-row items-start sm:items-center gap-3">
         <CustomFilterBar

@@ -57,7 +57,7 @@
     </div>
 
     <!-- Arama + Liste -->
-    <div class="app-card !p-0 overflow-hidden">
+    <div class="app-card !p-0">
       <!-- Arama -->
       <div class="px-4 py-3 border-b border-slate-100 dark:border-slate-700/60">
         <FilterBar
