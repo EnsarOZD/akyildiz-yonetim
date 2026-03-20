@@ -1,221 +1,252 @@
 <template>
-  <div class="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 sm:p-6 lg:p-8">
-    <div class="max-w-7xl mx-auto">
-      <!-- Header Area -->
-      <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
-        <div>
-          <h1 class="text-3xl font-bold text-gray-800 dark:text-white flex items-center gap-3">
-            <span class="text-4xl">📊</span>
-            Finansal Raporlama
-          </h1>
-          <p class="text-gray-500 dark:text-gray-400 mt-1">Borç ve tahsilat kayıtlarını listeleyin ve dışa aktarın</p>
+  <div class="p-4 sm:p-6 min-h-screen pb-24 md:pb-6">
+
+    <!-- Sayfa Başlığı -->
+    <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <div>
+        <h1 class="page-title">Finansal Raporlar</h1>
+        <p class="page-subtitle">Borç ve tahsilat kayıtlarını filtreleyin, dışa aktarın</p>
+      </div>
+      <div class="flex items-center gap-2 shrink-0">
+        <button @click="exportToExcel" class="btn btn-sm btn-ghost border border-slate-300 dark:border-slate-600">
+          <svg class="w-4 h-4 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+          </svg>
+          Excel
+        </button>
+        <button @click="exportToPDF" class="btn btn-sm btn-ghost border border-slate-300 dark:border-slate-600">
+          <svg class="w-4 h-4 text-rose-500 dark:text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+          </svg>
+          PDF
+        </button>
+        <button @click="fetchData" :disabled="loading" class="btn btn-sm btn-primary">
+          <svg v-if="!loading" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/>
+          </svg>
+          <span v-else class="loading loading-spinner loading-xs"></span>
+          Sorgula
+        </button>
+      </div>
+    </div>
+
+    <!-- Filtreler -->
+    <div class="app-card mb-5">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3">
+        <div class="form-control">
+          <label class="label py-1"><span class="label-text text-xs font-semibold uppercase tracking-wide">Başlangıç</span></label>
+          <input v-model="filters.startDate" type="date" class="input input-sm input-bordered w-full" />
         </div>
-        <div class="flex gap-2">
-          <button @click="exportToExcel" class="btn btn-success text-white shadow-md normal-case">
-            <span>📗 Excel'e Al</span>
+        <div class="form-control">
+          <label class="label py-1"><span class="label-text text-xs font-semibold uppercase tracking-wide">Bitiş</span></label>
+          <input v-model="filters.endDate" type="date" class="input input-sm input-bordered w-full" />
+        </div>
+        <div class="form-control">
+          <label class="label py-1"><span class="label-text text-xs font-semibold uppercase tracking-wide">Kiracı</span></label>
+          <select v-model="filters.tenantId" class="select select-sm select-bordered w-full">
+            <option value="">Tüm Kiracılar</option>
+            <option v-for="t in tenants" :key="t.id" :value="t.id">{{ t.companyName }}</option>
+          </select>
+        </div>
+        <div class="form-control">
+          <label class="label py-1"><span class="label-text text-xs font-semibold uppercase tracking-wide">Mal Sahibi</span></label>
+          <select v-model="filters.ownerId" class="select select-sm select-bordered w-full">
+            <option value="">Tüm Mal Sahipleri</option>
+            <option v-for="o in owners" :key="o.id" :value="o.id">{{ o.firstName }} {{ o.lastName }}</option>
+          </select>
+        </div>
+        <div class="form-control">
+          <label class="label py-1"><span class="label-text text-xs font-semibold uppercase tracking-wide">İşlem Tipi</span></label>
+          <select v-model="filters.type" class="select select-sm select-bordered w-full">
+            <option value="all">Tümü</option>
+            <option value="debt">Sadece Borçlar</option>
+            <option value="payment">Sadece Tahsilatlar</option>
+          </select>
+        </div>
+        <div class="form-control">
+          <label class="label py-1"><span class="label-text text-xs font-semibold uppercase tracking-wide">Kategori</span></label>
+          <select v-model="filters.utilityType" class="select select-sm select-bordered w-full">
+            <option value="">Tümü</option>
+            <option value="Aidat">Aidat</option>
+            <option value="Electricity">Elektrik</option>
+            <option value="Water">Su</option>
+          </select>
+        </div>
+      </div>
+      <div class="flex justify-end mt-3 pt-3 border-t border-slate-200 dark:border-slate-700">
+        <button @click="clearFilters" class="btn btn-ghost btn-xs text-slate-400">Filtreleri Temizle</button>
+      </div>
+    </div>
+
+    <!-- Özet Kartları -->
+    <div v-if="reportItems.length > 0" class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5">
+      <div class="app-card flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-red-100 dark:bg-red-900/30 text-red-500 flex items-center justify-center shrink-0">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"/>
+          </svg>
+        </div>
+        <div class="min-w-0">
+          <p class="text-xs text-slate-500 dark:text-slate-400 leading-none mb-1">Toplam Tahakkuk</p>
+          <p class="text-base font-bold text-slate-800 dark:text-slate-100 leading-none">{{ formatCurrency(summary.totalDebt) }}</p>
+        </div>
+      </div>
+      <div class="app-card flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+          </svg>
+        </div>
+        <div class="min-w-0">
+          <p class="text-xs text-slate-500 dark:text-slate-400 leading-none mb-1">Toplam Tahsilat</p>
+          <p class="text-base font-bold text-slate-800 dark:text-slate-100 leading-none">{{ formatCurrency(summary.totalPayment) }}</p>
+        </div>
+      </div>
+      <div class="app-card flex items-center gap-3">
+        <div :class="[
+          'w-9 h-9 rounded-xl flex items-center justify-center shrink-0',
+          summary.balance >= 0 ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400' : 'bg-red-100 dark:bg-red-900/30 text-red-500'
+        ]">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"/>
+          </svg>
+        </div>
+        <div class="min-w-0">
+          <p class="text-xs text-slate-500 dark:text-slate-400 leading-none mb-1">Net Bakiye</p>
+          <p :class="[
+            'text-base font-bold leading-none',
+            summary.balance >= 0 ? 'text-blue-600 dark:text-blue-400' : 'text-red-500'
+          ]">{{ formatCurrency(summary.balance) }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tablo Kartı -->
+    <div class="app-card !p-0">
+      <!-- Tablo Başlığı -->
+      <div class="flex items-center justify-between px-4 py-3 border-b border-slate-200 dark:border-slate-700">
+        <div class="flex items-center gap-2">
+          <span class="text-sm font-semibold text-slate-700 dark:text-slate-200">İşlem Listesi</span>
+          <span class="text-xs text-slate-400">{{ reportItems.length }} kayıt</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-xs text-slate-400 hidden sm:block">Sayfa başına</span>
+          <select v-model="pageSize" class="select select-xs select-bordered">
+            <option :value="10">10</option>
+            <option :value="25">25</option>
+            <option :value="50">50</option>
+            <option :value="100">100</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Tablo -->
+      <div class="overflow-x-auto">
+        <table class="table table-sm w-full" id="report-table">
+          <thead>
+            <tr class="bg-slate-50 dark:bg-slate-800/60 text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide">
+              <th class="font-semibold">Tarih</th>
+              <th class="font-semibold">Dönem</th>
+              <th class="font-semibold">Kiracı / Ünite</th>
+              <th class="font-semibold">İşlem</th>
+              <th class="font-semibold">Açıklama</th>
+              <th class="font-semibold">Fatura No</th>
+              <th class="font-semibold text-right">Borç (−)</th>
+              <th class="font-semibold text-right">Alacak (+)</th>
+              <th class="font-semibold text-center">Durum</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100 dark:divide-slate-700/50">
+            <tr v-if="loading">
+              <td colspan="9" class="text-center py-10">
+                <span class="loading loading-spinner loading-md text-slate-400"></span>
+              </td>
+            </tr>
+            <tr v-else-if="reportItems.length === 0">
+              <td colspan="9" class="py-12">
+                <div class="text-center">
+                  <div class="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-700 flex items-center justify-center mx-auto mb-3">
+                    <svg class="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                  </div>
+                  <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Kayıt bulunamadı</p>
+                  <p class="text-xs text-slate-400 mt-1">Farklı filtre kriterleri deneyin</p>
+                </div>
+              </td>
+            </tr>
+            <tr
+              v-else
+              v-for="(item, idx) in paginatedReports"
+              :key="idx"
+              class="table-row-hover"
+            >
+              <td class="whitespace-nowrap text-xs text-slate-500 dark:text-slate-400">{{ formatDate(item.date) }}</td>
+              <td class="whitespace-nowrap text-xs font-mono text-slate-500 dark:text-slate-400">{{ formatPeriod(item.periodYear, item.periodMonth) }}</td>
+              <td>
+                <p class="text-sm font-semibold text-slate-800 dark:text-slate-100 leading-tight">{{ item.tenantName }}</p>
+                <p class="text-xs text-slate-400 leading-tight">{{ item.unitCode }}</p>
+              </td>
+              <td>
+                <span :class="[
+                  'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium',
+                  item.isPayment ? 'badge-active' : 'badge-overdue'
+                ]">
+                  {{ item.isPayment ? 'Tahsilat' : 'Borç' }}
+                </span>
+              </td>
+              <td class="max-w-[180px] truncate text-xs text-slate-600 dark:text-slate-300">{{ item.description }}</td>
+              <td class="text-xs font-mono text-slate-400">{{ item.invoiceNumber || '—' }}</td>
+              <td class="text-right text-sm font-semibold" :class="!item.isPayment ? 'text-red-500' : 'text-slate-300 dark:text-slate-600'">
+                {{ !item.isPayment ? formatCurrency(item.amount) : '—' }}
+              </td>
+              <td class="text-right text-sm font-semibold" :class="item.isPayment ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-300 dark:text-slate-600'">
+                {{ item.isPayment ? formatCurrency(item.amount) : '—' }}
+              </td>
+              <td class="text-center">
+                <span v-if="!item.isPayment" :class="[
+                  'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium',
+                  item.isPaid ? 'badge-active' : 'badge-pending'
+                ]">
+                  {{ item.isPaid ? 'Ödendi' : 'Bekliyor' }}
+                </span>
+                <span v-else class="text-slate-300 dark:text-slate-600 text-xs">—</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <div v-if="totalPages > 1" class="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-3 border-t border-slate-200 dark:border-slate-700">
+        <p class="text-xs text-slate-400">
+          {{ reportItems.length }} kayıttan
+          {{ (currentPage - 1) * pageSize + 1 }}–{{ Math.min(currentPage * pageSize, reportItems.length) }} arası
+        </p>
+        <div class="flex items-center gap-1">
+          <button @click="currentPage = 1" :disabled="currentPage === 1" class="btn btn-ghost btn-xs" aria-label="İlk">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/></svg>
           </button>
-          <button @click="exportToPDF" class="btn btn-error text-white shadow-md normal-case">
-            <span>📕 PDF'e Al</span>
+          <button @click="currentPage--" :disabled="currentPage === 1" class="btn btn-ghost btn-xs">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
           </button>
-        </div>
-      </div>
-
-      <!-- Filters Card -->
-      <div class="card bg-white dark:bg-gray-800 shadow-xl mb-8 overflow-visible">
-        <div class="card-body p-6">
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <!-- Tarih Aralığı -->
-            <div class="form-control">
-              <label class="label"><span class="label-text font-semibold">Başlangıç Tarihi</span></label>
-              <input v-model="filters.startDate" type="date" class="input input-bordered w-full bg-white dark:bg-gray-700" />
-            </div>
-            <div class="form-control">
-              <label class="label"><span class="label-text font-semibold">Bitiş Tarihi</span></label>
-              <input v-model="filters.endDate" type="date" class="input input-bordered w-full bg-white dark:bg-gray-700" />
-            </div>
-
-            <!-- Kiracı Seçimi -->
-            <div class="form-control">
-              <label class="label"><span class="label-text font-semibold">Kiracı</span></label>
-              <select v-model="filters.tenantId" class="select select-bordered w-full bg-white dark:bg-gray-700">
-                <option value="">Tüm Kiracılar</option>
-                <option v-for="t in tenants" :key="t.id" :value="t.id">{{ t.companyName }}</option>
-              </select>
-            </div>
-
-            <!-- Mal Sahibi Seçimi -->
-            <div class="form-control">
-              <label class="label"><span class="label-text font-semibold">Mal Sahibi</span></label>
-              <select v-model="filters.ownerId" class="select select-bordered w-full bg-white dark:bg-gray-700">
-                <option value="">Tüm Mal Sahipleri</option>
-                <option v-for="o in owners" :key="o.id" :value="o.id">{{ o.firstName }} {{ o.lastName }}</option>
-              </select>
-            </div>
-
-            <!-- İşlem Tipi (Borç/Tahsilat) -->
-            <div class="form-control">
-              <label class="label"><span class="label-text font-semibold">İşlem Tipi</span></label>
-              <select v-model="filters.type" class="select select-bordered w-full bg-white dark:bg-gray-700">
-                <option value="all">Tümü (Borç & Tahsilat)</option>
-                <option value="debt">Sadece Borçlar</option>
-                <option value="payment">Sadece Tahsilatlar</option>
-              </select>
-            </div>
-
-            <!-- Borç Kategorisi -->
-            <div class="form-control">
-              <label class="label"><span class="label-text font-semibold">Borç Kategorisi</span></label>
-              <select v-model="filters.utilityType" class="select select-bordered w-full bg-white dark:bg-gray-700">
-                <option value="">Tümü (Aidat, Elektrik, Su)</option>
-                <option value="Aidat">Aidat</option>
-                <option value="Electricity">Elektrik</option>
-                <option value="Water">Su</option>
-              </select>
-            </div>
-          </div>
-          
-          <div class="flex justify-end mt-4 pt-4 border-t dark:border-gray-700">
-            <button @click="clearFilters" class="btn btn-ghost btn-sm">Filtreleri Temizle</button>
-            <button @click="fetchData" class="btn btn-primary btn-sm ml-2" :disabled="loading">
-              <span v-if="loading" class="loading loading-spinner loading-xs"></span>
-              Sorgula
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Summary Cards -->
-      <div v-if="reportItems.length > 0" class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div class="card bg-error/10 text-error-content shadow-sm p-4 border-l-4 border-error">
-          <div class="text-xs font-bold uppercase tracking-wider opacity-70">Toplam Tahakkuk (Borç)</div>
-          <div class="text-2xl font-bold">{{ formatCurrency(summary.totalDebt) }}</div>
-        </div>
-        <div class="card bg-success/10 text-success-content shadow-sm p-4 border-l-4 border-success">
-          <div class="text-xs font-bold uppercase tracking-wider opacity-70">Toplam Tahsilat (Ödeme)</div>
-          <div class="text-2xl font-bold">{{ formatCurrency(summary.totalPayment) }}</div>
-        </div>
-        <div class="card bg-primary/10 text-primary-content shadow-sm p-4 border-l-4 border-primary">
-          <div class="text-xs font-bold uppercase tracking-wider opacity-70">Net Bakiye</div>
-          <div class="text-2xl font-bold">{{ formatCurrency(summary.balance) }}</div>
-        </div>
-      </div>
-
-      <!-- Main Table Card -->
-      <div class="card bg-white dark:bg-gray-800 shadow-xl overflow-hidden">
-        <div class="overflow-x-auto">
-          <table class="table table-zebra w-full" id="report-table">
-            <thead>
-              <tr class="bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
-                <th scope="col">Tarih</th>
-                <th scope="col">Dönem</th>
-                <th scope="col">Kiracı / Ünite</th>
-                <th scope="col">İşlem</th>
-                <th scope="col">Açıklama</th>
-                <th scope="col">Fatura No</th>
-                <th scope="col" class="text-right">Borç(-)</th>
-                <th scope="col" class="text-right">Alacak(+)</th>
-                <th scope="col" class="text-center">Durum</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="(item, idx) in paginatedReports" :key="idx" class="hover">
-                <td class="whitespace-nowrap">{{ formatDate(item.date) }}</td>
-                <td class="whitespace-nowrap font-mono text-sm">{{ formatPeriod(item.periodYear, item.periodMonth) }}</td>
-                <td>
-                  <div class="font-bold">{{ item.tenantName }}</div>
-                  <div class="text-xs opacity-60">{{ item.unitCode }}</div>
-                </td>
-                <td>
-                  <span :class="['badge badge-sm font-semibold', item.isPayment ? 'badge-success' : 'badge-error']">
-                    {{ item.isPayment ? 'Tahsilat' : 'Borç' }}
-                  </span>
-                </td>
-                <td class="max-w-xs truncate">{{ item.description }}</td>
-                <td class="text-xs font-mono text-gray-500 dark:text-gray-400">{{ item.invoiceNumber || '-' }}</td>
-                <td class="text-right font-semibold" :class="{'text-error': !item.isPayment}">
-                  {{ !item.isPayment ? formatCurrency(item.amount) : '-' }}
-                </td>
-                <td class="text-right font-semibold" :class="{'text-success': item.isPayment}">
-                  {{ item.isPayment ? formatCurrency(item.amount) : '-' }}
-                </td>
-                <td class="text-center">
-                   <div v-if="!item.isPayment">
-                      <span v-if="item.isPaid" class="badge badge-success badge-sm">Ödendi</span>
-                      <span v-else class="badge badge-warning badge-sm">Bekliyor</span>
-                   </div>
-                   <span v-else>-</span>
-                </td>
-              </tr>
-              <tr v-if="reportItems.length === 0">
-                <td colspan="9" class="text-center py-12 text-gray-500 italic">
-                  {{ loading ? 'Veriler yükleniyor...' : 'Kritere uygun kayıt bulunamadı.' }}
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <!-- Pagination Control -->
-        <div v-if="totalPages > 1" class="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 bg-gray-50 dark:bg-gray-800/50 border-t dark:border-gray-700">
-          <div class="flex items-center gap-4">
-            <p class="text-sm text-gray-500">
-              Toplam <span class="font-medium">{{ reportItems.length }}</span> kayıttan 
-              <span class="font-medium">{{ (currentPage - 1) * pageSize + 1 }}</span> - 
-              <span class="font-medium">{{ Math.min(currentPage * pageSize, reportItems.length) }}</span> arası gösteriliyor
-            </p>
-            <select v-model="pageSize" class="select select-xs select-bordered bg-white dark:bg-gray-700">
-              <option :value="10">10 / sayfa</option>
-              <option :value="25">25 / sayfa</option>
-              <option :value="50">50 / sayfa</option>
-              <option :value="100">100 / sayfa</option>
-            </select>
-          </div>
-
-          <div class="flex items-center gap-1">
-            <button 
-              @click="currentPage = 1" 
-              :disabled="currentPage === 1"
-              class="btn btn-sm btn-ghost"
-              aria-label="İlk Sayfa"
-            >
-              ««
-            </button>
-            <button 
-              @click="currentPage--" 
-              :disabled="currentPage === 1"
-              class="btn btn-sm btn-ghost"
-            >
-              Önceki
-            </button>
-            
-            <div class="flex items-center gap-1">
-              <button 
-                v-for="page in displayedPages" 
-                :key="page"
-                @click="currentPage = page"
-                class="btn btn-sm"
-                :class="currentPage === page ? 'bg-blue-600 text-white shadow-sm' : 'btn-ghost text-gray-700 dark:text-gray-300'"
-              >
-                {{ page }}
-              </button>
-            </div>
-
-            <button 
-              @click="currentPage++" 
-              :disabled="currentPage === totalPages"
-              class="btn btn-sm btn-ghost"
-            >
-              Sonraki
-            </button>
-            <button 
-              @click="currentPage = totalPages" 
-              :disabled="currentPage === totalPages"
-              class="btn btn-sm btn-ghost"
-              aria-label="Son Sayfa"
-            >
-              »»
-            </button>
-          </div>
+          <button
+            v-for="page in displayedPages"
+            :key="page"
+            @click="currentPage = page"
+            :class="[
+              'btn btn-xs',
+              currentPage === page ? 'btn-primary' : 'btn-ghost text-slate-500 dark:text-slate-400'
+            ]"
+          >
+            {{ page }}
+          </button>
+          <button @click="currentPage++" :disabled="currentPage === totalPages" class="btn btn-ghost btn-xs">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+          </button>
+          <button @click="currentPage = totalPages" :disabled="currentPage === totalPages" class="btn btn-ghost btn-xs" aria-label="Son">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"/></svg>
+          </button>
         </div>
       </div>
     </div>
