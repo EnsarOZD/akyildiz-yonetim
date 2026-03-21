@@ -390,6 +390,12 @@ const toggleUserDropdown = () => {
   if (showUserDropdown.value) showNotificationsDropdown.value = false
 }
 const toggleNotifications = () => {
+  // On mobile, go straight to notifications page
+  if (window.innerWidth < 768) {
+    showNotificationsDropdown.value = false
+    router.push('/notifications')
+    return
+  }
   showNotificationsDropdown.value = !showNotificationsDropdown.value
   if (showNotificationsDropdown.value) {
     showUserDropdown.value = false

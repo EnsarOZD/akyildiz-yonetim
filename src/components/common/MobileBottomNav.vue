@@ -97,6 +97,13 @@
               <!-- Active indicator pill -->
               <span v-if="isActive" class="absolute -top-2.5 left-1/2 -translate-x-1/2 w-5 h-0.5 rounded-full bg-blue-600" />
               <component :is="item.icon" class="w-5 h-5" />
+              <!-- Unread notifications badge -->
+              <span
+                v-if="item.path === '/notifications' && notificationsStore.unreadCount > 0"
+                class="absolute -top-1 -right-1 min-w-[14px] h-3.5 flex items-center justify-center bg-red-500 text-white text-[8px] font-bold rounded-full px-0.5 leading-none shadow"
+              >
+                {{ notificationsStore.unreadCount > 9 ? '9+' : notificationsStore.unreadCount }}
+              </span>
             </div>
             <span class="text-[10px] font-semibold leading-none truncate max-w-full px-1 transition-colors duration-150"
               :class="isActive ? 'text-blue-600 dark:text-blue-400' : 'text-slate-400 dark:text-slate-500'">
@@ -131,11 +138,13 @@
 <script setup>
 import { ref, computed, h } from 'vue'
 import { useAuthStore } from '@/stores/auth'
+import { useNotificationsStore } from '@/stores/notificationsStore'
 import { useRouter } from 'vue-router'
 
-const authStore   = useAuthStore()
-const router      = useRouter()
-const showMoreMenu = ref(false)
+const authStore            = useAuthStore()
+const notificationsStore   = useNotificationsStore()
+const router               = useRouter()
+const showMoreMenu          = ref(false)
 
 const logout = () => {
   showMoreMenu.value = false

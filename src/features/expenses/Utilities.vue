@@ -240,6 +240,11 @@
               ]">
                 {{ d.status === 'paid' ? 'Ödendi' : d.status === 'partial' ? 'Kısmi' : 'Bekliyor' }}
               </span>
+              <!-- Kuruş farkı uyarısı -->
+              <p v-if="d.status !== 'paid' && d.remainingAmount > 0 && d.remainingAmount < 1"
+                class="text-[10px] text-amber-500 font-medium mt-0.5">
+                {{ formatNumber(d.remainingAmount) }} ₺ kaldı
+              </p>
             </div>
 
             <!-- Dropdown Menü -->
@@ -250,8 +255,16 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/>
                   </svg>
                 </label>
-                <ul tabindex="0" class="dropdown-content menu menu-sm p-1.5 shadow-lg bg-base-100 border border-slate-200 dark:border-slate-700 rounded-xl w-36 z-30">
+                <ul tabindex="0" class="dropdown-content menu menu-sm p-1.5 shadow-lg bg-base-100 border border-slate-200 dark:border-slate-700 rounded-xl w-40 z-30">
                   <li><a @click="editDebt(d)" class="text-sm">Düzenle</a></li>
+                  <li v-if="d.status !== 'paid' && d.remainingAmount > 0 && d.remainingAmount < 1">
+                    <a @click="openCloseDebt(d)" class="text-sm text-amber-600 dark:text-amber-400">
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                      </svg>
+                      Borcu Kapat
+                    </a>
+                  </li>
                   <li v-if="authStore.role === ROLES.ADMIN">
                     <a @click="openAidatDelete(d)" class="text-sm text-red-500">Sil</a>
                   </li>
@@ -301,6 +314,38 @@
       </div>
       <form method="dialog" class="modal-backdrop">
         <button @click="showBulkDeleteConfirm = false" :disabled="isBulkDeleting">Kapat</button>
+      </form>
+    </dialog>
+
+    <!-- Borcu Kapat Onay Modal -->
+    <dialog v-if="showCloseDebtConfirm && selectedDue" class="modal modal-bottom sm:modal-middle" open>
+      <div class="modal-box">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+          </div>
+          <h3 class="font-bold text-lg text-slate-800 dark:text-slate-100">Borcu Kapat</h3>
+        </div>
+        <p class="text-sm text-slate-600 dark:text-slate-300 mb-1">
+          <strong>{{ selectedDue.tenantCompany || selectedDue.flatNumber }}</strong> –
+          {{ selectedDue.periodYear }}/{{ String(selectedDue.periodMonth).padStart(2, '0') }}
+        </p>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">
+          Kalan <strong class="text-amber-600 dark:text-amber-400">{{ formatNumber(selectedDue.remainingAmount) }} ₺</strong>
+          kuruş farkı sıfırlanarak borç kapatılacak. Bu işlem geri alınamaz.
+        </p>
+        <div class="modal-action">
+          <button class="btn btn-ghost btn-sm" @click="showCloseDebtConfirm = false; selectedDue = null" :disabled="isClosingDebt">Vazgeç</button>
+          <button class="btn btn-warning btn-sm text-white" @click="confirmCloseDebt" :disabled="isClosingDebt">
+            <span v-if="isClosingDebt" class="loading loading-spinner loading-xs"></span>
+            Evet, Kapat
+          </button>
+        </div>
+      </div>
+      <form method="dialog" class="modal-backdrop">
+        <button @click="showCloseDebtConfirm = false; selectedDue = null" :disabled="isClosingDebt">Kapat</button>
       </form>
     </dialog>
 
@@ -381,6 +426,8 @@ const pageSize = ref(PAGE_SIZE_DEFAULT)
 const selectedIds = ref([])
 const showBulkDeleteConfirm = ref(false)
 const isBulkDeleting = ref(false)
+const showCloseDebtConfirm = ref(false)
+const isClosingDebt = ref(false)
 
 /* ---------- Computed (filters) ---------- */
 
@@ -481,6 +528,31 @@ const confirmBulkDelete = async () => {
 }
 
 // Excel aktarımı modal aracılığıyla yönetiliyor
+
+const openCloseDebt = (d) => {
+  selectedDue.value = d
+  showCloseDebtConfirm.value = true
+}
+
+const confirmCloseDebt = async () => {
+  if (!selectedDue.value) return
+  isClosingDebt.value = true
+  try {
+    await utilityDebtsService.updateUtilityDebt(selectedDue.value.id, {
+      status: 2,
+      remainingAmount: 0,
+      isPaid: true,
+    })
+    showSuccess('Borç başarıyla kapatıldı.')
+    showCloseDebtConfirm.value = false
+    selectedDue.value = null
+    await refreshAll()
+  } catch (err) {
+    handleNetworkError(err)
+  } finally {
+    isClosingDebt.value = false
+  }
+}
 
 const editDebt = (d) => {
   selectedDue.value = d
