@@ -538,9 +538,7 @@ const confirmCloseDebt = async () => {
   if (!selectedDue.value) return
   isClosingDebt.value = true
   try {
-    await utilityDebtsService.updateUtilityDebt(selectedDue.value.id, {
-      status: 2,
-      remainingAmount: 0,
+    await utilityDebtsService.patchUtilityDebt(selectedDue.value.id, {
       isPaid: true,
     })
     showSuccess('Borç başarıyla kapatıldı.')

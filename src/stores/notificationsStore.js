@@ -65,6 +65,13 @@ export const useNotificationsStore = defineStore('notifications', () => {
         }
     }
 
+    async function deleteAll() {
+        await notificationsService.deleteAll()
+        items.value = []
+        unreadCount.value = 0
+        totalCount.value = 0
+    }
+
     return {
         items,
         unreadCount,
@@ -74,6 +81,7 @@ export const useNotificationsStore = defineStore('notifications', () => {
         refresh,
         fetchMore,
         markAsRead,
-        markAllAsRead
+        markAllAsRead,
+        deleteAll
     }
 })

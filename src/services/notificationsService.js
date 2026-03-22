@@ -24,5 +24,9 @@ export const notificationsService = {
 
     async sendOverdueEmail(tenantId, ownerId) {
         return await apiService.post('/notifications/send-overdue-email', { tenantId, ownerId })
+    },
+
+    async deleteAll() {
+        await apiService.delete('/notifications/all')
     }
 }

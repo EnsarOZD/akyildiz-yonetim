@@ -51,9 +51,14 @@ class UtilityDebtsService {
     return apiService.post('/utilitydebts', utilityDebtData)
   }
 
-  // Utility debt güncelle
+  // Utility debt güncelle (tam güncelleme - tüm alanlar gönderilmeli)
   async updateUtilityDebt(id, utilityDebtData) {
     return apiService.put(`/utilitydebts/${id}`, utilityDebtData)
+  }
+
+  // Utility debt kısmi güncelle (sadece gönderilen alanlar değişir)
+  async patchUtilityDebt(id, fields) {
+    return apiService.patch(`/utilitydebts/${id}`, fields)
   }
 
   // Toplu utility debt oluştur (sıralı veya toplu request)

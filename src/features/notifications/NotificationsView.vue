@@ -7,16 +7,28 @@
         <h1 class="page-title">Bildirimler</h1>
         <p class="page-subtitle">Tüm bildirimleriniz ve duyurular</p>
       </div>
-      <button
-        v-if="canBroadcast"
-        @click="showAnnouncementModal = true"
-        class="btn btn-sm btn-primary shrink-0"
-      >
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/>
-        </svg>
-        Duyuru Yayınla
-      </button>
+      <div class="flex gap-2 shrink-0">
+        <button
+          v-if="authStore.role?.toLowerCase() === 'admin' && notificationsStore.totalCount > 0"
+          @click="showDeleteConfirm = true"
+          class="btn btn-sm btn-error btn-outline"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+          </svg>
+          Tümünü Sil
+        </button>
+        <button
+          v-if="canBroadcast"
+          @click="showAnnouncementModal = true"
+          class="btn btn-sm btn-primary"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/>
+          </svg>
+          Duyuru Yayınla
+        </button>
+      </div>
     </div>
 
     <!-- Filtreler + Tümünü Oku -->
@@ -143,6 +155,24 @@
       </div>
     </div>
 
+    <!-- Tümünü Sil Onay Modalı -->
+    <dialog v-if="showDeleteConfirm" class="modal modal-bottom sm:modal-middle" open>
+      <div class="modal-box">
+        <h3 class="font-bold text-lg text-error">Tüm Bildirimleri Sil</h3>
+        <p class="py-4 text-sm text-slate-600 dark:text-slate-300">
+          Sistemdeki <strong>tüm kullanıcılara ait</strong> bildirimler kalıcı olarak silinecek. Bu işlem geri alınamaz.
+        </p>
+        <div class="modal-action">
+          <button class="btn btn-ghost btn-sm" @click="showDeleteConfirm = false" :disabled="deleting">Vazgeç</button>
+          <button class="btn btn-error btn-sm" @click="confirmDeleteAll" :disabled="deleting">
+            <span v-if="deleting" class="loading loading-spinner loading-xs"></span>
+            Evet, Tümünü Sil
+          </button>
+        </div>
+      </div>
+      <form method="dialog" class="modal-backdrop"><button @click="showDeleteConfirm = false">Kapat</button></form>
+    </dialog>
+
     <!-- Duyuru Modalı -->
     <TargetedNotificationModal
       :show="showAnnouncementModal"
@@ -166,6 +196,8 @@ const authStore = useAuthStore()
 const router = useRouter()
 const unreadOnly = ref(false)
 const showAnnouncementModal = ref(false)
+const showDeleteConfirm = ref(false)
+const deleting = ref(false)
 
 const canBroadcast = computed(() => {
     const role = authStore.role?.toLowerCase()
@@ -210,6 +242,18 @@ const getTypeColor = (type) => {
 const formatDate = (date) => {
     if (!date) return ''
     return formatDistanceToNow(new Date(date), { addSuffix: true, locale: tr })
+}
+
+const confirmDeleteAll = async () => {
+    deleting.value = true
+    try {
+        await notificationsStore.deleteAll()
+        showDeleteConfirm.value = false
+    } catch (error) {
+        console.error('Bildirimler silinemedi:', error)
+    } finally {
+        deleting.value = false
+    }
 }
 
 const handleNotificationClick = async (notification) => {
