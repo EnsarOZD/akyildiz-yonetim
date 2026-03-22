@@ -6,6 +6,7 @@ export const useAuthStore = defineStore('auth', () => {
   const user = ref(null)
   const role = ref(null)
   const companyId = ref(null)
+  const companyName = ref(null)
   const fullName = ref(null)
   const email = ref(null)
   const isInitialized = ref(false) // 🔄 Backend tamamlandı mı?
@@ -27,6 +28,7 @@ export const useAuthStore = defineStore('auth', () => {
           user.value = { id: backendUser.id, email: backendUser.email }
           role.value = backendUser.role ? backendUser.role.toLowerCase() : null
           companyId.value = backendUser.companyId
+          companyName.value = backendUser.companyName || null
           fullName.value = backendUser.name || `${backendUser.firstName || ''} ${backendUser.lastName || ''}`.trim()
           email.value = backendUser.email
         } else {
@@ -107,6 +109,7 @@ export const useAuthStore = defineStore('auth', () => {
     user.value = null
     role.value = null
     companyId.value = null
+    companyName.value = null
     fullName.value = null
     email.value = null
   }
@@ -120,6 +123,7 @@ export const useAuthStore = defineStore('auth', () => {
     user,
     role,
     companyId,
+    companyName,
     fullName,
     email,
     isInitialized,

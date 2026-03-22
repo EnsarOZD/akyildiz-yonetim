@@ -6,11 +6,11 @@
       <div class="mb-6 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
         <div>
           <h1 class="page-title">Hoş Geldiniz, {{ authStore.fullName }}</h1>
-          <p v-if="tenantInfo" class="mt-1 text-sm font-medium text-blue-600 dark:text-blue-400 flex items-center gap-1.5">
+          <p v-if="tenantInfo?.companyName || authStore.companyName" class="mt-1 text-sm font-medium text-blue-600 dark:text-blue-400 flex items-center gap-1.5">
             <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
             </svg>
-            {{ tenantInfo.companyName }}
+            {{ tenantInfo?.companyName || authStore.companyName }}
           </p>
           <p class="page-subtitle mt-0.5">Mülkünüzün özet finansal durumu aşağıdadır.</p>
         </div>
@@ -95,7 +95,7 @@
       </div>
 
       <!-- Firma Bilgi Kartı -->
-      <div v-if="tenantInfo" class="app-card mb-4">
+      <div v-if="tenantInfo || authStore.companyName" class="app-card mb-4">
         <div class="flex flex-col sm:flex-row sm:items-center gap-4">
           <div class="flex items-center gap-3 flex-1 min-w-0">
             <div class="w-9 h-9 bg-blue-50 dark:bg-blue-900/20 rounded-xl flex items-center justify-center text-blue-500 shrink-0">
@@ -105,10 +105,10 @@
             </div>
             <div class="min-w-0">
               <p class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">Firma Bilgileri</p>
-              <p class="text-sm font-bold text-slate-800 dark:text-white truncate">{{ tenantInfo.companyName }}</p>
+              <p class="text-sm font-bold text-slate-800 dark:text-white truncate">{{ tenantInfo?.companyName || authStore.companyName }}</p>
             </div>
           </div>
-          <div class="flex flex-wrap gap-x-5 gap-y-1.5 text-xs text-slate-500 dark:text-slate-400">
+          <div v-if="tenantInfo" class="flex flex-wrap gap-x-5 gap-y-1.5 text-xs text-slate-500 dark:text-slate-400">
             <span v-if="tenantInfo.identityNumber">
               <span class="font-semibold text-slate-600 dark:text-slate-300">VKN:</span> {{ tenantInfo.identityNumber }}
             </span>
@@ -209,7 +209,7 @@ const totalDebt = computed(() =>
 
 const overdueItems = computed(() => {
   const now = new Date()
-  return debts.value.filter(d => d.dueDate && new Date(d.dueDate) < now && d.status?.toLowerCase() !== 'paid')
+  return debts.value.filter(d => (!d.dueDate || new Date(d.dueDate) < now) && d.status?.toLowerCase() !== 'paid')
 })
 
 const overdueDebt = computed(() =>

@@ -170,7 +170,7 @@ const totalDebt = computed(() =>
 
 const overdueItems = computed(() => {
   const now = new Date()
-  return pendingDebts.value.filter(d => d.dueDate && new Date(d.dueDate) < now)
+  return pendingDebts.value.filter(d => !d.dueDate || new Date(d.dueDate) < now)
 })
 
 const overdueDebt = computed(() =>

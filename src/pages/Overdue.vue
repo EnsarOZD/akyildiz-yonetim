@@ -273,7 +273,8 @@ const fetchOverduePayments = async () => {
     const now = new Date()
     
     const overdueItems = items.filter(d => {
-      const isOverdue = d.dueDate && new Date(d.dueDate) < now
+      // dueDate yoksa gecikmiş sayıyoruz — tarihi girilmemiş eski borçlar
+      const isOverdue = !d.dueDate || new Date(d.dueDate) < now
       const hasUnpaidAmount = d.status !== 'Paid' && Number(d.remainingAmount || 0) > 0
       return isOverdue && hasUnpaidAmount
     })

@@ -618,7 +618,7 @@ const overdueUtilityDebtsCount = computed(() => {
   if (!Array.isArray(debts.value)) return 0
   const now = new Date()
   return debts.value.filter(debt => {
-    const isOverdue = debt.dueDate && new Date(debt.dueDate) < now
+    const isOverdue = !debt.dueDate || new Date(debt.dueDate) < now
     const hasUnpaidAmount = debt.status !== 'paid' && Number(debt.remainingAmount || 0) > 0
     return isOverdue && hasUnpaidAmount
   }).length
@@ -747,14 +747,15 @@ const overdueItems = computed(() => {
   
   return debts.value
     .filter(debt => {
-      const isOverdue = debt.dueDate && new Date(debt.dueDate) < now
+      // dueDate yoksa (null/undefined) gecikmiş sayıyoruz — tarihi girilmemiş eski borçlar
+      const isOverdue = !debt.dueDate || new Date(debt.dueDate) < now
       const hasValidEntity = !!debt.tenantId || !!debt.ownerId
       const hasUnpaidAmount = debt.status !== 'paid' && Number(debt.remainingAmount || 0) > 0
-      
+
       const isOwnTenant = userRole.value === 'tenant'
         ? debt.tenantId === authStore.companyId
         : true
-      
+
       return isOverdue && hasValidEntity && isOwnTenant && hasUnpaidAmount
     })
     .sort((a, b) => new Date(b.dueDate) - new Date(a.dueDate))
