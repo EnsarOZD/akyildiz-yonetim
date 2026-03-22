@@ -147,16 +147,17 @@
               <th class="font-semibold text-right">Borç (−)</th>
               <th class="font-semibold text-right">Ödeme (+)</th>
               <th class="font-semibold text-center">Durum</th>
+              <th class="font-semibold text-center">Vade Tarihi</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100 dark:divide-slate-700/50">
             <tr v-if="loading">
-              <td colspan="8" class="text-center py-10">
+              <td colspan="9" class="text-center py-10">
                 <span class="loading loading-spinner loading-md text-slate-400"></span>
               </td>
             </tr>
             <tr v-else-if="reportItems.length === 0">
-              <td colspan="8" class="py-12">
+              <td colspan="9" class="py-12">
                 <div class="text-center">
                   <div class="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-700 flex items-center justify-center mx-auto mb-3">
                     <svg class="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -200,6 +201,13 @@
                   {{ item.isPaid ? 'Ödendi' : 'Bekliyor' }}
                 </span>
                 <span v-else class="text-slate-300 dark:text-slate-600 text-xs">—</span>
+              </td>
+              <td class="whitespace-nowrap text-xs text-center" :class="
+                !item.lastPaymentDate ? 'text-slate-300 dark:text-slate-600' :
+                (!item.isPaid && new Date(item.lastPaymentDate) < new Date()) ? 'text-red-500 font-medium' :
+                'text-slate-500 dark:text-slate-400'
+              ">
+                {{ item.lastPaymentDate ? formatDate(item.lastPaymentDate) : '—' }}
               </td>
             </tr>
           </tbody>
@@ -250,10 +258,6 @@ import { useAuthStore } from '@/stores/auth'
 import utilityDebtsService from '@/services/utilityDebtsService'
 import paymentsService from '@/services/paymentsService'
 import tenantsService from '@/services/tenantsService'
-import * as XLSX from 'xlsx'
-import { jsPDF } from 'jspdf'
-import autoTable from 'jspdf-autotable'
-import { arialBase64 } from '../reports/utils/pdfFonts'
 
 const route = useRoute()
 const authStore = useAuthStore()
@@ -335,7 +339,8 @@ const reportItems = computed(() => {
         invoiceNumber: d.invoiceNumber || null,
         amount: Number(d.amount ?? 0),
         isPayment: false,
-        isPaid
+        isPaid,
+        lastPaymentDate: d.dueDate || null
       })
     })
   }
@@ -351,7 +356,8 @@ const reportItems = computed(() => {
           invoiceNumber: p.receiptNumber || null,
           amount: Number(p.amount ?? 0),
           isPayment: true,
-          isPaid: true
+          isPaid: true,
+          lastPaymentDate: null
         })
       })
     }
@@ -409,7 +415,8 @@ const formatPeriod = (year, month) => {
 }
 
 // EXPORTS
-const exportToExcel = () => {
+const exportToExcel = async () => {
+  const XLSX = await import('xlsx')
   const dateStr = new Date().toISOString().split('T')[0]
   const companyName = tenantInfo.value?.companyName || authStore.fullName
 
@@ -420,7 +427,7 @@ const exportToExcel = () => {
   wsData.push([`Kiraci: ${companyName}`])
   wsData.push([`Olusturulma: ${new Date().toLocaleString('tr-TR')}`])
   wsData.push([])
-  wsData.push(['Tarih', 'Donem', 'Tur', 'Aciklama', 'Fatura No', 'Borc (-)', 'Odeme (+)', 'Durum'])
+  wsData.push(['Tarih', 'Donem', 'Tur', 'Aciklama', 'Fatura No', 'Borc (-)', 'Odeme (+)', 'Durum', 'Vade Tarihi'])
 
   reportItems.value.forEach(i => {
     wsData.push([
@@ -431,23 +438,27 @@ const exportToExcel = () => {
       i.invoiceNumber || '',
       !i.isPayment ? i.amount : '',
       i.isPayment ? i.amount : '',
-      i.isPayment ? 'Odendi' : (i.isPaid ? 'Odendi' : 'Bekliyor')
+      i.isPayment ? 'Odendi' : (i.isPaid ? 'Odendi' : 'Bekliyor'),
+      i.lastPaymentDate ? formatDate(i.lastPaymentDate) : ''
     ])
   })
 
   wsData.push([])
-  wsData.push(['', '', '', 'TOPLAM BORC TAHAKKUKU', '', rawSummary.value.totalDebt, '', ''])
-  wsData.push(['', '', '', 'TOPLAM ODEME', '', '', rawSummary.value.totalPayment, ''])
-  wsData.push(['', '', '', 'NET BAKIYE', '', '', rawSummary.value.balance, ''])
+  wsData.push(['', '', '', 'TOPLAM BORC TAHAKKUKU', '', rawSummary.value.totalDebt, '', '', ''])
+  wsData.push(['', '', '', 'TOPLAM ODEME', '', '', rawSummary.value.totalPayment, '', ''])
+  wsData.push(['', '', '', 'NET BAKIYE', '', '', rawSummary.value.balance, '', ''])
 
   const ws = XLSX.utils.aoa_to_sheet(wsData)
-  ws['!cols'] = [{ wch: 14 }, { wch: 10 }, { wch: 18 }, { wch: 40 }, { wch: 16 }, { wch: 16 }, { wch: 16 }, { wch: 12 }]
-  ws['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 7 } }]
+  ws['!cols'] = [{ wch: 14 }, { wch: 10 }, { wch: 18 }, { wch: 40 }, { wch: 16 }, { wch: 16 }, { wch: 16 }, { wch: 12 }, { wch: 14 }]
+  ws['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 8 } }]
   XLSX.utils.book_append_sheet(wb, ws, 'Borc ve Odeme Ekstresi')
   XLSX.writeFile(wb, `Akyildiz_Ekstresi_${dateStr}.xlsx`)
 }
 
-const exportToPDF = () => {
+const exportToPDF = async () => {
+  const { jsPDF } = await import('jspdf')
+  const { default: autoTable } = await import('jspdf-autotable')
+  const { arialBase64 } = await import('../reports/utils/pdfFonts')
   const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' })
   doc.addFileToVFS('arial.ttf', arialBase64)
   doc.addFont('arial.ttf', 'Arial', 'normal')
@@ -547,26 +558,28 @@ const exportToPDF = () => {
   doc.line(margin, boxY + boxH + 10, pageW - margin, boxY + boxH + 10)
 
   const rows = reportItems.value.map(i => ({
-    date:    formatDate(i.date),
-    period:  formatPeriod(i.periodYear, i.periodMonth),
-    desc:    (i.description || '-').length > 42 ? (i.description || '').substring(0, 42) + '...' : (i.description || '-'),
-    invoice: i.invoiceNumber || '-',
-    debt:    !i.isPayment ? formatCurrency(i.amount) : '-',
-    payment: i.isPayment  ? formatCurrency(i.amount) : '-',
-    status:  i.isPayment  ? 'Odeme' : (i.isPaid ? 'Odendi' : 'Bekliyor')
+    date:     formatDate(i.date),
+    period:   formatPeriod(i.periodYear, i.periodMonth),
+    desc:     (i.description || '-').length > 42 ? (i.description || '').substring(0, 42) + '...' : (i.description || '-'),
+    invoice:  i.invoiceNumber || '-',
+    debt:     !i.isPayment ? formatCurrency(i.amount) : '-',
+    payment:  i.isPayment  ? formatCurrency(i.amount) : '-',
+    status:   i.isPayment  ? 'Odeme' : (i.isPaid ? 'Odendi' : 'Bekliyor'),
+    lastPaid: i.lastPaymentDate ? formatDate(i.lastPaymentDate) : '-'
   }))
 
   let pdfTotalPages = 1
 
   autoTable(doc, {
     columns: [
-      { header: 'Tarih',     dataKey: 'date'    },
-      { header: 'Donem',     dataKey: 'period'  },
-      { header: 'Aciklama',  dataKey: 'desc'    },
-      { header: 'Fatura No', dataKey: 'invoice' },
-      { header: 'Borc (-)',  dataKey: 'debt'    },
-      { header: 'Odeme (+)', dataKey: 'payment' },
-      { header: 'Durum',     dataKey: 'status'  },
+      { header: 'Tarih',      dataKey: 'date'     },
+      { header: 'Donem',      dataKey: 'period'   },
+      { header: 'Aciklama',   dataKey: 'desc'     },
+      { header: 'Fatura No',  dataKey: 'invoice'  },
+      { header: 'Borc (-)',   dataKey: 'debt'     },
+      { header: 'Odeme (+)',  dataKey: 'payment'  },
+      { header: 'Durum',      dataKey: 'status'   },
+      { header: 'Vade Tarihi', dataKey: 'lastPaid' },
     ],
     body: rows,
     startY: boxY + boxH + 13,
@@ -582,13 +595,14 @@ const exportToPDF = () => {
     },
     alternateRowStyles: { fillColor: [248, 250, 252] },
     columnStyles: {
-      date:    { halign: 'center', cellWidth: 22 },
-      period:  { halign: 'center', cellWidth: 18 },
-      desc:    { cellWidth: 'auto' },
-      invoice: { halign: 'center', cellWidth: 24, fontSize: 7 },
-      debt:    { halign: 'right', cellWidth: 28, textColor: RED },
-      payment: { halign: 'right', cellWidth: 28, textColor: GREEN },
-      status:  { halign: 'center', cellWidth: 22 },
+      date:     { halign: 'center', cellWidth: 22 },
+      period:   { halign: 'center', cellWidth: 18 },
+      desc:     { cellWidth: 'auto' },
+      invoice:  { halign: 'center', cellWidth: 22, fontSize: 7 },
+      debt:     { halign: 'right', cellWidth: 26, textColor: RED },
+      payment:  { halign: 'right', cellWidth: 26, textColor: GREEN },
+      status:   { halign: 'center', cellWidth: 20 },
+      lastPaid: { halign: 'center', cellWidth: 22, textColor: [16, 100, 45] },
     },
     didParseCell(data) {
       if (data.section !== 'body' || data.column.dataKey !== 'status') return

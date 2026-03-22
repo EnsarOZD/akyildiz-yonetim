@@ -47,13 +47,19 @@ export default defineConfig({
         navigateFallback: 'index.html',
         runtimeCaching: [
           {
+            // Auth endpoint'leri asla cache'leme — her zaman güncel olmalı
+            urlPattern: /^https:\/\/api\.akyildizyonetim\.com\/api\/Auth\/.*/i,
+            handler: 'NetworkOnly'
+          },
+          {
+            // Finansal veriler: cache'den hemen sun, arka planda güncelle
             urlPattern: /^https:\/\/api\.akyildizyonetim\.com\/api\/.*/i,
-            handler: 'NetworkFirst',
+            handler: 'StaleWhileRevalidate',
             options: {
               cacheName: 'api-cache',
               expiration: {
-                maxEntries: 50,
-                maxAgeSeconds: 60 * 60 * 24 // 24 hours
+                maxEntries: 60,
+                maxAgeSeconds: 60 * 5 // 5 dakika
               }
             }
           }
@@ -75,7 +81,7 @@ export default defineConfig({
       output: {
         manualChunks: {
           'vue-vendor': ['vue', 'vue-router', 'pinia'],
-          'utils-vendor': ['xlsx', 'date-fns']
+          'utils-vendor': ['date-fns']
         }
       }
     },
@@ -111,7 +117,6 @@ export default defineConfig({
       'vue',
       'vue-router',
       'pinia',
-      'xlsx',
       'date-fns'
     ]
   }

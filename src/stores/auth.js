@@ -16,52 +16,53 @@ export const useAuthStore = defineStore('auth', () => {
   )
 
   async function fetchUserProfile() {
-    // Backend API kontrolü
+    // Aynı anda birden fazla çağrı varsa tek isteğe indir
+    if (_fetchPromise) return _fetchPromise
+
     const isBackendActive = import.meta.env.VITE_API_BASE_URL &&
       import.meta.env.VITE_API_BASE_URL !== 'http://localhost:5000/api'
 
     if (isBackendActive) {
-      // Backend API ile kullanıcı profili
-      try {
-        const backendUser = await authService.checkAuthStatus()
-        if (backendUser) {
-          user.value = { id: backendUser.id, email: backendUser.email }
-          role.value = backendUser.role ? backendUser.role.toLowerCase() : null
-          companyId.value = backendUser.companyId
-          companyName.value = backendUser.companyName || null
-          fullName.value = backendUser.name || `${backendUser.firstName || ''} ${backendUser.lastName || ''}`.trim()
-          email.value = backendUser.email
-        } else {
+      _fetchPromise = (async () => {
+        try {
+          const backendUser = await authService.checkAuthStatus()
+          if (backendUser) {
+            user.value = { id: backendUser.id, email: backendUser.email }
+            role.value = backendUser.role ? backendUser.role.toLowerCase() : null
+            companyId.value = backendUser.companyId
+            companyName.value = backendUser.companyName || null
+            fullName.value = backendUser.name || `${backendUser.firstName || ''} ${backendUser.lastName || ''}`.trim()
+            email.value = backendUser.email
+          } else {
+            clearUser()
+          }
+        } catch (error) {
+          console.error('Backend kullanıcı profili hatası:', error)
           clearUser()
+        } finally {
+          isInitialized.value = true
+          _fetchPromise = null
         }
-      } catch (error) {
-        console.error('Backend kullanıcı profili hatası:', error)
-        clearUser()
-      } finally {
-        isInitialized.value = true
-        console.log('🔐 Auth Store initialized (Backend mode)')
-      }
-      return
+      })()
+      return _fetchPromise
     }
 
-    // Demo modu kontrolü
+    // Demo modu
     const isDemoMode = !import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_BASE_URL === 'http://localhost:5000/api'
-
     if (isDemoMode) {
-      // Demo kullanıcı profili
       user.value = { uid: 'demo-user-id', email: 'demo@akyildiz.com' }
       role.value = 'admin'
       companyId.value = 'demo-company'
       fullName.value = 'Demo Kullanıcı'
       email.value = 'demo@akyildiz.com'
       isInitialized.value = true
-      console.log('Demo mode: Admin user created', { role: role.value, isInitialized: isInitialized.value })
-      return
     }
   }
 
   // Listener'ın birden fazla kez kaydedilmesini önle
   let _listenerRegistered = false
+  // Eş zamanlı fetchUserProfile çağrılarını tek isteğe indir
+  let _fetchPromise = null
 
   // 👇 Bu fonksiyon App.vue'de çağrılmalı
   function initAuthListener() {
@@ -94,13 +95,7 @@ export const useAuthStore = defineStore('auth', () => {
     const isDemoMode = !import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_BASE_URL === 'http://localhost:5000/api'
 
     if (isDemoMode) {
-      // Demo modu için mock auth listener
-      console.log('Demo mode: Initializing auth listener')
-      setTimeout(() => {
-        const demoUser = { uid: 'demo-user-id', email: 'demo@akyildiz.com' }
-        fetchUserProfile()
-        console.log('Demo mode: Auth listener completed')
-      }, 1000)
+      fetchUserProfile()
       return
     }
   }

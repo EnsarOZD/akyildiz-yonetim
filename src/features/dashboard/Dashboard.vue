@@ -477,7 +477,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import paymentsService from '@/services/paymentsService'
 import expensesService from '@/services/expensesService'
@@ -1021,29 +1021,6 @@ const loadDashboardData = async () => {
       notificationsStore.refresh()
     ])
     
-    console.log('Dashboard verileri başarıyla yüklendi:', {
-      payments: payments.value.length,
-      expenses: expenses.value.length,
-      tenants: tenants.value.length,
-      ownerAidats: ownerAidats.value.length,
-      owners: owners.value.length,
-      ownerPayments: ownerPayments.value.length,
-      debts: debts.value.length,
-      totalIncome: totalIncome.value,
-      totalExpense: totalExpense.value,
-      balance: balance.value
-    })
-    
-    // Debug: İlk birkaç veriyi kontrol et
-    if (payments.value.length > 0) {
-      console.log('📊 İlk ödeme örneği:', payments.value[0])
-    }
-    if (expenses.value.length > 0) {
-      console.log('📊 İlk gider örneği:', expenses.value[0])
-    }
-    if (debts.value.length > 0) {
-      console.log('📊 İlk borç örneği:', debts.value[0])
-    }
   } catch (err) {
     console.error('Dashboard verileri yüklenirken hata:', err)
     error.value = 'Veriler yüklenirken bir hata oluştu. Lütfen sayfayı yenileyin.'
@@ -1053,24 +1030,15 @@ const loadDashboardData = async () => {
 }
 
 onMounted(() => {
-  // Auth store'un başlatılmasını bekle
-  const checkAuth = () => {
-    if (authStore.isInitialized) {
-      loadDashboardData()
-      
-      // Debug için auth durumunu kontrol et
-      console.log('Dashboard mounted - Auth state:', {
-        isInitialized: authStore.isInitialized,
-        userRole: userRole.value,
-        canViewDashboard: canViewDashboard.value,
-        user: authStore.user
-      })
-    } else {
-      // Auth store henüz başlatılmamışsa 100ms sonra tekrar dene
-      setTimeout(checkAuth, 100)
-    }
+  if (authStore.isInitialized) {
+    loadDashboardData()
+  } else {
+    const stop = watch(() => authStore.isInitialized, (val) => {
+      if (val) {
+        stop()
+        loadDashboardData()
+      }
+    })
   }
-  
-  checkAuth()
 })
 </script>
