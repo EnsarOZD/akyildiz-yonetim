@@ -7,7 +7,7 @@
         <h1 class="page-title">Ödemelerim ve Borçlarım</h1>
         <p v-if="tenantInfo?.companyName || authStore.companyName" class="text-sm font-semibold text-blue-600 dark:text-blue-400 mt-0.5">
           {{ tenantInfo?.companyName || authStore.companyName }}
-          <span v-if="tenantInfo.flats && tenantInfo.flats.length" class="text-slate-400 font-normal">
+          <span v-if="tenantInfo?.flats && tenantInfo.flats.length" class="text-slate-400 font-normal">
             — Ünite: {{ tenantInfo.flats.map(f => f.code).join(', ') }}
           </span>
         </p>
