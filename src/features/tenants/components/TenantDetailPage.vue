@@ -482,43 +482,18 @@ const formatDate = (ts) => {
 }
 
 
-// Tip bazlı ödeme durumu hesaplama
+// Tip bazlı ödeme durumu hesaplama — backend status alanına güvenilir
 const getPaymentStatusByType = (item, payments) => {
-  // Sayaç okumaları için otomatik ödenmiş say
-  if (item.type === 'Electricity' || item.type === 'Water') {
-    if (item.isPaid === true || item.type === 'Electricity' || item.type === 'Water') {
-      return { status: 'paid', badge: 'badge-success', label: 'Ödendi' }
-    }
+  // Backend'den gelen isPaid (debt.status === 'Paid') en güvenilir kaynak
+  if (item.isPaid === true) {
+    return { status: 'paid', badge: 'badge-success', label: 'Ödendi' }
   }
-  
-  // Utility debts için tip bazlı kontrol
-  if (item.type && payments && payments.length > 0) {
-    // Bu tip için yapılan ödemeleri filtrele
-    const typePayments = payments.filter(payment => {
-      // Backend enum yapısına göre eşleştirme:
-      // PAYMENT_TYPES: 0=Aidat, 1=Elektrik, 2=Su, 3=Doğalgaz, 4=Diğer
-      if (item.type === 'Electricity' && payment.type === 1) return true
-      if (item.type === 'Water' && payment.type === 2) return true
-      if (item.type === 'Aidat' && payment.type === 0) return true
-      return false
-    })
-    
-    // Bu tip için toplam ödenen tutar
-    const totalPaidForType = typePayments.reduce((sum, payment) => sum + (payment.amount || 0), 0)
-    
-    // Bu item'ın tutarını kontrol et
-    const itemAmount = item.amount || item.toplamTutar || 0
-    
-    if (totalPaidForType >= itemAmount) {
-      return { status: 'paid', badge: 'badge-success', label: 'Ödendi' }
-    }
-  }
-  
+
   // Varsayılan durum - ödenmemiş
   if (item.dueDate && new Date(item.dueDate) < new Date()) {
     return { status: 'overdue', badge: 'badge-error', label: 'Vadesi Geçmiş' }
   }
-  
+
   return { status: 'unpaid', badge: 'badge-warning', label: 'Ödenmemiş' }
 }
 
@@ -571,27 +546,12 @@ const fetchTenantDetails = async () => {
     
     historyItems.value = combinedHistory.sort((a, b) => (toDate(b.date)?.getTime() ?? 0) - (toDate(a.date)?.getTime() ?? 0))
 
-    // unpaid - Tip bazlı ödeme durumu kontrolü ile
+    // unpaid - Backend status ve remainingAmount'a güven
     unpaidItems.value = (utilityDebtsData || [])
       .filter(d => {
-        // Status kontrolü
         if (d.status === 'Paid') return false
-        
-        // Tutar kontrolü
         const amount = Number(d.remainingAmount ?? d.amount ?? 0)
-        if (amount <= 0) return false
-        
-        // Tip bazlı ödeme durumu kontrolü
-        const mockItem = {
-          type: d.type,
-          amount: amount,
-          toplamTutar: amount,
-          dueDate: d.dueDate
-        }
-        const paymentStatus = getPaymentStatusByType(mockItem, paymentsData)
-        
-        // Sadece gerçekten ödenmemiş olanları al
-        return paymentStatus.status !== 'paid'
+        return amount > 0
       })
       .map(d => ({
         ...d,
