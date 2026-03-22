@@ -278,10 +278,10 @@ const loadAdvanceAccount = async () => {
     })
     advanceAccount.value = Array.isArray(adv) ? adv[0] : adv?.items?.[0] || null
 
-    // 2) Ödenmemiş borçlar — diğer sayfalarla tutarlı
+    // 2) Ödenmemiş borçlar — Unpaid ve Partial dahil
     const debts = await utilityDebtsService.getUtilityDebts({
       tenantId: selectedTenantId.value,
-      status: 'Unpaid'
+      excludePaid: true
     })
     unpaidDebts.value = Array.isArray(debts) ? debts : (debts?.items || [])
   } catch (e) {

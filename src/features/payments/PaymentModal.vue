@@ -514,6 +514,12 @@ const getDaysOverdue = (d) => {
 
 // ── Kaydet ────────────────────────────────────────────────────
 const handleSave = async () => {
+  // Manuel modda borç seçilmemişse kaydetme
+  if (!autoAllocate.value && selectedDebts.value.length === 0) {
+    errorMessage.value = 'Manuel eşleştirme için en az 1 borç seçmelisiniz.'
+    return
+  }
+
   isLoading.value = true
   errorMessage.value = ''
   try {
