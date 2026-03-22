@@ -619,7 +619,7 @@ const overdueUtilityDebtsCount = computed(() => {
   const now = new Date()
   return debts.value.filter(debt => {
     const isOverdue = !debt.dueDate || new Date(debt.dueDate) < now
-    const hasUnpaidAmount = debt.status !== 'paid' && Number(debt.remainingAmount || 0) > 0
+    const hasUnpaidAmount = debt.status !== 'Paid' && Number(debt.remainingAmount || 0) > 0
     return isOverdue && hasUnpaidAmount
   }).length
 })
@@ -750,7 +750,7 @@ const overdueItems = computed(() => {
       // dueDate yoksa (null/undefined) gecikmiş sayıyoruz — tarihi girilmemiş eski borçlar
       const isOverdue = !debt.dueDate || new Date(debt.dueDate) < now
       const hasValidEntity = !!debt.tenantId || !!debt.ownerId
-      const hasUnpaidAmount = debt.status !== 'paid' && Number(debt.remainingAmount || 0) > 0
+      const hasUnpaidAmount = debt.status !== 'Paid' && Number(debt.remainingAmount || 0) > 0
 
       const isOwnTenant = userRole.value === 'tenant'
         ? debt.tenantId === authStore.companyId
@@ -989,13 +989,11 @@ const loadOwnerPayments = async () => {
 
 const loadUtilityDebts = async () => {
   try {
-    const filters = {}
+    const filters = { excludePaid: true }
     if (userRole.value === 'tenant') {
       filters.tenantId = authStore.companyId
     }
-    
-    // Utility debts için backend enum değerleri kontrol edilmeli
-    // Muhtemelen: "Electricity", "Water", "Gas" gibi
+
     const response = await utilityDebtsService.getUtilityDebts(filters)
     debts.value = response || []
   } catch (err) {

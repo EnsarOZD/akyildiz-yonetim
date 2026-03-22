@@ -232,16 +232,16 @@
               <p class="text-sm font-bold text-slate-800 dark:text-slate-100">{{ formatNumber(d.amount) }} ₺</p>
               <span :class="[
                 'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium mt-0.5',
-                d.status === 'paid'
+                d.status === 'Paid'
                   ? 'badge-active'
-                  : d.status === 'partial'
+                  : d.status === 'Partial'
                     ? 'badge-pending'
                     : 'badge-overdue'
               ]">
-                {{ d.status === 'paid' ? 'Ödendi' : d.status === 'partial' ? 'Kısmi' : 'Bekliyor' }}
+                {{ d.status === 'Paid' ? 'Ödendi' : d.status === 'Partial' ? 'Kısmi' : 'Bekliyor' }}
               </span>
               <!-- Kuruş farkı uyarısı -->
-              <p v-if="d.status !== 'paid' && d.remainingAmount > 0 && d.remainingAmount < 1"
+              <p v-if="d.status !== 'Paid' && d.remainingAmount > 0 && d.remainingAmount < 1"
                 class="text-[10px] text-amber-500 font-medium mt-0.5">
                 {{ formatNumber(d.remainingAmount) }} ₺ kaldı
               </p>
@@ -257,7 +257,7 @@
                 </label>
                 <ul tabindex="0" class="dropdown-content menu menu-sm p-1.5 shadow-lg bg-base-100 border border-slate-200 dark:border-slate-700 rounded-xl w-40 z-30">
                   <li><a @click="editDebt(d)" class="text-sm">Düzenle</a></li>
-                  <li v-if="d.status !== 'paid' && d.remainingAmount > 0 && d.remainingAmount < 1">
+                  <li v-if="d.status !== 'Paid' && d.remainingAmount > 0 && d.remainingAmount < 1">
                     <a @click="openCloseDebt(d)" class="text-sm text-amber-600 dark:text-amber-400">
                       <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
