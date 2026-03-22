@@ -76,12 +76,12 @@
 
 <script setup>
 import { ref, watch, computed } from 'vue';
-import { UNIT_OPTIONS } from '@/constants/units';
 
 const props = defineProps({
   visible: Boolean,
   initialData: Object,
   availableUnits: Array, // Sadece boş olanlar + zaten bu mal sahibine ait olanlar
+  allUnitOptions: { type: Array, default: () => [] },
 });
 const emit = defineEmits(['close', 'save']);
 
@@ -94,8 +94,6 @@ const formData = ref({
   isActive: true,
   monthlyDues: 0,
 });
-
-const allUnitOptions = UNIT_OPTIONS;
 
 const isUnitAvailable = (unit) => {
   // Eğer kat boşsa (availableUnits içinde) veya zaten bu mal sahibine aitse seçilebilir kalsın

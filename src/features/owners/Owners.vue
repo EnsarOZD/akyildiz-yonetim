@@ -136,7 +136,7 @@
     <!-- Modallar -->
     <OwnerCreateModal :visible="createModalVisible" :available-units="availableUnitsForCreation" @save="saveOwner" @close="createModalVisible = false" />
     <ConfirmModal :isOpen="deleteModalVisible" title="Mal Sahibi Silinecek" :message="`'${ownerToDelete?.name}' mal sahibini silmek istediğinizden emin misiniz?`" confirmLabel="Evet, Sil" confirmClass="btn-error" :loading="deleting" @confirm="confirmDelete" @cancel="deleteModalVisible = false" />
-    <OwnerEditModal :visible="editModalVisible" :initial-data="selectedOwner" :available-units="availableUnitsForCreation" @save="updateOwner" @close="editModalVisible = false" />
+    <OwnerEditModal :visible="editModalVisible" :initial-data="selectedOwner" :available-units="availableUnitsForCreation" :all-unit-options="allFlatCodes" @save="updateOwner" @close="editModalVisible = false" />
   </div>
 </template>
 
@@ -153,7 +153,7 @@ import EmptyState from '@/components/ui/EmptyState.vue';
 import OwnerCreateModal from './components/OwnerCreateModal.vue';
 import OwnerEditModal from './components/OwnerEditModal.vue';
 import { useNotification } from '@/composables/useNotification';
-import { UNIT_OPTIONS } from '@/constants/units';
+import flatsService from '@/features/flats/services/flatsService';
 
 const { handleNetworkError, handleValidationError, showSuccess } = useErrorHandler()
 const { showCreateSuccess, showUpdateSuccess, showDeleteSuccess } = useNotification();
@@ -161,6 +161,7 @@ const authStore = useAuthStore()
 
 const owners = ref([]);
 const tenants = ref([]);
+const allFlats = ref([]);
 const selectedOwner = ref(null);
 const editModalVisible = ref(false);
 const createModalVisible = ref(false);
@@ -171,8 +172,11 @@ const search = ref('');
 
 const fetchOwners = async () => {
   try {
-    owners.value = await ownersService.getOwners();
-    tenants.value = await tenantsService.getTenants();
+    [owners.value, tenants.value, allFlats.value] = await Promise.all([
+      ownersService.getOwners(),
+      tenantsService.getTenants(),
+      flatsService.getFlats(),
+    ]);
   } catch (error) {
     handleNetworkError(error, { component: 'Owners', action: 'fetchOwners' });
   }
@@ -248,9 +252,16 @@ const filteredOwnersWithUnits = computed(() => {
   });
 });
 
+const allFlatCodes = computed(() => {
+  const flats = Array.isArray(allFlats.value) ? allFlats.value : (allFlats.value?.items || []);
+  return flats.map(f => f.code || f.number).filter(Boolean).sort();
+});
+
 const availableUnitsForCreation = computed(() => {
-  const assignedUnits = new Set(allOwnedUnits.value);
-  return UNIT_OPTIONS.filter(unit => !assignedUnits.has(unit));
+  const assignedCodes = new Set(
+    allOwnedUnits.value.map(u => typeof u === 'object' ? (u.code || u.number) : u)
+  );
+  return allFlatCodes.value.filter(code => !assignedCodes.has(code));
 });
 
 // --- Methods ---
