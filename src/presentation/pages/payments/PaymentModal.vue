@@ -118,9 +118,9 @@
         <div class="form-control">
           <label class="label"><span class="label-text font-semibold text-gray-700 dark:text-gray-300">Gelen Tutar (₺) *</span></label>
           <input
-            :value="displayAmount"
-            @focus="isAmountFocused = true"
-            @blur="isAmountFocused = false"
+            :value="amountInput"
+            @focus="handleAmountFocus"
+            @blur="handleAmountBlur"
             @input="updateAmount($event.target.value)"
             type="text"
             inputmode="decimal"
@@ -242,8 +242,8 @@
               <div v-if="selectedDebts.includes(debt.id)" class="mt-2 flex items-center gap-2" @click.stop>
                 <input
                   :value="getDisplayRowAmount(debt.id)"
-                  @focus="isRowFocused[debt.id] = true"
-                  @blur="isRowFocused[debt.id] = false"
+                  @focus="handleRowFocus(debt.id)"
+                  @blur="handleRowBlur(debt.id)"
                   @input="updateRowAmount(debt.id, $event.target.value)"
                   type="text"
                   inputmode="decimal"
@@ -378,25 +378,67 @@ watch(() => props.payment, (val) => { Object.assign(form, val || {}) }, { immedi
 
 // ── Input Formatters (Thousand Separator) ─────────────────────
 const isAmountFocused = ref(false)
-const displayAmount = computed(() => {
-  if (isAmountFocused.value) return form.amount === null ? '' : form.amount.toString()
-  if (form.amount === null || form.amount === undefined) return ''
-  return form.amount.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-})
+const amountInput = ref('')
+
+const handleAmountFocus = () => {
+  isAmountFocused.value = true
+  if (form.amount !== null && form.amount !== undefined) {
+    amountInput.value = form.amount.toString().replace('.', ',')
+  } else {
+    amountInput.value = ''
+  }
+}
+
+const handleAmountBlur = () => {
+  isAmountFocused.value = false
+  if (form.amount !== null && form.amount !== undefined) {
+    amountInput.value = form.amount.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+  }
+}
 
 const updateAmount = (val) => {
+  amountInput.value = val
   const clean = val.replace(/[^0-9,.-]/g, '').replace(/\./g, '').replace(',', '.')
   form.amount = isNaN(parseFloat(clean)) ? null : parseFloat(clean)
 }
 
+watch(() => form.amount, (newVal) => {
+  if (!isAmountFocused.value) {
+    if (newVal !== null && newVal !== undefined) {
+      amountInput.value = Number(newVal).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+    } else {
+      amountInput.value = ''
+    }
+  }
+}, { immediate: true })
+
 const isRowFocused = reactive({})
+const rowInputStrings = reactive({})
+
+const handleRowFocus = (id) => {
+  isRowFocused[id] = true
+  if (debtAllocations.value[id] !== undefined) {
+    rowInputStrings[id] = debtAllocations.value[id].toString().replace('.', ',')
+  } else {
+    rowInputStrings[id] = ''
+  }
+}
+
+const handleRowBlur = (id) => {
+  isRowFocused[id] = false
+  if (debtAllocations.value[id] !== undefined) {
+    rowInputStrings[id] = Number(debtAllocations.value[id]).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+  }
+}
+
 const getDisplayRowAmount = (id) => {
-  if (isRowFocused[id]) return debtAllocations.value[id] === undefined ? '' : debtAllocations.value[id].toString()
+  if (isRowFocused[id]) return rowInputStrings[id] === undefined ? '' : rowInputStrings[id]
   if (!debtAllocations.value[id]) return ''
   return Number(debtAllocations.value[id]).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 }
 
 const updateRowAmount = (id, val) => {
+  rowInputStrings[id] = val
   const clean = val.replace(/[^0-9,.-]/g, '').replace(/\./g, '').replace(',', '.')
   debtAllocations.value[id] = isNaN(parseFloat(clean)) ? undefined : parseFloat(clean)
 }

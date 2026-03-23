@@ -217,7 +217,7 @@ const displayAmount = ref('')
 // Initialize display amount
 watch(() => props.expense.amount, (newVal) => {
   if (parseCurrency(displayAmount.value) !== newVal) {
-    displayAmount.value = formatCurrency(newVal, false)
+    displayAmount.value = formatInputCurrency(newVal)
   }
 }, { immediate: true })
 
