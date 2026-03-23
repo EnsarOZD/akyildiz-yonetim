@@ -11,8 +11,11 @@ export const formatCurrency = (value) => {
 }
 
 export const parseCurrency = (value) => {
-  if (!value) return 0
-  const str = String(value).replace(/[₺\s]/g, '').replace(',', '.')
+  if (value === null || value === undefined || value === '') return 0
+  const str = String(value)
+    .replace(/[₺\s]/g, '')   // ₺ ve boşlukları kaldır
+    .replace(/\./g, '')        // binlik ayracı (TR: nokta) kaldır
+    .replace(',', '.')         // ondalık ayracı (TR: virgül → nokta)
   const num = parseFloat(str)
   return isNaN(num) ? 0 : num
 }
@@ -20,7 +23,7 @@ export const parseCurrency = (value) => {
 export const formatInputCurrency = (value) => {
   if (value === undefined || value === null || value === '') return ''
   const num = typeof value === 'string' ? parseCurrency(value) : Number(value)
-  if (isNaN(num)) return ''
+  if (isNaN(num) || num === 0) return ''
   return num.toLocaleString('tr-TR', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2

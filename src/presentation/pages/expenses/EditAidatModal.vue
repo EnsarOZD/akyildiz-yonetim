@@ -80,7 +80,7 @@
                 type="text"
                 v-model="displayAmount"
                 @input="handleAmountInput"
-                @blur="validateAmount"
+                @blur="handleAmountBlur"
                 class="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 pr-10"
                 :class="{ 'border-red-500': amountError }"
                 placeholder="0,00"
@@ -148,9 +148,18 @@ const displayAmount = ref('')
 const amountError = ref('')
 
 const handleAmountInput = (e) => {
-  const formatted = formatInputCurrency(e.target.value)
-  displayAmount.value = formatted
-  local.value.toplamTutar = parseCurrency(formatted)
+  displayAmount.value = e.target.value
+  local.value.toplamTutar = parseCurrency(e.target.value)
+}
+
+const handleAmountBlur = () => {
+  if (local.value.toplamTutar > 0) {
+    displayAmount.value = local.value.toplamTutar.toLocaleString('tr-TR', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    })
+  }
+  validateAmount()
 }
 
 const validateAmount = () => {

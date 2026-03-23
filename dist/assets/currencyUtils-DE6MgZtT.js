@@ -1,0 +1,1 @@
+const r=r=>null==r||isNaN(r)?"₺0,00":Number(r).toLocaleString("tr-TR",{style:"currency",currency:"TRY",minimumFractionDigits:2,maximumFractionDigits:2}),e=r=>{if(null==r||""===r)return 0;const e=String(r).replace(/[₺\s]/g,"").replace(/\./g,"").replace(",","."),t=parseFloat(e);return isNaN(t)?0:t};export{r as f,e as p};

@@ -71,7 +71,7 @@
               <input 
                 v-model="displayAmount" 
                 @input="handleAmountInput"
-                @blur="validateField('amount')"
+                @blur="handleAmountBlur"
                 type="text" 
                 inputmode="decimal"
                 class="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400 pr-10"
@@ -222,9 +222,18 @@ watch(() => props.expense.amount, (newVal) => {
 }, { immediate: true })
 
 const handleAmountInput = (e) => {
-  const formatted = formatInputCurrency(e.target.value)
-  displayAmount.value = formatted
-  props.expense.amount = parseCurrency(formatted)
+  displayAmount.value = e.target.value
+  props.expense.amount = parseCurrency(e.target.value)
+}
+
+const handleAmountBlur = () => {
+  if (props.expense.amount > 0) {
+    displayAmount.value = props.expense.amount.toLocaleString('tr-TR', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    })
+  }
+  validateField('amount')
 }
 
 const validateField = (field) => {
