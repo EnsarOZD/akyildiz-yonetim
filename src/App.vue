@@ -62,13 +62,13 @@
 
 <script setup>
 import { useRoute } from 'vue-router'
-import Header from './components/common/Header.vue'
-import MobileBottomNav from './components/common/MobileBottomNav.vue'
-import NotificationPermissionBanner from './components/notifications/NotificationPermissionBanner.vue'
-import ErrorNotification from './components/common/ErrorNotification.vue'
-import SuccessNotification from './components/common/SuccessNotification.vue'
-import ScrollToTop from './components/common/ScrollToTop.vue'
-import { useAuthStore } from '@/stores/auth'
+import Header from '@/presentation/components/common/Header.vue'
+import MobileBottomNav from '@/presentation/components/common/MobileBottomNav.vue'
+import NotificationPermissionBanner from '@/presentation/components/notifications/NotificationPermissionBanner.vue'
+import ErrorNotification from '@/presentation/components/common/ErrorNotification.vue'
+import SuccessNotification from '@/presentation/components/common/SuccessNotification.vue'
+import ScrollToTop from '@/presentation/components/common/ScrollToTop.vue'
+import { useAuthStore } from '@/application/stores/auth'
 import { ref, onMounted, watchEffect, watch, computed, onErrorCaptured } from 'vue'
 
 const route = useRoute()

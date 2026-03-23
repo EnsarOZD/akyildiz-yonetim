@@ -1,0 +1,450 @@
+<template>
+  <div class="p-4 sm:p-6 min-h-screen pb-24 md:pb-6">
+
+    <!-- Sayfa Başlığı -->
+    <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <div>
+        <h1 class="page-title">İş Hanı Kiracıları</h1>
+        <p class="page-subtitle">İş hanındaki tüm kiracıları yönetin</p>
+      </div>
+      <div class="flex gap-2 shrink-0">
+        <button
+          v-if="authStore.role === ROLES.ADMIN"
+          @click="handleSyncBalances"
+          :disabled="syncLoading"
+          class="btn btn-sm btn-outline btn-primary"
+        >
+          <span v-if="syncLoading" class="loading loading-spinner loading-xs"></span>
+          <svg v-else class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+          </svg>
+          Senkronize Et
+        </button>
+        <button
+          v-if="authStore.role === ROLES.ADMIN || authStore.role === ROLES.MANAGER"
+          @click="showCreateModal = true"
+          class="btn btn-sm btn-primary"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+          </svg>
+          Yeni Kiracı
+        </button>
+      </div>
+    </div>
+
+    <!-- İstatistik Kartları -->
+    <div class="grid grid-cols-3 gap-3 sm:gap-4 mb-5">
+      <div class="app-card flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
+          <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+          </svg>
+        </div>
+        <div class="min-w-0">
+          <p class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 truncate">Aktif Kiracı</p>
+          <p class="text-xl font-bold text-slate-800 dark:text-white tabular-nums">{{ stats.activeCount }}</p>
+        </div>
+      </div>
+      <div class="app-card flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 flex items-center justify-center shrink-0">
+          <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+          </svg>
+        </div>
+        <div class="min-w-0">
+          <p class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 truncate">Doluluk</p>
+          <p class="text-xl font-bold text-slate-800 dark:text-white tabular-nums">%{{ stats.occupancyRate }}</p>
+        </div>
+      </div>
+      <div class="app-card flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-500 flex items-center justify-center shrink-0">
+          <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+        </div>
+        <div class="min-w-0">
+          <p class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 truncate">Bakiye</p>
+          <p class="text-sm font-bold text-slate-800 dark:text-white tabular-nums">{{ formatCurrency(stats.totalDebt) }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filtreler -->
+    <div class="app-card mb-5">
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <div class="col-span-2 lg:col-span-1">
+          <label class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1 block">Arama</label>
+          <input
+            v-model="filters.searchTerm"
+            @input="handleSearch"
+            class="input input-bordered input-sm w-full"
+            placeholder="Şirket, kişi, kimlik no..."
+          />
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1 block">Durum</label>
+          <select v-model="filters.isActive" @change="handleSearch" class="select select-bordered select-sm w-full">
+            <option value="">Tümü</option>
+            <option value="true">Aktif</option>
+            <option value="false">Pasif</option>
+          </select>
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1 block">Kat</label>
+          <select v-model="filters.floorNumber" @change="handleSearch" class="select select-bordered select-sm w-full">
+            <option value="">Tüm Katlar</option>
+            <option v-for="floor in availableFloors" :key="floor" :value="floor">{{ floor }}. Kat</option>
+          </select>
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1 block">İş Türü</label>
+          <select v-model="filters.businessType" @change="handleSearch" class="select select-bordered select-sm w-full">
+            <option value="">Tümü</option>
+            <option value="Ticaret">Ticaret</option>
+            <option value="Hizmet">Hizmet</option>
+            <option value="Üretim">Üretim</option>
+            <option value="Ofis">Ofis</option>
+            <option value="Depo">Depo</option>
+            <option value="Diğer">Diğer</option>
+          </select>
+        </div>
+      </div>
+      <div class="flex items-center justify-between mt-3 pt-3 border-t border-slate-100 dark:border-slate-700/60">
+        <button @click="clearFilters" class="btn btn-ghost btn-xs text-slate-500 gap-1">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+          Temizle
+        </button>
+        <span class="text-xs text-slate-400 dark:text-slate-500">{{ filteredTenants.length }} kiracı</span>
+      </div>
+    </div>
+
+    <!-- Kiracı Kartları -->
+    <div v-if="filteredTenants.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div
+        v-for="tenant in paginatedTenants"
+        :key="tenant.id"
+        class="app-card hoverable relative flex flex-col gap-3"
+      >
+        <!-- Menü -->
+        <div v-if="authStore.role === ROLES.ADMIN || authStore.role === ROLES.MANAGER" class="absolute top-3 right-3 z-10">
+          <div class="dropdown dropdown-end">
+            <button tabindex="0" class="btn btn-ghost btn-circle btn-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/><circle cx="5" cy="12" r="1.5"/>
+              </svg>
+            </button>
+            <ul tabindex="0" class="dropdown-content menu p-1.5 shadow-card bg-base-100 border border-slate-200 dark:border-slate-700 rounded-xl w-40 z-10 text-sm">
+              <li><a @click="viewTenant(tenant)" class="rounded-lg">Detayları Gör</a></li>
+              <li><a @click="editTenant(tenant)" class="rounded-lg">Düzenle</a></li>
+              <li v-if="authStore.role === ROLES.ADMIN"><a @click="openDeleteModal(tenant)" class="rounded-lg text-error">Sil</a></li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Avatar + Başlık -->
+        <div class="flex items-center gap-3 pr-8">
+          <div :class="getAvatarColor(tenant.contactPersonName) + ' w-11 h-11 rounded-xl flex items-center justify-center text-lg font-bold text-white shrink-0'">
+            {{ getAvatarInitial(tenant.companyName) }}
+          </div>
+          <div class="min-w-0">
+            <p class="text-sm font-bold text-slate-800 dark:text-slate-100 truncate">{{ tenant.companyName }}</p>
+            <div class="flex items-center gap-1.5 mt-0.5 flex-wrap">
+              <span :class="['badge badge-xs font-semibold', tenant.isActive ? 'badge-active' : 'badge-passive']">
+                {{ tenant.isActive ? 'Aktif' : 'Pasif' }}
+              </span>
+              <span v-if="tenant.flats?.length" class="badge badge-xs badge-info">
+                Ünite {{ tenant.flats[0].code }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bakiye -->
+        <div class="flex items-center justify-between py-2 px-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-700/60">
+          <span class="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Bakiye</span>
+          <span :class="['text-sm font-bold tabular-nums', tenant.totalBalance > 0 ? 'text-red-500' : 'text-green-500']">
+            {{ formatCurrency(tenant.totalBalance) }}
+          </span>
+        </div>
+
+        <!-- Aksiyonlar -->
+        <div class="flex gap-2 mt-auto">
+          <button @click="viewTenant(tenant)" class="btn btn-sm btn-outline flex-1 normal-case text-xs">Detay</button>
+          <a
+            :href="`https://wa.me/${tenant.contactPersonPhone?.replace(/\D/g,'')}`"
+            target="_blank"
+            class="btn btn-sm btn-ghost btn-square text-green-500"
+            title="WhatsApp"
+          >
+            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L0 24l6.335-1.662c1.72.937 3.659 1.432 5.628 1.433h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+            </svg>
+          </a>
+          <button
+            v-if="authStore.role === ROLES.ADMIN || authStore.role === ROLES.MANAGER"
+            @click="router.push(`/payments?tenantId=${tenant.id}`)"
+            class="btn btn-sm btn-ghost btn-square text-blue-500"
+            title="Ödemeler"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Boş durum -->
+    <div v-else class="app-card">
+      <EmptyState title="Kiracı bulunamadı" description="Filtrelerinizi değiştirin veya yeni bir kiracı ekleyin." />
+    </div>
+
+    <!-- Sayfalama -->
+    <div class="mt-4">
+      <PaginationBar
+        v-model:currentPage="currentPage"
+        :total-count="filteredTenants.length"
+        :page-size="pageSize"
+        :page-size-options="[]"
+      />
+    </div>
+
+    <!-- Modallar -->
+    <TenantCreateModal :visible="showCreateModal" @save="handleCreateTenant" @close="showCreateModal = false" />
+    <ConfirmModal :isOpen="showDeleteModal" title="Kiracı Silinecek" :message="deleteModalMessage" confirmLabel="Evet, Sil" confirmClass="btn-error" :loading="deleteLoading" @confirm="confirmDelete" @cancel="closeDeleteModal" />
+    <ConfirmModal :isOpen="showSyncModal" title="Bakiye Senkronizasyonu" message="Tüm kiracıların avans bakiyeleri geçmiş işlem verilerine göre yeniden hesaplanacak ve eşitlenecektir. Devam etmek istiyor musunuz?" confirmLabel="Evet, Senkronize Et" confirmClass="btn-primary" :loading="syncLoading" @confirm="handleConfirmSync" @cancel="showSyncModal = false" />
+    <ConfirmModal :isOpen="showAssignModal" title="Mevcut Kiracı Bulundu" :message="assignModalMessage" confirmLabel="Evet, Bağla" confirmClass="btn-primary" @confirm="handleConfirmAssign" @cancel="showAssignModal = false" />
+    <TenantEditModal v-if="editingTenant" :visible="showEditModal" :tenant="editingTenant" @save="handleUpdateTenant" @close="closeEditModal" />
+  </div>
+</template>
+
+<script setup>
+import { ref, computed, onMounted, watch } from 'vue'
+import { useRouter } from 'vue-router'
+import { ROLES } from '@/core/constants/roles'
+import { useAuthStore } from '@/application/stores/auth'
+import tenantsService from '@/infrastructure/services/tenantsService'
+import TenantEditModal from './components/TenantEditModal.vue'
+import TenantCreateModal from './components/TenantCreateModal.vue'
+import { useTenantsStore } from '@/application/stores/tenants.js'
+import { errorHandler } from '@/core/utils/errorHandler'
+import ConfirmModal from '@/presentation/components/common/ConfirmModal.vue'
+import PaginationBar from '@/presentation/components/common/PaginationBar.vue'
+import { useEventBus } from '@/application/composables/useEventBus'
+import { safeFormatDate as formatDate } from '@/core/utils/dateUtils'
+import { getAvatarColor, getAvatarInitial } from '@/core/utils/uiHelpers'
+import EmptyState from '@/presentation/components/ui/EmptyState.vue'
+
+const router = useRouter()
+const authStore = useAuthStore()
+const { emit: emitEvent } = useEventBus()
+const tenantsStore = useTenantsStore()
+
+// Delete modal state
+const showDeleteModal = ref(false)
+const deleteLoading = ref(false)
+const tenantToDelete = ref(null)
+const deleteModalMessage = computed(() =>
+  tenantToDelete.value ? `'${tenantToDelete.value.companyName}' kiracısını silerseniz ilgili ünite boşaltılacaktır. Bu işlem geri alınamaz.` : ''
+)
+const openDeleteModal = (tenant) => { tenantToDelete.value = tenant; showDeleteModal.value = true }
+const closeDeleteModal = () => { showDeleteModal.value = false; tenantToDelete.value = null }
+
+// Sync Modal State
+const showSyncModal = ref(false)
+const handleSyncBalances = () => { showSyncModal.value = true }
+const handleConfirmSync = async () => {
+  showSyncModal.value = false
+  syncLoading.value = true
+  try {
+    const response = await tenantsService.syncAdvanceBalances()
+    errorHandler.logSuccess('success', `Senkronizasyon tamamlandı. ${response.updatedAccountsCount} hesap güncellendi.`, { component: 'Tenants', action: 'sync-balances' })
+    await fetchTenants()
+  } catch (err) {
+    console.error('Senkronizasyon hatası:', err)
+    errorHandler.logError(err, { component: 'Tenants', action: 'sync-balances' })
+  } finally {
+    syncLoading.value = false
+  }
+}
+
+// Assign Modal State
+const showAssignModal = ref(false)
+const assignModalMessage = ref('')
+const assignData = ref(null)
+const handleConfirmAssign = async () => {
+  if (!assignData.value) return
+  showAssignModal.value = false
+  try {
+    await tenantsStore.updateTenant(assignData.value.existingId, {
+      ...assignData.value.existing,
+      flatIds: [...(assignData.value.existing.flatIds || []), ...assignData.value.selectedIds]
+    })
+    errorHandler.logSuccess('success', 'Üniteler mevcut kiracıya atandı.', { component: 'Tenants', action: 'assign-flats' })
+    showCreateModal.value = false
+  } catch (err) {
+    errorHandler.logError(err, { component: 'Tenants', action: 'assign-flats' })
+  }
+}
+
+// Page state
+const loading = computed(() => tenantsStore.loading)
+const tenants = computed(() => tenantsStore.tenants)
+const showCreateModal = ref(false)
+const showEditModal = ref(false)
+const editingTenant = ref(null)
+const currentPage = ref(1)
+const pageSize = 10
+const syncLoading = ref(false)
+
+// Filters
+const filters = ref({
+  searchTerm: '',
+  isActive: '',
+  floorNumber: '',
+  businessType: '' // client-side filter
+})
+
+// Stats
+const stats = computed(() => tenantsStore.stats)
+
+// Computeds
+const filteredTenants = computed(() => {
+  let list = tenants.value
+
+  if (filters.value.searchTerm) {
+    const s = String(filters.value.searchTerm).toLowerCase()
+    list = list.filter(t =>
+      String(t.companyName || '').toLowerCase().includes(s) ||
+      String(t.contactPersonName || '').toLowerCase().includes(s) ||
+      String(t.identityNumber || '').includes(s) ||
+      String(t.contactPersonEmail || '').toLowerCase().includes(s) ||
+      String(t.contactPersonPhone || '').includes(s)
+    )
+  }
+
+  if (filters.value.isActive !== '') {
+    const wanted = (filters.value.isActive === 'true')
+    list = list.filter(t => t.isActive === wanted)
+  }
+
+  if (filters.value.floorNumber !== '') {
+    const f = parseInt(filters.value.floorNumber, 10)
+    list = list.filter(t => t.flats?.some(fl => fl.floorNumber === f))
+  }
+
+  if (filters.value.businessType) {
+    list = list.filter(t => t.businessType === filters.value.businessType)
+  }
+
+  return list
+})
+
+const paginatedTenants = computed(() => {
+  const start = (currentPage.value - 1) * pageSize
+  return filteredTenants.value.slice(start, start + pageSize)
+})
+
+const totalPages = computed(() => Math.ceil(filteredTenants.value.length / pageSize))
+
+const availableFloors = computed(() => {
+  const set = new Set()
+  tenants.value.forEach(t => t.flats?.forEach(fl => {
+    if (fl.floorNumber !== null && fl.floorNumber !== undefined) set.add(fl.floorNumber)
+  }))
+  return Array.from(set).sort((a, b) => a - b)
+})
+
+const formatCurrency = (amount) =>
+  new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' })
+    .format(Number(amount || 0))
+
+// Methods
+const fetchTenants = async () => {
+  try {
+    // Pinia store üzerinden çekiyoruz
+    await tenantsStore.fetchTenants()
+  } catch (err) {
+    console.error('Kiracılar yüklenirken hata:', err)
+  }
+}
+
+const handleSearch = () => { currentPage.value = 1 }
+const clearFilters = () => {
+  filters.value = { searchTerm: '', isActive: '', floorNumber: '', businessType: '' }
+  currentPage.value = 1
+}
+
+const handleCreateTenant = async (data) => {
+  try {
+    await tenantsStore.createTenant(data)
+    errorHandler.logSuccess('success', 'Kiracı başarıyla eklendi', { component: 'Tenants', action: 'create' })
+    showCreateModal.value = false
+  } catch (err) {
+    // Sunucu mesajını yakala
+    const serverText = err?.serverMessage || err?.message || ''
+    const isActiveExists = /aktif.*kiracı.*var/i.test(serverText)
+    const selectedIds = (data.flatIds && data.flatIds.length) ? data.flatIds
+                       : (data.flatId ? [data.flatId] : [])
+
+    if (isActiveExists && selectedIds.length) {
+      try {
+        // Aynı kimlik no ile mevcut aktif kiracıyı bul
+        const candidates = tenants.value.filter(t => t.identityNumber === data.identityNumber && t.isActive)
+        const existing = candidates[0]
+
+        if (existing) {
+          assignData.value = { existingId: existing.id, existing, selectedIds }
+          assignModalMessage.value = `Bu kimlik numarasıyla zaten aktif bir kiracı var: "${existing.companyName}". Seçili ${selectedIds.length} üniteyi bu kiracıya bağlayalım mı?`
+          showAssignModal.value = true
+          return
+        }
+      } catch (e) {
+        console.warn('Mevcut kiracıya atama akışı başarısız:', e)
+      }
+    }
+
+    console.error('Kiracı eklenirken hata:', err)
+    errorHandler.logError(err, { component: 'Tenants', action: 'create' })
+  }
+}
+
+const handleUpdateTenant = async (data) => {
+  try {
+    await tenantsStore.updateTenant(editingTenant.value.id, data)
+    errorHandler.logSuccess('success', 'Kiracı başarıyla güncellendi', { component: 'Tenants', action: 'update' })
+    closeEditModal()
+  } catch (err) {
+    console.error('Kiracı güncellenirken hata:', err)
+    errorHandler.logError(err, { component: 'Tenants', action: 'update' })
+  }
+}
+
+const editTenant = (t) => { editingTenant.value = t; showEditModal.value = true }
+const closeEditModal = () => { editingTenant.value = null; showEditModal.value = false }
+const viewTenant = (t) => { router.push(`/tenants/${t.id}`) }
+
+// Silme onayı
+const confirmDelete = async () => {
+  if (!tenantToDelete.value) return
+  deleteLoading.value = true
+  try {
+    await tenantsStore.deleteTenant(tenantToDelete.value.id)
+    errorHandler.logSuccess('success', 'Kiracı silindi', { component: 'Tenants', action: 'delete' })
+    emitEvent('tenant:deleted')
+  } catch (err) {
+    console.error('Kiracı silme hatası:', err)
+    errorHandler.logError(err, { component: 'Tenants', action: 'delete' })
+  } finally {
+    deleteLoading.value = false
+    closeDeleteModal()
+  }
+}
+
+// Lifecycle
+onMounted(fetchTenants)
+watch(filters, handleSearch, { deep: true })
+</script>
