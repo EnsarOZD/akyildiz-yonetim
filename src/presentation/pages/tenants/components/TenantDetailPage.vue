@@ -187,9 +187,10 @@
                   <td>{{ formatDate(item.dueDate) }}</td>
                   <td class="text-right font-semibold text-error">{{ formatCurrency(item.amount ?? item.toplamTutar) }}</td>
                   <td class="text-center">
-                    <div class="flex justify-center gap-2">
+                    <div class="flex justify-center flex-wrap gap-2">
                       <button @click="router.push(`/payments?tenantId=${tenant.id}&debtId=${item.id}`)" class="btn btn-xs btn-primary font-bold shadow-sm" title="Nakit/Kart Ödeme">Öde</button>
                       <button @click="openAdvanceModal(item)" class="btn btn-xs btn-outline btn-info font-bold" title="Avans Kullan">Avans</button>
+                      <button v-if="authStore.role === 'admin' || authStore.role === 'manager'" @click="handleDeleteDebt(item.id)" class="btn btn-xs btn-outline btn-error font-bold" title="Aidat/Borç Sil">Sil</button>
                     </div>
                   </td>
                 </tr>
@@ -390,7 +391,7 @@ const totalDebt = ref(0)
 const showAdvanceModal = ref(false)
 const showEditModal = ref(false)
 const timelineFilter = ref('all')
-const { notifySuccess } = useNotify()
+const { notifySuccess, notifyError } = useNotify()
 
 const filteredPayments = computed(() => {
   return payments.value.filter(p => !p.receiptNumber?.startsWith('AVANS-'))
@@ -415,6 +416,18 @@ const handleUpdateTenant = async (data) => {
 const handleAdvanceSuccess = () => {
   showAdvanceModal.value = false
   fetchTenantDetails()
+}
+
+const handleDeleteDebt = async (debtId) => {
+  if (!confirm('Bu borç kaydını kalıcı olarak silmek istediğinize emin misiniz?')) return
+  try {
+    await utilityDebtsService.deleteUtilityDebt(debtId)
+    notifySuccess('Borç kaydı başarıyla silindi.')
+    await fetchTenantDetails()
+  } catch (err) {
+    console.error('Borç silinirken hata:', err)
+    notifyError('Borç silinemedi.')
+  }
 }
 
 const filteredTimelineItems = computed(() => {
