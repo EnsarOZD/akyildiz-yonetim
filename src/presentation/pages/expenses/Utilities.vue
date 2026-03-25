@@ -236,16 +236,16 @@
               <p class="text-sm font-bold text-slate-800 dark:text-slate-100">{{ formatNumber(d.amount) }} ₺</p>
               <span :class="[
                 'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium mt-0.5',
-                d.status === 'Paid'
+                d.status === 'paid'
                   ? 'badge-active'
-                  : d.status === 'Partial'
+                  : d.status === 'partial'
                     ? 'badge-pending'
                     : 'badge-overdue'
               ]">
-                {{ d.status === 'Paid' ? 'Ödendi' : d.status === 'Partial' ? 'Kısmi' : 'Bekliyor' }}
+                {{ d.status === 'paid' ? 'Ödendi' : d.status === 'partial' ? 'Kısmi' : 'Bekliyor' }}
               </span>
               <!-- Kuruş farkı uyarısı -->
-              <p v-if="d.status !== 'Paid' && d.remainingAmount > 0 && d.remainingAmount < 1"
+              <p v-if="d.status !== 'paid' && d.remainingAmount > 0 && d.remainingAmount < 1"
                 class="text-[10px] text-amber-500 font-medium mt-0.5">
                 {{ formatNumber(d.remainingAmount) }} ₺ kaldı
               </p>
@@ -616,6 +616,8 @@ const fetchDues = async () => {
   return (isNaN(t) || t.getFullYear() < 1900) ? null : raw
 })(),
         status: normStatus(d.status),
+        paidAmount: d.paidAmount != null ? Number(d.paidAmount) : (d.PaidAmount != null ? Number(d.PaidAmount) : null),
+        paidDate: d.paidDate ?? d.PaidDate ?? null,
         remainingAmount: Number(d.remainingAmount ?? d.RemainingAmount ?? 0),
         tenantId: d.tenantId ?? d.TenantId ?? null,
         ownerId: d.ownerId ?? d.OwnerId ?? null,

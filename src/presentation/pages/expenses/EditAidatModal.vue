@@ -206,20 +206,19 @@ const save = async () => {
     const remaining = Number(local.value.toplamTutar) - paid
 
     await utilityDebtsService.updateUtilityDebt(props.record.id, {
-      ...props.record,
       id: props.record.id,
       flatId: props.record.flatId,
       type: props.record.type ?? 0,
       amount: local.value.toplamTutar,
-      kdvHaric: local.value.kdvHaric,
-      kdvDahil: local.value.toplamTutar,
       remainingAmount: remaining,
-      isPaid: remaining <= 0,
+      status: props.record.status,
+      paidAmount: props.record.paidAmount ?? null,
+      paidDate: props.record.paidDate ?? null,
       periodYear: local.value.periodYear,
       periodMonth: local.value.periodMonth,
       dueDate: local.value.dueDate,
       description: local.value.description,
-      invoiceNumber: local.value.invoiceNumber,
+      invoiceNumber: local.value.invoiceNumber || null,
       tenantId: props.record.tenantId,
       ownerId: props.record.ownerId
     })
