@@ -93,6 +93,18 @@
 
           <div class="form-control">
             <label class="label">
+              <span class="label-text font-semibold text-gray-700 dark:text-gray-300">Fatura Numarası</span>
+            </label>
+            <input
+              v-model="local.invoiceNumber"
+              type="text"
+              class="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300"
+              placeholder="Opsiyonel fatura no..."
+            />
+          </div>
+
+          <div class="form-control">
+            <label class="label">
               <span class="label-text font-semibold text-gray-700 dark:text-gray-300">Açıklama</span>
             </label>
             <textarea
@@ -143,7 +155,7 @@ const emit = defineEmits(['close', 'updated'])
 
 const { handleValidationError, showSuccess } = useErrorHandler?.() ?? {}
 
-const local = ref({ kdvHaric: 0, toplamTutar: 0, periodYear: 2025, periodMonth: 1, dueDate: '', description: '' })
+const local = ref({ kdvHaric: 0, toplamTutar: 0, periodYear: 2025, periodMonth: 1, dueDate: '', description: '', invoiceNumber: '' })
 const displayAmount = ref('')
 const amountError = ref('')
 
@@ -184,6 +196,7 @@ onMounted(() => {
     local.value.periodMonth = props.record.periodMonth || (new Date().getMonth() + 1)
     local.value.dueDate = props.record.dueDate ? new Date(props.record.dueDate).toISOString().split('T')[0] : ''
     local.value.description = props.record.description || ''
+    local.value.invoiceNumber = props.record.invoiceNumber || ''
   }
 })
 
@@ -201,6 +214,7 @@ const save = async () => {
       periodMonth: local.value.periodMonth,
       dueDate: local.value.dueDate,
       description: local.value.description,
+      invoiceNumber: local.value.invoiceNumber,
       tenantId: props.record.tenantId,
       ownerId: props.record.ownerId,
       flatId: props.record.flatId
