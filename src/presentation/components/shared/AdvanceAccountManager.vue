@@ -25,15 +25,21 @@
 
     <!-- Avans hesabı bilgileri -->
     <div v-if="advanceAccount" class="mb-6">
-      <div class="bg-base-200 p-4 rounded-lg">
-        <h3 class="text-lg font-semibold mb-3">Mevcut Bakiye</h3>
-        <div class="text-3xl font-bold text-primary">
-          {{ formatCurrency(advanceBalance) }}
+      <div class="bg-base-200 p-4 rounded-lg flex items-center justify-between">
+        <div>
+          <h3 class="text-lg font-semibold mb-3">Mevcut Bakiye</h3>
+          <div class="text-3xl font-bold text-primary">
+            {{ formatCurrency(advanceBalance) }}
+          </div>
+          <div class="text-sm text-gray-600 mt-2">
+            Son güncelleme:
+            {{ formatDate(advanceAccount.updatedAt || advanceAccount.createdAt) }}
+          </div>
         </div>
-        <div class="text-sm text-gray-600 mt-2">
-          Son güncelleme:
-          {{ formatDate(advanceAccount.updatedAt || advanceAccount.createdAt) }}
-        </div>
+        <button v-if="advanceBalance > 0 && isAdmin" @click="handleDelete" class="btn btn-error btn-sm text-white">
+          <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+          Sıfırla
+        </button>
       </div>
     </div>
 
@@ -165,15 +171,19 @@ import utilityDebtsService from '@/infrastructure/services/utilityDebtsService'
 import { getDebtTypeLabel } from '@/core/constants/enums'
 import { useNotify } from '@/application/composables/useNotify'
 import { safeFormatDate } from '@/core/utils/dateUtils'
-// import { errorHandler } from '@/core/utils/errorHandler' // istersen merkezi error’la
+import { useAuthStore } from '@/application/stores/auth'
+import { ROLES } from '@/core/constants/roles'
 
-const { notifyError } = useNotify()
+const { notifyError, notifySuccess } = useNotify()
+const authStore = useAuthStore()
 
 const props = defineProps({
   tenantId: { type: String, default: '' }
 })
 
 const emit = defineEmits(['success'])
+
+const isAdmin = computed(() => authStore.role === ROLES.ADMIN || authStore.role === ROLES.MANAGER)
 
 /* state */
 const loading = ref(false)
@@ -320,12 +330,31 @@ const useAdvanceAccount = async () => {
     }
 
     const res = await paymentsService.useAdvanceAccount(payload)
+    if (notifySuccess) notifySuccess('Avans başarıyla kullanıldı.')
     emit('success', res)
     await loadAdvanceAccount() // yenile
   } catch (e) {
     console.error('Avans kullanılamadı:', e)
-    // errorHandler.logError(e, { component: 'AdvanceAccountManager', action: 'useAdvance' })
     notifyError('Avans kullanılamadı. Lütfen tekrar deneyin.')
+  } finally {
+    loading.value = false
+  }
+}
+
+const handleDelete = async () => {
+  if (!confirm('Kiracının avans bakiyesini tamamen silmek (sıfırlamak) istediğinize emin misiniz? Bu işlem geri alınamaz.')) return
+  loading.value = true
+  try {
+    const id = advanceAccount.value?.id || advanceAccount.value?._id
+    if (id) {
+      await paymentsService.deleteAdvanceAccount(id)
+      if (notifySuccess) notifySuccess('Avans hesabı başarıyla silindi.')
+      await loadAdvanceAccount()
+      emit('success')
+    }
+  } catch (e) {
+    console.error('Avans hesabı silinemedi:', e)
+    notifyError('Avans hesabı silinirken bir hata oluştu.')
   } finally {
     loading.value = false
   }
