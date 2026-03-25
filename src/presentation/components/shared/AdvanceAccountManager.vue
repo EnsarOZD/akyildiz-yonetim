@@ -36,7 +36,7 @@
             {{ formatDate(advanceAccount.updatedAt || advanceAccount.createdAt) }}
           </div>
         </div>
-        <button v-if="advanceBalance > 0 && isAdmin" @click="handleDelete" class="btn btn-error btn-sm text-white">
+        <button v-if="advanceBalance > 0" @click="handleDelete" class="btn btn-error btn-sm text-white">
           <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
           Sıfırla
         </button>
@@ -172,7 +172,6 @@ import { getDebtTypeLabel } from '@/core/constants/enums'
 import { useNotify } from '@/application/composables/useNotify'
 import { safeFormatDate } from '@/core/utils/dateUtils'
 import { useAuthStore } from '@/application/stores/auth'
-import { ROLES } from '@/core/constants/roles'
 
 const { notifyError, notifySuccess } = useNotify()
 const authStore = useAuthStore()
@@ -183,7 +182,10 @@ const props = defineProps({
 
 const emit = defineEmits(['success'])
 
-const isAdmin = computed(() => authStore.role === ROLES.ADMIN || authStore.role === ROLES.MANAGER)
+const isAdmin = computed(() => {
+  const r = authStore.role?.toLowerCase()
+  return r === 'admin' || r === 'manager'
+})
 
 /* state */
 const loading = ref(false)
