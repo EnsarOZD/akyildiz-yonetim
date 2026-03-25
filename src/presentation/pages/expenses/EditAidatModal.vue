@@ -146,7 +146,7 @@
 
 <script setup>
 import { ref, onMounted, watch } from 'vue'
-import aidatService from '@/infrastructure/services/aidatService'
+import utilityDebtsService from '@/infrastructure/services/utilityDebtsService'
 import { useErrorHandler } from '@/application/composables/useErrorHandler'
 import { formatCurrency, parseCurrency, formatInputCurrency } from '@/core/utils/currencyUtils'
 
@@ -205,7 +205,12 @@ const save = async () => {
     const paid = Number(props.record.paidAmount || 0)
     const remaining = Number(local.value.toplamTutar) - paid
 
-    await aidatService.updateAidat(props.record.id, {
+    await utilityDebtsService.updateUtilityDebt(props.record.id, {
+      ...props.record,
+      id: props.record.id,
+      flatId: props.record.flatId,
+      type: props.record.type ?? 0,
+      amount: local.value.toplamTutar,
       kdvHaric: local.value.kdvHaric,
       kdvDahil: local.value.toplamTutar,
       remainingAmount: remaining,
@@ -216,8 +221,7 @@ const save = async () => {
       description: local.value.description,
       invoiceNumber: local.value.invoiceNumber,
       tenantId: props.record.tenantId,
-      ownerId: props.record.ownerId,
-      flatId: props.record.flatId
+      ownerId: props.record.ownerId
     })
     showSuccess?.('Aidat kaydı güncellendi.')
     emit('updated')
