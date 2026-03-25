@@ -224,6 +224,10 @@
                 <span class="text-xs text-slate-400">{{ d.periodYear }}/{{ String(d.periodMonth).padStart(2,'0') }}</span>
                 <span class="text-slate-300 dark:text-slate-600">·</span>
                 <span class="text-xs text-slate-400">Son: {{ formatDate(d.dueDate) }}</span>
+                <template v-if="d.invoiceNumber">
+                  <span class="text-slate-300 dark:text-slate-600">·</span>
+                  <span class="text-xs text-slate-400">Fatura: {{ d.invoiceNumber }}</span>
+                </template>
               </div>
             </div>
 
@@ -615,6 +619,8 @@ const fetchDues = async () => {
         remainingAmount: Number(d.remainingAmount ?? d.RemainingAmount ?? 0),
         tenantId: d.tenantId ?? d.TenantId ?? null,
         ownerId: d.ownerId ?? d.OwnerId ?? null,
+        description: d.description ?? d.Description ?? null,
+        invoiceNumber: d.invoiceNumber ?? d.InvoiceNumber ?? null,
       }
     })
   } catch (e) {
