@@ -594,6 +594,7 @@ watch([filters, pageSize], () => {
 
 /* ---- Modal form ---- */
 const newPayment = ref({
+  id: null,
   date: new Date().toISOString().substring(0, 10),
   tenantId: '',
   ownerId: null,
@@ -613,6 +614,7 @@ const reallyClosePaymentModal = () => {
   confirmModalVisible.value = false
   pendingCloseAction.value = null
   newPayment.value = {
+    id: null,
     date: new Date().toISOString().substring(0, 10),
     tenantId: '',
     ownerId: null,
@@ -671,6 +673,7 @@ const confirmBulkDelete = async () => {
 
 const startEdit = (payment) => {
   newPayment.value = { 
+    id: payment.id,
     date: (getPaymentDate(payment) || new Date().toISOString()).substring(0,10),
     tenantId: payment.tenantId || '',
     ownerId: payment.ownerId ?? null,
@@ -692,6 +695,7 @@ const handleClearFilters = () => {
 const handlePaymentSave = async () => {
   showModal.value = false
   newPayment.value = {
+    id: null,
     date: new Date().toISOString().substring(0, 10),
     tenantId: '',
     ownerId: null,

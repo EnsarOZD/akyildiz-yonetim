@@ -355,7 +355,7 @@ const props = defineProps({
   visible: { type: Boolean, default: false },
   payment: {
     type: Object,
-    default: () => ({ tenantId: null, ownerId: null, amount: null, date: '', type: '', bank: '', description: '' })
+    default: () => ({ id: null, tenantId: null, ownerId: null, amount: null, date: '', type: '', bank: '', description: '' })
   },
   tenants: { type: Array, default: () => [] },
   banks:   { type: Array, default: () => [] },
@@ -373,7 +373,7 @@ const stepLabels = ['Temel Bilgiler', 'Borç Eşleştirme', 'Özet & Onay']
 const step1Touched = ref(false)
 
 // ── Form state ────────────────────────────────────────────────
-const form = reactive({ tenantId: null, ownerId: null, amount: null, date: '', type: '', bank: '', description: '' })
+const form = reactive({ id: null, tenantId: null, ownerId: null, amount: null, date: '', type: '', bank: '', description: '' })
 watch(() => props.payment, (val) => { Object.assign(form, val || {}) }, { immediate: true, deep: true })
 
 // ── Input Formatters (Thousand Separator) ─────────────────────
@@ -566,7 +566,7 @@ const handleSave = async () => {
   errorMessage.value = ''
   try {
     const fType = parseInt(form.type)
-    const payload = {
+    const basePayload = {
       tenantId: paymentType.value === 'tenant' ? form.tenantId : null,
       ownerId:  paymentType.value === 'owner'  ? form.ownerId  : null,
       amount: Number(form.amount),
@@ -575,14 +575,23 @@ const handleSave = async () => {
       type: fType === 0 ? 1 : (fType === 1 || fType === 2 ? 2 : 3), 
       targetDebtType: fType < 3 ? fType : null,
       bank: form.bank,
-      description: form.description || '',
-      autoAllocate: autoAllocate.value,
-      debtAllocations: autoAllocate.value ? [] : selectedDebts.value.map(id => ({
-        debtId: id,
-        amount: Number(debtAllocations.value[id] || 0)
-      }))
+      description: form.description || ''
     }
-    const saved = await paymentsService.createPaymentWithAllocation(payload)
+
+    let saved;
+    if (props.editMode && form.id) {
+      saved = await paymentsService.updatePayment(form.id, basePayload)
+    } else {
+      const payload = {
+        ...basePayload,
+        autoAllocate: autoAllocate.value,
+        debtAllocations: autoAllocate.value ? [] : selectedDebts.value.map(id => ({
+          debtId: id,
+          amount: Number(debtAllocations.value[id] || 0)
+        }))
+      }
+      saved = await paymentsService.createPaymentWithAllocation(payload)
+    }
     resetDirty()
     emit('save', saved)
   } catch (e) {
