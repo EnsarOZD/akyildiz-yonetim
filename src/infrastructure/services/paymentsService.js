@@ -14,6 +14,7 @@ class PaymentsService {
     if (filters.utilityType) params.utilityType = filters.utilityType
     if (filters.excludeAdvanceUse !== undefined) params.excludeAdvanceUse = filters.excludeAdvanceUse
 
+    // Tüm kayıtlar çekilir; PaymentsStore 5 dk. cache'ler, dashboard client-side filtreler.
     params.pageSize = 1000
     let pageNumber = 1
     const allItems = []
@@ -26,7 +27,7 @@ class PaymentsService {
 
       if (items.length === 0) break
       allItems.push(...items)
-      
+
       if (items.length < actualPageSize) break // Son sayfa
       pageNumber++
     }

@@ -479,9 +479,9 @@
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue'
 import { useAuthStore } from '@/application/stores/auth'
-import paymentsService from '@/infrastructure/services/paymentsService'
+import { usePaymentsStore } from '@/application/stores/payments'
+import { useTenantsStore } from '@/application/stores/tenants'
 import expensesService from '@/infrastructure/services/expensesService'
-import tenantsService from '@/infrastructure/services/tenantsService'
 import ownerDuesService from '@/infrastructure/services/ownerDuesService'
 import ownersService from '@/infrastructure/services/ownersService'
 import utilityDebtsService from '@/infrastructure/services/utilityDebtsService'
@@ -517,6 +517,8 @@ const openManualDebtModal = (type = 0) => {
 
 // Store
 const authStore = useAuthStore()
+const paymentsStore = usePaymentsStore()
+const tenantsStore = useTenantsStore()
 const notificationsStore = useNotificationsStore()
 const userRole = computed(() => authStore.role)
 
@@ -875,25 +877,24 @@ const maxAmount = computed(() => {
 // API'den veri yükleme fonksiyonları
 const loadPayments = async () => {
   try {
-    const filters = {}
-    if (userRole.value === 'tenant') {
-      filters.tenantId = authStore.companyId
-    }
-    
-    // Tarih filtresi ekle
+    // Store'dan çek (5 dakika cache); tarih filtresi client-side uygulanır
+    await paymentsStore.fetchPayments()
+    let data = paymentsStore.payments
+
     if (dateFilter.value !== 'all') {
       const { startDate, endDate } = getDateRange(dateFilter.value)
-      filters.startDate = startDate
-      filters.endDate = endDate
+      data = data.filter(p => {
+        const d = (p.paymentDate || p.date || '').substring(0, 10)
+        return (!startDate || d >= startDate) && (!endDate || d <= endDate)
+      })
     }
-    
-    // Payments için backend enum: "Rent"(0), "Dues"(1), "Utility"(2), "Other"(3)
-    // Kiracı ödemeleri genellikle "Rent" tipinde olur
-    const response = await paymentsService.getPayments(filters)
-    payments.value = response || []
+
+    payments.value = data
+    ownerPayments.value = data.filter(p => p.ownerId)
   } catch (err) {
     console.error('Ödemeler yüklenirken hata:', err)
     payments.value = []
+    ownerPayments.value = []
   }
 }
 
@@ -935,8 +936,8 @@ const loadDebtsSummary = async () => {
 
 const loadTenants = async () => {
   try {
-    const response = await tenantsService.getTenants()
-    tenants.value = response || []
+    await tenantsStore.fetchTenants()
+    tenants.value = tenantsStore.tenants
   } catch (err) {
     console.error('Kiracılar yüklenirken hata:', err)
     tenants.value = []
@@ -963,29 +964,6 @@ const loadOwners = async () => {
   }
 }
 
-const loadOwnerPayments = async () => {
-  try {
-    // Mal sahibi ödemeleri için backend'de ownerId filtresi kullan
-    const filters = {
-      ownerId: null // Tüm ödemeleri getir, aşağıda mal sahibi olanları filtreleyeceğiz
-    }
-    
-    // Tarih filtresi ekle
-    if (dateFilter.value !== 'all') {
-      const { startDate, endDate } = getDateRange(dateFilter.value)
-      filters.startDate = startDate
-      filters.endDate = endDate
-    }
-    
-    const response = await paymentsService.getPayments(filters)
-    
-    // Backend'den gelen ownerId'li ödemeleri al
-    ownerPayments.value = (response || []).filter(payment => payment.ownerId)
-  } catch (err) {
-    console.error('Mal sahibi ödemeleri yüklenirken hata:', err)
-    ownerPayments.value = []
-  }
-}
 
 const loadUtilityDebts = async () => {
   try {
@@ -1006,27 +984,29 @@ const loadUtilityDebts = async () => {
 const loadDashboardData = async () => {
   loading.value = true
   error.value = null
-  
+
   try {
-    // Paralel olarak tüm verileri yükle
+    // Aşama 1: Kritik veriler — UI bu yüklenmeler tamamlanınca gösterilir
     await Promise.all([
       loadPayments(),
       loadExpenses(),
       loadTenants(),
-      loadOwnerDues(),
-      loadOwners(),
-      loadOwnerPayments(),
       loadUtilityDebts(),
-      loadDebtsSummary(),
-      notificationsStore.refresh()
     ])
-    
   } catch (err) {
     console.error('Dashboard verileri yüklenirken hata:', err)
     error.value = 'Veriler yüklenirken bir hata oluştu. Lütfen sayfayı yenileyin.'
   } finally {
     loading.value = false
   }
+
+  // Aşama 2: İkincil veriler — arka planda yüklenir, UI reaktif olarak güncellenir
+  Promise.all([
+    loadOwnerDues(),
+    loadOwners(),
+    loadDebtsSummary(),
+    notificationsStore.refresh()
+  ]).catch(err => console.error('İkincil veriler yüklenirken hata:', err))
 }
 
 onMounted(() => {
