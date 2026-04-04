@@ -107,6 +107,7 @@
 
     <!-- Duyuru Modal -->
     <TargetedNotificationModal
+      v-if="showAnnouncementModal"
       :show="showAnnouncementModal"
       @close="showAnnouncementModal = false"
     />

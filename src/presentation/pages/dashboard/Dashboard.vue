@@ -457,7 +457,7 @@
 
       <!-- Modaller -->
       <ManualDebtModal v-if="showManualDebtModal" :type="selectedDebtType" @close="showManualDebtModal = false" @refresh="loadDashboardData" />
-      <TargetedNotificationModal :show="showAnnouncementModal" @close="showAnnouncementModal = false" @success="loadDashboardData" />
+      <TargetedNotificationModal v-if="showAnnouncementModal" :show="showAnnouncementModal" @close="showAnnouncementModal = false" @success="loadDashboardData" />
 
     </div>
   </div>
@@ -1001,8 +1001,7 @@ const loadDashboardData = async () => {
       loadOwners(),
       loadOwnerPayments(),
       loadUtilityDebts(),
-      loadDebtsSummary(),
-      notificationsStore.refresh()
+      loadDebtsSummary()
     ])
   } catch (err) {
     console.error('Dashboard verileri yüklenirken hata:', err)
