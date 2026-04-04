@@ -479,9 +479,9 @@
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue'
 import { useAuthStore } from '@/application/stores/auth'
-import { usePaymentsStore } from '@/application/stores/payments'
-import { useTenantsStore } from '@/application/stores/tenants'
+import paymentsService from '@/infrastructure/services/paymentsService'
 import expensesService from '@/infrastructure/services/expensesService'
+import tenantsService from '@/infrastructure/services/tenantsService'
 import ownerDuesService from '@/infrastructure/services/ownerDuesService'
 import ownersService from '@/infrastructure/services/ownersService'
 import utilityDebtsService from '@/infrastructure/services/utilityDebtsService'
@@ -517,8 +517,6 @@ const openManualDebtModal = (type = 0) => {
 
 // Store
 const authStore = useAuthStore()
-const paymentsStore = usePaymentsStore()
-const tenantsStore = useTenantsStore()
 const notificationsStore = useNotificationsStore()
 const userRole = computed(() => authStore.role)
 
@@ -877,23 +875,32 @@ const maxAmount = computed(() => {
 // API'den veri yükleme fonksiyonları
 const loadPayments = async () => {
   try {
-    // Store'dan çek (5 dakika cache); tarih filtresi client-side uygulanır
-    await paymentsStore.fetchPayments()
-    let data = paymentsStore.payments
-
+    const filters = {}
     if (dateFilter.value !== 'all') {
       const { startDate, endDate } = getDateRange(dateFilter.value)
-      data = data.filter(p => {
-        const d = (p.paymentDate || p.date || '').substring(0, 10)
-        return (!startDate || d >= startDate) && (!endDate || d <= endDate)
-      })
+      filters.startDate = startDate
+      filters.endDate = endDate
     }
-
-    payments.value = data
-    ownerPayments.value = data.filter(p => p.ownerId)
+    const response = await paymentsService.getPayments(filters)
+    payments.value = response || []
   } catch (err) {
     console.error('Ödemeler yüklenirken hata:', err)
     payments.value = []
+  }
+}
+
+const loadOwnerPayments = async () => {
+  try {
+    const filters = {}
+    if (dateFilter.value !== 'all') {
+      const { startDate, endDate } = getDateRange(dateFilter.value)
+      filters.startDate = startDate
+      filters.endDate = endDate
+    }
+    const response = await paymentsService.getPayments(filters)
+    ownerPayments.value = (response || []).filter(payment => payment.ownerId)
+  } catch (err) {
+    console.error('Mal sahibi ödemeleri yüklenirken hata:', err)
     ownerPayments.value = []
   }
 }
@@ -936,8 +943,8 @@ const loadDebtsSummary = async () => {
 
 const loadTenants = async () => {
   try {
-    await tenantsStore.fetchTenants()
-    tenants.value = tenantsStore.tenants
+    const response = await tenantsService.getTenants()
+    tenants.value = response || []
   } catch (err) {
     console.error('Kiracılar yüklenirken hata:', err)
     tenants.value = []
@@ -986,12 +993,16 @@ const loadDashboardData = async () => {
   error.value = null
 
   try {
-    // Aşama 1: Kritik veriler — UI bu yüklenmeler tamamlanınca gösterilir
     await Promise.all([
       loadPayments(),
       loadExpenses(),
       loadTenants(),
+      loadOwnerDues(),
+      loadOwners(),
+      loadOwnerPayments(),
       loadUtilityDebts(),
+      loadDebtsSummary(),
+      notificationsStore.refresh()
     ])
   } catch (err) {
     console.error('Dashboard verileri yüklenirken hata:', err)
@@ -999,14 +1010,6 @@ const loadDashboardData = async () => {
   } finally {
     loading.value = false
   }
-
-  // Aşama 2: İkincil veriler — arka planda yüklenir, UI reaktif olarak güncellenir
-  Promise.all([
-    loadOwnerDues(),
-    loadOwners(),
-    loadDebtsSummary(),
-    notificationsStore.refresh()
-  ]).catch(err => console.error('İkincil veriler yüklenirken hata:', err))
 }
 
 onMounted(() => {

@@ -2,6 +2,9 @@ import { defineStore } from 'pinia'
 import paymentsService from '@/infrastructure/services/paymentsService'
 import { errorHandler } from '@/core/utils/errorHandler'
 
+// Eş zamanlı fetchPayments çağrılarını tek isteğe indir
+let _fetchPromise = null
+
 export const usePaymentsStore = defineStore('payments', {
     state: () => ({
         payments: [],
@@ -16,18 +19,25 @@ export const usePaymentsStore = defineStore('payments', {
                 return this.payments
             }
 
+            if (_fetchPromise) return _fetchPromise
+
             this.loading = true
-            try {
-                const data = await paymentsService.getPayments()
-                this.payments = data || []
-                this.lastFetched = Date.now()
-                return this.payments
-            } catch (err) {
-                errorHandler.logError(err, { component: 'PaymentsStore', action: 'fetchPayments' })
-                throw err
-            } finally {
-                this.loading = false
-            }
+            _fetchPromise = (async () => {
+                try {
+                    const data = await paymentsService.getPayments()
+                    this.payments = data || []
+                    this.lastFetched = Date.now()
+                    return this.payments
+                } catch (err) {
+                    errorHandler.logError(err, { component: 'PaymentsStore', action: 'fetchPayments' })
+                    throw err
+                } finally {
+                    this.loading = false
+                    _fetchPromise = null
+                }
+            })()
+
+            return _fetchPromise
         },
 
         async fetchAdvanceAccounts() {
