@@ -60,6 +60,9 @@ export const EXPENSE_TYPES = [
   { value: 'Maintenance', label: 'Bakım', icon: '🛠️' },
   { value: 'Cleaning', label: 'Temizlik', icon: '🧹' },
   { value: 'Security', label: 'Güvenlik', icon: '🔒' },
+  { value: 'FoodAndBeverage', label: 'Yeme/İçme', icon: '🍔' },
+  { value: 'Salary', label: 'Maaş', icon: '💵' },
+  { value: 'Tax', label: 'Vergi', icon: '📄' },
   { value: 'Other', label: 'Diğer', icon: '📦' },
 ];
 

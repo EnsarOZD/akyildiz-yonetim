@@ -511,6 +511,7 @@ const saveExpense = async (expenseData) => {
     }
 
     if (editMode.value && selectedExpenseId.value) {
+      data.id = selectedExpenseId.value
       await expensesService.updateExpense(selectedExpenseId.value, data)
       showSuccess('Gider güncellendi')
     } else {
