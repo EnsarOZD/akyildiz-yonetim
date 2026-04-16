@@ -173,7 +173,7 @@
               class="btn btn-outline border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700" 
               type="button" 
               @click="handleClose"
-              :disabled="loading"
+              :disabled="props.loading"
             >
               <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -183,9 +183,9 @@
             <button 
               class="btn btn-primary bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 border-0 text-white shadow-lg" 
               type="submit"
-              :disabled="loading || !isFormValid"
+              :disabled="props.loading || !isFormValid"
             >
-              <div v-if="loading" class="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></div>
+              <div v-if="props.loading" class="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></div>
               <svg v-else class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
               </svg>
@@ -203,13 +203,12 @@ import { computed, ref, watch, nextTick, onMounted } from 'vue'
 import { useDirtyGuard } from '@/application/composables/useDirtyGuard'
 import { formatCurrency, parseCurrency, formatInputCurrency } from '@/core/utils/currencyUtils'
 
-const props = defineProps(['visible', 'expense', 'types', 'editMode'])
+const props = defineProps(['visible', 'expense', 'types', 'editMode', 'loading'])
 const emit = defineEmits(['close', 'save'])
 
 const { isDirty, resetDirty } = useDirtyGuard(() => props.expense)
 const typeSelect = ref(null)
 const showPreview = ref(false)
-const loading = ref(false)
 const error = ref(null)
 const errors = ref({})
 const displayAmount = ref('')
@@ -387,7 +386,6 @@ async function handleSave() {
     return
   }
   
-  loading.value = true
   error.value = null
   
   try {
@@ -406,13 +404,11 @@ async function handleSave() {
     emit('save', expenseData)
   } catch (err) {
     error.value = err.message || 'Gider kaydedilirken bir hata oluştu'
-  } finally {
-    loading.value = false
   }
 }
 
 function handleClose() {
-  if (loading.value) return // Prevent closing while loading
+  if (props.loading) return // Prevent closing while loading
   
   if (isDirty.value) {
     if (!confirm('Kaydedilmemiş değişiklikleriniz var. Kapatmak istediğinizden emin misiniz?')) {

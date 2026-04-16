@@ -76,6 +76,18 @@
             <div class="bg-red-100 dark:bg-red-900/50 text-red-600 dark:text-red-400 px-3 py-1 rounded-full text-sm font-medium">
               {{ filteredOverdueItems.length }} adet geciken ödeme
             </div>
+            <button @click="exportToExcel" class="btn btn-sm btn-ghost border border-gray-300 dark:border-gray-600" title="Excel Olarak İndir">
+              <svg class="w-4 h-4 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+              </svg>
+              Excel
+            </button>
+            <button @click="exportToPDF" class="btn btn-sm btn-ghost border border-gray-300 dark:border-gray-600" title="PDF Olarak İndir">
+              <svg class="w-4 h-4 text-rose-500 dark:text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+              </svg>
+              PDF
+            </button>
           </div>
         </div>
         
@@ -342,4 +354,173 @@ const isManagerOrViewer = computed(() =>
 onMounted(() => {
   fetchOverduePayments()
 })
+
+// ── EXPORT: Excel ────────────────────────────────────────────────────────────
+const exportToExcel = async () => {
+  const XLSX = await import('xlsx')
+  const data = filteredOverdueItems.value.map(item => ({
+    'Kiracı / Firma': item.company,
+    'Ünite': item.unit,
+    'Tür': item.typeLabel,
+    'Dönem': item.period || '-',
+    'Son Ödeme Tarihi': item.dueDateFormatted,
+    'Gecikme (Gün)': getDaysOverdue(item.dueDate),
+    'Durum': item.paymentStatus.label,
+    'Ödenen Tutar (₺)': item.paidAmount,
+    'Kalan Tutar (₺)': item.unpaidAmount,
+  }))
+
+  const ws = XLSX.utils.json_to_sheet(data)
+  const wb = XLSX.utils.book_new()
+  XLSX.utils.book_append_sheet(wb, ws, 'Gecikmiş Ödemeler')
+
+  ws['!cols'] = [
+    { wch: 28 }, { wch: 14 }, { wch: 14 }, { wch: 12 },
+    { wch: 18 }, { wch: 16 }, { wch: 14 }, { wch: 18 }, { wch: 18 }
+  ]
+
+  XLSX.writeFile(wb, `Gecikmiş_Ödemeler_${new Date().toISOString().split('T')[0]}.xlsx`)
+}
+
+// ── EXPORT: PDF ─────────────────────────────────────────────────────────────
+const exportToPDF = async () => {
+  const { jsPDF } = await import('jspdf')
+  const { default: autoTable } = await import('jspdf-autotable')
+  const { arialBase64 } = await import('../reports/utils/pdfFonts')
+
+  const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' })
+  doc.addFileToVFS('arial.ttf', arialBase64)
+  doc.addFont('arial.ttf', 'Arial', 'normal')
+  doc.setFont('Arial', 'normal')
+
+  const pageW  = doc.internal.pageSize.getWidth()
+  const pageH  = doc.internal.pageSize.getHeight()
+  const margin = 14
+  const genDate = new Date().toLocaleString('tr-TR')
+  const dateStr = new Date().toISOString().split('T')[0]
+
+  const NAVY  = [15, 52, 96]
+  const GOLD  = [180, 145, 40]
+  const WHITE = [255, 255, 255]
+  const RED   = [200, 30, 30]
+  const GRAY  = [110, 110, 110]
+
+  const drawHeader = (isFirst) => {
+    doc.setFillColor(...NAVY)
+    doc.rect(0, 0, pageW, isFirst ? 36 : 24, 'F')
+    doc.setFillColor(...GOLD)
+    doc.rect(0, isFirst ? 36 : 24, pageW, 1.5, 'F')
+
+    doc.setTextColor(...WHITE)
+    doc.setFontSize(isFirst ? 15 : 10)
+    doc.text('AKYILDIZ IS MERKEZI', margin, isFirst ? 13 : 10)
+    if (isFirst) {
+      doc.setFontSize(8)
+      doc.text('Yonetim ve Isletme Sistemi', margin, 21)
+    }
+    doc.setFontSize(isFirst ? 19 : 10)
+    doc.text('GECIKMIŞ ÖDEMELER RAPORU', pageW - margin, isFirst ? 17 : 10, { align: 'right' })
+    if (isFirst) {
+      doc.setFontSize(7.5)
+      doc.text(`Olusturulma: ${genDate}`, pageW - margin, 25, { align: 'right' })
+    }
+  }
+
+  const drawFooter = (pageNum, pageTotal) => {
+    doc.setFillColor(243, 244, 246)
+    doc.rect(0, pageH - 11, pageW, 11, 'F')
+    doc.setDrawColor(210, 215, 220)
+    doc.setLineWidth(0.3)
+    doc.line(0, pageH - 11, pageW, pageH - 11)
+    doc.setTextColor(...GRAY)
+    doc.setFontSize(7)
+    doc.text('Akyildiz Is Merkezi | Yonetim Sistemi | Gizli ve Kuruma Ozel', margin, pageH - 4)
+    doc.text(`Sayfa ${pageNum} / ${pageTotal}`, pageW / 2, pageH - 4, { align: 'center' })
+    doc.text(`Olusturulma: ${genDate}`, pageW - margin, pageH - 4, { align: 'right' })
+  }
+
+  drawHeader(true)
+
+  // Özet kutu
+  const totalUnpaid = filteredOverdueItems.value.reduce((s, i) => s + i.unpaidAmount, 0)
+  const count = filteredOverdueItems.value.length
+
+  doc.setTextColor(...GRAY)
+  doc.setFontSize(7.5)
+  doc.text(`Toplam ${count} kayit listelenmistir. Toplam gecikmiş tutar: ${formatCurrency(totalUnpaid)}`, margin, 43)
+
+  // Tablo satırları
+  const rows = filteredOverdueItems.value.map(item => ([
+    item.company,
+    item.unit,
+    item.typeLabel,
+    item.period || '-',
+    item.dueDateFormatted,
+    `${getDaysOverdue(item.dueDate)} gün`,
+    item.paymentStatus.label,
+    formatCurrency(item.paidAmount),
+    formatCurrency(item.unpaidAmount),
+  ]))
+
+  let totalPDFPages = 1
+
+  autoTable(doc, {
+    head: [[
+      'Kiracı / Firma', 'Ünite', 'Tür', 'Dönem',
+      'Son Ödeme Tar.', 'Gecikme', 'Durum', 'Ödenen', 'Kalan'
+    ]],
+    body: rows,
+    startY: 48,
+    margin: { left: margin, right: margin, bottom: 18 },
+    styles: {
+      fontSize: 7.5,
+      font: 'Arial',
+      cellPadding: { top: 2.5, right: 3, bottom: 2.5, left: 3 },
+      textColor: [30, 30, 30],
+      lineColor: [215, 220, 228],
+      lineWidth: 0.1,
+    },
+    headStyles: {
+      fillColor: NAVY,
+      textColor: WHITE,
+      fontSize: 7.5,
+      fontStyle: 'normal',
+      cellPadding: { top: 4, right: 3, bottom: 4, left: 3 },
+      halign: 'center',
+    },
+    alternateRowStyles: { fillColor: [248, 250, 252] },
+    columnStyles: {
+      0: { cellWidth: 44 },
+      1: { cellWidth: 20, halign: 'center' },
+      2: { cellWidth: 20, halign: 'center' },
+      3: { cellWidth: 16, halign: 'center' },
+      4: { cellWidth: 24, halign: 'center' },
+      5: { cellWidth: 18, halign: 'center', textColor: RED },
+      6: { cellWidth: 20, halign: 'center' },
+      7: { cellWidth: 28, halign: 'right' },
+      8: { cellWidth: 28, halign: 'right', textColor: RED },
+    },
+    didParseCell(data) {
+      if (data.section !== 'body' || data.column.index !== 6) return
+      if (data.cell.raw === 'Ödenmedi') {
+        data.cell.styles.textColor = [160, 20, 20]
+        data.cell.styles.fillColor = [254, 242, 242]
+      } else if (data.cell.raw === 'Kısmi Ödendi') {
+        data.cell.styles.textColor = [146, 60, 14]
+        data.cell.styles.fillColor = [255, 251, 235]
+      } else if (data.cell.raw === 'Ödendi') {
+        data.cell.styles.textColor = [16, 100, 45]
+      }
+    },
+    willDrawPage(data) {
+      if (data.pageNumber > 1) drawHeader(false)
+    },
+    didDrawPage(data) {
+      totalPDFPages = data.pageCount ?? doc.internal.getNumberOfPages()
+      drawFooter(data.pageNumber, totalPDFPages)
+    }
+  })
+
+  doc.save(`Gecikmiş_Ödemeler_${dateStr}.pdf`)
+}
 </script>
