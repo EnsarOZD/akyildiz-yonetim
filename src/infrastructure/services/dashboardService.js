@@ -7,6 +7,16 @@ class DashboardService {
         return api.get('/dashboard/debts-summary', params)
     }
 
+    async getDashboardSummary(dateFilter) {
+        const params = {}
+        if (dateFilter && dateFilter !== 'all') params.dateFilter = dateFilter
+        return api.get('/dashboard/summary', params)
+    }
+
+    async getOwnerDashboard() {
+        return api.get('/dashboard/owner')
+    }
+
     async getFinancialSummary(startDate, endDate) {
         return api.get('/reports/finance/summary', { startDate, endDate })
     }

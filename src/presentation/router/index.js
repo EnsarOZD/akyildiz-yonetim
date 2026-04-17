@@ -24,6 +24,8 @@ const Reports = () => import('../pages/reports/ReportsView.vue')
 const Notifications = () => import('../pages/notifications/NotificationsView.vue')
 const Profile = () => import('../pages/users/ProfileView.vue')
 const MyProperties = () => import('../pages/owners/MyPropertiesView.vue')
+const OwnerDashboard = () => import('../pages/owners/OwnerDashboardView.vue')
+const ServiceRequests = () => import('../pages/service-requests/ServiceRequestsView.vue')
 
 const routes = [
   { path: '/', name: 'Landing', component: LandingPage, meta: { public: true, hideLayout: true } },
@@ -45,6 +47,8 @@ const routes = [
 
   { path: '/profile', name: 'Profile', component: Profile, meta: { requiresAuth: true } },
   { path: '/my-properties', name: 'MyProperties', component: MyProperties, meta: { requiresAuth: true, roles: ['owner'] } },
+  { path: '/owner-dashboard', name: 'OwnerDashboard', component: OwnerDashboard, meta: { requiresAuth: true, roles: ['owner'] } },
+  { path: '/service-requests', name: 'ServiceRequests', component: ServiceRequests, meta: { requiresAuth: true, roles: ['admin', 'manager', 'dataentry', 'tenant', 'owner'] } },
 
   { path: '/set-password', name: 'SetPassword', component: () => import('../pages/auth/SetPasswordView.vue'), meta: { public: true, hideLayout: true } },
   { path: '/reset-password', name: 'ResetPassword', component: () => import('../pages/auth/SetPasswordView.vue'), meta: { public: true, hideLayout: true } },
@@ -146,7 +150,7 @@ router.beforeEach(async (to, from, next) => {
       if (!allowedRoles.includes(userRole)) {
         console.warn(`Access denied for role: ${userRole}. Allowed: ${allowedRoles}`);
         if (userRole === 'tenant') return next('/tenant-dashboard');
-        if (userRole === 'owner') return next('/my-properties');
+        if (userRole === 'owner') return next('/owner-dashboard');
         return next('/dashboard');
       }
     }
@@ -156,7 +160,7 @@ router.beforeEach(async (to, from, next) => {
       let target = '/dashboard';
       if (userRole === 'admin') target = '/admin';
       else if (userRole === 'tenant') target = '/tenant-dashboard';
-      else if (userRole === 'owner') target = '/my-properties';
+      else if (userRole === 'owner') target = '/owner-dashboard';
       else if (userRole === 'observer') target = '/dashboard';
 
       if (to.path !== target) return next(target);

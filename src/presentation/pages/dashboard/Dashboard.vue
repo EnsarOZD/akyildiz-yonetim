@@ -479,12 +479,6 @@
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue'
 import { useAuthStore } from '@/application/stores/auth'
-import paymentsService from '@/infrastructure/services/paymentsService'
-import expensesService from '@/infrastructure/services/expensesService'
-import tenantsService from '@/infrastructure/services/tenantsService'
-import ownerDuesService from '@/infrastructure/services/ownerDuesService'
-import ownersService from '@/infrastructure/services/ownersService'
-import utilityDebtsService from '@/infrastructure/services/utilityDebtsService'
 import dashboardService from '@/infrastructure/services/dashboardService'
 import ManualDebtModal from '../expenses/ManualDebtModal.vue'
 import OverdueWidget from './components/OverdueWidget.vue'
@@ -496,10 +490,6 @@ import { formatCurrency } from '@/core/utils/currencyUtils'
 // Reactive data
 const payments = ref([])
 const expenses = ref([])
-const tenants = ref([])
-const ownerAidats = ref([])
-const ownerPayments = ref([])
-const owners = ref([])
 const debts = ref([])
 const debtsSummary = ref([])
 const dashboardType = ref('')
@@ -534,32 +524,6 @@ const formatDate = (dateStr) => {
   return new Date(dateStr).toLocaleDateString('tr-TR', options)
 }
 
-// Tarih aralığı hesaplama yardımcı fonksiyonu
-const getDateRange = (filter) => {
-  const now = new Date()
-  const year = now.getFullYear()
-  const month = now.getMonth()
-  
-  switch (filter) {
-    case 'this_month':
-      return {
-        startDate: new Date(year, month, 1).toISOString().split('T')[0],
-        endDate: new Date(year, month + 1, 0).toISOString().split('T')[0]
-      }
-    case 'last_month':
-      return {
-        startDate: new Date(year, month - 1, 1).toISOString().split('T')[0],
-        endDate: new Date(year, month, 0).toISOString().split('T')[0]
-      }
-    case 'this_year':
-      return {
-        startDate: new Date(year, 0, 1).toISOString().split('T')[0],
-        endDate: new Date(year, 11, 31).toISOString().split('T')[0]
-      }
-    default:
-      return { startDate: null, endDate: null }
-  }
-}
 
 const totalIncome = computed(() => {
   if (!Array.isArray(payments.value)) return 0
@@ -591,38 +555,12 @@ const thisMonthTenantPayments = computed(() => {
     .reduce((sum, p) => sum + Number(p.amount || 0), 0)
 })
 
-const tenantsCount = computed(() => Array.isArray(tenants.value) ? tenants.value.length : 0)
-
-const activeTenantsCount = computed(() => 
-  Array.isArray(tenants.value) ? tenants.value.filter(tenant => tenant.isActive !== false).length : 0
-)
-
-const inactiveTenantsCount = computed(() => 
-  Array.isArray(tenants.value) ? tenants.value.filter(tenant => tenant.isActive === false).length : 0
-)
-
-const ownersCount = computed(() => Array.isArray(owners.value) ? owners.value.length : 0)
-
-const activeOwnerDuesCount = computed(() => 
-  Array.isArray(ownerAidats.value) ? ownerAidats.value.filter(aidat => aidat.isPaid !== true).length : 0
-)
 
 const totalUtilityDebts = computed(() => {
   if (!Array.isArray(debts.value)) return 0
   return debts.value.reduce((sum, debt) => sum + Number(debt.remainingAmount || 0), 0)
 })
 
-const utilityDebtsCount = computed(() => Array.isArray(debts.value) ? debts.value.length : 0)
-
-const overdueUtilityDebtsCount = computed(() => {
-  if (!Array.isArray(debts.value)) return 0
-  const now = new Date()
-  return debts.value.filter(debt => {
-    const isOverdue = !debt.dueDate || new Date(debt.dueDate) < now
-    const hasUnpaidAmount = debt.status !== 'Paid' && Number(debt.remainingAmount || 0) > 0
-    return isOverdue && hasUnpaidAmount
-  }).length
-})
 
 const totalAidatDebt = computed(() => {
   if (!Array.isArray(debts.value)) return 0
@@ -645,79 +583,6 @@ const totalWaterDebt = computed(() => {
     .reduce((sum, d) => sum + Number(d.remainingAmount || 0), 0)
 })
 
-const monthlyAverage = computed(() => {
-  if (!Array.isArray(payments.value) || !Array.isArray(expenses.value)) return 0
-  const totalIncome = payments.value.reduce((sum, p) => sum + Number(p.amount || 0), 0)
-  const totalExpense = expenses.value.reduce((sum, e) => sum + Number(e.amount || 0), 0)
-  const totalNet = totalIncome - totalExpense
-  
-  // Son 6 ayın ortalaması
-  const months = 6
-  return totalNet / months
-})
-
-const monthlyIncomeAverage = computed(() => {
-  if (!Array.isArray(payments.value)) return 0
-  const totalIncome = payments.value.reduce((sum, p) => sum + Number(p.amount || 0), 0)
-  const months = 6
-  return totalIncome / months
-})
-
-const ownerDuesIncome = computed(() => {
-  if (!Array.isArray(ownerAidats.value)) return 0
-  return ownerAidats.value.reduce((sum, aidat) => sum + Number(aidat.amount || 0), 0)
-})
-
-const ownerDuesCount = computed(() => Array.isArray(ownerAidats.value) ? ownerAidats.value.length : 0)
-
-const thisMonthOwnerDues = computed(() => {
-  if (!Array.isArray(ownerAidats.value)) return 0
-  const today = new Date()
-  const currentMonth = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0')
-  
-  return ownerAidats.value
-    .filter(aidat => {
-      const aidatDate = aidat.dueDate || aidat.date || aidat.createdAt
-      return aidatDate && aidatDate.startsWith(currentMonth)
-    })
-    .reduce((sum, aidat) => sum + Number(aidat.amount || 0), 0)
-})
-
-const ownerPaymentsTotal = computed(() => {
-  if (!Array.isArray(ownerPayments.value)) return 0
-  return ownerPayments.value.reduce((sum, payment) => sum + Number(payment.amount || 0), 0)
-})
-
-const ownerPaymentsCount = computed(() => Array.isArray(ownerPayments.value) ? ownerPayments.value.length : 0)
-
-const thisMonthOwnerPayments = computed(() => {
-  if (!Array.isArray(ownerPayments.value)) return 0
-  const today = new Date()
-  const currentMonth = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0')
-  
-  return ownerPayments.value
-    .filter(payment => {
-      const paymentDate = payment.paymentDate || payment.date
-      return paymentDate && paymentDate.startsWith(currentMonth)
-    })
-    .reduce((sum, payment) => sum + Number(payment.amount || 0), 0)
-})
-
-const overdueOwnerPayments = computed(() => {
-  if (!Array.isArray(ownerAidats.value)) return []
-  const now = new Date()
-  return ownerAidats.value.filter(aidat => {
-    const isOverdue = aidat.dueDate && new Date(aidat.dueDate) < now
-    const isPaid = aidat.isPaid === true
-    const hasRemainingDebt = aidat.remainingAmount && Number(aidat.remainingAmount) > 0
-    const hasUnpaidAmount = !isPaid || hasRemainingDebt
-    return isOverdue && hasUnpaidAmount
-  })
-})
-
-const overdueOwnerPaymentsCount = computed(() => {
-  return overdueOwnerPayments.value.length
-})
 
 const overdueTotalAmount = computed(() => {
   if (!Array.isArray(overdueItems.value)) return 0
@@ -730,57 +595,30 @@ const oldestOverdueDate = computed(() => {
   return Array.from(overdueItems.value).sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))[0].dueDate
 })
 
-const overdueOwnerPaymentsTotal = computed(() => {
-  if (!Array.isArray(overdueOwnerPayments.value)) return 0
-  return overdueOwnerPayments.value.reduce((sum, aidat) => {
-    const totalAmount = Number(aidat.amount || 0)
-    const paidAmount = Number(aidat.paidAmount || 0)
-    const remainingAmount = Number(aidat.remainingAmount || 0)
-    const unpaidAmount = remainingAmount > 0 ? remainingAmount : totalAmount - paidAmount
-    return sum + unpaidAmount
-  }, 0)
-})
 
 const overdueItems = computed(() => {
   if (!Array.isArray(debts.value)) return []
   const now = new Date()
-  
+
   return debts.value
     .filter(debt => {
-      // dueDate yoksa (null/undefined) gecikmiş sayıyoruz — tarihi girilmemiş eski borçlar
       const isOverdue = !debt.dueDate || new Date(debt.dueDate) < now
       const hasValidEntity = !!debt.tenantId || !!debt.ownerId
       const hasUnpaidAmount = debt.status !== 'Paid' && Number(debt.remainingAmount || 0) > 0
-
-      const isOwnTenant = userRole.value === 'tenant'
-        ? debt.tenantId === authStore.companyId
-        : true
-
-      return isOverdue && hasValidEntity && isOwnTenant && hasUnpaidAmount
+      return isOverdue && hasValidEntity && hasUnpaidAmount
     })
     .sort((a, b) => new Date(b.dueDate) - new Date(a.dueDate))
-    .map(debt => {
-      const tenant = Array.isArray(tenants.value) ? tenants.value.find(t => t.id === debt.tenantId) : null
-      const owner = debt.ownerId && Array.isArray(owners.value) ? owners.value.find(o => o.id === debt.ownerId) : null
-      
-      return {
-        ...debt,
-        company: debt.tenantName || tenant?.companyName || tenant?.company || (owner ? `${owner.firstName} ${owner.lastName} (M)` : null) || debt.description || 'Bilinmiyor',
-        floor: debt.unit || '-',
-        amount: Number(debt.remainingAmount || 0),
-        totalAmount: Number(debt.amount || 0),
-        paidAmount: Number(debt.amount || 0) - Number(debt.remainingAmount || 0),
-        remainingAmount: Number(debt.remainingAmount || 0),
-        typeLabel:
-          debt.type === 'Aidat' || debt.type === 0
-            ? 'Aidat'
-            : debt.type === 'Water' || debt.type === 2
-            ? 'Su'
-            : debt.type === 'Electricity' || debt.type === 1
-            ? 'Elektrik'
-            : 'Borç',
-      }
-    })
+    .map(debt => ({
+      ...debt,
+      company: debt.displayName || debt.description || 'Bilinmiyor',
+      floor: debt.unit || '-',
+      amount: Number(debt.remainingAmount || 0),
+      totalAmount: Number(debt.amount || 0),
+      remainingAmount: Number(debt.remainingAmount || 0),
+      typeLabel: debt.type === 0 || debt.type === 'Aidat' ? 'Aidat'
+               : debt.type === 1 || debt.type === 'Electricity' ? 'Elektrik'
+               : 'Su',
+    }))
 })
 
 const recentActivities = computed(() => {
@@ -791,39 +629,27 @@ const recentActivities = computed(() => {
       type: 'income',
       payer: p.tenantName || p.ownerName || p.description || 'Tahsilat'
     })),
-    // Observer gider görmez
     ...(isObserver ? [] : expenses.value.map(e => ({
       ...e,
       type: 'expense',
       payer: e.description || 'Gider'
     }))),
-    ...debts.value.map(d => {
-      const tenant = tenants.value.find(t => t.id === d.tenantId)
-      const owner = d.ownerId ? owners.value.find(o => o.id === d.ownerId) : null
-      return { 
-        ...d, 
-        type: 'debt',
-        company: d.tenantName || tenant?.companyName || tenant?.company || tenant?.fullName || (owner ? `${owner.firstName} ${owner.lastName} (M)` : null) || d.description || 'Bilinmiyor',
-        typeLabel: d.type === 0 || d.type === 'Aidat' ? 'Aidat' : (d.type === 1 || d.type === 'Electricity' ? 'Elektrik' : 'Su'),
-        totalAmount: Number(d.amount || 0)
-      }
-    })
+    ...debts.value.map(d => ({
+      ...d,
+      type: 'debt',
+      company: d.displayName || d.description || 'Bilinmiyor',
+      typeLabel: d.type === 0 || d.type === 'Aidat' ? 'Aidat'
+               : d.type === 1 || d.type === 'Electricity' ? 'Elektrik' : 'Su',
+      totalAmount: Number(d.amount || 0)
+    }))
   ]
 
-  const filteredByTenant = userRole.value === 'tenant'
-    ? items.filter(item => item.tenantId === authStore.companyId)
+  let filtered = dashboardType.value
+    ? items.filter(item => item.type === dashboardType.value)
     : items
 
-  let filtered = filteredByTenant
-  if (dashboardType.value) {
-    filtered = filtered.filter(item => item.type === dashboardType.value)
-  }
-
   return filtered
-    .filter(item => {
-      const itemDate = item.paymentDate || item.expenseDate || item.dueDate || item.date || item.createdAt
-      return itemDate
-    })
+    .filter(item => item.paymentDate || item.expenseDate || item.dueDate || item.date || item.createdAt)
     .sort((a, b) => {
       const dateA = a.paymentDate || a.expenseDate || a.dueDate || a.date || a.createdAt
       const dateB = b.paymentDate || b.expenseDate || b.dueDate || b.date || b.createdAt
@@ -872,137 +698,26 @@ const maxAmount = computed(() => {
   return Math.max(...allAmounts, 1) // En az 1 olsun ki sıfıra bölme hatası olmasın
 })
 
-// API'den veri yükleme fonksiyonları
-const loadPayments = async () => {
-  try {
-    const filters = {}
-    if (dateFilter.value !== 'all') {
-      const { startDate, endDate } = getDateRange(dateFilter.value)
-      filters.startDate = startDate
-      filters.endDate = endDate
-    }
-    const response = await paymentsService.getPayments(filters)
-    payments.value = response || []
-  } catch (err) {
-    console.error('Ödemeler yüklenirken hata:', err)
-    payments.value = []
-  }
-}
-
-const loadOwnerPayments = async () => {
-  try {
-    const filters = {}
-    if (dateFilter.value !== 'all') {
-      const { startDate, endDate } = getDateRange(dateFilter.value)
-      filters.startDate = startDate
-      filters.endDate = endDate
-    }
-    const response = await paymentsService.getPayments(filters)
-    ownerPayments.value = (response || []).filter(payment => payment.ownerId)
-  } catch (err) {
-    console.error('Mal sahibi ödemeleri yüklenirken hata:', err)
-    ownerPayments.value = []
-  }
-}
-
-const loadExpenses = async () => {
-  try {
-    const filters = {}
-    
-    // Tarih filtresi ekle
-    if (dateFilter.value !== 'all') {
-      const { startDate, endDate } = getDateRange(dateFilter.value)
-      filters.startDate = startDate
-      filters.endDate = endDate
-    }
-    
-    // Expenses için backend enum değerleri: "Electricity", "Water", "Gas", "Maintenance", "Cleaning", "Security", "Other"
-    const response = await expensesService.getExpenses(filters)
-    expenses.value = response || []
-  } catch (err) {
-    console.error('Giderler yüklenirken hata:', err)
-    expenses.value = []
-  }
-}
-
-const loadDebtsSummary = async () => {
-  try {
-    if (userRole.value !== 'tenant') {
-      const now = new Date()
-      const year = dateFilter.value === 'all' 
-        ? null 
-        : (dateFilter.value === 'last_month' && now.getMonth() === 0 ? now.getFullYear() - 1 : now.getFullYear())
-      const summaryResult = await dashboardService.getDebtsSummary(year)
-      debtsSummary.value = summaryResult || []
-    }
-  } catch (err) {
-    console.error('Borç özeti yüklenirken hata:', err)
-    debtsSummary.value = []
-  }
-}
-
-const loadTenants = async () => {
-  try {
-    const response = await tenantsService.getTenants()
-    tenants.value = response || []
-  } catch (err) {
-    console.error('Kiracılar yüklenirken hata:', err)
-    tenants.value = []
-  }
-}
-
-const loadOwnerDues = async () => {
-  try {
-    const response = await ownerDuesService.getOwnerDues()
-    ownerAidats.value = response || []
-  } catch (err) {
-    console.error('Mal sahibi aidatları yüklenirken hata:', err)
-    ownerAidats.value = []
-  }
-}
-
-const loadOwners = async () => {
-  try {
-    const response = await ownersService.getOwners()
-    owners.value = response || []
-  } catch (err) {
-    console.error('Mal sahipleri yüklenirken hata:', err)
-    owners.value = []
-  }
-}
-
-
-const loadUtilityDebts = async () => {
-  try {
-    const filters = { excludePaid: true }
-    if (userRole.value === 'tenant') {
-      filters.tenantId = authStore.companyId
-    }
-
-    const response = await utilityDebtsService.getUtilityDebts(filters)
-    debts.value = response || []
-  } catch (err) {
-    console.error('Utility borçları yüklenirken hata:', err)
-    debts.value = []
-  }
-}
-
-// Tüm verileri yükle
+// Tüm verileri yükle — 2 paralel çağrı (8'den indirildi)
 const loadDashboardData = async () => {
   loading.value = true
   error.value = null
 
   try {
-    await Promise.all([
-      loadPayments(),
-      loadExpenses(),
-      loadTenants(),
-      loadOwnerDues(),
-      loadOwners(),
-      loadOwnerPayments(),
-      loadUtilityDebts(),
-      loadDebtsSummary()
+    const now = new Date()
+    const year = dateFilter.value === 'all'
+      ? null
+      : (dateFilter.value === 'last_month' && now.getMonth() === 0 ? now.getFullYear() - 1 : now.getFullYear())
+
+    const [summary, debtsResult] = await Promise.all([
+      dashboardService.getDashboardSummary(dateFilter.value),
+      userRole.value !== 'tenant' ? dashboardService.getDebtsSummary(year) : Promise.resolve([])
     ])
+
+    payments.value = summary?.payments || []
+    expenses.value = summary?.expenses || []
+    debts.value = summary?.debts || []
+    debtsSummary.value = debtsResult || []
   } catch (err) {
     console.error('Dashboard verileri yüklenirken hata:', err)
     error.value = 'Veriler yüklenirken bir hata oluştu. Lütfen sayfayı yenileyin.'
