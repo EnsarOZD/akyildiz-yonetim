@@ -128,25 +128,28 @@ class ApiService {
 
   // POST isteği
   async post(endpoint, data) {
+    const isFormData = data instanceof FormData
     return this.request(endpoint, {
       method: 'POST',
-      body: JSON.stringify(data)
+      body: isFormData ? data : JSON.stringify(data)
     })
   }
 
   // PUT isteği
   async put(endpoint, data) {
+    const isFormData = data instanceof FormData
     return this.request(endpoint, {
       method: 'PUT',
-      body: JSON.stringify(data)
+      body: isFormData ? data : JSON.stringify(data)
     })
   }
 
   // PATCH isteği
   async patch(endpoint, data) {
+    const isFormData = data instanceof FormData
     return this.request(endpoint, {
       method: 'PATCH',
-      body: JSON.stringify(data)
+      body: isFormData ? data : JSON.stringify(data)
     })
   }
 
