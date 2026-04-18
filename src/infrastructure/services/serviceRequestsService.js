@@ -4,36 +4,36 @@ class ServiceRequestsService {
     async getServiceRequests(status) {
         const params = {}
         if (status) params.status = status
-        return api.get('/service-requests', params)
+        return api.get('/ServiceRequests', params)
     }
 
     async createServiceRequest(data) {
         // Handle image attachment (FormData)
         if (data.attachment) {
             const formData = new FormData()
+            // .NET FromForm prefers matching case or camelCase depending on config, 
+            // but usually handles both. I'll stick to standard keys but 
+            // will match the record property names for safety if needed.
             formData.append('title', data.title)
             formData.append('description', data.description)
             formData.append('category', data.category)
             formData.append('attachment', data.attachment)
             
-            // Using request directly since apiService might need a custom multipart config 
-            // but ApiService.request handles FormData if check is correct.
-            // Let's assume api.post(endpoint, formData) works as ApiService.request checks for FormData.
-            return api.post('/service-requests', formData)
+            return api.post('/ServiceRequests', formData)
         }
-        return api.post('/service-requests', data)
+        return api.post('/ServiceRequests', data)
     }
 
     async updateStatus(id, status, adminNote) {
-        return api.patch(`/service-requests/${id}/status`, { status, adminNote })
+        return api.patch(`/ServiceRequests/${id}/status`, { status, adminNote })
     }
 
     async assignPersonnel(id, personnelId) {
-        return api.patch(`/service-requests/${id}/assign`, { personnelId })
+        return api.patch(`/ServiceRequests/${id}/assign`, { personnelId })
     }
 
     async resolveRequest(id, resolutionNote) {
-        return api.patch(`/service-requests/${id}/resolve`, { resolutionNote })
+        return api.patch(`/ServiceRequests/${id}/resolve`, { resolutionNote })
     }
 }
 
