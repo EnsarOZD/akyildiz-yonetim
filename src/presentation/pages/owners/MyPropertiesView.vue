@@ -92,8 +92,8 @@
                 <p class="font-semibold text-sm text-gray-800 dark:text-white">{{ debtTypeLabel(debt.type) }}</p>
                 <p class="text-xs text-gray-400">
                   {{ debt.periodMonth }}/{{ debt.periodYear }}
-                  <span v-if="debt.flatId || debt.apartmentNumber" class="ml-1 text-gray-300 dark:text-gray-600">·</span>
-                  <span v-if="debt.flatId || debt.apartmentNumber" class="ml-1">Kat {{ debt.apartmentNumber || debt.flatId }}</span>
+                  <span v-if="debt.flatCode" class="ml-1 text-gray-300 dark:text-gray-600">·</span>
+                  <span v-if="debt.flatCode" class="ml-1">Ünite {{ debt.flatCode }}</span>
                 </p>
               </div>
             </div>
@@ -147,12 +147,8 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import PageHeader from '@/presentation/components/ui/PageHeader.vue'
-import { useAuthStore } from '@/application/stores/auth'
-import utilityDebtsService from '@/infrastructure/services/utilityDebtsService'
-import paymentsService from '@/infrastructure/services/paymentsService'
+import dashboardService from '@/infrastructure/services/dashboardService'
 import { formatCurrency } from '@/core/utils/currencyUtils'
-
-const authStore = useAuthStore()
 
 const loading = ref(true)
 const debts = ref([])
@@ -225,16 +221,10 @@ const debtTypeClass = (type) => {
 const loadData = async () => {
   loading.value = true
   try {
-    const ownerId = authStore.companyId
-    if (!ownerId) return
-
-    const [debtData, paymentData] = await Promise.all([
-      utilityDebtsService.getUtilityDebts({ ownerId }),
-      paymentsService.getPayments({ ownerId }),
-    ])
-
-    debts.value = debtData || []
-    payments.value = paymentData || []
+    const result = await dashboardService.getOwnerDashboard()
+    // myDebts comes pre-filtered (Status != Paid) from the backend
+    debts.value    = result?.myDebts        || []
+    payments.value = result?.recentPayments || []
   } catch (error) {
     console.error('Mülk verisi yüklenirken hata:', error)
   } finally {
