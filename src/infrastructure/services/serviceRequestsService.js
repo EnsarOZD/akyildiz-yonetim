@@ -8,17 +8,7 @@ class ServiceRequestsService {
     }
 
     async createServiceRequest(data) {
-        // Always use FormData to match backend [FromForm] endpoint
-        const formData = new FormData()
-        formData.append('title', data.title)
-        formData.append('description', data.description)
-        formData.append('category', data.category)
-        
-        if (data.attachment) {
-            formData.append('attachment', data.attachment)
-        }
-        
-        return api.post('/ServiceRequests', formData)
+        return api.post('/ServiceRequests', data)
     }
 
     async updateStatus(id, status, adminNote) {

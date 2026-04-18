@@ -1,148 +1,191 @@
 <template>
   <div class="p-4 sm:p-6 min-h-screen pb-24 md:pb-6">
-    <div class="max-w-4xl mx-auto">
+    <div class="max-w-6xl mx-auto">
 
-      <PageHeader :title="`Hoş Geldiniz, ${authStore.fullName}`" subtitle="Mülklerinize ait borç ve kiracı durumu">
+      <PageHeader :title="`Hoş Geldiniz, ${authStore.fullName}`" subtitle="Mülk portföyünüz ve finansal durum özeti">
         <template #icon>
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
           </svg>
         </template>
       </PageHeader>
 
       <!-- Loading -->
-      <div v-if="loading" class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-        <div v-for="i in 3" :key="i" class="app-card p-5 animate-pulse">
-          <div class="h-3 bg-slate-100 dark:bg-slate-700 rounded w-1/2 mb-3"></div>
-          <div class="h-7 bg-slate-100 dark:bg-slate-700 rounded w-2/3"></div>
-        </div>
-      </div>
-
-      <!-- Error -->
-      <div v-else-if="error" class="app-card p-5 border-red-200 dark:border-red-800/50 mb-6">
-        <p class="text-sm text-red-600 dark:text-red-400">{{ error }}</p>
-        <button @click="loadData" class="mt-2 text-xs font-semibold text-blue-600 hover:underline">Tekrar dene</button>
+      <div v-if="loading" class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+        <div v-for="i in 4" :key="i" class="app-card p-6 animate-pulse h-32"></div>
       </div>
 
       <template v-else>
-        <!-- Özet Kartları -->
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-          <div class="app-card p-5">
-            <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Toplam Borcum</p>
-            <p class="text-2xl font-bold" :class="data.totalOwnerDebt > 0 ? 'text-red-500' : 'text-emerald-500'">
-              {{ formatCurrency(data.totalOwnerDebt) }}
-            </p>
-            <span class="mt-2 inline-block text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full"
-              :class="data.totalOwnerDebt > 0 ? 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' : 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400'">
-              {{ data.totalOwnerDebt > 0 ? 'Ödeme Bekliyor' : 'Borç Yok' }}
-            </span>
+        <!-- Üst Özet Kartları -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+          <div class="app-card p-6 bg-gradient-to-br from-white to-red-50/30 dark:from-slate-800 dark:to-red-900/5 border-l-4 border-l-red-500">
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Ödeyeceğim Toplam (Boş Üniteler)</p>
+            <p class="text-2xl font-black text-red-600 dark:text-red-400">{{ formatCurrency(data.totalOwnerDebt) }}</p>
+            <div class="mt-3 flex items-center gap-1.5">
+              <span class="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></span>
+              <span class="text-[10px] font-bold text-red-500 uppercase italic">Ödeme Bekliyor</span>
+            </div>
           </div>
 
-          <div class="app-card p-5">
-            <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Gecikmiş Kalem</p>
-            <p class="text-2xl font-bold" :class="data.overdueCount > 0 ? 'text-orange-500' : 'text-slate-300 dark:text-slate-600'">
-              {{ data.overdueCount }}
-            </p>
-            <p class="mt-2 text-xs text-slate-400">{{ data.overdueCount > 0 ? 'adet vadesi geçmiş' : 'Gecikmiş kalem yok' }}</p>
+          <div class="app-card p-6 border-l-4 border-l-blue-500">
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Kiracı Toplam Bakiyesi</p>
+            <p class="text-2xl font-black text-blue-600 dark:text-blue-400">{{ formatCurrency(data.totalTenantDebt) }}</p>
+            <p class="mt-3 text-[10px] font-medium text-slate-500 italic">Bağımsız bölümlerdeki toplam alacak</p>
           </div>
 
-          <div class="app-card p-5">
-            <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Kiracı Sayısı</p>
-            <p class="text-2xl font-bold text-slate-800 dark:text-slate-100">{{ data.myTenants.length }}</p>
-            <p class="mt-2 text-xs text-slate-400">aktif kiracı</p>
+          <div class="app-card p-6 border-l-4 border-l-amber-500">
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Vadesi Geçmiş Kalem</p>
+            <p class="text-2xl font-black text-amber-600 dark:text-amber-400">{{ data.overdueCount }}</p>
+            <p class="mt-3 text-[10px] font-medium text-slate-500 italic">Acil kontrol edilmesi gerekenler</p>
+          </div>
+
+          <div class="app-card p-6 border-l-4 border-l-indigo-500">
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Toplam Ünite</p>
+            <p class="text-2xl font-black text-indigo-600 dark:text-indigo-400">{{ data.myProperties.length }}</p>
+            <p class="mt-3 text-[10px] font-medium text-slate-500 italic">Portföyünüzdeki toplam mülk</p>
           </div>
         </div>
 
-        <!-- Borçlarım -->
-        <div class="app-card overflow-hidden mb-5">
-          <div class="px-5 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
-            <h2 class="text-sm font-semibold text-slate-800 dark:text-slate-100">Bekleyen Borçlarım</h2>
-            <span v-if="data.myDebts.length > 0" class="badge badge-warning badge-sm">{{ data.myDebts.length }} kalem</span>
-          </div>
-
-          <div v-if="data.myDebts.length === 0" class="px-5 py-10 flex flex-col items-center gap-2">
-            <div class="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
+        <!-- Master-Detail Portföy Görünümü -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          
+          <!-- Master: Property List -->
+          <div class="lg:col-span-5 space-y-3">
+            <div class="flex items-center justify-between mb-4 px-1">
+              <h2 class="text-lg font-bold text-slate-800 dark:text-white font-cormorantSC tracking-wide">Mülk Portföyünüz</h2>
+              <span class="text-[10px] font-bold text-slate-400 uppercase">{{ data.myProperties.length }} Ünite</span>
             </div>
-            <p class="text-sm font-medium text-slate-600 dark:text-slate-300">Ödenmemiş borcunuz bulunmamaktadır.</p>
-          </div>
 
-          <div v-else class="divide-y divide-slate-50 dark:divide-slate-800">
-            <div v-for="debt in data.myDebts" :key="debt.id"
-              class="px-5 py-3.5 flex items-center justify-between table-row-hover">
-              <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 text-sm"
-                  :class="debtTypeClass(debt.type)">
-                  {{ debtTypeIcon(debt.type) }}
+            <div v-for="prop in data.myProperties" :key="prop.flatId"
+              @click="selectedFlatId = prop.flatId"
+              :class="[
+                'app-card p-4 transition-all duration-300 cursor-pointer border-l-4 group',
+                selectedFlatId === prop.flatId 
+                  ? 'border-l-blue-600 shadow-lg shadow-blue-500/10 ring-1 ring-blue-500/20 translate-x-1' 
+                  : 'border-l-transparent hover:border-l-slate-300 dark:hover:border-l-slate-700'
+              ]">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <div :class="[
+                    'w-10 h-10 rounded-xl flex items-center justify-center transition-colors',
+                    selectedFlatId === prop.flatId ? 'bg-blue-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-400'
+                  ]">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 class="text-base font-bold text-slate-800 dark:text-slate-100 group-hover:text-blue-600 transition-colors">No: {{ prop.code }}</h3>
+                    <p class="text-[10px] font-bold tracking-tight" :class="prop.isOccupied ? 'text-emerald-500' : 'text-slate-400'">
+                      {{ prop.isOccupied ? `Kiracı: ${prop.tenantName}` : 'Daire Boş (Müstakil)' }}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <p class="text-sm font-medium text-slate-800 dark:text-slate-100">{{ debtTypeLabel(debt.type) }}</p>
-                  <p class="text-xs text-slate-400">{{ debt.periodMonth }}/{{ debt.periodYear }}
-                    <span v-if="debt.flatCode" class="ml-1">· {{ debt.flatCode }}</span>
-                  </p>
+                <div class="text-right">
+                  <p class="text-xs font-black text-slate-700 dark:text-slate-300">{{ formatCurrency(getPropertyDebtTotal(prop.flatId)) }}</p>
+                  <p class="text-[9px] font-bold uppercase text-slate-400 mt-1">Borç Bakiyesi</p>
                 </div>
               </div>
-              <div class="text-right">
-                <p class="text-sm font-bold text-slate-900 dark:text-white">{{ formatCurrency(debt.remainingAmount) }}</p>
-                <span v-if="debt.isOverdue" class="badge badge-error badge-xs text-white">Gecikmiş</span>
-                <p v-else class="text-[10px] text-slate-400">{{ formatDate(debt.dueDate) }}</p>
+            </div>
+          </div>
+
+          <!-- Detail: Property Finances -->
+          <div class="lg:col-span-7">
+            <template v-if="selectedFlat">
+              <div class="app-card p-0 overflow-hidden min-h-[400px]">
+                <!-- Detail Header -->
+                <div class="p-6 bg-slate-50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-700/50">
+                  <div class="flex items-center justify-between gap-4">
+                    <div>
+                      <h2 class="text-2xl font-bold text-slate-900 dark:text-white font-cormorantSC">Ünite Detayı: {{ selectedFlat.code }}</h2>
+                      <div class="flex items-center gap-2 mt-1">
+                        <span class="text-xs font-bold text-slate-500">Durum:</span>
+                        <span :class="selectedFlat.isOccupied ? 'text-emerald-500' : 'text-slate-400'" class="text-xs font-bold uppercase tracking-wider">
+                          {{ selectedFlat.isOccupied ? 'Kiracılı' : 'Boş / Kendi Kullanımı' }}
+                        </span>
+                      </div>
+                    </div>
+                    <div class="text-right">
+                      <p class="text-xs font-bold text-slate-400 uppercase mb-1">Toplam Alacak</p>
+                      <p class="text-2xl font-black text-slate-900 dark:text-white">{{ formatCurrency(getPropertyDebtTotal(selectedFlat.flatId)) }}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Debts List for Selected Property -->
+                <div class="p-0">
+                  <div v-if="selectedPropertyDebts.length === 0" class="p-12 text-center">
+                    <div class="w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-900/20 text-emerald-600 mx-auto mb-3 flex items-center justify-center">
+                      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                    </div>
+                    <p class="text-sm font-bold text-slate-700 dark:text-slate-300">Bu üniteye ait borç bulunmamaktadır.</p>
+                  </div>
+                  
+                  <div v-else class="divide-y divide-slate-50 dark:divide-slate-800">
+                    <div v-for="debt in selectedPropertyDebts" :key="debt.id" class="p-4 flex items-center justify-between transition-colors hover:bg-slate-50/50 dark:hover:bg-slate-700/20">
+                      <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-lg flex items-center justify-center text-xs" :class="debtTypeClass(debt.type)">
+                          {{ debtTypeIcon(debt.type) }}
+                        </div>
+                        <div>
+                          <p class="text-sm font-bold text-slate-800 dark:text-slate-100">{{ debtTypeLabel(debt.type) }}</p>
+                          <p class="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">
+                            {{ debt.periodMonth }}/{{ debt.periodYear }} · 
+                            <span :class="debt.isVacantDebt ? 'text-amber-600' : 'text-blue-500'">{{ debt.isVacantDebt ? 'Benim Borcum' : `Kiracı: ${debt.tenantName}` }}</span>
+                          </p>
+                        </div>
+                      </div>
+                      <div class="text-right">
+                        <p class="text-sm font-black text-slate-800 dark:text-white">{{ formatCurrency(debt.remainingAmount) }}</p>
+                        <span v-if="debt.isOverdue" class="badge badge-error badge-xs font-bold text-white px-1.5 py-2">Vadesi Geçmiş</span>
+                        <p v-else class="text-[9px] font-bold text-slate-400 uppercase">{{ formatDate(debt.dueDate) }}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </template>
+
+            <!-- Boş Seçim Durumu -->
+            <div v-else class="app-card h-full flex flex-col items-center justify-center p-12 text-center bg-slate-50/30 dark:bg-slate-800/20 border-dashed border-2">
+              <div class="w-16 h-16 rounded-3xl bg-slate-100 dark:bg-slate-800 text-slate-300 flex items-center justify-center mb-4">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              </div>
+              <h3 class="text-base font-bold text-slate-700 dark:text-slate-300">Portföy Detayı</h3>
+              <p class="text-xs text-slate-500 mt-1 max-w-[240px]">Herhangi bir ünitenin detaylarını, kiracı durumunu ve borç geçmişini görmek için soldaki listeden seçim yapın.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Son İşlemler (Ekranın en altı) -->
+        <div class="mt-8">
+          <h2 class="text-lg font-bold text-slate-800 dark:text-white font-cormorantSC mb-4 px-1">Son Ödemelerim</h2>
+          <div class="app-card p-0 overflow-hidden">
+            <div v-if="data.recentPayments.length === 0" class="p-8 text-center text-slate-400 italic text-sm">Henüz bir ödeme kaydı bulunmamaktadır.</div>
+            <div v-else class="divide-y divide-slate-50 dark:divide-slate-800">
+              <div v-for="p in data.recentPayments" :key="p.id" class="p-4 flex items-center justify-between table-row-hover">
+                <div class="flex items-center gap-3">
+                  <div class="w-9 h-9 rounded-xl bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 flex items-center justify-center">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                  </div>
+                  <div>
+                    <p class="text-sm font-bold text-slate-800 dark:text-slate-100">{{ p.description || p.type || 'Tahsilat' }}</p>
+                    <p class="text-[10px] font-medium text-slate-400">{{ formatDate(p.paymentDate) }}</p>
+                  </div>
+                </div>
+                <span class="text-base font-black text-emerald-600 dark:text-emerald-400">+{{ formatCurrency(p.amount) }}</span>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Kiracılarım -->
-        <div class="app-card overflow-hidden mb-5" v-if="data.myTenants.length > 0">
-          <div class="px-5 py-4 border-b border-slate-100 dark:border-slate-800">
-            <h2 class="text-sm font-semibold text-slate-800 dark:text-slate-100">Kiracılarım</h2>
-          </div>
-          <div class="divide-y divide-slate-50 dark:divide-slate-800">
-            <div v-for="tenant in data.myTenants" :key="tenant.tenantId"
-              class="px-5 py-3.5 flex items-center justify-between table-row-hover">
-              <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 flex items-center justify-center flex-shrink-0">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                  </svg>
-                </div>
-                <div>
-                  <p class="text-sm font-medium text-slate-800 dark:text-slate-100">{{ tenant.displayName }}</p>
-                  <p v-if="tenant.flatCode" class="text-xs text-slate-400">{{ tenant.flatCode }}</p>
-                </div>
-              </div>
-              <span :class="tenant.isActive ? 'badge badge-success badge-sm' : 'badge badge-ghost badge-sm'">
-                {{ tenant.isActive ? 'Aktif' : 'Pasif' }}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Son Ödemeler -->
-        <div class="app-card overflow-hidden" v-if="data.recentPayments.length > 0">
-          <div class="px-5 py-4 border-b border-slate-100 dark:border-slate-800">
-            <h2 class="text-sm font-semibold text-slate-800 dark:text-slate-100">Son Ödemelerim</h2>
-          </div>
-          <div class="divide-y divide-slate-50 dark:divide-slate-800">
-            <div v-for="p in data.recentPayments" :key="p.id"
-              class="px-5 py-3 flex items-center justify-between table-row-hover">
-              <div>
-                <p class="text-sm font-medium text-slate-800 dark:text-slate-100">{{ p.description || p.type || 'Ödeme' }}</p>
-                <p class="text-xs text-slate-400">{{ formatDate(p.paymentDate) }}</p>
-              </div>
-              <span class="font-bold text-emerald-600 dark:text-emerald-400">+{{ formatCurrency(p.amount) }}</span>
-            </div>
-          </div>
-        </div>
       </template>
-
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import PageHeader from '@/presentation/components/ui/PageHeader.vue'
 import { useAuthStore } from '@/application/stores/auth'
 import dashboardService from '@/infrastructure/services/dashboardService'
@@ -151,7 +194,27 @@ import { formatCurrency } from '@/core/utils/currencyUtils'
 const authStore = useAuthStore()
 const loading = ref(true)
 const error = ref(null)
-const data = ref({ myDebts: [], myTenants: [], recentPayments: [], totalOwnerDebt: 0, overdueCount: 0 })
+const data = ref({ 
+  myDebts: [], 
+  myTenants: [], 
+  myProperties: [],
+  recentPayments: [], 
+  totalOwnerDebt: 0, 
+  totalTenantDebt: 0,
+  overdueCount: 0 
+})
+
+const selectedFlatId = ref(null)
+
+const selectedFlat = computed(() => {
+  if (!selectedFlatId.value) return null
+  return data.value.myProperties.find(p => p.flatId === selectedFlatId.value)
+})
+
+const selectedPropertyDebts = computed(() => {
+  if (!selectedFlatId.value) return []
+  return data.value.myDebts.filter(d => d.flatId === selectedFlatId.value)
+})
 
 const loadData = async () => {
   loading.value = true
@@ -159,12 +222,23 @@ const loadData = async () => {
   try {
     const result = await dashboardService.getOwnerDashboard()
     data.value = result || data.value
+    
+    // Default selection
+    if (data.value.myProperties?.length > 0 && !selectedFlatId.value) {
+      selectedFlatId.value = data.value.myProperties[0].flatId
+    }
   } catch (err) {
     console.error('Owner dashboard yüklenirken hata:', err)
     error.value = 'Veriler yüklenemedi. Lütfen sayfayı yenileyin.'
   } finally {
     loading.value = false
   }
+}
+
+const getPropertyDebtTotal = (flatId) => {
+  return data.value.myDebts
+    .filter(d => d.flatId === flatId)
+    .reduce((sum, d) => sum + d.remainingAmount, 0)
 }
 
 const formatDate = (d) => {
@@ -182,3 +256,15 @@ const debtTypeClass = (t) => ({
 
 onMounted(loadData)
 </script>
+
+<style scoped>
+.font-cormorantSC {
+  font-family: 'Cormorant SC', serif;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.table-row-hover {
+  transition: all 0.2s ease;
+}
+</style>

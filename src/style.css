@@ -157,14 +157,17 @@ button:active:not([disabled]) {
    Typography utilities
    ============================================================ */
 .page-title {
-  font-size: 1.625rem;
-  font-weight: 800;
-  line-height: 1.2;
-  letter-spacing: -0.03em;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 2.125rem;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
   color: #0f172a;
+  text-shadow: 0 1px 1px rgba(0,0,0,0.02);
 }
 .dark .page-title {
   color: #f8fafc;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
 }
 .page-subtitle {
   font-size: 0.9375rem;

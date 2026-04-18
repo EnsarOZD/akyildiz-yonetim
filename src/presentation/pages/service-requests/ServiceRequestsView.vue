@@ -144,21 +144,15 @@
             <input v-model="form.title" type="text" placeholder="Kısa ve öz bir başlık..." class="input input-bordered bg-slate-50 dark:bg-slate-800/50 w-full focus:ring-2 focus:ring-blue-500/20" />
           </div>
           
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div class="form-control">
-              <label class="label py-1"><span class="label-text text-xs font-bold text-slate-500 uppercase">Kategori</span></label>
-              <select v-model="form.category" class="select select-bordered bg-slate-50 dark:bg-slate-800/50 w-full">
-                <option value="Maintenance">Bakım / Tamir</option>
-                <option value="Cleaning">Temizlik</option>
-                <option value="Noise">Gürültü / Şikayet</option>
-                <option value="Security">Güvenlik</option>
-                <option value="Other">Diğer</option>
-              </select>
-            </div>
-            <div class="form-control">
-              <label class="label py-1"><span class="label-text text-xs font-bold text-slate-500 uppercase">Fotoğraf Ekle</span></label>
-              <input type="file" @change="handleFileChange" accept="image/*" class="file-input file-input-bordered file-input-sm w-full bg-slate-50 dark:bg-slate-800/50 text-xs" />
-            </div>
+          <div class="form-control">
+            <label class="label py-1"><span class="label-text text-xs font-bold text-slate-500 uppercase">Kategori</span></label>
+            <select v-model="form.category" class="select select-bordered bg-slate-50 dark:bg-slate-800/50 w-full">
+              <option value="Maintenance">Bakım / Tamir</option>
+              <option value="Cleaning">Temizlik</option>
+              <option value="Noise">Gürültü / Şikayet</option>
+              <option value="Security">Güvenlik</option>
+              <option value="Other">Diğer</option>
+            </select>
           </div>
           
           <div class="form-control">
@@ -313,7 +307,7 @@ const resolutionNote = ref('')
 const deleteTarget = ref(null)
 
 // Form
-const form = ref({ title: '', description: '', category: 'Other', attachment: null })
+const form = ref({ title: '', description: '', category: 'Other' })
 const personnel = ref([])
 const personnelLoading = ref(false)
 
@@ -345,18 +339,6 @@ const loadPersonnel = async () => {
   }
 }
 
-/** Dosya İşlemleri */
-const handleFileChange = (e) => {
-  const file = e.target.files[0]
-  if (file) {
-    if (file.size > 5 * 1024 * 1024) {
-      notifyError('Dosya boyutu 5MB\'dan küçük olmalıdır.')
-      e.target.value = ''
-      return
-    }
-    form.value.attachment = file
-  }
-}
 
 /** CRUD & İş Akışı */
 const submitCreate = async () => {
@@ -365,7 +347,7 @@ const submitCreate = async () => {
     await serviceRequestsService.createServiceRequest(form.value)
     notifySuccess('Talebiniz başarıyla oluşturuldu.')
     showCreate.value = false
-    form.value = { title: '', description: '', category: 'Other', attachment: null }
+    form.value = { title: '', description: '', category: 'Other' }
     await loadRequests()
   } catch (err) {
     notifyError('Talep gönderilemedi: ' + (err.message || 'Bilinmeyen hata'))

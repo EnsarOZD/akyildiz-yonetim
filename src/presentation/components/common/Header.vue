@@ -331,7 +331,6 @@ const setTabsBasedOnRole = (role) => {
     tabs.value = [
       { label: 'Özet',        value: 'dashboard', route: '/dashboard'  },
       { label: 'Kiracılar',   value: 'tenants',   route: '/tenants'    },
-      { label: 'Mal Sahipleri', value: 'owners',  route: '/owners'     },
       { label: 'Ödemeler',    value: 'payments',  route: '/payments'   },
       { label: 'Giderler',    value: 'expenses',  route: '/expenses'   },
       { label: 'Borçlar',     value: 'utilities', route: '/utilities'  },

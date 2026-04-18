@@ -14,8 +14,8 @@
         </div>
         
         <div>
-          <h1 class="page-title leading-tight">{{ title }}</h1>
-          <p v-if="subtitle" class="page-subtitle leading-relaxed">{{ subtitle }}</p>
+          <h1 class="page-title">{{ title }}</h1>
+          <p v-if="subtitle" class="page-subtitle mt-1.5 opacity-80">{{ subtitle }}</p>
         </div>
       </div>
 
