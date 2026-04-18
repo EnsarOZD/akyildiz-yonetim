@@ -2,30 +2,30 @@
   <div class="p-4 sm:p-6 min-h-screen pb-24 md:pb-6">
 
     <!-- Sayfa Başlığı -->
-    <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-      <div>
-        <h1 class="page-title">Giderler</h1>
-        <p class="page-subtitle">İşletme giderlerini takip edin</p>
-      </div>
-      <div class="flex gap-2 shrink-0">
-        <select v-model="dateFilter" @change="fetchExpenses" class="select select-sm select-bordered">
-          <option value="all">Tüm Zamanlar</option>
-    <PageHeader title="Gider Yönetimi" subtitle="Binaya ait tüm giderleri takip edin ve yeni harcama ekleyin">
+    <PageHeader title="Giderler" subtitle="İşletme giderlerini takip edin ve yeni harcamaları buradan yönetin">
       <template #icon>
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
         </svg>
       </template>
       <template #actions>
-        <button
-          @click="openNewExpenseModal"
-          class="btn btn-sm btn-primary"
-        >
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-          </svg>
-          Yeni Gider
-        </button>
+        <div class="flex items-center gap-3">
+          <select v-model="dateFilter" @change="fetchExpenses" class="select select-sm select-bordered h-10 border-slate-200 dark:border-slate-700 bg-white/50 dark:bg-slate-800/50">
+            <option value="all">Tüm Zamanlar</option>
+            <option value="this_month">Bu Ay</option>
+            <option value="last_month">Geçen Ay</option>
+            <option value="this_year">Bu Yıl</option>
+          </select>
+          <button
+            @click="openNewExpenseModal"
+            class="btn btn-sm btn-primary h-10 px-4"
+          >
+            <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+            </svg>
+            Yeni Gider
+          </button>
+        </div>
       </template>
     </PageHeader>
 
