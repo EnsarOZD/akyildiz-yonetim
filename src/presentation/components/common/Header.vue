@@ -299,7 +299,7 @@ const notifTypes = {
   Debt:            { bg: 'bg-red-100 dark:bg-red-900/30',    color: 'text-red-600 dark:text-red-400',    path: 'M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z' },
   Payment:         { bg: 'bg-emerald-100 dark:bg-emerald-900/30', color: 'text-emerald-600 dark:text-emerald-400', path: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z' },
   PaymentCreated:  { bg: 'bg-blue-100 dark:bg-blue-900/30',   color: 'text-blue-600 dark:text-blue-400',  path: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1' },
-  Announcement:    { bg: 'bg-amber-100 dark:bg-amber-900/30', color: 'text-amber-600 dark:text-amber-400', path: 'M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z' },
+  Announcement:    { bg: 'bg-amber-100 dark:bg-amber-900/30', color: 'text-amber-600 dark:text-amber-400', path: 'M11 5.882V19.24a1.76 1.76 0 0 1 -3.417 .592l-2.147-6.15M18 13a3 3 0 1 0 0-6M5.436 13.683A4.001 4.001 0 0 1 7 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 0 1 -1.564 -.317z' },
 }
 const notifIconBg    = (type) => (notifTypes[type] || notifTypes.Announcement).bg
 const notifIconColor = (type) => (notifTypes[type] || notifTypes.Announcement).color
@@ -348,8 +348,8 @@ const setTabsBasedOnRole = (role) => {
   } else if (r === ROLES.OWNER) {
     tabs.value = [
       { label: 'Mülklerim',   value: 'my-properties', route: '/my-properties' },
+      { label: 'Kiracılarım', value: 'tenants',       route: '/tenants'       },
       { label: 'Talepler',    value: 'service-requests', route: '/service-requests' },
-      { label: 'Bildirimler', value: 'notifications',  route: '/notifications' },
     ]
   } else if (r === ROLES.OBSERVER) {
     tabs.value = [

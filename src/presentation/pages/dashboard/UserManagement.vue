@@ -165,6 +165,13 @@
                 <option v-for="tenant in tenants" :key="tenant.id" :value="tenant.id">{{ tenant.companyName }}</option>
               </select>
             </div>
+            <div v-if="newUser.role === 'owner'" class="form-control">
+              <label class="label py-1"><span class="label-text font-semibold text-xs uppercase tracking-wide">İlişkili Mal Sahibi</span></label>
+              <select v-model="newUser.companyId" class="select select-sm select-bordered w-full" required>
+                <option disabled value="">Mal Sahibi Seçiniz</option>
+                <option v-for="owner in owners" :key="owner.id" :value="owner.id">{{ owner.firstName }} {{ owner.lastName }}</option>
+              </select>
+            </div>
           </div>
 
           <div class="flex items-start gap-3 p-3 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
@@ -217,6 +224,7 @@ import { ref, onMounted, computed, reactive } from 'vue'
 import PageHeader from '@/presentation/components/ui/PageHeader.vue'
 import usersService from '@/infrastructure/services/usersService'
 import tenantsService from '@/infrastructure/services/tenantsService'
+import ownersService from '@/infrastructure/services/ownersService'
 import { useErrorHandler } from '@/application/composables/useErrorHandler'
 import { ROLE_LABELS, ROLES } from '@/core/constants/roles'
 import ConfirmModal from '@/presentation/components/common/ConfirmModal.vue'
@@ -229,6 +237,7 @@ const { handleNetworkError, handleValidationError, showSuccess } = useErrorHandl
 
 const users = ref([])
 const tenants = ref([])
+const owners = ref([])
 const search = ref('')
 const showAddUserModal = ref(false)
 const isEditMode = ref(false)
@@ -252,6 +261,14 @@ const notification = reactive({
 const fetchTenants = async () => {
   try {
     tenants.value = await tenantsService.getTenants()
+  } catch (error) {
+    handleNetworkError(error)
+  }
+}
+
+const fetchOwners = async () => {
+  try {
+    owners.value = await ownersService.getOwners()
   } catch (error) {
     handleNetworkError(error)
   }
@@ -365,6 +382,10 @@ const createUser = async () => {
     showNotification('Kiracı rolü için bir firma seçmelisiniz.', 'error');
     return;
   }
+  if (newUser.role === ROLES.OWNER && !newUser.companyId) {
+    showNotification('Mal sahibi rolü için bir mal sahibi seçmelisiniz.', 'error');
+    return;
+  }
 
   if (!newUser.firstName || !newUser.lastName || !newUser.email || !newUser.role) {
     showNotification('Lütfen tüm zorunlu alanları doldurun.', 'error');
@@ -374,23 +395,20 @@ const createUser = async () => {
   loading.value = true
   
   try {
+    const needsCompanyId = newUser.role === ROLES.TENANT || newUser.role === ROLES.OWNER
+    const payload = {
+      firstName: newUser.firstName,
+      lastName: newUser.lastName,
+      email: newUser.email,
+      role: newUser.role,
+      companyId: needsCompanyId ? newUser.companyId : null,
+    }
+
     if (isEditMode.value && selectedUser.value) {
-      await usersService.updateUser(selectedUser.value.id, {
-        firstName: newUser.firstName,
-        lastName: newUser.lastName,
-        email: newUser.email,
-        role: newUser.role,
-        companyId: newUser.role === ROLES.TENANT ? newUser.companyId : null
-      })
+      await usersService.updateUser(selectedUser.value.id, payload)
       showSuccess('Kullanıcı başarıyla güncellendi.')
     } else {
-      await usersService.createUser({
-        firstName: newUser.firstName,
-        lastName: newUser.lastName,
-        email: newUser.email,
-        role: newUser.role,
-        companyId: newUser.role === ROLES.TENANT ? newUser.companyId : null
-      })
+      await usersService.createUser(payload)
       showSuccess(`Kullanıcı başarıyla oluşturuldu! Şifre belirleme bağlantısı ${newUser.email} adresine gönderildi.`)
     }
     
@@ -448,6 +466,7 @@ const getRoleClass = (role) => {
 onMounted(async () => {
   await Promise.all([
     fetchTenants(),
+    fetchOwners(),
     fetchUsers(),
     fetchRoles()
   ])
