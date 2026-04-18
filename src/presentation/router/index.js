@@ -24,6 +24,7 @@ const Reports = () => import('../pages/reports/ReportsView.vue')
 const Notifications = () => import('../pages/notifications/NotificationsView.vue')
 const Profile = () => import('../pages/users/ProfileView.vue')
 const MyProperties = () => import('../pages/owners/MyPropertiesView.vue')
+const MyTenants = () => import('../pages/owners/MyTenantsView.vue')
 const OwnerDashboard = () => import('../pages/owners/OwnerDashboardView.vue')
 const ServiceRequests = () => import('../pages/service-requests/ServiceRequestsView.vue')
 
@@ -47,6 +48,7 @@ const routes = [
 
   { path: '/profile', name: 'Profile', component: Profile, meta: { requiresAuth: true } },
   { path: '/my-properties', name: 'MyProperties', component: MyProperties, meta: { requiresAuth: true, roles: ['owner'] } },
+  { path: '/my-tenants', name: 'MyTenants', component: MyTenants, meta: { requiresAuth: true, roles: ['owner', 'admin', 'manager'] } },
   { path: '/owner-dashboard', name: 'OwnerDashboard', component: OwnerDashboard, meta: { requiresAuth: true, roles: ['owner'] } },
   { path: '/service-requests', name: 'ServiceRequests', component: ServiceRequests, meta: { requiresAuth: true, roles: ['admin', 'manager', 'dataentry', 'tenant', 'owner'] } },
 

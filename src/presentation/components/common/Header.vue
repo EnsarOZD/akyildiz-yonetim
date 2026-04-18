@@ -348,7 +348,7 @@ const setTabsBasedOnRole = (role) => {
   } else if (r === ROLES.OWNER) {
     tabs.value = [
       { label: 'Mülklerim',   value: 'my-properties', route: '/my-properties' },
-      { label: 'Kiracılarım', value: 'tenants',       route: '/tenants'       },
+      { label: 'Kiracılarım', value: 'my-tenants',    route: '/my-tenants'    },
       { label: 'Talepler',    value: 'service-requests', route: '/service-requests' },
     ]
   } else if (r === ROLES.OBSERVER) {
