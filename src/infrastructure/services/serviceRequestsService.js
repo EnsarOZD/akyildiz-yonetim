@@ -32,6 +32,10 @@ class ServiceRequestsService {
     async resolveRequest(id, resolutionNote) {
         return api.patch(`/ServiceRequests/${id}/resolve`, { resolutionNote })
     }
+
+    async deleteServiceRequest(id) {
+        return api.delete(`/ServiceRequests/${id}`)
+    }
 }
 
 export default new ServiceRequestsService()

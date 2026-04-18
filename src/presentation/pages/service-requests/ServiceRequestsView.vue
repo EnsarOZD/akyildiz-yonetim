@@ -124,7 +124,8 @@
               <li v-if="req.status === 'Open'"><a @click="updateStatus(req.id, 'InProgress')" class="rounded-lg py-2"><svg class="w-3.5 h-3.5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/></svg> İşleme Al</a></li>
               <li v-if="req.status === 'InProgress'"><a @click="openResolve(req)" class="rounded-lg py-2"><svg class="w-3.5 h-3.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> Tamamlandı Olarak İşaretle</a></li>
               <li><div class="divider my-0"></div></li>
-              <li><a @click="openClose(req)" class="rounded-lg py-2 text-error"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> Talebi Kapat</a></li>
+              <li><a @click="openClose(req)" class="rounded-lg py-2 text-error"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> Talebi Kapat</a></li>
+              <li v-if="isAdmin"><a @click="openDelete(req)" class="rounded-lg py-2 text-error font-bold bg-error/5"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg> Talebi Kalıcı Olarak Sil</a></li>
             </ul>
           </div>
         </div>
@@ -249,6 +250,26 @@
       <div class="modal-backdrop" @click="closeTarget = null"></div>
     </div>
 
+    <!-- Silme Modal -->
+    <div v-if="deleteTarget" class="modal modal-open">
+      <div class="modal-box max-w-sm bg-white dark:bg-slate-900 border-2 border-error/20">
+        <div class="w-12 h-12 rounded-full bg-error/10 text-error flex items-center justify-center mx-auto mb-4">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+        </div>
+        <h3 class="font-bold text-lg text-center text-slate-800 dark:text-white">Talebi Sil?</h3>
+        <p class="text-xs text-center text-slate-500 mt-2 mb-6">Bu işlem geri alınamaz. Talebe ait tüm veriler ve fotoğraflar listeden kaldırılacaktır.</p>
+        
+        <div class="flex gap-2">
+          <button @click="deleteTarget = null" class="btn btn-sm flex-1 btn-ghost">Vazgeç</button>
+          <button @click="submitDelete" :disabled="submitting" class="btn btn-sm flex-1 btn-error text-white px-6">
+            <span v-if="submitting" class="loading loading-spinner loading-xs"></span>
+            Evet, Sil
+          </button>
+        </div>
+      </div>
+      <div class="modal-backdrop bg-slate-900/60" @click="deleteTarget = null"></div>
+    </div>
+
   </div>
 </template>
 
@@ -264,6 +285,7 @@ const authStore = useAuthStore()
 const { notifySuccess, notifyError } = useNotify()
 
 const userRole = computed(() => authStore.role?.toLowerCase())
+const isAdmin = computed(() => userRole.value === 'admin')
 const canCreate = computed(() => ['tenant', 'owner', 'admin', 'manager'].includes(userRole.value))
 const canManage = computed(() => ['admin', 'manager', 'dataentry'].includes(userRole.value))
 
@@ -288,6 +310,7 @@ const assignTarget = ref(null)
 const selectedPersonnelId = ref('')
 const resolveTarget = ref(null)
 const resolutionNote = ref('')
+const deleteTarget = ref(null)
 
 // Form
 const form = ref({ title: '', description: '', category: 'Other', attachment: null })
@@ -404,6 +427,21 @@ const submitClose = async () => {
     notifySuccess('Talep kapatıldı.')
     closeTarget.value = null
     await loadRequests()
+  } finally {
+    submitting.value = false
+  }
+}
+
+const openDelete = (req) => { deleteTarget.value = req }
+const submitDelete = async () => {
+  submitting.value = true
+  try {
+    await serviceRequestsService.deleteServiceRequest(deleteTarget.value.id)
+    notifySuccess('Talep başarıyla silindi.')
+    deleteTarget.value = null
+    await loadRequests()
+  } catch (err) {
+    notifyError('Talep silinemedi. Sadece yöneticiler silebilir.')
   } finally {
     submitting.value = false
   }
