@@ -2,12 +2,8 @@
   <div class="p-4 sm:p-6 min-h-screen pb-24 md:pb-6">
 
     <!-- Sayfa Başlığı -->
-    <div class="mb-5 flex items-center justify-between gap-3">
-      <div>
-        <h1 class="page-title">Bildirimler</h1>
-        <p class="page-subtitle">Tüm bildirimleriniz ve duyurular</p>
-      </div>
-      <div class="flex gap-2 shrink-0">
+    <PageHeader title="Bildirimler" subtitle="Tüm bildirimleriniz ve duyurular">
+      <template #actions>
         <button
           v-if="authStore.role?.toLowerCase() === 'admin' && notificationsStore.totalCount > 0"
           @click="showDeleteConfirm = true"
@@ -28,8 +24,8 @@
           </svg>
           Duyuru Yayınla
         </button>
-      </div>
-    </div>
+      </template>
+    </PageHeader>
 
     <!-- Filtreler + Tümünü Oku -->
     <div class="flex items-center justify-between gap-2 mb-4">
@@ -184,6 +180,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import PageHeader from '@/presentation/components/ui/PageHeader.vue'
 import { useNotificationsStore } from '@/application/stores/notificationsStore'
 import { useAuthStore } from '@/application/stores/auth'
 import TargetedNotificationModal from './components/TargetedNotificationModal.vue'

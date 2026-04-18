@@ -2,10 +2,13 @@
   <div class="p-4 sm:p-6 min-h-screen pb-24 md:pb-6">
     <div class="max-w-4xl mx-auto">
 
-      <div class="mb-6">
-        <h1 class="page-title">Hoş Geldiniz, {{ authStore.fullName }}</h1>
-        <p class="page-subtitle">Mülklerinize ait borç ve kiracı durumu</p>
-      </div>
+      <PageHeader :title="`Hoş Geldiniz, ${authStore.fullName}`" subtitle="Mülklerinize ait borç ve kiracı durumu">
+        <template #icon>
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+          </svg>
+        </template>
+      </PageHeader>
 
       <!-- Loading -->
       <div v-if="loading" class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
@@ -140,6 +143,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import PageHeader from '@/presentation/components/ui/PageHeader.vue'
 import { useAuthStore } from '@/application/stores/auth'
 import dashboardService from '@/infrastructure/services/dashboardService'
 import { formatCurrency } from '@/core/utils/currencyUtils'

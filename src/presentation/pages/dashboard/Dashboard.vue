@@ -12,37 +12,42 @@
     <div class="max-w-7xl mx-auto">
 
       <!-- ─── Başlık ─────────────────────────────────── -->
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
-        <div>
-          <h1 class="page-title">Genel Bakış</h1>
-          <p class="page-subtitle">Finansal özet ve son aktiviteler</p>
-        </div>
-        <div class="flex items-center gap-2">
-          <select
-            v-model="dateFilter"
-            @change="loadDashboardData"
-            class="select select-sm select-bordered bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-sm rounded-lg"
-          >
-            <option value="all">Tüm Zamanlar</option>
-            <option value="this_month">Bu Ay</option>
-            <option value="last_month">Geçen Ay</option>
-            <option value="this_year">Bu Yıl</option>
-          </select>
-          <button
-            @click="loadDashboardData"
-            :disabled="loading"
-            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium
-              bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700
-              text-slate-600 dark:text-slate-300
-              hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors disabled:opacity-50"
-          >
-            <svg class="w-4 h-4" :class="loading ? 'animate-spin' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-            </svg>
-            Yenile
-          </button>
-        </div>
-      </div>
+      <PageHeader title="Genel Bakış" subtitle="Finansal özet ve son aktiviteler">
+        <template #icon>
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M11 3.055A9.003 9.003 0 1020.945 13H11V3.055z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
+          </svg>
+        </template>
+        <template #actions>
+          <div class="flex items-center gap-2">
+            <select
+              v-model="dateFilter"
+              @change="loadDashboardData"
+              class="select select-sm select-bordered bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-sm rounded-lg"
+            >
+              <option value="all">Tüm Zamanlar</option>
+              <option value="this_month">Bu Ay</option>
+              <option value="last_month">Geçen Ay</option>
+              <option value="this_year">Bu Yıl</option>
+              <option v-for="y in availableYears" :key="y" :value="y.toString()">{{ y }}</option>
+            </select>
+            <button
+              @click="loadDashboardData"
+              :disabled="loading"
+              class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium
+                bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700
+                text-slate-600 dark:text-slate-300
+                hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors disabled:opacity-50"
+            >
+              <svg class="w-4 h-4" :class="loading ? 'animate-spin' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              Yenile
+            </button>
+          </div>
+        </template>
+      </PageHeader>
 
       <!-- ─── Loading state ─────────────────────────── -->
       <div v-if="loading" class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
@@ -292,6 +297,16 @@
               <span class="text-xs font-semibold text-slate-700 dark:text-slate-200 text-center">Raporlar</span>
             </router-link>
 
+            <!-- Talepler -->
+            <router-link to="/service-requests" class="app-card p-4 flex flex-col items-center gap-2 hover:shadow-card-md group transition-shadow">
+              <div class="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center group-hover:scale-105 transition-transform">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
+                </svg>
+              </div>
+              <span class="text-xs font-semibold text-slate-700 dark:text-slate-200 text-center">Talepler</span>
+            </router-link>
+
             <!-- Duyuru Yap -->
             <button @click="showAnnouncementModal = true"
               class="app-card p-4 flex flex-col items-center gap-2 hover:shadow-card-md group transition-shadow border-violet-200 dark:border-violet-800/40 cursor-pointer w-full">
@@ -485,6 +500,7 @@ import OverdueWidget from './components/OverdueWidget.vue'
 import { useNotificationsStore } from '@/application/stores/notificationsStore'
 import TargetedNotificationModal from '../notifications/components/TargetedNotificationModal.vue'
 import DebtsTable from './components/DebtsTable.vue'
+import PageHeader from '@/presentation/components/ui/PageHeader.vue'
 import { formatCurrency } from '@/core/utils/currencyUtils'
 
 // Reactive data
@@ -516,6 +532,17 @@ const canViewDashboard = computed(() => {
   if (!userRole.value) return false
   const role = userRole.value.toLowerCase()
   return ['admin', 'manager', 'observer', 'dataentry'].includes(role)
+})
+
+const availableYears = computed(() => {
+  const currentYear = new Date().getFullYear()
+  const years = []
+  for (let i = 0; i < 5; i++) {
+    years.push(currentYear - i)
+  }
+  // Mevcut yıl zaten "Bu Yıl" olarak var, ama kullanıcıyı şaşırtmamak için listede de olabilir veya "Bu Yıl" yeterli olabilir.
+  // Kullanıcı "2025 i seçtiğimde" dediği için yılları listelemek en iyisi.
+  return years
 })
 
 const formatDate = (dateStr) => {
@@ -705,9 +732,19 @@ const loadDashboardData = async () => {
 
   try {
     const now = new Date()
-    const year = dateFilter.value === 'all'
-      ? null
-      : (dateFilter.value === 'last_month' && now.getMonth() === 0 ? now.getFullYear() - 1 : now.getFullYear())
+    let year = null
+    
+    if (dateFilter.value === 'all') {
+      year = null
+    } else if (dateFilter.value === 'this_year' || dateFilter.value === 'this_month') {
+      year = now.getFullYear()
+    } else if (dateFilter.value === 'last_month') {
+      year = now.getMonth() === 0 ? now.getFullYear() - 1 : now.getFullYear()
+    } else if (!isNaN(dateFilter.value)) {
+      year = parseInt(dateFilter.value)
+    } else {
+      year = now.getFullYear()
+    }
 
     const [summary, debtsResult] = await Promise.all([
       dashboardService.getDashboardSummary(dateFilter.value),

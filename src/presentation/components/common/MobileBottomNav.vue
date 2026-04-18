@@ -156,14 +156,15 @@ const visibleNavItems = computed(() => {
 
   if (role === 'tenant') return [
     { name: 'Özet',        path: '/tenant-dashboard', icon: DashboardIcon },
-    { name: 'Raporlar',    path: '/my-payments',      icon: ChartIcon     },
+    { name: 'Talepler',    path: '/service-requests', icon: ChatIcon      },
     { name: 'Bildirimler', path: '/notifications',    icon: BellIcon      },
     { name: 'Profil',      path: '/profile',           icon: UserIcon      },
   ]
 
   if (role === 'owner') return [
     { name: 'Mülklerim',   path: '/my-properties', icon: BuildingIcon },
-    { name: 'Bildirimler', path: '/notifications',  icon: BellIcon     },
+    { name: 'Talepler',    path: '/service-requests', icon: ChatIcon      },
+    { name: 'Raporlar',    path: '/reports',          icon: ChartIcon     },
     { name: 'Profil',      path: '/profile',         icon: UserIcon     },
   ]
 
@@ -198,6 +199,7 @@ const moreItems = computed(() => {
 
   // Admin / Manager / DataEntry
   const items = [
+    { name: 'Talepler',     path: '/service-requests', icon: ChatIcon     },
     { name: 'Giderler',     path: '/expenses',      icon: ExpenseIcon  },
     { name: 'Borçlar',      path: '/utilities',     icon: BoltIcon     },
     { name: 'Üniteler',     path: '/flats',         icon: HomeIcon     },
@@ -231,6 +233,7 @@ const ExpenseIcon   = makeIcon('M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.19
 const HomeIcon      = makeIcon('M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25')
 const BuildingIcon  = makeIcon('M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0012 9.75c-2.551 0-5.056.2-7.5.582V21M3 21h18M12 6.75h.008v.008H12V6.75z')
 const AdminIcon     = makeIcon('M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751A11.959 11.959 0 0112 2.714z')
+const ChatIcon      = makeIcon('M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z')
 const LogoutIcon    = makeIcon('M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9')
 </script>
 

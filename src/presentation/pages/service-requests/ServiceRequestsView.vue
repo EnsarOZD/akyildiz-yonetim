@@ -1,16 +1,22 @@
 <template>
   <div class="p-4 sm:p-6 min-h-screen pb-24 md:pb-6">
 
-    <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-      <div>
-        <h1 class="page-title">Talepler</h1>
-        <p class="page-subtitle">Bakım ve hizmet talepleri</p>
-      </div>
-      <button v-if="canCreate" @click="showCreate = true"
-        class="btn btn-sm btn-primary shrink-0">
-        + Yeni Talep
-      </button>
-    </div>
+    <PageHeader title="Talepler" subtitle="Bakım ve hizmet talepleri">
+      <template #icon>
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      </template>
+      <template #actions>
+        <button v-if="canCreate" @click="showCreate = true"
+          class="btn btn-sm btn-primary shrink-0 transition-all duration-300 hover:scale-105">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+          </svg>
+          Yeni Talep
+        </button>
+      </template>
+    </PageHeader>
 
     <!-- Filtre -->
     <div class="flex gap-2 mb-4 flex-wrap">
@@ -138,6 +144,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import PageHeader from '@/presentation/components/ui/PageHeader.vue'
 import { useAuthStore } from '@/application/stores/auth'
 import serviceRequestsService from '@/infrastructure/services/serviceRequestsService'
 

@@ -3,20 +3,26 @@
     <div class="max-w-7xl mx-auto">
       
       <!-- Başlık -->
-      <div class="flex items-center justify-between mb-6">
-        <h1 class="text-3xl font-bold text-gray-800 dark:text-gray-100">Geciken Mal Sahibi Ödemeleri</h1>
-        <div class="flex items-center gap-4">
-          <div class="bg-red-100 dark:bg-red-900/50 text-red-600 dark:text-red-400 px-3 py-1 rounded-full text-sm">
-            Toplam: {{ formatCurrency(totalOverdue) }}
+      <PageHeader title="Geciken Mal Sahibi Ödemeleri" subtitle="Vadesi geçmiş ve henüz ödenmemiş mal sahibi aidatlarını yönetin">
+        <template #icon>
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </template>
+        <template #actions>
+          <div class="flex items-center gap-3">
+            <div class="flex flex-col items-end">
+              <span class="text-[10px] font-bold uppercase tracking-wider text-red-400">Toplam Geciken</span>
+              <span class="text-sm font-bold text-red-500">{{ formatCurrency(totalOverdueAmount) }}</span>
+            </div>
+            <div class="w-px h-8 bg-slate-200 dark:bg-slate-700 mx-1"></div>
+            <div class="flex flex-col items-end">
+              <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Adet</span>
+              <span class="text-sm font-bold text-slate-700 dark:text-slate-200">{{ overdueCount }}</span>
+            </div>
           </div>
-          <div class="bg-orange-100 dark:bg-orange-900/50 text-orange-600 dark:text-orange-400 px-3 py-1 rounded-full text-sm">
-            {{ overdueCount }} geciken ödeme
-          </div>
-          <div class="bg-yellow-100 dark:bg-yellow-900/50 text-yellow-600 dark:text-yellow-400 px-3 py-1 rounded-full text-sm">
-            Ortalama: {{ formatCurrency(averageOverdue) }}
-          </div>
-        </div>
-      </div>
+        </template>
+      </PageHeader>
 
       <!-- Filtreler -->
       <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 mb-6">
@@ -157,6 +163,7 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
+import PageHeader from '@/presentation/components/ui/PageHeader.vue'
 import { useNotify } from '@/application/composables/useNotify'
 import apiService from '@/infrastructure/services/api'
 

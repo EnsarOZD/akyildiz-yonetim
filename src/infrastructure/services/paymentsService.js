@@ -12,6 +12,7 @@ class PaymentsService {
     if (filters.startDate) params.startDate = filters.startDate
     if (filters.endDate) params.endDate = filters.endDate
     if (filters.utilityType) params.utilityType = filters.utilityType
+    if (filters.debtorType !== undefined && filters.debtorType !== null && filters.debtorType !== '') params.debtorType = filters.debtorType
     if (filters.excludeAdvanceUse !== undefined) params.excludeAdvanceUse = filters.excludeAdvanceUse
 
     // Tüm kayıtlar çekilir; PaymentsStore 5 dk. cache'ler, dashboard client-side filtreler.

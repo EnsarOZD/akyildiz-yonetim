@@ -11,52 +11,44 @@
 
   <div v-else class="p-4 sm:p-6 space-y-6">
     <!-- Başlık ve Durum Kartı -->
-    <div class="card bg-base-100 shadow-xl">
-      <div class="card-body">
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div class="flex items-center gap-4">
-            <div class="avatar placeholder">
-              <div class="bg-primary text-primary-content rounded-full w-16">
-                <span class="text-2xl">{{ getAvatarInitial(tenant.companyName) }}</span>
-              </div>
-            </div>
-            <div>
-              <h1 class="text-3xl font-bold">{{ tenant.companyName }}</h1>
-              <p class="text-base-content/70">
-                {{ tenant.businessType }}
-                -
-                {{ (tenant.flats?.map(f => f.code || f.unitNumber).join(', ')) || 'Ünite bilgisi yok' }}
-              </p>
+    <PageHeader 
+      :title="tenant.companyName" 
+      :subtitle="`${tenant.businessType} — ${(tenant.flats?.map(f => f.code || f.unitNumber).join(', ')) || 'Ünite bilgisi yok'}`"
+    >
+      <template #icon>
+        <div class="avatar placeholder">
+          <div class="bg-primary text-primary-content rounded-xl w-12 h-12 flex items-center justify-center">
+            <span class="text-xl font-bold">{{ getAvatarInitial(tenant.companyName) }}</span>
+          </div>
+        </div>
+      </template>
+      <template #actions>
+        <div class="flex items-center gap-4">
+          <div class="text-right hidden sm:block">
+            <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Bakiye</div>
+            <div class="text-lg font-black" :class="tenant.totalBalance > 0 ? 'text-red-500' : 'text-emerald-500'">
+              {{ formatCurrency(tenant.totalBalance) }}
             </div>
           </div>
-
-          <div class="flex items-center gap-4">
-            <div class="text-right">
-            <div class="text-sm text-base-content/70">Güncel Bakiye</div>
-              <div class="text-2xl font-bold" :class="tenant.totalBalance > 0 ? 'text-error' : 'text-success'">
-                {{ formatCurrency(tenant.totalBalance) }}
-              </div>
-              <div v-if="tenant.advanceBalance > 0" class="text-xs text-success font-semibold">
-                (Avans: {{ formatCurrency(tenant.advanceBalance) }})
-              </div>
-            </div>
-            <span :class="['badge badge-lg font-semibold', tenant.isActive ? 'badge-success' : 'badge-ghost']">
+          <div class="w-px h-8 bg-slate-200 dark:bg-slate-700 mx-1 hidden sm:block"></div>
+          <div class="flex items-center gap-2">
+            <span :class="['badge badge-sm font-bold px-3 py-2', tenant.isActive ? 'badge-success' : 'badge-ghost']">
               {{ tenant.isActive ? 'Aktif' : 'Pasif' }}
             </span>
             <button 
               v-if="authStore.role === 'admin' || authStore.role === 'manager'"
               @click="showEditModal = true"
-              class="btn btn-outline btn-sm sm:btn-md"
+              class="btn btn-sm btn-outline border-slate-300 dark:border-slate-600"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
               </svg>
               Bilgileri Düzenle
             </button>
           </div>
         </div>
-      </div>
-    </div>
+      </template>
+    </PageHeader>
 
     <!-- Sekmeler -->
     <div class="tabs tabs-boxed bg-base-200 p-1 mb-6">
@@ -364,6 +356,7 @@
 
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue'
+import PageHeader from '@/presentation/components/ui/PageHeader.vue'
 import { useRoute, useRouter } from 'vue-router'
 import AdvanceAccountManager from '@/presentation/components/shared/AdvanceAccountManager.vue'
 import TenantEditModal from './TenantEditModal.vue'

@@ -3,7 +3,20 @@
     <div class="max-w-7xl mx-auto">
       
       <!-- Başlık -->
-      <h1 class="text-3xl font-bold text-gray-800 mb-6 dark:text-gray-100">Geciken Ödemeler</h1>
+      <PageHeader title="Geciken Ödemeler" subtitle="Tahsilatı bekleyen ve vadesi geçmiş tüm kayıtlar">
+        <template #icon>
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </template>
+        <template #actions>
+          <div class="flex items-center gap-2">
+            <div class="bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 px-3 py-1.5 rounded-lg text-xs font-bold border border-red-200 dark:border-red-800/50">
+              {{ filteredOverdueItems.length }} Gecikme
+            </div>
+          </div>
+        </template>
+      </PageHeader>
 
       <!-- Filtreler -->
       <section class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 mb-8">
@@ -168,6 +181,7 @@ import { ref, onMounted, computed } from 'vue'
 import apiService from '@/infrastructure/services/api'
 import { useAuthStore } from '@/application/stores/auth'
 import utilityDebtsService from '@/infrastructure/services/utilityDebtsService'
+import PageHeader from '@/presentation/components/ui/PageHeader.vue'
 import { getDebtTypeLabel, DEBT_TYPES } from '@/core/constants/enums'
 
 const debtTypesList = DEBT_TYPES

@@ -2,38 +2,41 @@
   <div class="p-4 sm:p-6 min-h-screen pb-24 md:pb-6">
 
     <!-- Sayfa Başlığı -->
-    <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-      <div>
-        <h1 class="page-title">Borçlar</h1>
-        <p class="page-subtitle">Aidat ve fatura borçlarını takip edin</p>
-      </div>
-      <div v-if="authStore.role === ROLES.ADMIN || authStore.role === ROLES.MANAGER" class="flex flex-wrap gap-2 shrink-0">
-        <button @click="openManualDebt(0)" class="btn btn-sm btn-ghost border border-slate-300 dark:border-slate-600">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-          </svg>
-          Aidat
-        </button>
-        <button @click="openManualDebt(1)" class="btn btn-sm btn-ghost border border-slate-300 dark:border-slate-600">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-          </svg>
-          Elektrik
-        </button>
-        <button @click="openManualDebt(2)" class="btn btn-sm btn-ghost border border-slate-300 dark:border-slate-600">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 3v1m0 16v1m8-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z"/>
-          </svg>
-          Su
-        </button>
-        <button @click="showImportModal = true" class="btn btn-sm btn-primary">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
-          </svg>
-          Excel'den Yükle
-        </button>
-      </div>
-    </div>
+    <PageHeader title="Borçlar" subtitle="Aidat ve fatura borçlarını takip edin">
+      <template #icon>
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+        </svg>
+      </template>
+      <template #actions>
+        <div v-if="authStore.role === ROLES.ADMIN || authStore.role === ROLES.MANAGER" class="flex flex-wrap gap-2 shrink-0">
+          <button @click="openManualDebt(0)" class="btn btn-sm btn-ghost border border-slate-300 dark:border-slate-600">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+            Aidat
+          </button>
+          <button @click="openManualDebt(1)" class="btn btn-sm btn-ghost border border-slate-300 dark:border-slate-600">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+            </svg>
+            Elektrik
+          </button>
+          <button @click="openManualDebt(2)" class="btn btn-sm btn-ghost border border-slate-300 dark:border-slate-600">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 3v1m0 16v1m8-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z"/>
+            </svg>
+            Su
+          </button>
+          <button @click="showImportModal = true" class="btn btn-sm btn-primary">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+            </svg>
+            Excel'den Yükle
+          </button>
+        </div>
+      </template>
+    </PageHeader>
 
     <!-- Yükleniyor -->
     <div v-if="dataStatus.loading" class="space-y-3">
@@ -374,6 +377,7 @@
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue'
 import { ROLES } from '@/core/constants/roles'
+import PageHeader from '@/presentation/components/ui/PageHeader.vue'
 import { useAuthStore } from '@/application/stores/auth'
 import FilterBar from '@/presentation/components/common/FilterBar.vue'
 import PaginationBar from '@/presentation/components/common/PaginationBar.vue'

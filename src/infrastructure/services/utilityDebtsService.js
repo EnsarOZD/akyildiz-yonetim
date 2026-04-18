@@ -20,6 +20,7 @@ class UtilityDebtsService {
     if (filters.ownerId) params.ownerId = filters.ownerId
     if (filters.startDate) params.startDate = filters.startDate
     if (filters.endDate) params.endDate = filters.endDate
+    if (filters.debtorType !== undefined && filters.debtorType !== null && filters.debtorType !== '') params.debtorType = filters.debtorType
 
     params.pageSize = 1000
     let pageNumber = 1

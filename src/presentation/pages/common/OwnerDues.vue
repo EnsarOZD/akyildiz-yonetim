@@ -3,20 +3,26 @@
     <div class="max-w-7xl mx-auto">
       
       <!-- Başlık -->
-      <div class="flex items-center justify-between mb-6">
-        <h1 class="text-3xl font-bold text-gray-800 dark:text-gray-100">Mal Sahibi Aidatları</h1>
-        <div class="flex items-center gap-4">
-          <div class="bg-purple-100 dark:bg-purple-900/50 text-purple-600 dark:text-purple-400 px-3 py-1 rounded-full text-sm">
-            Toplam: {{ formatCurrency(totalDues) }}
+      <PageHeader title="Mal Sahibi Aidatları" subtitle="Mal sahiplerine ait aidat tahakkuklarını ve ödeme durumlarını takip edin">
+        <template #icon>
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
+          </svg>
+        </template>
+        <template #actions>
+          <div class="flex items-center gap-3">
+            <div class="flex flex-col items-end">
+              <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Toplam Borç</span>
+              <span class="text-sm font-bold text-slate-700 dark:text-slate-200">{{ formatCurrency(totalDues) }}</span>
+            </div>
+            <div class="w-px h-8 bg-slate-200 dark:bg-slate-700 mx-1"></div>
+            <div class="flex flex-col items-end">
+              <span class="text-[10px] font-bold uppercase tracking-wider text-red-400">Geciken</span>
+              <span class="text-sm font-bold text-red-500">{{ formatCurrency(overdueDues) }}</span>
+            </div>
           </div>
-          <div class="bg-green-100 dark:bg-green-900/50 text-green-600 dark:text-green-400 px-3 py-1 rounded-full text-sm">
-            Ödenen: {{ formatCurrency(paidDues) }}
-          </div>
-          <div class="bg-red-100 dark:bg-red-900/50 text-red-600 dark:text-red-400 px-3 py-1 rounded-full text-sm">
-            Geciken: {{ formatCurrency(overdueDues) }}
-          </div>
-        </div>
-      </div>
+        </template>
+      </PageHeader>
 
       <!-- Filtreler -->
       <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 mb-6">
@@ -135,6 +141,7 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
+import PageHeader from '@/presentation/components/ui/PageHeader.vue'
 import apiService from '@/infrastructure/services/api'
 
 const ownerDues = ref([])

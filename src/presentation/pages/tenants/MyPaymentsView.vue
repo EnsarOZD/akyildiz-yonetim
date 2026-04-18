@@ -2,39 +2,44 @@
   <div class="p-4 sm:p-6 min-h-screen pb-24 md:pb-6">
 
     <!-- Sayfa Başlığı -->
-    <div class="mb-6 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
-      <div>
-        <h1 class="page-title">Ödemelerim ve Borçlarım</h1>
-        <p v-if="tenantInfo?.companyName || authStore.companyName" class="text-sm font-semibold text-blue-600 dark:text-blue-400 mt-0.5">
+    <PageHeader title="Ödemelerim ve Borçlarım" subtitle="Geçmiş ödemelerinizi ve güncel borç durumunuzu takip edin">
+      <template #icon>
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
+        </svg>
+      </template>
+      <template #actions>
+        <div class="flex items-center gap-2 shrink-0">
+          <button @click="exportToExcel" :disabled="loading || reportItems.length === 0" class="btn btn-sm btn-ghost border border-slate-300 dark:border-slate-600">
+            <svg class="w-4 h-4 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+            </svg>
+            Excel
+          </button>
+          <button @click="exportToPDF" :disabled="loading || reportItems.length === 0" class="btn btn-sm btn-ghost border border-slate-300 dark:border-slate-600">
+            <svg class="w-4 h-4 text-rose-500 dark:text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+            </svg>
+            PDF
+          </button>
+          <button @click="fetchData" :disabled="loading" class="btn btn-sm btn-primary">
+            <svg v-if="!loading" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/>
+            </svg>
+            <span v-else class="loading loading-spinner loading-xs"></span>
+            Sorgula
+          </button>
+        </div>
+      </template>
+      <template #subtitle-extra>
+        <p v-if="tenantInfo?.companyName || authStore.companyName" class="text-xs font-semibold text-blue-600 dark:text-blue-400 mt-1">
           {{ tenantInfo?.companyName || authStore.companyName }}
           <span v-if="tenantInfo?.flats && tenantInfo.flats.length" class="text-slate-400 font-normal">
             — Ünite: {{ tenantInfo.flats.map(f => f.code).join(', ') }}
           </span>
         </p>
-        <p class="page-subtitle">Geçmiş ödemelerinizi ve güncel borç durumunuzu takip edin</p>
-      </div>
-      <div class="flex items-center gap-2 shrink-0">
-        <button @click="exportToExcel" :disabled="loading || reportItems.length === 0" class="btn btn-sm btn-ghost border border-slate-300 dark:border-slate-600">
-          <svg class="w-4 h-4 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
-          </svg>
-          Excel
-        </button>
-        <button @click="exportToPDF" :disabled="loading || reportItems.length === 0" class="btn btn-sm btn-ghost border border-slate-300 dark:border-slate-600">
-          <svg class="w-4 h-4 text-rose-500 dark:text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
-          </svg>
-          PDF
-        </button>
-        <button @click="fetchData" :disabled="loading" class="btn btn-sm btn-primary">
-          <svg v-if="!loading" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/>
-          </svg>
-          <span v-else class="loading loading-spinner loading-xs"></span>
-          Sorgula
-        </button>
-      </div>
-    </div>
+      </template>
+    </PageHeader>
 
     <!-- Filtreler -->
     <div class="app-card mb-5">
@@ -253,6 +258,7 @@
 
 <script setup>
 import { ref, reactive, computed, onMounted, watch } from 'vue'
+import PageHeader from '@/presentation/components/ui/PageHeader.vue'
 import { useRoute } from 'vue-router'
 import { useAuthStore } from '@/application/stores/auth'
 import utilityDebtsService from '@/infrastructure/services/utilityDebtsService'

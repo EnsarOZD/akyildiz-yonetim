@@ -3,32 +3,36 @@
     <div class="max-w-4xl mx-auto">
 
       <!-- Başlık -->
-      <div class="mb-6 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
-        <div>
-          <h1 class="page-title">Hoş Geldiniz, {{ authStore.fullName }}</h1>
-          <p v-if="tenantInfo?.companyName || authStore.companyName" class="mt-1 text-sm font-medium text-blue-600 dark:text-blue-400 flex items-center gap-1.5">
-            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <PageHeader :title="`Hoş Geldiniz, ${authStore.fullName}`" subtitle="Mülkünüzün özet finansal durumu aşağıdadır.">
+        <template #icon>
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+          </svg>
+        </template>
+        <template #actions>
+          <div v-if="tenantInfo?.flats?.length > 0" class="flex flex-wrap gap-2 shrink-0">
+            <div
+              v-for="flat in tenantInfo.flats"
+              :key="flat.id"
+              class="app-card !py-1 !px-2.5 flex items-center gap-1.5 text-[10px] font-bold text-slate-600 dark:text-slate-300 bg-white/50 dark:bg-slate-800/50"
+            >
+              <svg class="w-3.5 h-3.5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+              </svg>
+              <span>Ünite:</span>
+              <span class="text-blue-600 dark:text-blue-400 font-black">{{ flat.code }}</span>
+            </div>
+          </div>
+        </template>
+        <template #subtitle-extra>
+          <p v-if="tenantInfo?.companyName || authStore.companyName" class="mt-1 text-xs font-semibold text-blue-600 dark:text-blue-400 flex items-center gap-1.5">
+            <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
             </svg>
             {{ tenantInfo?.companyName || authStore.companyName }}
           </p>
-          <p class="page-subtitle mt-0.5">Mülkünüzün özet finansal durumu aşağıdadır.</p>
-        </div>
-
-        <div v-if="tenantInfo?.flats?.length > 0" class="flex flex-wrap gap-2 shrink-0">
-          <div
-            v-for="flat in tenantInfo.flats"
-            :key="flat.id"
-            class="app-card !py-1.5 !px-3 flex items-center gap-1.5 text-xs font-medium text-slate-600 dark:text-slate-300"
-          >
-            <svg class="w-3.5 h-3.5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
-            </svg>
-            <span class="text-slate-400 dark:text-slate-500">Daire:</span>
-            <b>{{ flat.code }}</b>
-          </div>
-        </div>
-      </div>
+        </template>
+      </PageHeader>
 
       <!-- Özet Kartları -->
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
@@ -189,6 +193,7 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
+import PageHeader from '@/presentation/components/ui/PageHeader.vue'
 import { useAuthStore } from '@/application/stores/auth'
 import utilityDebtsService from '@/infrastructure/services/utilityDebtsService'
 import paymentsService from '@/infrastructure/services/paymentsService'

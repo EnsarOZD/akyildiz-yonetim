@@ -2,17 +2,18 @@
   <div class="p-4 sm:p-6 min-h-screen pb-24 md:pb-6">
 
     <!-- Sayfa Başlığı -->
-    <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-      <div>
-        <h1 class="page-title">Finansal Raporlar</h1>
-        <p class="page-subtitle">Borç ve tahsilat kayıtlarını filtreleyin, dışa aktarın</p>
-      </div>
-      <div class="flex items-center gap-2 shrink-0">
-        <button @click="exportToExcel" class="btn btn-sm btn-ghost border border-slate-300 dark:border-slate-600">
-          <svg class="w-4 h-4 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+    <PageHeader title="Mali Raporlar" subtitle="Gelir, gider ve bakiye durumunu analiz edin">
+      <template #icon>
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+      </template>
+      <template #actions>
+        <button @click="exportToExcel" class="btn btn-sm btn-outline btn-success gap-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
           </svg>
-          Excel
+          Excel Aktar
         </button>
         <button @click="exportToPDF" class="btn btn-sm btn-ghost border border-slate-300 dark:border-slate-600">
           <svg class="w-4 h-4 text-rose-500 dark:text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -27,12 +28,12 @@
           <span v-else class="loading loading-spinner loading-xs"></span>
           Sorgula
         </button>
-      </div>
-    </div>
+      </template>
+    </PageHeader>
 
     <!-- Filtreler -->
     <div class="app-card mb-5">
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-7 gap-3">
         <div class="form-control">
           <label class="label py-1"><span class="label-text text-xs font-semibold uppercase tracking-wide">Başlangıç</span></label>
           <input v-model="filters.startDate" type="date" class="input input-sm input-bordered w-full" />
@@ -70,6 +71,14 @@
             <option value="Aidat">Aidat</option>
             <option value="Electricity">Elektrik</option>
             <option value="Water">Su</option>
+          </select>
+        </div>
+        <div class="form-control">
+          <label class="label py-1"><span class="label-text text-xs font-semibold uppercase tracking-wide">Borçlu Türü</span></label>
+          <select v-model="filters.debtorType" class="select select-sm select-bordered w-full">
+            <option value="All">Tümü</option>
+            <option value="OnlyTenants">Yalnızca Kiracılar</option>
+            <option value="OnlyOwners">Yalnızca Mal Sahipleri</option>
           </select>
         </div>
       </div>
@@ -266,6 +275,7 @@ import { ref, reactive, computed, onMounted, watch } from 'vue'
 import tenantsService from '@/infrastructure/services/tenantsService'
 import ownersService from '@/infrastructure/services/ownersService'
 import utilityDebtsService from '@/infrastructure/services/utilityDebtsService'
+import PageHeader from '@/presentation/components/ui/PageHeader.vue'
 import paymentsService from '@/infrastructure/services/paymentsService'
 
 // State
@@ -280,7 +290,8 @@ const filters = reactive({
   tenantId: '',
   ownerId: '',
   type: 'all',
-  utilityType: ''
+  utilityType: '',
+  debtorType: 'All'
 })
 
 // Lifecycle
@@ -323,7 +334,8 @@ const fetchData = async () => {
         ownerId: filters.ownerId || undefined,
         startDate: filters.startDate || undefined,
         endDate: filters.endDate || undefined,
-        type: filters.utilityType || undefined
+        type: filters.utilityType || undefined,
+        debtorType: filters.debtorType === 'All' ? undefined : filters.debtorType
       }),
       paymentsService.getPayments({
         tenantId: filters.tenantId || undefined,
@@ -331,6 +343,7 @@ const fetchData = async () => {
         startDate: filters.startDate || undefined,
         endDate: filters.endDate || undefined,
         utilityType: filters.utilityType || undefined,
+        debtorType: filters.debtorType === 'All' ? undefined : filters.debtorType,
         excludeAdvanceUse: true
       })
     ])
@@ -349,6 +362,7 @@ const clearFilters = () => {
   filters.ownerId = ''
   filters.type = 'all'
   filters.utilityType = ''
+  filters.debtorType = 'All'
   filters.startDate = ''
   filters.endDate = ''
   fetchData()

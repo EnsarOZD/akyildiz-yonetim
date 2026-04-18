@@ -336,17 +336,22 @@ const setTabsBasedOnRole = (role) => {
       { label: 'Giderler',    value: 'expenses',  route: '/expenses'   },
       { label: 'Borçlar',     value: 'utilities', route: '/utilities'  },
       { label: 'Üniteler',    value: 'flats',     route: '/flats'      },
+      { label: 'Talepler',    value: 'service-requests', route: '/service-requests' },
       { label: 'Raporlar',    value: 'reports',   route: '/reports'    },
     ]
   } else if (r === ROLES.TENANT) {
     tabs.value = [
       { label: 'Özet',    value: 'tenant-dashboard', route: '/tenant-dashboard' },
+      { label: 'Talepler', value: 'service-requests', route: '/service-requests' },
       { label: 'Raporlar', value: 'my-payments',     route: '/my-payments'      },
       { label: 'Profilim', value: 'profile',         route: '/profile'          },
     ]
   } else if (r === ROLES.OWNER) {
     tabs.value = [
       { label: 'Mülklerim',   value: 'my-properties', route: '/my-properties' },
+      { label: 'Kiracılarım', value: 'tenants',       route: '/tenants'       },
+      { label: 'Raporlar',    value: 'reports',       route: '/reports'       },
+      { label: 'Talepler',    value: 'service-requests', route: '/service-requests' },
       { label: 'Bildirimler', value: 'notifications',  route: '/notifications' },
     ]
   } else if (r === ROLES.OBSERVER) {

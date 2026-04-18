@@ -3,12 +3,13 @@
     <div class="max-w-5xl mx-auto">
 
       <!-- Başlık -->
-      <div class="mb-8">
-        <h1 class="text-2xl font-bold text-gray-800 dark:text-white">
-          Hoş Geldiniz, {{ authStore.fullName }}
-        </h1>
-        <p class="text-gray-500 dark:text-gray-400 mt-1">Mülklerinize ait aidat ve ödeme durumu aşağıda görüntülenmektedir.</p>
-      </div>
+      <PageHeader :title="`Hoş Geldiniz, ${authStore.fullName}`" subtitle="Mülklerinize ait aidat ve ödeme durumu aşağıda görüntülenmektedir.">
+        <template #icon>
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+          </svg>
+        </template>
+      </PageHeader>
 
       <!-- Özet Kartları -->
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
@@ -145,6 +146,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import PageHeader from '@/presentation/components/ui/PageHeader.vue'
 import { useAuthStore } from '@/application/stores/auth'
 import utilityDebtsService from '@/infrastructure/services/utilityDebtsService'
 import paymentsService from '@/infrastructure/services/paymentsService'

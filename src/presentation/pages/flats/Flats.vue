@@ -2,22 +2,25 @@
   <div class="p-4 sm:p-6 min-h-screen pb-24 md:pb-6">
 
     <!-- Sayfa Başlığı -->
-    <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-      <div>
-        <h1 class="page-title">Ünite Yönetimi</h1>
-        <p class="page-subtitle">İş hanındaki tüm üniteleri yönetin</p>
-      </div>
-      <button
-        v-if="authStore.role === ROLES.ADMIN || authStore.role === ROLES.MANAGER"
-        @click="showCreateModal = true"
-        class="btn btn-sm btn-primary shrink-0"
-      >
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+    <PageHeader title="Ünite Yönetimi" subtitle="İş hanındaki tüm üniteleri yönetin">
+      <template #icon>
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
         </svg>
-        Yeni Ünite
-      </button>
-    </div>
+      </template>
+      <template #actions>
+        <button
+          v-if="authStore.role === ROLES.ADMIN || authStore.role === ROLES.MANAGER"
+          @click="showCreateModal = true"
+          class="btn btn-sm btn-primary shrink-0"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+          </svg>
+          Yeni Ünite
+        </button>
+      </template>
+    </PageHeader>
 
     <!-- Filtreler -->
     <div class="app-card mb-5">
@@ -170,6 +173,7 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { ROLES } from '@/core/constants/roles'
+import PageHeader from '@/presentation/components/ui/PageHeader.vue'
 import { useAuthStore } from '@/application/stores/auth'
 import FlatEditModal from './components/FlatEditModal.vue'
 import FlatCreateModal from './components/FlatCreateModal.vue'

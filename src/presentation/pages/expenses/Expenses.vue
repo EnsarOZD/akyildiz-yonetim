@@ -10,24 +10,24 @@
       <div class="flex gap-2 shrink-0">
         <select v-model="dateFilter" @change="fetchExpenses" class="select select-sm select-bordered">
           <option value="all">Tüm Zamanlar</option>
-          <option value="this_month">Bu Ay</option>
-          <option value="last_month">Geçen Ay</option>
-          <option value="this_year">Bu Yıl</option>
-        </select>
-        <button @click="fetchExpenses" :disabled="loading" class="btn btn-sm btn-ghost">
-          <svg v-if="!loading" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-          </svg>
-          <span v-else class="loading loading-spinner loading-xs"></span>
-        </button>
-        <button @click="openNewExpenseModal" class="btn btn-sm btn-primary">
+    <PageHeader title="Gider Yönetimi" subtitle="Binaya ait tüm giderleri takip edin ve yeni harcama ekleyin">
+      <template #icon>
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      </template>
+      <template #actions>
+        <button
+          @click="openNewExpenseModal"
+          class="btn btn-sm btn-primary"
+        >
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
           </svg>
           Yeni Gider
         </button>
-      </div>
-    </div>
+      </template>
+    </PageHeader>
 
     <!-- Yükleniyor -->
     <div v-if="loading" class="space-y-3">
@@ -203,6 +203,7 @@
 <script setup>
 import { ref, reactive, computed, onMounted, watch } from 'vue'
 import expensesService from '@/infrastructure/services/expensesService'
+import PageHeader from '@/presentation/components/ui/PageHeader.vue'
 import ExpenseModal from './ExpenseModal.vue'
 import ConfirmModal from '@/presentation/components/common/ConfirmModal.vue'
 import PaginationBar from '@/presentation/components/common/PaginationBar.vue'

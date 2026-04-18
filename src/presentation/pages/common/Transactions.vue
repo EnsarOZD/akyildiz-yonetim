@@ -3,23 +3,26 @@
     <div class="max-w-7xl mx-auto">
       
       <!-- Başlık -->
-      <div class="flex items-center justify-between mb-6">
-        <h1 class="text-3xl font-bold text-gray-800 dark:text-gray-100">Tüm İşlemler</h1>
-        <div class="flex items-center gap-4">
-          <div class="bg-green-100 dark:bg-green-900/50 text-green-600 dark:text-green-400 px-3 py-1 rounded-full text-sm">
-            Toplam Gelir: {{ formatCurrency(totalIncome) }}
+      <PageHeader title="Tüm İşlemler" subtitle="Gelir, gider ve borç kayıtlarının tamamını görün">
+        <template #icon>
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+          </svg>
+        </template>
+        <template #actions>
+          <div class="flex flex-wrap items-center gap-2">
+            <div class="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 px-3 py-1.5 rounded-lg text-xs font-bold border border-emerald-200 dark:border-emerald-800/50">
+              Gelir: {{ formatCurrency(totalIncome) }}
+            </div>
+            <div class="bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 px-3 py-1.5 rounded-lg text-xs font-bold border border-red-200 dark:border-red-800/50">
+              Gider: {{ formatCurrency(totalExpense) }}
+            </div>
+            <div class="bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 px-3 py-1.5 rounded-lg text-xs font-bold border border-amber-200 dark:border-amber-800/50">
+              Borç: {{ formatCurrency(totalDebt) }}
+            </div>
           </div>
-          <div class="bg-red-100 dark:bg-red-900/50 text-red-600 dark:text-red-400 px-3 py-1 rounded-full text-sm">
-            Toplam Gider: {{ formatCurrency(totalExpense) }}
-          </div>
-          <div class="bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 px-3 py-1 rounded-full text-sm">
-            {{ totalTransactionsCount }} işlem
-          </div>
-          <div class="bg-orange-100 dark:bg-orange-900/50 text-orange-600 dark:text-orange-400 px-3 py-1 rounded-full text-sm">
-            Toplam Borç: {{ formatCurrency(totalDebt) }}
-          </div>
-        </div>
-      </div>
+        </template>
+      </PageHeader>
 
       <!-- Filtreler -->
       <section class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 mb-8">
@@ -62,12 +65,13 @@
 
       <!-- İşlem Listesi -->
       <section class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md border border-gray-200 dark:border-gray-700">
-        <div class="flex items-center justify-between mb-6">
-          <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-100">İşlem Geçmişi</h2>
-          <div class="bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 px-3 py-1 rounded-full text-sm font-medium">
-            {{ filteredTransactions.length }} işlem
-          </div>
-        </div>
+        <PageHeader title="İşlem Geçmişi" subtitle="Tüm finansal hareketlerin listesi">
+          <template #actions>
+            <div class="bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 px-3 py-1 rounded-full text-sm font-medium">
+              {{ filteredTransactions.length }} işlem
+            </div>
+          </template>
+        </PageHeader>
 
         <div v-if="filteredTransactions.length > 0" class="space-y-3">
           <div 
@@ -147,6 +151,7 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
+import PageHeader from '@/presentation/components/ui/PageHeader.vue'
 import apiService from '@/infrastructure/services/api'
 
 const tenants = ref([])
