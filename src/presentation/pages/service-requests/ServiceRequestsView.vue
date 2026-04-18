@@ -1,84 +1,130 @@
 <template>
   <div class="p-4 sm:p-6 min-h-screen pb-24 md:pb-6">
 
-    <PageHeader title="Talepler" subtitle="Bakım ve hizmet talepleri">
+    <PageHeader title="Talep Yönetimi" subtitle="Bakım, hizmet ve teknik talepleri buradan takip edin ve yönetin">
       <template #icon>
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
         </svg>
       </template>
       <template #actions>
         <button v-if="canCreate" @click="showCreate = true"
-          class="btn btn-sm btn-primary shrink-0 transition-all duration-300 hover:scale-105">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          class="btn btn-sm btn-primary shrink-0 transition-all duration-300 hover:scale-105 px-4 h-10 shadow-lg shadow-blue-500/20">
+          <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
           </svg>
-          Yeni Talep
+          Yeni Talep Oluştur
         </button>
       </template>
     </PageHeader>
 
-    <!-- Filtre -->
-    <div class="flex gap-2 mb-4 flex-wrap">
-      <button v-for="f in filters" :key="f.value"
-        @click="activeFilter = f.value; loadRequests()"
-        :class="['btn btn-sm', activeFilter === f.value ? 'btn-primary' : 'btn-ghost']">
-        {{ f.label }}
-      </button>
+    <!-- Filtreler -->
+    <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
+      <div class="flex p-1 bg-slate-100 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700/50">
+        <button v-for="f in filters" :key="f.value"
+          @click="activeFilter = f.value; loadRequests()"
+          :class="[
+            'px-4 py-1.5 text-xs font-semibold rounded-lg transition-all duration-200',
+            activeFilter === f.value 
+              ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm' 
+              : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+          ]">
+          {{ f.label }}
+        </button>
+      </div>
+      
+      <div class="flex items-center gap-2">
+        <span class="text-xs text-slate-400">{{ requests.length }} talep gösteriliyor</span>
+      </div>
     </div>
 
     <!-- Loading -->
-    <div v-if="loading" class="flex justify-center py-12">
-      <span class="loading loading-spinner loading-md text-primary"></span>
+    <div v-if="loading" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div v-for="i in 4" :key="i" class="app-card animate-pulse h-32"></div>
     </div>
 
-    <!-- Boş -->
-    <div v-else-if="requests.length === 0" class="app-card p-12 text-center">
-      <div class="w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center mx-auto mb-3">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+    <!-- Boş Durum -->
+    <div v-else-if="requests.length === 0" class="app-card p-16 text-center border-dashed border-2">
+      <div class="w-16 h-16 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-300 flex items-center justify-center mx-auto mb-4">
+        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
         </svg>
       </div>
-      <p class="text-sm font-medium text-slate-600 dark:text-slate-300">Talep bulunmamaktadır.</p>
+      <h3 class="text-base font-bold text-slate-800 dark:text-slate-200">Henüz talep yok</h3>
+      <p class="text-sm text-slate-500 mt-1 max-w-xs mx-auto">Herhangi bir arıza, temizlik veya güvenlik talebiniz olduğunda buradan kolayca iletebilirsiniz.</p>
+      <button @click="showCreate = true" class="btn btn-sm btn-ghost text-blue-500 mt-4">Yeni Talep Oluştur</button>
     </div>
 
-    <!-- Liste -->
-    <div v-else class="space-y-3">
+    <!-- Hizmet Talebi Listesi -->
+    <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div v-for="req in requests" :key="req.id"
-        class="app-card p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div class="flex items-start gap-3 min-w-0">
-          <div class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5"
+        class="app-card group hover:shadow-xl hover:shadow-blue-500/5 transition-all duration-300 border-l-4"
+        :class="statusBorder(req.status)">
+        
+        <div class="flex items-start gap-4">
+          <div class="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0"
             :class="categoryClass(req.category)">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
+            <component :is="categoryIcon(req.category)" class="w-5 h-5" />
           </div>
-          <div class="min-w-0">
-            <p class="text-sm font-semibold text-slate-800 dark:text-slate-100">{{ req.title }}</p>
-            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-2">{{ req.description }}</p>
-            <div class="flex flex-wrap items-center gap-2 mt-1.5 text-[11px] text-slate-400">
-              <span>{{ formatDate(req.createdAt) }}</span>
-              <span v-if="req.tenantName || req.ownerName" class="text-slate-300 dark:text-slate-600">·</span>
-              <span v-if="req.tenantName || req.ownerName">{{ req.tenantName || req.ownerName }}</span>
-              <span v-if="req.adminNote" class="text-slate-300 dark:text-slate-600">·</span>
-              <span v-if="req.adminNote" class="italic">{{ req.adminNote }}</span>
+          
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center justify-between gap-2 mb-1">
+              <span class="text-[10px] uppercase font-bold tracking-widest text-slate-400">{{ categoryLabel(req.category) }}</span>
+              <span :class="statusBadge(req.status)" class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider">{{ statusLabel(req.status) }}</span>
+            </div>
+            
+            <h3 class="text-sm font-bold text-slate-800 dark:text-slate-100 truncate mb-1">{{ req.title }}</h3>
+            <p class="text-xs text-slate-600 dark:text-slate-400 line-clamp-2 mb-3 leading-relaxed">{{ req.description }}</p>
+            
+            <div class="flex flex-wrap items-center gap-y-2 gap-x-4 pt-3 border-t border-slate-100 dark:border-slate-700/50">
+              <div class="flex items-center gap-1.5 min-w-0">
+                <div class="w-5 h-5 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-[8px] font-bold text-slate-500 overflow-hidden">
+                  <span v-if="!(req.tenantName || req.ownerName)">?</span>
+                  <img v-else-if="req.userPhoto" :src="req.userPhoto" class="w-full h-full object-cover">
+                  <span v-else>{{ (req.tenantName || req.ownerName || '?').charAt(0) }}</span>
+                </div>
+                <span class="text-[11px] font-medium text-slate-500 dark:text-slate-400 truncate">{{ req.tenantName || req.ownerName || 'Bilinmiyor' }}</span>
+              </div>
+              
+              <div class="flex items-center gap-1.5">
+                <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <span class="text-[11px] text-slate-400">{{ formatDate(req.createdAt) }}</span>
+              </div>
+
+              <!-- Atanan Personel -->
+              <div v-if="req.assignedPersonnelName" class="flex items-center gap-1.5">
+                <div class="w-4 h-4 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center">
+                  <svg class="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                </div>
+                <span class="text-[11px] font-semibold text-blue-600 dark:text-blue-400">{{ req.assignedPersonnelName }}</span>
+              </div>
             </div>
           </div>
         </div>
 
-        <div class="flex items-center gap-2 sm:flex-shrink-0">
-          <span :class="statusBadge(req.status)" class="badge badge-sm">{{ statusLabel(req.status) }}</span>
-          <!-- Yönetici durum değiştirme -->
-          <div v-if="canManage && req.status !== 'Closed'" class="dropdown dropdown-end">
-            <button tabindex="0" class="btn btn-xs btn-ghost">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <!-- İşlemler -->
+        <div v-if="canManage" class="mt-4 flex items-center justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-700/50">
+          <button v-if="!req.assignedPersonnelId && req.status !== 'Closed'" 
+            @click="openAssign(req)" 
+            class="btn btn-xs btn-outline btn-primary gap-1.5 rounded-lg border-opacity-30">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
+            Personel Ata
+          </button>
+          
+          <div v-if="req.status !== 'Closed'" class="dropdown dropdown-end">
+            <button tabindex="0" class="btn btn-xs btn-ghost hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg">
+              <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
               </svg>
             </button>
-            <ul tabindex="0" class="dropdown-content z-[1] menu p-1.5 shadow-card-lg bg-white dark:bg-slate-800 rounded-xl w-40 border border-slate-200 dark:border-slate-700 text-sm">
-              <li v-if="req.status === 'Open'"><a @click="updateStatus(req.id, 'InProgress')" class="rounded-lg text-slate-700 dark:text-slate-200">İşleme Al</a></li>
-              <li><a @click="openClose(req)" class="rounded-lg text-slate-700 dark:text-slate-200">Kapat</a></li>
+            <ul tabindex="0" class="dropdown-content z-[1] menu p-1.5 shadow-xl bg-white dark:bg-slate-800 rounded-xl w-44 border border-slate-200 dark:border-slate-700 text-xs">
+              <li v-if="req.status === 'Open'"><a @click="updateStatus(req.id, 'InProgress')" class="rounded-lg py-2"><svg class="w-3.5 h-3.5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/></svg> İşleme Al</a></li>
+              <li v-if="req.status === 'InProgress'"><a @click="openResolve(req)" class="rounded-lg py-2"><svg class="w-3.5 h-3.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> Tamamlandı Olarak İşaretle</a></li>
+              <li><div class="divider my-0"></div></li>
+              <li><a @click="openClose(req)" class="rounded-lg py-2 text-error"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> Talebi Kapat</a></li>
             </ul>
           </div>
         </div>
@@ -87,50 +133,114 @@
 
     <!-- Yeni Talep Modal -->
     <div v-if="showCreate" class="modal modal-open">
-      <div class="modal-box max-w-md">
-        <h3 class="font-bold text-lg mb-4">Yeni Talep Oluştur</h3>
-        <div class="space-y-3">
-          <div>
-            <label class="label label-text text-xs font-semibold">Başlık</label>
-            <input v-model="form.title" type="text" placeholder="Kısa başlık girin" class="input input-bordered input-sm w-full" maxlength="200" />
+      <div class="modal-box max-w-md bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border border-white/20 dark:border-slate-700/30">
+        <h3 class="font-bold text-xl mb-1 text-slate-800 dark:text-white">Yeni Talep</h3>
+        <p class="text-xs text-slate-500 mb-6">Arıza veya hizmet talebinizi aşağıdan iletebilirsiniz.</p>
+        
+        <div class="space-y-4">
+          <div class="form-control">
+            <label class="label py-1"><span class="label-text text-xs font-bold text-slate-500 uppercase">Talep Başlığı</span></label>
+            <input v-model="form.title" type="text" placeholder="Kısa ve öz bir başlık..." class="input input-bordered bg-slate-50 dark:bg-slate-800/50 w-full focus:ring-2 focus:ring-blue-500/20" />
           </div>
-          <div>
-            <label class="label label-text text-xs font-semibold">Kategori</label>
-            <select v-model="form.category" class="select select-bordered select-sm w-full">
-              <option value="Maintenance">Bakım / Tamir</option>
-              <option value="Cleaning">Temizlik</option>
-              <option value="Noise">Gürültü</option>
-              <option value="Security">Güvenlik</option>
-              <option value="Other">Diğer</option>
-            </select>
+          
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="form-control">
+              <label class="label py-1"><span class="label-text text-xs font-bold text-slate-500 uppercase">Kategori</span></label>
+              <select v-model="form.category" class="select select-bordered bg-slate-50 dark:bg-slate-800/50 w-full">
+                <option value="Maintenance">Bakım / Tamir</option>
+                <option value="Cleaning">Temizlik</option>
+                <option value="Noise">Gürültü / Şikayet</option>
+                <option value="Security">Güvenlik</option>
+                <option value="Other">Diğer</option>
+              </select>
+            </div>
+            <div class="form-control">
+              <label class="label py-1"><span class="label-text text-xs font-bold text-slate-500 uppercase">Fotoğraf Ekle</span></label>
+              <input type="file" @change="handleFileChange" accept="image/*" class="file-input file-input-bordered file-input-sm w-full bg-slate-50 dark:bg-slate-800/50 text-xs" />
+            </div>
           </div>
-          <div>
-            <label class="label label-text text-xs font-semibold">Açıklama</label>
-            <textarea v-model="form.description" class="textarea textarea-bordered textarea-sm w-full" rows="3" placeholder="Detayları açıklayın" maxlength="2000"></textarea>
+          
+          <div class="form-control">
+            <label class="label py-1"><span class="label-text text-xs font-bold text-slate-500 uppercase">Açıklama</span></label>
+            <textarea v-model="form.description" class="textarea textarea-bordered bg-slate-50 dark:bg-slate-800/50 w-full h-24" placeholder="Lütfen detayları belirtin..."></textarea>
           </div>
         </div>
-        <div class="modal-action mt-4">
-          <button @click="showCreate = false" class="btn btn-ghost btn-sm">İptal</button>
-          <button @click="submitCreate" :disabled="submitting" class="btn btn-primary btn-sm">
+        
+        <div class="modal-action mt-8">
+          <button @click="showCreate = false" class="btn btn-ghost">İptal</button>
+          <button @click="submitCreate" :disabled="submitting || !form.title || !form.description" class="btn btn-primary px-8">
             <span v-if="submitting" class="loading loading-spinner loading-xs"></span>
-            Gönder
+            Talebi Gönder
           </button>
         </div>
       </div>
-      <div class="modal-backdrop" @click="showCreate = false"></div>
+      <div class="modal-backdrop bg-slate-900/40 backdrop-blur-sm" @click="showCreate = false"></div>
+    </div>
+
+    <!-- Personel Ata Modal -->
+    <div v-if="assignTarget" class="modal modal-open">
+      <div class="modal-box max-w-sm bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl">
+        <h3 class="font-bold text-lg mb-4 text-slate-800 dark:text-white">Personel Atama</h3>
+        <p class="text-xs text-slate-500 mb-4 font-medium italic">"{{ assignTarget.title }}"</p>
+        
+        <div class="form-control mb-6">
+          <label class="label py-1"><span class="label-text text-xs font-bold text-slate-500 uppercase">Görevlendirilecek Personel</span></label>
+          <div v-if="personnelLoading" class="flex justify-center py-4">
+            <span class="loading loading-spinner loading-sm text-blue-500"></span>
+          </div>
+          <select v-else v-model="selectedPersonnelId" class="select select-bordered w-full bg-slate-50 dark:bg-slate-800/50">
+            <option value="">Lütfen seçim yapın...</option>
+            <option v-for="p in personnel" :key="p.id" :value="p.id">{{ p.firstName }} {{ p.lastName }}</option>
+          </select>
+        </div>
+        
+        <div class="modal-action">
+          <button @click="assignTarget = null" class="btn btn-ghost btn-sm">Vazgeç</button>
+          <button @click="submitAssign" :disabled="!selectedPersonnelId || submitting" class="btn btn-primary btn-sm px-6">
+            <span v-if="submitting" class="loading loading-spinner loading-xs"></span>
+            Atama Yap
+          </button>
+        </div>
+      </div>
+      <div class="modal-backdrop" @click="assignTarget = null"></div>
+    </div>
+
+    <!-- Tamamlandı Modal (Çözüm Notu) -->
+    <div v-if="resolveTarget" class="modal modal-open">
+      <div class="modal-box max-w-md bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl">
+        <h3 class="font-bold text-lg mb-2 text-emerald-600">Talep Tamamlandı</h3>
+        <p class="text-xs text-slate-500 mb-6">Hizmetin nasıl tamamlandığına dair kısa bir not ekleyebilirsiniz.</p>
+        
+        <div class="form-control">
+          <label class="label py-1"><span class="label-text text-xs font-bold text-slate-500 uppercase">Çözüm Notu</span></label>
+          <textarea v-model="resolutionNote" class="textarea textarea-bordered bg-slate-50 dark:bg-slate-800/50 w-full h-24" placeholder="Yapılan işlemi açıklayın..."></textarea>
+        </div>
+        
+        <div class="modal-action mt-6">
+          <button @click="resolveTarget = null" class="btn btn-ghost btn-sm">İptal</button>
+          <button @click="submitResolve" :disabled="submitting" class="btn btn-success btn-sm px-8 text-white">
+            <span v-if="submitting" class="loading loading-spinner loading-xs"></span>
+            Tamamla
+          </button>
+        </div>
+      </div>
+      <div class="modal-backdrop" @click="resolveTarget = null"></div>
     </div>
 
     <!-- Kapat Modal -->
     <div v-if="closeTarget" class="modal modal-open">
-      <div class="modal-box max-w-sm">
-        <h3 class="font-bold text-base mb-3">Talebi Kapat</h3>
-        <div>
-          <label class="label label-text text-xs font-semibold">Kapatma Notu (isteğe bağlı)</label>
-          <textarea v-model="closeNote" class="textarea textarea-bordered textarea-sm w-full" rows="2" maxlength="1000"></textarea>
+      <div class="modal-box max-w-sm bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl">
+        <h3 class="font-bold text-base mb-1 text-red-500">Talebi Kapat</h3>
+        <p class="text-xs text-slate-500 mb-4 italic">Talep kalıcı olarak arşive alınacaktır.</p>
+        
+        <div class="form-control">
+          <label class="label py-1"><span class="label-text text-xs font-bold text-slate-500 uppercase">Kapatma Nedeni</span></label>
+          <textarea v-model="closeNote" class="textarea textarea-bordered bg-slate-50 dark:bg-slate-800/50 w-full h-20" placeholder="İsteğe bağlı not..."></textarea>
         </div>
-        <div class="modal-action mt-3">
-          <button @click="closeTarget = null; closeNote = ''" class="btn btn-ghost btn-sm">İptal</button>
-          <button @click="submitClose" :disabled="submitting" class="btn btn-error btn-sm">
+        
+        <div class="modal-action mt-6">
+          <button @click="closeTarget = null" class="btn btn-ghost btn-sm">Vazgeç</button>
+          <button @click="submitClose" :disabled="submitting" class="btn btn-error btn-sm px-8 text-white">
             <span v-if="submitting" class="loading loading-spinner loading-xs"></span>
             Kapat
           </button>
@@ -143,14 +253,17 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, markRaw, defineComponent, h } from 'vue'
 import PageHeader from '@/presentation/components/ui/PageHeader.vue'
 import { useAuthStore } from '@/application/stores/auth'
 import serviceRequestsService from '@/infrastructure/services/serviceRequestsService'
+import usersService from '@/infrastructure/services/usersService'
+import { useNotify } from '@/application/composables/useNotify'
 
 const authStore = useAuthStore()
-const userRole = computed(() => authStore.role?.toLowerCase())
+const { notifySuccess, notifyError } = useNotify()
 
+const userRole = computed(() => authStore.role?.toLowerCase())
 const canCreate = computed(() => ['tenant', 'owner', 'admin', 'manager'].includes(userRole.value))
 const canManage = computed(() => ['admin', 'manager', 'dataentry'].includes(userRole.value))
 
@@ -158,6 +271,7 @@ const filters = [
   { label: 'Tümü', value: '' },
   { label: 'Açık', value: 'Open' },
   { label: 'İşlemde', value: 'InProgress' },
+  { label: 'Çözüldü', value: 'Resolved' },
   { label: 'Kapalı', value: 'Closed' },
 ]
 
@@ -166,10 +280,21 @@ const requests = ref([])
 const loading = ref(true)
 const showCreate = ref(false)
 const submitting = ref(false)
+
+// Modals
 const closeTarget = ref(null)
 const closeNote = ref('')
-const form = ref({ title: '', description: '', category: 'Other' })
+const assignTarget = ref(null)
+const selectedPersonnelId = ref('')
+const resolveTarget = ref(null)
+const resolutionNote = ref('')
 
+// Form
+const form = ref({ title: '', description: '', category: 'Other', attachment: null })
+const personnel = ref([])
+const personnelLoading = ref(false)
+
+/** Veri Yükleme */
 const loadRequests = async () => {
   loading.value = true
   try {
@@ -177,21 +302,85 @@ const loadRequests = async () => {
     requests.value = result || []
   } catch (err) {
     console.error('Talepler yüklenemedi:', err)
+    notifyError('Talepler listesi alınırken bir hata oluştu.')
   } finally {
     loading.value = false
   }
 }
 
+const loadPersonnel = async () => {
+  if (personnel.value.length > 0) return
+  personnelLoading.value = true
+  try {
+    // Sadece personelleri getir (Admin/Manager role de personel sayılabilir)
+    const allUsers = await usersService.getUsers()
+    personnel.value = allUsers.filter(u => 
+      ['admin', 'manager', 'staff', 'technician'].includes(u.role?.toLowerCase())
+    )
+  } finally {
+    personnelLoading.value = false
+  }
+}
+
+/** Dosya İşlemleri */
+const handleFileChange = (e) => {
+  const file = e.target.files[0]
+  if (file) {
+    if (file.size > 5 * 1024 * 1024) {
+      notifyError('Dosya boyutu 5MB\'dan küçük olmalıdır.')
+      e.target.value = ''
+      return
+    }
+    form.value.attachment = file
+  }
+}
+
+/** CRUD & İş Akışı */
 const submitCreate = async () => {
-  if (!form.value.title.trim() || !form.value.description.trim()) return
   submitting.value = true
   try {
     await serviceRequestsService.createServiceRequest(form.value)
+    notifySuccess('Talebiniz başarıyla oluşturuldu.')
     showCreate.value = false
-    form.value = { title: '', description: '', category: 'Other' }
+    form.value = { title: '', description: '', category: 'Other', attachment: null }
     await loadRequests()
   } catch (err) {
-    console.error('Talep oluşturulamadı:', err)
+    notifyError('Talep gönderilemedi: ' + (err.message || 'Bilinmeyen hata'))
+  } finally {
+    submitting.value = false
+  }
+}
+
+const openAssign = (req) => {
+  assignTarget.value = req
+  selectedPersonnelId.value = req.assignedPersonnelId || ''
+  loadPersonnel()
+}
+
+const submitAssign = async () => {
+  submitting.value = true
+  try {
+    await serviceRequestsService.assignPersonnel(assignTarget.value.id, selectedPersonnelId.value)
+    notifySuccess('Personel ataması yapıldı.')
+    assignTarget.value = null
+    await loadRequests()
+  } finally {
+    submitting.value = false
+  }
+}
+
+const openResolve = (req) => {
+  resolveTarget.value = req
+  resolutionNote.value = ''
+}
+
+const submitResolve = async () => {
+  submitting.value = true
+  try {
+    await serviceRequestsService.resolveRequest(resolveTarget.value.id, resolutionNote.value)
+    notifySuccess('Talep çözüldü olarak işaretlendi.')
+    resolveTarget.value = null
+    await loadRequests()
   } finally {
     submitting.value = false
   }
@@ -200,9 +389,10 @@ const submitCreate = async () => {
 const updateStatus = async (id, status, adminNote = null) => {
   try {
     await serviceRequestsService.updateStatus(id, status, adminNote)
+    notifySuccess('Talep durumu güncellendi.')
     await loadRequests()
   } catch (err) {
-    console.error('Durum güncellenemedi:', err)
+    notifyError('İşlem başarısız.')
   }
 }
 
@@ -211,32 +401,62 @@ const submitClose = async () => {
   submitting.value = true
   try {
     await serviceRequestsService.updateStatus(closeTarget.value.id, 'Closed', closeNote.value || null)
+    notifySuccess('Talep kapatıldı.')
     closeTarget.value = null
-    closeNote.value = ''
     await loadRequests()
   } finally {
     submitting.value = false
   }
 }
 
+/** Helpers */
 const formatDate = (d) => {
   if (!d) return '—'
   return new Date(d).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
-const statusLabel = (s) => ({ Open: 'Açık', InProgress: 'İşlemde', Closed: 'Kapalı' }[s] ?? s)
+const statusLabel = (s) => ({ Open: 'Yeni', InProgress: 'İşlemde', Resolved: 'Çözüldü', Closed: 'Kapalı' }[s] ?? s)
 const statusBadge = (s) => ({
-  Open: 'badge-info',
-  InProgress: 'badge-warning',
-  Closed: 'badge-ghost',
-}[s] ?? 'badge-ghost')
+  Open: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400',
+  InProgress: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400',
+  Resolved: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400',
+  Closed: 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400',
+}[s] ?? 'bg-slate-100 text-slate-400')
+
+const statusBorder = (s) => ({
+  Open: 'border-l-blue-500',
+  InProgress: 'border-l-amber-500',
+  Resolved: 'border-l-emerald-500',
+  Closed: 'border-l-slate-300 dark:border-l-slate-700',
+}[s] ?? 'border-l-transparent')
+
+const categoryLabel = (c) => ({
+  Maintenance: 'Bakım & Onarım',
+  Cleaning: 'Temizlik',
+  Noise: 'Gürültü & Şikayet',
+  Security: 'Güvenlik',
+  Other: 'Diğer',
+}[c] ?? 'Talep')
+
+/** İkon Yönetimi */
+const categoryIcon = (c) => {
+  const icons = {
+    Maintenance: markRaw(defineComponent({ render: () => h('svg', { fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z' }), h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M15 12a3 3 0 11-6 0 3 3 0 016 0z' })]) })),
+    Cleaning: markRaw(defineComponent({ render: () => h('svg', { fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10' })]) })),
+    Noise: markRaw(defineComponent({ render: () => h('svg', { fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z' })]) })),
+    Security: markRaw(defineComponent({ render: () => h('svg', { fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z' })]) })),
+    Other: markRaw(defineComponent({ render: () => h('svg', { fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z' })]) })),
+  }
+  return icons[c] || icons.Other
+}
+
 const categoryClass = (c) => ({
-  Maintenance: 'bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400',
-  Cleaning: 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400',
-  Noise: 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400',
-  Security: 'bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400',
-  Other: 'bg-slate-100 dark:bg-slate-700 text-slate-500',
-}[c] ?? 'bg-slate-100 dark:bg-slate-700 text-slate-500')
+  Maintenance: 'bg-amber-100 text-amber-600 dark:bg-amber-900/40 dark:text-amber-400',
+  Cleaning: 'bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400',
+  Noise: 'bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-400',
+  Security: 'bg-violet-100 text-violet-600 dark:bg-violet-900/40 dark:text-violet-400',
+  Other: 'bg-slate-100 text-slate-500 dark:bg-slate-700 dark:text-slate-400',
+}[c] ?? 'bg-slate-100 text-slate-500')
 
 onMounted(loadRequests)
 </script>
