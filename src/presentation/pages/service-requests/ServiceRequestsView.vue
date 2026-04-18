@@ -114,7 +114,7 @@
             Personel Ata
           </button>
           
-          <div v-if="req.status !== 'Closed'" class="dropdown dropdown-end">
+          <div class="dropdown dropdown-end">
             <button tabindex="0" class="btn btn-xs btn-ghost hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg">
               <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
@@ -123,8 +123,8 @@
             <ul tabindex="0" class="dropdown-content z-[1] menu p-1.5 shadow-xl bg-white dark:bg-slate-800 rounded-xl w-44 border border-slate-200 dark:border-slate-700 text-xs">
               <li v-if="req.status === 'Open'"><a @click="updateStatus(req.id, 'InProgress')" class="rounded-lg py-2"><svg class="w-3.5 h-3.5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/></svg> İşleme Al</a></li>
               <li v-if="req.status === 'InProgress'"><a @click="openResolve(req)" class="rounded-lg py-2"><svg class="w-3.5 h-3.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> Tamamlandı Olarak İşaretle</a></li>
-              <li><div class="divider my-0"></div></li>
-              <li><a @click="openClose(req)" class="rounded-lg py-2 text-error"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> Talebi Kapat</a></li>
+              <li v-if="req.status !== 'Closed'"><div class="divider my-0"></div></li>
+              <li v-if="req.status !== 'Closed'"><a @click="openClose(req)" class="rounded-lg py-2 text-error"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> Talebi Kapat</a></li>
               <li v-if="isAdmin"><a @click="openDelete(req)" class="rounded-lg py-2 text-error font-bold bg-error/5"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg> Talebi Kalıcı Olarak Sil</a></li>
             </ul>
           </div>
