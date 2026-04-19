@@ -213,25 +213,14 @@
               <div class="text-right">
                 <p class="text-xl font-black text-emerald-500 tracking-tighter shadow-sm">+ {{ formatCurrency(p.amount) }}</p>
                 <div class="flex items-center justify-end gap-1 mt-1">
-                   <div class="w-1 h-1 rounded-full bg-emerald-500 animate-pulse"></div>
-                   <span class="text-[9px] font-black text-emerald-500 uppercase">Onaylandı</span>
+                  <div class="w-1 h-1 rounded-full bg-emerald-500 animate-pulse"></div>
+                  <span class="text-[9px] font-black text-emerald-500 uppercase">Onaylandı</span>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </section>
-
-    </div>
-  </div>
-</template>
-/span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-      </template>
     </div>
   </div>
 </template>
