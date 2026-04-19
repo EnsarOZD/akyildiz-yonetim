@@ -9,7 +9,7 @@
 
   <!-- Ana içerik -->
   <div v-else-if="canViewDashboard" class="p-4 sm:p-6 pb-24 md:pb-6 min-h-screen">
-    <div class="max-w-7xl mx-auto">
+    <div class="max-w-7xl mx-auto space-y-5">
 
       <!-- ─── Başlık ─────────────────────────────────── -->
       <PageHeader title="Genel Bakış" subtitle="Finansal özet ve son aktiviteler">
@@ -49,21 +49,29 @@
         </template>
       </PageHeader>
 
-      <!-- ─── Loading state ─────────────────────────── -->
-      <div v-if="loading" class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-        <div v-for="i in 3" :key="i" class="app-card p-5 animate-pulse">
-          <div class="flex items-center gap-4">
-            <div class="w-12 h-12 rounded-xl bg-slate-100 dark:bg-[#1c2238]"></div>
-            <div class="flex-1 space-y-2">
-              <div class="h-3 bg-slate-100 dark:bg-[#1c2238] rounded w-2/3"></div>
-              <div class="h-6 bg-slate-100 dark:bg-[#1c2238] rounded w-1/2"></div>
+      <!-- ─── Loading skeleton ──────────────────────── -->
+      <template v-if="loading">
+        <div class="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-5">
+          <div class="app-card p-5 animate-pulse">
+            <div class="grid grid-cols-3 gap-5">
+              <div v-for="i in 3" :key="i" class="space-y-3">
+                <div class="w-9 h-9 rounded-xl bg-slate-100 dark:bg-[#1c2238]"></div>
+                <div class="h-3 bg-slate-100 dark:bg-[#1c2238] rounded w-3/4"></div>
+                <div class="h-6 bg-slate-100 dark:bg-[#1c2238] rounded w-1/2"></div>
+              </div>
+            </div>
+          </div>
+          <div class="app-card p-5 animate-pulse border-l-4 border-l-red-200 dark:border-l-red-800/40">
+            <div class="space-y-3">
+              <div class="h-3 bg-slate-100 dark:bg-[#1c2238] rounded w-2/5"></div>
+              <div class="h-8 bg-slate-100 dark:bg-[#1c2238] rounded w-3/5"></div>
             </div>
           </div>
         </div>
-      </div>
+      </template>
 
       <!-- ─── Error state ────────────────────────────── -->
-      <div v-else-if="error" class="app-card p-5 mb-6 border-red-200 dark:border-red-800/50 flex items-start gap-3">
+      <div v-else-if="error" class="app-card p-5 border-red-200 dark:border-red-800/50 flex items-start gap-3">
         <div class="w-8 h-8 rounded-lg bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 flex items-center justify-center flex-shrink-0">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -77,11 +85,11 @@
       </div>
 
       <!-- ─── İçerik ─────────────────────────────────── -->
-      <div v-else class="animate-fade-in">
+      <template v-else>
 
         <!-- Duyuru Banner -->
         <div v-if="notificationsStore.latestAnnouncement"
-          class="app-card mb-6 flex flex-col sm:flex-row items-stretch overflow-hidden border-violet-200 dark:border-violet-800/40">
+          class="app-card flex flex-col sm:flex-row items-stretch overflow-hidden border-violet-200 dark:border-violet-800/40">
           <div class="bg-violet-600 px-4 py-4 flex items-center justify-center flex-shrink-0">
             <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M11 5.882V19.24a1.76 1.76 0 0 1 -3.417 .592l-2.147-6.15M18 13a3 3 0 1 0 0-6M5.436 13.683A4.001 4.001 0 0 1 7 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 0 1 -1.564 -.317z" />
@@ -106,102 +114,253 @@
           </div>
         </div>
 
-        <!-- ─── Admin/Manager: Finansal Kartlar ──────── -->
-        <section v-if="userRole === 'admin' || userRole === 'manager'" class="grid grid-cols-1 md:grid-cols-12 gap-4 mb-6">
+        <!-- ════════════════════════════════════════════
+             Admin / Manager layout
+             ════════════════════════════════════════════ -->
+        <template v-if="userRole === 'admin' || userRole === 'manager'">
 
-          <!-- Sol: 3 ana kart -->
-          <div class="md:col-span-8 grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <!-- Kasa Bakiyesi -->
-            <router-link to="/transactions" class="app-card p-5 flex flex-col justify-between hover:shadow-card-md transition-shadow group">
+          <!-- ─── Row 1: Stats card + Overdue card ─── -->
+          <section class="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-5">
+
+            <!-- Combined stats: Kasa / Gelir / Gider -->
+            <div class="app-card p-5">
+              <div class="grid grid-cols-3 divide-x divide-slate-100 dark:divide-white/[0.06]">
+
+                <!-- Kasa Bakiyesi -->
+                <router-link to="/transactions" class="flex flex-col items-start pr-5 group">
+                  <div class="w-9 h-9 rounded-xl bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
+                    <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                    </svg>
+                  </div>
+                  <p class="text-[11px] font-medium text-slate-500 dark:text-[#9aa0b4] uppercase tracking-wider leading-none mb-1.5">Kasa Bakiyesi</p>
+                  <p class="text-lg font-bold text-slate-800 dark:text-[#f1f3f9] leading-tight">{{ formatCurrency(balance) }}</p>
+                  <span class="mt-2 text-[10px] font-semibold bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 px-1.5 py-0.5 rounded-full">Güncel</span>
+                </router-link>
+
+                <!-- Toplam Gelir -->
+                <router-link to="/payments" class="flex flex-col items-start px-5 group">
+                  <div class="w-9 h-9 rounded-xl bg-brand-500/10 dark:bg-brand-500/[0.12] text-brand-600 dark:text-brand-400 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
+                    <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
+                    </svg>
+                  </div>
+                  <p class="text-[11px] font-medium text-slate-500 dark:text-[#9aa0b4] uppercase tracking-wider leading-none mb-1.5">Toplam Gelir</p>
+                  <p class="text-lg font-bold text-brand-600 dark:text-brand-400 leading-tight">{{ formatCurrency(totalIncome) }}</p>
+                  <p class="mt-2 text-[10px] text-slate-400 dark:text-[#626885]">+{{ formatCurrency(thisMonthTenantPayments) }} bu ay</p>
+                </router-link>
+
+                <!-- Toplam Gider -->
+                <router-link to="/expenses" class="flex flex-col items-start pl-5 group">
+                  <div class="w-9 h-9 rounded-xl bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
+                    <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                    </svg>
+                  </div>
+                  <p class="text-[11px] font-medium text-slate-500 dark:text-[#9aa0b4] uppercase tracking-wider leading-none mb-1.5">Toplam Gider</p>
+                  <p class="text-lg font-bold text-red-600 dark:text-red-400 leading-tight">{{ formatCurrency(totalExpense) }}</p>
+                  <p class="mt-2 text-[10px] text-slate-400 dark:text-[#626885]">{{ expenses.length }} kalem</p>
+                </router-link>
+
+              </div>
+            </div>
+
+            <!-- Overdue card -->
+            <router-link to="/overdue"
+              class="app-card p-5 border-l-4 border-l-red-500 hover:shadow-lg transition-shadow flex flex-col justify-between"
+              :class="overdueItems.length === 0 ? 'border-l-emerald-500' : 'border-l-red-500'">
               <div class="flex items-start justify-between mb-3">
-                <div class="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center group-hover:scale-105 transition-transform">
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
-                  </svg>
+                <p class="text-xs font-semibold uppercase tracking-wider"
+                  :class="overdueItems.length > 0 ? 'text-red-500' : 'text-emerald-600 dark:text-emerald-400'">
+                  Geciken Ödemeler
+                </p>
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full"
+                  :class="overdueItems.length > 0 ? 'badge-overdue' : 'badge-active'">
+                  {{ overdueItems.length }} adet
+                </span>
+              </div>
+              <p class="text-3xl font-bold text-slate-800 dark:text-[#f1f3f9] mb-3">
+                {{ formatCurrency(overdueTotalAmount) }}
+              </p>
+              <div v-if="overdueItems.length > 0 && oldestOverdueDate" class="text-xs text-slate-500 dark:text-[#9aa0b4]">
+                En eski: <span class="font-medium text-red-500">{{ formatDate(oldestOverdueDate) }}</span>
+              </div>
+              <div v-else class="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-medium">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Geciken ödeme yok
+              </div>
+            </router-link>
+
+          </section>
+
+          <!-- ─── Row 2: Monthly chart + Bekleyen Alacaklar ─── -->
+          <section class="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-5">
+
+            <!-- Aylık Gelir/Gider Grafiği -->
+            <div class="app-card overflow-hidden">
+              <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100 dark:border-white/[0.05]">
+                <h2 class="text-sm font-semibold text-slate-800 dark:text-[#f1f3f9]">Aylık Gelir / Gider</h2>
+                <div class="flex items-center gap-4 text-xs text-slate-500 dark:text-[#9aa0b4]">
+                  <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-500"></span>Gelir</span>
+                  <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-red-400"></span>Gider</span>
                 </div>
-                <span class="badge-active text-[10px] font-bold px-2 py-0.5 rounded-full">Güncel</span>
               </div>
-              <div>
-                <p class="text-xs font-medium text-slate-500 dark:text-[#9aa0b4] uppercase tracking-wider">Kasa Bakiyesi</p>
-                <p class="text-xl font-bold text-slate-800 dark:text-[#f1f3f9] mt-0.5">{{ formatCurrency(balance) }}</p>
+              <div class="p-5 overflow-x-auto">
+                <div class="h-48 flex items-end gap-3 min-w-[380px]">
+                  <div v-for="(month, index) in monthlyData" :key="index" class="flex-1 flex flex-col items-center gap-1.5">
+                    <div class="w-full flex items-end justify-center gap-1" style="height: 160px">
+                      <div class="w-5 rounded-t bg-emerald-400 hover:bg-emerald-500 transition-colors cursor-default"
+                        :style="{ height: `${Math.max(4, (month.income / maxAmount) * 160)}px` }"
+                        :title="`Gelir: ${formatCurrency(month.income)}`"></div>
+                      <div class="w-5 rounded-t bg-red-400 hover:bg-red-500 transition-colors cursor-default"
+                        :style="{ height: `${Math.max(4, (month.expense / maxAmount) * 160)}px` }"
+                        :title="`Gider: ${formatCurrency(month.expense)}`"></div>
+                    </div>
+                    <span class="text-[10px] font-medium text-slate-400 dark:text-[#626885] whitespace-nowrap">{{ month.month }}</span>
+                  </div>
+                </div>
               </div>
-            </router-link>
-
-            <!-- Toplam Gelir -->
-            <router-link to="/payments" class="app-card p-5 flex flex-col justify-between hover:shadow-card-md transition-shadow group">
-              <div class="w-10 h-10 rounded-xl bg-brand-100 dark:bg-brand-500/[0.12] text-brand-600 dark:text-brand-400 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
-                </svg>
-              </div>
-              <div>
-                <p class="text-xs font-medium text-slate-500 dark:text-[#9aa0b4] uppercase tracking-wider">Toplam Gelir</p>
-                <p class="text-xl font-bold text-brand-600 dark:text-brand-400 mt-0.5">{{ formatCurrency(totalIncome) }}</p>
-                <p class="text-xs text-slate-400 mt-0.5">+{{ formatCurrency(thisMonthTenantPayments) }} bu ay</p>
-              </div>
-            </router-link>
-
-            <!-- Toplam Gider -->
-            <router-link to="/expenses" class="app-card p-5 flex flex-col justify-between hover:shadow-card-md transition-shadow group">
-              <div class="w-10 h-10 rounded-xl bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                </svg>
-              </div>
-              <div>
-                <p class="text-xs font-medium text-slate-500 dark:text-[#9aa0b4] uppercase tracking-wider">Toplam Gider</p>
-                <p class="text-xl font-bold text-red-600 dark:text-red-400 mt-0.5">{{ formatCurrency(totalExpense) }}</p>
-                <p class="text-xs text-slate-400 mt-0.5">{{ expenses.length }} kalem</p>
-              </div>
-            </router-link>
-          </div>
-
-          <!-- Sağ: Geciken + Bekleyen alacaklar -->
-          <div class="md:col-span-4 flex flex-col gap-4">
-            <OverdueWidget
-              v-if="overdueItems.length > 0"
-              :count="overdueItems.length"
-              :total-amount="overdueTotalAmount"
-              :oldest-date="oldestOverdueDate"
-            />
+            </div>
 
             <!-- Bekleyen Alacaklar -->
-            <router-link to="/utilities" class="app-card p-5 hover:shadow-card-md transition-shadow flex-1">
-              <h4 class="text-sm font-semibold text-slate-700 dark:text-[#f1f3f9] mb-3 flex items-center gap-2">
+            <router-link to="/utilities" class="app-card p-5 hover:shadow-lg transition-shadow flex flex-col">
+              <h4 class="text-sm font-semibold text-slate-700 dark:text-[#f1f3f9] mb-4 flex items-center gap-2">
                 <span class="w-1 h-5 bg-amber-500 rounded-full"></span>
                 Bekleyen Alacaklar
               </h4>
-              <div class="space-y-2">
-                <div class="flex items-center justify-between text-sm">
-                  <span class="flex items-center gap-2 text-slate-600 dark:text-[#9aa0b4]">
-                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span>Aidat
+              <div class="space-y-3 flex-1">
+                <div class="flex items-center justify-between">
+                  <span class="flex items-center gap-2 text-sm text-slate-600 dark:text-[#9aa0b4]">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 flex-shrink-0"></span>Aidat
                   </span>
-                  <span class="font-semibold text-slate-800 dark:text-[#f1f3f9]">{{ formatCurrency(totalAidatDebt) }}</span>
+                  <span class="text-sm font-semibold text-slate-800 dark:text-[#f1f3f9]">{{ formatCurrency(totalAidatDebt) }}</span>
                 </div>
-                <div class="flex items-center justify-between text-sm">
-                  <span class="flex items-center gap-2 text-slate-600 dark:text-[#9aa0b4]">
-                    <span class="w-2 h-2 rounded-full bg-amber-500"></span>Elektrik
+                <div class="flex items-center justify-between">
+                  <span class="flex items-center gap-2 text-sm text-slate-600 dark:text-[#9aa0b4]">
+                    <span class="w-2 h-2 rounded-full bg-amber-500 flex-shrink-0"></span>Elektrik
                   </span>
-                  <span class="font-semibold text-slate-800 dark:text-[#f1f3f9]">{{ formatCurrency(totalElectricityDebt) }}</span>
+                  <span class="text-sm font-semibold text-slate-800 dark:text-[#f1f3f9]">{{ formatCurrency(totalElectricityDebt) }}</span>
                 </div>
-                <div class="flex items-center justify-between text-sm">
-                  <span class="flex items-center gap-2 text-slate-600 dark:text-[#9aa0b4]">
-                    <span class="w-2 h-2 rounded-full bg-brand-500"></span>Su
+                <div class="flex items-center justify-between">
+                  <span class="flex items-center gap-2 text-sm text-slate-600 dark:text-[#9aa0b4]">
+                    <span class="w-2 h-2 rounded-full bg-brand-500 flex-shrink-0"></span>Su
                   </span>
-                  <span class="font-semibold text-slate-800 dark:text-[#f1f3f9]">{{ formatCurrency(totalWaterDebt) }}</span>
+                  <span class="text-sm font-semibold text-slate-800 dark:text-[#f1f3f9]">{{ formatCurrency(totalWaterDebt) }}</span>
                 </div>
-                <div class="h-px bg-slate-100 dark:bg-[#1c2238] my-1"></div>
-                <div class="flex items-center justify-between text-sm font-semibold">
-                  <span class="text-slate-500 dark:text-[#9aa0b4]">Toplam</span>
-                  <span class="text-amber-600 dark:text-amber-400">{{ formatCurrency(totalUtilityDebts) }}</span>
+                <div class="h-px bg-slate-100 dark:bg-white/[0.06] my-1"></div>
+                <div class="flex items-center justify-between">
+                  <span class="text-sm font-semibold text-slate-500 dark:text-[#9aa0b4]">Toplam</span>
+                  <span class="text-sm font-bold text-amber-600 dark:text-amber-400">{{ formatCurrency(totalUtilityDebts) }}</span>
                 </div>
               </div>
             </router-link>
-          </div>
-        </section>
 
-        <!-- ─── Observer: Özet Kartları ───────────────── -->
-        <section v-else-if="userRole?.toLowerCase() === 'observer'" class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+          </section>
+
+          <!-- ─── Row 3: Hızlı İşlemler ─── -->
+          <section>
+            <h2 class="text-xs font-semibold text-slate-500 dark:text-[#626885] uppercase tracking-wider mb-3 px-0.5">Hızlı İşlemler</h2>
+            <div class="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-7 gap-3">
+
+              <!-- Borç Ekle -->
+              <div class="dropdown dropdown-end sm:dropdown-bottom">
+                <div tabindex="0" role="button"
+                  class="app-card p-4 flex flex-col items-center gap-2.5 cursor-pointer group transition-all hover:-translate-y-0.5 hover:shadow-lg h-full w-full">
+                  <div class="w-10 h-10 rounded-xl bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 flex items-center justify-center group-hover:scale-105 transition-transform">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                  </div>
+                  <span class="text-xs font-semibold text-slate-700 dark:text-[#f1f3f9] text-center leading-tight">Borç Ekle</span>
+                </div>
+                <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow-card-lg bg-white dark:bg-[#0f1322] rounded-xl w-48 mt-1 border border-slate-200 dark:border-white/[0.07] text-sm">
+                  <li><a @click="openManualDebtModal(0)" class="text-slate-700 dark:text-[#f1f3f9] rounded-lg flex items-center gap-2">
+                    <svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                    Aidat Ekle
+                  </a></li>
+                  <li><a @click="openManualDebtModal(1)" class="text-slate-700 dark:text-[#f1f3f9] rounded-lg flex items-center gap-2">
+                    <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                    Elektrik Ekle
+                  </a></li>
+                  <li><a @click="openManualDebtModal(2)" class="text-slate-700 dark:text-[#f1f3f9] rounded-lg flex items-center gap-2">
+                    <svg class="w-4 h-4 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3c-4.418 4.863-5 8-5 10a5 5 0 0010 0c0-2-0.582-5.137-5-10z"/></svg>
+                    Su Ekle
+                  </a></li>
+                </ul>
+              </div>
+
+              <!-- Tahsilat Al -->
+              <router-link to="/payments" class="app-card p-4 flex flex-col items-center gap-2.5 group transition-all hover:-translate-y-0.5 hover:shadow-lg">
+                <div class="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center group-hover:scale-105 transition-transform">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                  </svg>
+                </div>
+                <span class="text-xs font-semibold text-slate-700 dark:text-[#f1f3f9] text-center leading-tight">Tahsilat Al</span>
+              </router-link>
+
+              <!-- Gider Ekle -->
+              <router-link to="/expenses" class="app-card p-4 flex flex-col items-center gap-2.5 group transition-all hover:-translate-y-0.5 hover:shadow-lg">
+                <div class="w-10 h-10 rounded-xl bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 flex items-center justify-center group-hover:scale-105 transition-transform">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <span class="text-xs font-semibold text-slate-700 dark:text-[#f1f3f9] text-center leading-tight">Gider Ekle</span>
+              </router-link>
+
+              <!-- Kiracılar -->
+              <router-link to="/tenants" class="app-card p-4 flex flex-col items-center gap-2.5 group transition-all hover:-translate-y-0.5 hover:shadow-lg">
+                <div class="w-10 h-10 rounded-xl bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 flex items-center justify-center group-hover:scale-105 transition-transform">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                  </svg>
+                </div>
+                <span class="text-xs font-semibold text-slate-700 dark:text-[#f1f3f9] text-center leading-tight">Kiracılar</span>
+              </router-link>
+
+              <!-- Raporlar -->
+              <router-link to="/reports" class="app-card p-4 flex flex-col items-center gap-2.5 group transition-all hover:-translate-y-0.5 hover:shadow-lg">
+                <div class="w-10 h-10 rounded-xl bg-cyan-100 dark:bg-cyan-900/30 text-cyan-600 dark:text-cyan-400 flex items-center justify-center group-hover:scale-105 transition-transform">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                </div>
+                <span class="text-xs font-semibold text-slate-700 dark:text-[#f1f3f9] text-center leading-tight">Raporlar</span>
+              </router-link>
+
+              <!-- Talepler -->
+              <router-link to="/service-requests" class="app-card p-4 flex flex-col items-center gap-2.5 group transition-all hover:-translate-y-0.5 hover:shadow-lg">
+                <div class="w-10 h-10 rounded-xl bg-brand-500/10 dark:bg-brand-500/[0.12] text-brand-600 dark:text-brand-400 flex items-center justify-center group-hover:scale-105 transition-transform">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
+                  </svg>
+                </div>
+                <span class="text-xs font-semibold text-slate-700 dark:text-[#f1f3f9] text-center leading-tight">Talepler</span>
+              </router-link>
+
+              <!-- Duyuru Yap -->
+              <button @click="showAnnouncementModal = true"
+                class="app-card p-4 flex flex-col items-center gap-2.5 group transition-all hover:-translate-y-0.5 hover:shadow-lg border-violet-200 dark:border-violet-800/40 cursor-pointer w-full">
+                <div class="w-10 h-10 rounded-xl bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 flex items-center justify-center group-hover:scale-105 transition-transform">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M11 5.882V19.24a1.76 1.76 0 0 1 -3.417 .592l-2.147-6.15M18 13a3 3 0 1 0 0-6M5.436 13.683A4.001 4.001 0 0 1 7 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 0 1 -1.564 -.317z" />
+                  </svg>
+                </div>
+                <span class="text-xs font-semibold text-violet-700 dark:text-violet-300 text-center leading-tight">Duyuru Yap</span>
+              </button>
+
+            </div>
+          </section>
+
+        </template>
+
+        <!-- ════════════════════════════════════════════
+             Observer layout
+             ════════════════════════════════════════════ -->
+        <section v-else-if="userRole?.toLowerCase() === 'observer'" class="grid grid-cols-1 sm:grid-cols-3 gap-5">
           <div class="app-card p-5 border-l-4 border-amber-400">
             <p class="text-xs font-semibold text-slate-500 dark:text-[#9aa0b4] uppercase tracking-wider mb-1">Bekleyen Borç</p>
             <p class="text-2xl font-bold text-slate-800 dark:text-[#f1f3f9]">{{ formatCurrency(totalUtilityDebts) }}</p>
@@ -225,104 +384,8 @@
           </div>
         </section>
 
-        <!-- ─── Hızlı İşlemler ─────────────────────── -->
-        <section v-if="userRole === 'admin' || userRole === 'manager'" class="mb-6">
-          <h2 class="text-sm font-semibold text-slate-500 dark:text-[#9aa0b4] uppercase tracking-wider mb-3 px-0.5">Hızlı İşlemler</h2>
-          <div class="grid grid-cols-3 sm:grid-cols-5 lg:grid-cols-6 gap-3">
-
-            <!-- Borç Ekle -->
-            <div class="dropdown dropdown-end sm:dropdown-bottom">
-              <div tabindex="0" role="button"
-                class="app-card p-4 flex flex-col items-center gap-2 hover:shadow-card-md cursor-pointer group transition-shadow h-full w-full">
-                <div class="w-10 h-10 rounded-xl bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 flex items-center justify-center group-hover:scale-105 transition-transform">
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                  </svg>
-                </div>
-                <span class="text-xs font-semibold text-slate-700 dark:text-[#f1f3f9] text-center">Borç Ekle</span>
-              </div>
-              <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow-card-lg bg-white dark:bg-[#0f1322] rounded-xl w-48 mt-1 border border-slate-200 dark:border-white/[0.07] text-sm">
-                <li><a @click="openManualDebtModal(0)" class="text-slate-700 dark:text-[#f1f3f9] rounded-lg flex items-center gap-2">
-                  <svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                  Aidat Ekle
-                </a></li>
-                <li><a @click="openManualDebtModal(1)" class="text-slate-700 dark:text-[#f1f3f9] rounded-lg flex items-center gap-2">
-                  <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                  Elektrik Ekle
-                </a></li>
-                <li><a @click="openManualDebtModal(2)" class="text-slate-700 dark:text-[#f1f3f9] rounded-lg flex items-center gap-2">
-                  <svg class="w-4 h-4 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3c-4.418 4.863-5 8-5 10a5 5 0 0010 0c0-2-0.582-5.137-5-10z"/></svg>
-                  Su Ekle
-                </a></li>
-              </ul>
-            </div>
-
-            <!-- Tahsilat Al -->
-            <router-link to="/payments" class="app-card p-4 flex flex-col items-center gap-2 hover:shadow-card-md group transition-shadow">
-              <div class="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center group-hover:scale-105 transition-transform">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
-                </svg>
-              </div>
-              <span class="text-xs font-semibold text-slate-700 dark:text-[#f1f3f9] text-center">Tahsilat Al</span>
-            </router-link>
-
-            <!-- Gider Ekle -->
-            <router-link to="/expenses" class="app-card p-4 flex flex-col items-center gap-2 hover:shadow-card-md group transition-shadow">
-              <div class="w-10 h-10 rounded-xl bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 flex items-center justify-center group-hover:scale-105 transition-transform">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <span class="text-xs font-semibold text-slate-700 dark:text-[#f1f3f9] text-center">Gider Ekle</span>
-            </router-link>
-
-            <!-- Kiracılar -->
-            <router-link to="/tenants" class="app-card p-4 flex flex-col items-center gap-2 hover:shadow-card-md group transition-shadow">
-              <div class="w-10 h-10 rounded-xl bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 flex items-center justify-center group-hover:scale-105 transition-transform">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                </svg>
-              </div>
-              <span class="text-xs font-semibold text-slate-700 dark:text-[#f1f3f9] text-center">Kiracılar</span>
-            </router-link>
-
-            <!-- Raporlar -->
-            <router-link to="/reports" class="app-card p-4 flex flex-col items-center gap-2 hover:shadow-card-md group transition-shadow">
-              <div class="w-10 h-10 rounded-xl bg-cyan-100 dark:bg-cyan-900/30 text-cyan-600 dark:text-cyan-400 flex items-center justify-center group-hover:scale-105 transition-transform">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-              </div>
-              <span class="text-xs font-semibold text-slate-700 dark:text-[#f1f3f9] text-center">Raporlar</span>
-            </router-link>
-
-            <!-- Talepler -->
-            <router-link to="/service-requests" class="app-card p-4 flex flex-col items-center gap-2 hover:shadow-card-md group transition-shadow">
-              <div class="w-10 h-10 rounded-xl bg-brand-100 dark:bg-brand-500/[0.12] text-brand-600 dark:text-brand-400 flex items-center justify-center group-hover:scale-105 transition-transform">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
-                </svg>
-              </div>
-              <span class="text-xs font-semibold text-slate-700 dark:text-[#f1f3f9] text-center">Talepler</span>
-            </router-link>
-
-            <!-- Duyuru Yap -->
-            <button @click="showAnnouncementModal = true"
-              class="app-card p-4 flex flex-col items-center gap-2 hover:shadow-card-md group transition-shadow border-violet-200 dark:border-violet-800/40 cursor-pointer w-full">
-              <div class="w-10 h-10 rounded-xl bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 flex items-center justify-center group-hover:scale-105 transition-transform">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M11 5.882V19.24a1.76 1.76 0 0 1 -3.417 .592l-2.147-6.15M18 13a3 3 0 1 0 0-6M5.436 13.683A4.001 4.001 0 0 1 7 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 0 1 -1.564 -.317z" />
-                </svg>
-              </div>
-              <span class="text-xs font-semibold text-violet-700 dark:text-violet-300 text-center">Duyuru Yap</span>
-            </button>
-
-          </div>
-        </section>
-
-        <!-- ─── Geciken Ödemeler ───────────────────── -->
-        <section class="app-card overflow-hidden mb-5">
+        <!-- ─── Row 4: Geciken Ödemeler list ──────────── -->
+        <section class="app-card overflow-hidden">
           <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100 dark:border-white/[0.05]">
             <h2 class="text-sm font-semibold text-slate-800 dark:text-[#f1f3f9]">Geciken Ödemeler</h2>
             <span class="badge-overdue text-xs font-bold px-2.5 py-1 rounded-full">{{ overdueItems.length }} adet</span>
@@ -330,19 +393,19 @@
 
           <div v-if="overdueItems.length > 0">
             <div v-for="item in overdueItems.slice(0, 5)" :key="item.id"
-              class="flex items-center gap-3 px-5 py-3.5 border-b border-slate-50 dark:border-slate-800/50 last:border-0 table-row-hover">
+              class="flex items-center gap-3 px-5 py-3.5 border-b border-slate-50 dark:border-white/[0.03] last:border-0 table-row-hover">
               <div class="w-8 h-8 rounded-lg bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 flex items-center justify-center flex-shrink-0">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
               <div class="min-w-0 flex-1">
-                <p class="text-sm font-medium text-slate-800 dark:text-[#f1f3f9] truncate">{{ item.company }}</p>
-                <p class="text-xs text-slate-500 dark:text-[#9aa0b4]">{{ item.floor }} · {{ item.typeLabel }}</p>
+                <p class="text-sm font-semibold text-slate-800 dark:text-[#f1f3f9] truncate uppercase tracking-wide text-xs">{{ item.company }}</p>
+                <p class="text-xs text-slate-500 dark:text-[#9aa0b4] mt-0.5">{{ item.floor }} · {{ item.typeLabel }}</p>
               </div>
               <div class="text-right flex-shrink-0">
-                <p class="text-sm font-semibold text-red-600 dark:text-red-400">{{ formatCurrency(item.amount) }}</p>
-                <p class="text-[10px] text-slate-400">{{ formatDate(item.dueDate) }}</p>
+                <p class="text-sm font-bold text-red-600 dark:text-red-400">{{ formatCurrency(item.amount) }}</p>
+                <p class="text-[10px] text-slate-400 dark:text-[#626885] mt-0.5">{{ formatDate(item.dueDate) }}</p>
               </div>
             </div>
           </div>
@@ -356,8 +419,7 @@
             <p class="text-sm font-medium text-slate-700 dark:text-[#f1f3f9]">Geciken ödeme yok</p>
           </div>
 
-          <div v-if="overdueItems.length > 0"
-            class="px-5 py-3 border-t border-slate-100 dark:border-white/[0.05]">
+          <div v-if="overdueItems.length > 0" class="px-5 py-3 border-t border-slate-100 dark:border-white/[0.05]">
             <router-link to="/overdue"
               class="inline-flex items-center gap-1 text-xs font-semibold text-red-600 dark:text-red-400 hover:underline">
               Tümünü gör
@@ -368,38 +430,12 @@
           </div>
         </section>
 
-        <!-- ─── Borç Özet Tablosu ──────────────────── -->
-        <section v-if="userRole !== 'tenant'" class="mb-5">
+        <!-- ─── Borç Özet Tablosu ───────────────────── -->
+        <section v-if="userRole !== 'tenant'">
           <DebtsTable :debts="debtsSummary" :loading="loading" />
         </section>
 
-        <!-- ─── Aylık Gelir/Gider Grafiği ─────────── -->
-        <section v-if="userRole === 'admin' || userRole === 'manager'" class="app-card overflow-hidden mb-5">
-          <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100 dark:border-white/[0.05]">
-            <h2 class="text-sm font-semibold text-slate-800 dark:text-[#f1f3f9]">Aylık Gelir / Gider</h2>
-            <div class="flex items-center gap-4 text-xs text-slate-500 dark:text-[#9aa0b4]">
-              <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-500"></span>Gelir</span>
-              <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-red-400"></span>Gider</span>
-            </div>
-          </div>
-          <div class="p-5 overflow-x-auto">
-            <div class="h-48 flex items-end gap-3 min-w-[420px]">
-              <div v-for="(month, index) in monthlyData" :key="index" class="flex-1 flex flex-col items-center gap-1.5">
-                <div class="w-full flex items-end justify-center gap-1" style="height: 160px">
-                  <div class="w-4 rounded-t bg-emerald-400 hover:bg-emerald-500 transition-colors cursor-default"
-                    :style="{ height: `${Math.max(4, (month.income / maxAmount) * 160)}px` }"
-                    :title="`Gelir: ${formatCurrency(month.income)}`"></div>
-                  <div class="w-4 rounded-t bg-red-400 hover:bg-red-500 transition-colors cursor-default"
-                    :style="{ height: `${Math.max(4, (month.expense / maxAmount) * 160)}px` }"
-                    :title="`Gider: ${formatCurrency(month.expense)}`"></div>
-                </div>
-                <span class="text-[10px] font-medium text-slate-400 whitespace-nowrap">{{ month.month }}</span>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- ─── Son İşlemler ──────────────────────── -->
+        <!-- ─── Row 5: Son İşlemler ────────────────────── -->
         <section class="app-card overflow-hidden">
           <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100 dark:border-white/[0.05]">
             <h2 class="text-sm font-semibold text-slate-800 dark:text-[#f1f3f9]">Son İşlemler</h2>
@@ -414,7 +450,7 @@
 
           <div v-if="recentActivities.length > 0">
             <div v-for="activity in recentActivities" :key="activity.id"
-              class="flex items-center gap-3 px-5 py-3.5 border-b border-slate-50 dark:border-slate-800/50 last:border-0 table-row-hover">
+              class="flex items-center gap-3 px-5 py-3.5 border-b border-slate-50 dark:border-white/[0.03] last:border-0 table-row-hover">
               <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
                 :class="{
                   'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400': activity.type === 'income',
@@ -468,7 +504,7 @@
           </div>
         </section>
 
-      </div><!-- /v-else -->
+      </template><!-- /v-else -->
 
       <!-- Modaller -->
       <ManualDebtModal v-if="showManualDebtModal" :type="selectedDebtType" @close="showManualDebtModal = false" @refresh="loadDashboardData" />

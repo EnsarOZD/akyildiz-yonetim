@@ -49,6 +49,20 @@ a {
   background-color: #080b14;
 }
 
+/* Force DaisyUI bg-base-* to use Royal Blue palette in dark mode */
+.dark .bg-base-200,
+[data-theme="dark"] .bg-base-200 {
+  background-color: #080b14 !important;
+}
+.dark .bg-base-100,
+[data-theme="dark"] .bg-base-100 {
+  background-color: #0f1322 !important;
+}
+.dark .bg-base-300,
+[data-theme="dark"] .bg-base-300 {
+  background-color: #151a2e !important;
+}
+
 /* Normalize common gray page wrappers to use Royal Blue palette in dark mode */
 .dark .bg-gray-50,
 .dark .bg-gray-100,
