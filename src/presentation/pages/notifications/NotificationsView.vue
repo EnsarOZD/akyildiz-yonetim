@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="p-4 sm:p-6 min-h-screen pb-24 md:pb-6">
 
     <!-- Sayfa Başlığı -->
@@ -152,22 +152,51 @@
     </div>
 
     <!-- Tümünü Sil Onay Modalı -->
-    <dialog v-if="showDeleteConfirm" class="modal modal-bottom sm:modal-middle" open>
-      <div class="modal-box">
-        <h3 class="font-bold text-lg text-error">Tüm Bildirimleri Sil</h3>
-        <p class="py-4 text-sm text-slate-600 dark:text-[#f1f3f9]">
-          Sistemdeki <strong>tüm kullanıcılara ait</strong> bildirimler kalıcı olarak silinecek. Bu işlem geri alınamaz.
-        </p>
-        <div class="modal-action">
-          <button class="btn btn-ghost btn-sm" @click="showDeleteConfirm = false" :disabled="deleting">Vazgeç</button>
-          <button class="btn btn-error btn-sm" @click="confirmDeleteAll" :disabled="deleting">
-            <span v-if="deleting" class="loading loading-spinner loading-xs"></span>
-            Evet, Tümünü Sil
-          </button>
+    <BaseModal
+      v-if="showDeleteConfirm"
+      :model-value="showDeleteConfirm"
+      title="TÜM BİLDİRİMLERİ SİL"
+      icon="⚠️"
+      size="sm"
+      @close="showDeleteConfirm = false"
+    >
+      <div class="space-y-6">
+        <div class="flex flex-col items-center text-center space-y-4">
+          <div class="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center text-red-500 shadow-lg shadow-red-500/5">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+            </svg>
+          </div>
+          
+          <div class="space-y-2 px-2">
+            <h5 class="text-sm font-black text-[#f1f3f9] uppercase tracking-tight leading-relaxed">
+              Kritik İşlem Onayı
+            </h5>
+            <p class="text-[11px] text-[#626885] font-medium leading-relaxed italic">
+              Sistemdeki <span class="text-red-400 font-bold">tüm kullanıcılara ait</span> bildirim kayıtları kalıcı olarak silinecektir. Bu işlemin geri dönüşü yoktur.
+            </p>
+          </div>
         </div>
       </div>
-      <form method="dialog" class="modal-backdrop"><button @click="showDeleteConfirm = false">Kapat</button></form>
-    </dialog>
+
+      <template #footer>
+        <button 
+          class="btn btn-ghost !bg-transparent border border-white/[0.08] text-[#9aa0b4] hover:bg-white/[0.05] flex-1" 
+          @click="showDeleteConfirm = false" 
+          :disabled="deleting"
+        >
+          Vazgeç
+        </button>
+        <button 
+          class="btn btn-error flex-1 font-black uppercase tracking-widest" 
+          @click="confirmDeleteAll" 
+          :disabled="deleting"
+        >
+          <span v-if="deleting" class="loading loading-spinner loading-xs mr-2"></span>
+          Evet, Sil
+        </button>
+      </template>
+    </BaseModal>
 
     <!-- Duyuru Modalı -->
     <TargetedNotificationModal
@@ -181,6 +210,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import PageHeader from '@/presentation/components/ui/PageHeader.vue'
+import BaseModal from '@/presentation/components/common/BaseModal.vue'
 import { useNotificationsStore } from '@/application/stores/notificationsStore'
 import { useAuthStore } from '@/application/stores/auth'
 import TargetedNotificationModal from './components/TargetedNotificationModal.vue'

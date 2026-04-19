@@ -1,79 +1,59 @@
-﻿<template>
-  <dialog open class="modal">
-    <div class="modal-box max-w-md bg-white dark:bg-[#0f1322] border border-gray-200 dark:border-white/[0.07]">
-      <!-- Header -->
-      <div class="flex items-center justify-between mb-6 pb-4 border-b border-gray-200 dark:border-white/[0.07]">
-        <div class="flex items-center gap-3">
-          <div class="bg-yellow-100 dark:bg-yellow-900/50 text-yellow-600 dark:text-yellow-400 rounded-full p-2">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-            </svg>
+<template>
+  <BaseModal
+    :model-value="true"
+    title="Aidat Kaydı Düzenle"
+    icon="✏️"
+    size="md"
+    @close="$emit('close')"
+  >
+    <div class="space-y-6">
+      <!-- Bilgi Alanları -->
+      <div class="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-5 space-y-4">
+        <h4 class="text-[11px] font-black uppercase tracking-widest text-[#626885] mb-2">Kayıt Bilgileri</h4>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text">Kat/Daire</span>
+            </label>
+            <div class="px-4 py-2.5 bg-white/[0.04] border border-white/[0.08] rounded-xl text-sm text-[#9aa0b4] font-medium">
+              {{ record.unit || record.flatNumber || '-' }}
+            </div>
           </div>
-          <h3 class="text-xl font-bold text-gray-800 dark:text-[#f1f3f9]">Aidat Kaydı Düzenle</h3>
+
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text">Şirket/Kişi</span>
+            </label>
+            <div class="px-4 py-2.5 bg-white/[0.04] border border-white/[0.08] rounded-xl text-sm text-[#9aa0b4] font-medium truncate">
+               {{ record.tenantCompany || record.tenantName || record.ownerName || '-' }}
+            </div>
+          </div>
         </div>
-        <button @click="$emit('close')" class="btn btn-ghost btn-sm">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
+
+        <!-- Dönem ve Tarih -->
+        <div class="grid grid-cols-2 gap-4 mt-2">
+          <div class="form-control">
+            <label class="label"><span class="label-text">Yıl</span></label>
+            <input type="number" v-model.number="local.periodYear" class="input input-bordered w-full" min="2020" />
+          </div>
+          <div class="form-control">
+            <label class="label"><span class="label-text">Ay</span></label>
+            <select v-model.number="local.periodMonth" class="select select-bordered w-full">
+              <option v-for="m in 12" :key="m" :value="m">{{ m }}</option>
+            </select>
+          </div>
+        </div>
       </div>
 
-      <div class="space-y-6">
-        <!-- Bilgi Alanları -->
-        <div class="bg-gray-50 dark:bg-base-200 rounded-lg p-4 space-y-4">
-          <h4 class="text-lg font-semibold text-gray-800 dark:text-[#f1f3f9] mb-3">Kayıt Bilgileri</h4>
+      <!-- Düzenlenebilir Alanlar -->
+      <div class="bg-brand-500/[0.05] border border-brand-500/20 rounded-2xl p-5 space-y-5">
+        <h4 class="text-[11px] font-black uppercase tracking-widest text-brand-400 mb-2">Tutar ve Detaylar</h4>
 
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div class="form-control">
             <label class="label">
-              <span class="label-text font-semibold text-gray-700 dark:text-[#f1f3f9]">Kat/Daire</span>
-            </label>
-            <input
-              type="text"
-              class="input input-bordered w-full bg-gray-100 dark:bg-[#1c2238] border-gray-300 dark:border-white/[0.1] text-gray-500 dark:text-[#9aa0b4]"
-              :value="record.unit || record.flatNumber || '-'"
-              disabled
-            />
-          </div>
-
-          <div class="form-control">
-            <label class="label">
-              <span class="label-text font-semibold text-gray-700 dark:text-[#f1f3f9]">Şirket/Kişi</span>
-            </label>
-            <input
-              type="text"
-              class="input input-bordered w-full bg-gray-100 dark:bg-[#1c2238] border-gray-300 dark:border-white/[0.1] text-gray-500 dark:text-[#9aa0b4]"
-              :value="record.tenantCompany || record.tenantName || record.ownerName || '-'"
-              disabled
-            />
-          </div>
-
-          <!-- Dönem ve Tarih -->
-          <div class="grid grid-cols-2 gap-4 mt-4 pt-4 border-t border-gray-200 dark:border-white/[0.07]">
-            <div class="form-control">
-              <label class="label"><span class="label-text font-semibold">Yıl</span></label>
-              <input type="number" v-model.number="local.periodYear" class="input input-bordered w-full" min="2020" />
-            </div>
-            <div class="form-control">
-              <label class="label"><span class="label-text font-semibold">Ay</span></label>
-              <select v-model.number="local.periodMonth" class="select select-bordered w-full">
-                <option v-for="m in 12" :key="m" :value="m">{{ m }}</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="form-control mt-2">
-            <label class="label"><span class="label-text font-semibold">Son Ödeme Tarihi</span></label>
-            <input type="date" v-model="local.dueDate" class="input input-bordered w-full" />
-          </div>
-        </div>
-
-        <!-- Düzenlenebilir Alanlar -->
-        <div class="bg-brand-50 dark:bg-brand-500/[0.08] rounded-lg p-4 space-y-4">
-          <h4 class="text-lg font-semibold text-gray-800 dark:text-[#f1f3f9] mb-3">Tutar ve Açıklama</h4>
-
-          <div class="form-control">
-            <label class="label">
-              <span class="label-text font-semibold text-gray-700 dark:text-[#f1f3f9]">Toplam Tutar *</span>
+              <span class="label-text">Toplam Tutar *</span>
             </label>
             <div class="relative">
               <input
@@ -81,71 +61,77 @@
                 v-model="displayAmount"
                 @input="handleAmountInput"
                 @blur="handleAmountBlur"
-                class="input input-bordered w-full bg-white dark:bg-[#1c2238] border-gray-300 dark:border-white/[0.1] text-gray-700 dark:text-[#f1f3f9] pr-10"
-                :class="{ 'border-red-500': amountError }"
+                class="input input-bordered w-full font-bold !text-lg pr-10"
+                :class="{ '!border-red-500/50': amountError }"
                 placeholder="0,00"
                 required
               />
-              <span class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 font-bold">₺</span>
+              <span class="absolute right-4 top-1/2 -translate-y-1/2 text-[#626885] font-black uppercase tracking-widest text-[10px]">TL</span>
             </div>
-            <p v-if="amountError" class="text-error text-xs mt-1">{{ amountError }}</p>
+            <p v-if="amountError" class="text-red-400 text-[10px] font-bold uppercase tracking-wide mt-1.5 ml-1">{{ amountError }}</p>
           </div>
 
           <div class="form-control">
             <label class="label">
-              <span class="label-text font-semibold text-gray-700 dark:text-[#f1f3f9]">Fatura Numarası</span>
+              <span class="label-text">Son Ödeme Tarihi</span>
             </label>
-            <input
-              v-model="local.invoiceNumber"
-              type="text"
-              class="input input-bordered w-full bg-white dark:bg-[#1c2238] border-gray-300 dark:border-white/[0.1] text-gray-700 dark:text-[#f1f3f9]"
-              placeholder="Opsiyonel fatura no..."
-            />
-          </div>
-
-          <div class="form-control">
-            <label class="label">
-              <span class="label-text font-semibold text-gray-700 dark:text-[#f1f3f9]">Açıklama</span>
-            </label>
-            <textarea
-              v-model="local.description"
-              class="textarea textarea-bordered h-20 w-full"
-              placeholder="Aidat açıklaması..."
-            ></textarea>
+            <input type="date" v-model="local.dueDate" class="input input-bordered w-full" />
           </div>
         </div>
 
-        <!-- Uyarı -->
-        <div class="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-4 border border-yellow-200 dark:border-yellow-800">
-          <div class="flex items-start gap-3">
-            <div class="bg-yellow-100 dark:bg-yellow-900/50 text-yellow-600 dark:text-yellow-400 rounded-full p-1 mt-0.5">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-              </svg>
-            </div>
-            <div class="text-sm text-gray-700 dark:text-[#f1f3f9]">
-              <p class="font-medium mb-1">Dikkat</p>
-              <p>Bu değişiklik aidat kaydını kalıcı olarak günceller.</p>
-            </div>
-          </div>
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text">Fatura Numarası</span>
+          </label>
+          <input
+            v-model="local.invoiceNumber"
+            type="text"
+            class="input input-bordered w-full"
+            placeholder="E-Arşiv / Kağıt Fatura No..."
+          />
         </div>
 
-        <!-- Actions -->
-        <div class="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-white/[0.07]">
-          <button class="btn btn-outline btn-sm" @click="$emit('close')">
-            İptal
-          </button>
-          <button class="btn btn-primary btn-sm" @click="save" :disabled="local.kdvHaric < 0 || local.toplamTutar < 0">
-            Kaydet
-          </button>
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text">Açıklama</span>
+          </label>
+          <textarea
+            v-model="local.description"
+            class="textarea textarea-bordered h-24 w-full"
+            placeholder="Kayıt ile ilgili ek notlar..."
+          ></textarea>
+        </div>
+      </div>
+
+      <!-- Uyarı -->
+      <div class="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-4 flex items-start gap-3">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-amber-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+        </svg>
+        <div class="text-xs text-amber-500/90 font-medium leading-relaxed">
+          <p class="font-bold uppercase tracking-widest text-[9px] mb-1">Önemli Hatırlatma</p>
+          <p>Yaptığınız değişiklikler doğrudan veritabanına yansıtılır ve finansal raporları etkiler.</p>
         </div>
       </div>
     </div>
-  </dialog>
+
+    <template #footer>
+      <button class="btn btn-outline border-white/[0.08] text-[#9aa0b4] hover:bg-white/[0.04]" @click="$emit('close')">
+        Vazgeç
+      </button>
+      <button class="btn btn-primary" @click="save" :disabled="local.toplamTutar <= 0">
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
+        </svg>
+        Değişiklikleri Kaydet
+      </button>
+    </template>
+  </BaseModal>
 </template>
 
 <script setup>
 import { ref, onMounted, watch } from 'vue'
+import BaseModal from '@/presentation/components/common/BaseModal.vue'
 import utilityDebtsService from '@/infrastructure/services/utilityDebtsService'
 import { useErrorHandler } from '@/application/composables/useErrorHandler'
 import { formatCurrency, parseCurrency, formatInputCurrency } from '@/core/utils/currencyUtils'

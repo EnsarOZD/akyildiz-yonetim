@@ -1,36 +1,37 @@
-﻿<template>
-  <dialog id="editTenantModal" class="modal" :open="visible">
-    <div v-if="form" class="modal-box max-w-4xl bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 border border-gray-200 dark:border-white/[0.07] shadow-2xl">
-      <!-- Başlık -->
-      <div class="flex items-center justify-between pb-4 border-b border-gray-200 dark:border-white/[0.07] mb-6">
-        <h3 class="text-xl font-bold text-gray-800 dark:text-[#f1f3f9] flex items-center gap-2">
-          <span class="text-2xl">✏️</span>
-          İş Yeri Kiracısı Bilgilerini Güncelle
-        </h3>
-        <button @click="handleClose" class="btn btn-sm btn-ghost text-gray-500 hover:text-gray-700 dark:text-[#9aa0b4] dark:hover:text-gray-200">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-          </svg>
-        </button>
-      </div>
+<template>
+  <BaseModal
+    :model-value="visible"
+    title="KİRACI BİLGİLERİNİ GÜNCELLE"
+    icon="✏️"
+    size="lg"
+    @close="handleClose"
+  >
+    <div v-if="form" class="space-y-8">
+      <!-- Form Bilgileri -->
+      <form @submit.prevent="save" id="editTenantForm" class="space-y-10">
+        
+        <!-- 1. İş Yeri Bilgileri -->
+        <div class="space-y-4">
+          <div class="flex items-center gap-3 px-1">
+            <div class="w-8 h-8 rounded-lg bg-brand-500/10 flex items-center justify-center text-brand-400">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+              </svg>
+            </div>
+            <h4 class="text-[11px] font-black uppercase tracking-widest text-[#f1f3f9]">Resmi Kayıt Bilgileri</h4>
+          </div>
 
-      <!-- Scroll edilebilir form -->
-      <div class="overflow-y-auto max-h-[70vh] pr-2">
-        <form @submit.prevent="save" class="space-y-6">
-          <!-- İş Yeri Bilgileri -->
-          <div class="card bg-base-200 p-4">
-            <h4 class="text-lg font-semibold mb-4 text-gray-700 dark:text-[#f1f3f9]">🏢 İş Yeri Bilgileri</h4>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div class="form-control">
-                <label class="label"><span class="label-text font-semibold">Şirket Adı *</span></label>
-                <input v-model.trim="form.companyName" class="input input-bordered w-full bg-white dark:bg-[#1c2238]" required />
+          <div class="bg-white/[0.02] border border-white/[0.08] rounded-2xl p-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="form-control md:col-span-2">
+                <label class="label"><span class="label-text">Şirket Resmi Adı *</span></label>
+                <input v-model="form.companyName" class="input input-bordered w-full font-bold !text-lg" required />
               </div>
 
-
               <div class="form-control">
-                <label class="label"><span class="label-text font-semibold">İş Türü *</span></label>
-                <select v-model="form.businessType" class="select select-bordered w-full bg-white dark:bg-[#1c2238]" required>
-                  <option value="">İş türü seçin</option>
+                <label class="label"><span class="label-text">Sektör / İş Türü *</span></label>
+                <select v-model="form.businessType" class="select select-bordered w-full font-bold" required>
+                  <option value="">Seçiniz...</option>
                   <option value="Ticaret">Ticaret</option>
                   <option value="Hizmet">Hizmet</option>
                   <option value="Üretim">Üretim</option>
@@ -41,10 +42,10 @@
               </div>
 
               <div class="form-control">
-                <label class="label"><span class="label-text font-semibold">Kimlik/Vergi Numarası *</span></label>
+                <label class="label"><span class="label-text">V.K.N. / T.C. Kimlik No *</span></label>
                 <input
                   v-model="form.identityNumber"
-                  class="input input-bordered w-full bg-white dark:bg-[#1c2238]"
+                  class="input input-bordered w-full font-bold tracking-widest"
                   placeholder="TC veya Vergi No"
                   inputmode="numeric"
                   required
@@ -52,57 +53,91 @@
               </div>
             </div>
           </div>
+        </div>
 
-          <!-- İletişim Kişisi -->
-          <div class="card bg-base-200 p-4">
-            <h4 class="text-lg font-semibold mb-4 text-gray-700 dark:text-[#f1f3f9]">👤 İletişim Kişisi</h4>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- 2. İletişim Kişisi -->
+        <div class="space-y-4">
+          <div class="flex items-center gap-3 px-1">
+            <div class="w-8 h-8 rounded-lg bg-brand-500/10 flex items-center justify-center text-brand-400">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+            </div>
+            <h4 class="text-[11px] font-black uppercase tracking-widest text-[#f1f3f9]">Güncel İletişim Bilgileri</h4>
+          </div>
+
+          <div class="bg-white/[0.02] border border-white/[0.08] rounded-2xl p-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div class="form-control">
-                <label class="label"><span class="label-text font-semibold">Ad Soyad *</span></label>
-                <input v-model.trim="form.contactPersonName" class="input input-bordered w-full bg-white dark:bg-[#1c2238]" required />
+                <label class="label"><span class="label-text">Yetkili Ad Soyad *</span></label>
+                <input v-model="form.contactPersonName" class="input input-bordered w-full font-bold" required />
               </div>
               <div class="form-control">
-                <label class="label"><span class="label-text font-semibold">Telefon *</span></label>
-                <input v-model.trim="form.contactPersonPhone" class="input input-bordered w-full bg-white dark:bg-[#1c2238]" placeholder="+90 (5XX) XXX XX XX" required />
+                <label class="label"><span class="label-text">İletişim Telefonu *</span></label>
+                <input v-model="form.contactPersonPhone" class="input input-bordered w-full font-bold" placeholder="+90 (5XX) XXX XX XX" required />
               </div>
               <div class="form-control md:col-span-2">
-                <label class="label"><span class="label-text font-semibold">E-posta</span></label>
-                <input type="email" v-model.trim="form.contactPersonEmail" class="input input-bordered w-full bg-white dark:bg-[#1c2238]" placeholder="ornek@email.com" />
+                <label class="label"><span class="label-text">E-posta Adresi</span></label>
+                <input type="email" v-model="form.contactPersonEmail" class="input input-bordered w-full font-medium" placeholder="ornek@email.com" />
               </div>
             </div>
           </div>
+        </div>
 
-          <!-- Aidat & Durum -->
-          <div class="card bg-base-200 p-4">
-            <h4 class="text-lg font-semibold mb-4 text-gray-700 dark:text-[#f1f3f9]">💰 Aidat & Durum</h4>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div class="form-control">
-                <label class="label"><span class="label-text font-semibold">Aylık Aidat (₺) *</span></label>
-                <input type="number" v-model.number="form.monthlyAidat" min="0" step="0.01" class="input input-bordered w-full bg-white dark:bg-[#1c2238]" required />
+        <!-- 3. Finansal Detaylar -->
+        <div class="space-y-4">
+          <div class="flex items-center gap-3 px-1">
+            <div class="w-8 h-8 rounded-lg bg-brand-500/10 flex items-center justify-center text-brand-400 font-bold text-xs">💰</div>
+            <h4 class="text-[11px] font-black uppercase tracking-widest text-[#f1f3f9]">Finansal & Üyelik Durumu</h4>
+          </div>
+
+          <div class="bg-white/[0.02] border border-white/[0.08] rounded-2xl p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="form-control">
+              <label class="label"><span class="label-text">Aylık Aidat Bedeli</span></label>
+              <div class="relative">
+                <input type="number" v-model.number="form.monthlyAidat" class="input input-bordered w-full font-black text-lg pr-12" min="0" step="0.01" required />
+                <span class="absolute right-4 top-1/2 -translate-y-1/2 text-[#626885] font-black text-[10px] uppercase tracking-widest">TL</span>
               </div>
-              <div class="form-control md:col-span-2">
-                <label class="label"><span class="label-text font-semibold">Aktif</span></label>
+            </div>
+
+            <div class="form-control justify-center">
+              <label class="label cursor-pointer flex justify-start gap-4 p-0">
                 <input type="checkbox" v-model="form.isActive" class="toggle toggle-success" />
-              </div>
+                <span class="label-text font-black uppercase tracking-widest text-[11px] text-[#9aa0b4]">Üyelik Aktif</span>
+              </label>
             </div>
           </div>
-
-        </form>
-      </div>
-
-      <!-- Actions -->
-      <div class="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-white/[0.07] mt-6">
-        <button type="button" @click="$emit('close')" class="btn btn-outline">İptal</button>
-        <button @click="save" class="btn btn-primary">Güncelle</button>
-      </div>
+        </div>
+      </form>
     </div>
-  </dialog>
+
+    <!-- Footer -->
+    <template #footer>
+      <button 
+        type="button" 
+        @click="handleClose" 
+        class="btn btn-ghost !bg-transparent border border-white/[0.08] text-[#9aa0b4] hover:bg-white/[0.05] flex-1"
+      >
+        Vazgeç
+      </button>
+      <button 
+        form="editTenantForm" 
+        type="submit" 
+        class="btn btn-primary flex-1 shadow-lg shadow-brand-500/20 uppercase tracking-widest font-black"
+      >
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+        </svg>
+        Güncellemeleri Kaydet
+      </button>
+    </template>
+  </BaseModal>
 </template>
 
 <script setup>
-import { ref, watch, computed } from 'vue'
+import { ref, watch } from 'vue'
+import BaseModal from '@/presentation/components/common/BaseModal.vue'
 import { useDirtyGuard } from '@/application/composables/useDirtyGuard'
-
 
 const props = defineProps({
   tenant: Object,
@@ -112,8 +147,6 @@ const emit = defineEmits(['save', 'close'])
 
 const form = ref(null)
 const { isDirty, resetDirty } = useDirtyGuard(() => form.value)
-
-// helpers
 
 watch(() => props.tenant, (t) => {
   if (!t) { form.value = null; return }
@@ -143,23 +176,17 @@ const handleClose = () => {
   emit('close')
 }
 
-// Save
 const save = () => {
   const f = form.value
   if (!f) return
 
-
-  // UpdateTenantCommand payload
   const payload = {
-    id: f.id,
+    ...f,
     companyName: f.companyName.trim(),
-    businessType: f.businessType,
     identityNumber: f.identityNumber.trim(),
     contactPersonName: f.contactPersonName.trim(),
     contactPersonPhone: f.contactPersonPhone.trim(),
     contactPersonEmail: f.contactPersonEmail.trim(),
-    monthlyAidat: Number(f.monthlyAidat ?? 0),
-    isActive: Boolean(f.isActive)
   }
 
   resetDirty()

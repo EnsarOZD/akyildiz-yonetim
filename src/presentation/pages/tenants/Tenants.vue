@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="p-4 sm:p-6 min-h-screen pb-24 md:pb-6">
 
     <!-- Sayfa Başlığı -->
@@ -35,38 +35,44 @@
     </PageHeader>
 
     <!-- İstatistik Kartları -->
-    <div class="grid grid-cols-3 gap-3 sm:gap-4 mb-5">
-      <div class="app-card flex items-center gap-3">
-        <div class="w-9 h-9 rounded-xl bg-brand-50 dark:bg-brand-500/[0.08] text-brand-600 dark:text-brand-400 flex items-center justify-center shrink-0">
-          <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-          </svg>
-        </div>
-        <div class="min-w-0">
-          <p class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-[#626885] truncate">Aktif Kiracı</p>
-          <p class="text-xl font-bold text-slate-800 dark:text-white tabular-nums">{{ stats.activeCount }}</p>
-        </div>
-      </div>
-      <div class="app-card flex items-center gap-3">
-        <div class="w-9 h-9 rounded-xl bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 flex items-center justify-center shrink-0">
-          <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
-          </svg>
-        </div>
-        <div class="min-w-0">
-          <p class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-[#626885] truncate">Doluluk</p>
-          <p class="text-xl font-bold text-slate-800 dark:text-white tabular-nums">%{{ stats.occupancyRate }}</p>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+      <div class="app-card group hover:shadow-xl hover:shadow-blue-500/5 transition-all duration-300">
+        <div class="flex items-center gap-4">
+          <div class="w-12 h-12 rounded-2xl bg-brand-50 dark:bg-brand-500/10 text-brand-600 dark:text-brand-400 flex items-center justify-center shrink-0 transition-transform group-hover:scale-110">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+            </svg>
+          </div>
+          <div class="min-w-0">
+            <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-[#626885]">Aktif Kiracı</p>
+            <p class="text-2xl font-black text-slate-800 dark:text-white tabular-nums tracking-tight mt-0.5">{{ stats.activeCount }}</p>
+          </div>
         </div>
       </div>
-      <div class="app-card flex items-center gap-3">
-        <div class="w-9 h-9 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-500 flex items-center justify-center shrink-0">
-          <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-          </svg>
+      <div class="app-card group hover:shadow-xl hover:shadow-emerald-500/5 transition-all duration-300">
+        <div class="flex items-center gap-4">
+          <div class="w-12 h-12 rounded-2xl bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 transition-transform group-hover:scale-110">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+            </svg>
+          </div>
+          <div class="min-w-0">
+            <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-[#626885]">Doluluk</p>
+            <p class="text-2xl font-black text-slate-800 dark:text-white tabular-nums tracking-tight mt-0.5">%{{ stats.occupancyRate }}</p>
+          </div>
         </div>
-        <div class="min-w-0">
-          <p class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-[#626885] truncate">Bakiye</p>
-          <p class="text-sm font-bold text-slate-800 dark:text-white tabular-nums">{{ formatCurrency(stats.totalDebt) }}</p>
+      </div>
+      <div class="app-card group hover:shadow-xl hover:shadow-red-500/5 transition-all duration-300">
+        <div class="flex items-center gap-4">
+          <div class="w-12 h-12 rounded-2xl bg-red-50 dark:bg-red-500/10 text-red-500 flex items-center justify-center shrink-0 transition-transform group-hover:scale-110">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+          </div>
+          <div class="min-w-0">
+            <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-[#626885]">Toplam Bakiye</p>
+            <p class="text-2xl font-black text-slate-800 dark:text-white tabular-nums tracking-tight mt-0.5">{{ formatCurrency(stats.totalDebt) }}</p>
+          </div>
         </div>
       </div>
     </div>
@@ -137,26 +143,30 @@
                 <circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/><circle cx="5" cy="12" r="1.5"/>
               </svg>
             </button>
-            <ul tabindex="0" class="dropdown-content menu p-1.5 shadow-card bg-base-100 border border-slate-200 dark:border-white/[0.07] rounded-xl w-40 z-10 text-sm">
-              <li><a @click="viewTenant(tenant)" class="rounded-lg">Detayları Gör</a></li>
-              <li><a @click="editTenant(tenant)" class="rounded-lg">Düzenle</a></li>
-              <li v-if="authStore.role === ROLES.ADMIN"><a @click="openDeleteModal(tenant)" class="rounded-lg text-error">Sil</a></li>
+            <ul tabindex="0" class="dropdown-content menu p-1.5 shadow-xl bg-white dark:bg-[#0f1322] border border-slate-200 dark:border-white/[0.07] rounded-xl w-44 z-20 text-xs">
+              <li><button @click="viewTenant(tenant)" class="rounded-lg py-2">Detayları Gör</button></li>
+              <li><button @click="editTenant(tenant)" class="rounded-lg py-2">Düzenle</button></li>
+              <li v-if="authStore.role === ROLES.ADMIN"><button @click="openDeleteModal(tenant)" class="rounded-lg py-2 text-error">Sil</button></li>
             </ul>
           </div>
         </div>
 
         <!-- Avatar + Başlık -->
-        <div class="flex items-center gap-3 pr-8">
-          <div :class="getAvatarColor(tenant.contactPersonName) + ' w-11 h-11 rounded-xl flex items-center justify-center text-lg font-bold text-white shrink-0'">
+        <div class="flex items-start gap-4 pr-10">
+          <div :class="getAvatarColor(tenant.contactPersonName) + ' w-12 h-12 rounded-2xl flex items-center justify-center text-xl font-black text-white shrink-0 shadow-lg shadow-current/20 transition-transform group-hover:scale-105'">
             {{ getAvatarInitial(tenant.companyName) }}
           </div>
           <div class="min-w-0">
-            <p class="text-sm font-bold text-slate-800 dark:text-[#f1f3f9] truncate">{{ tenant.companyName }}</p>
-            <div class="flex items-center gap-1.5 mt-0.5 flex-wrap">
-              <span :class="['badge badge-xs font-semibold', tenant.isActive ? 'badge-active' : 'badge-passive']">
+            <h3 class="text-[13px] font-black text-slate-800 dark:text-white leading-tight uppercase tracking-tight truncate group-hover:text-brand-500 transition-colors">
+              {{ tenant.companyName }}
+            </h3>
+            <div class="flex items-center gap-1.5 mt-2 flex-wrap">
+              <span :class="['px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider', 
+                tenant.isActive ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400' 
+                : 'bg-slate-100 text-slate-500 dark:bg-slate-700/50 dark:text-slate-400']">
                 {{ tenant.isActive ? 'Aktif' : 'Pasif' }}
               </span>
-              <span v-if="tenant.flats?.length" class="badge badge-xs badge-info">
+              <span v-if="tenant.flats?.length" class="bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider">
                 Ünite {{ tenant.flats[0].code }}
               </span>
             </div>
@@ -164,36 +174,42 @@
         </div>
 
         <!-- Bakiye -->
-        <div class="flex items-center justify-between py-2 px-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-700/60">
-          <span class="text-xs font-semibold text-slate-400 dark:text-[#626885] uppercase tracking-wider">Bakiye</span>
-          <span :class="['text-sm font-bold tabular-nums', tenant.totalBalance > 0 ? 'text-red-500' : 'text-green-500']">
+        <div class="mt-4 flex items-center justify-between py-2 border-t border-slate-100 dark:border-white/[0.04]">
+          <span class="text-[10px] font-bold text-slate-400 dark:text-[#626885] uppercase tracking-widest">Bakiye</span>
+          <span :class="['text-lg font-black tabular-nums tracking-tight', tenant.totalBalance > 0 ? 'text-red-500' : 'text-emerald-500']">
             {{ formatCurrency(tenant.totalBalance) }}
           </span>
         </div>
 
         <!-- Aksiyonlar -->
-        <div class="flex gap-2 mt-auto">
-          <button @click="viewTenant(tenant)" class="btn btn-sm btn-outline flex-1 normal-case text-xs">Detay</button>
-          <a
-            :href="`https://wa.me/${tenant.contactPersonPhone?.replace(/\D/g,'')}`"
-            target="_blank"
-            class="btn btn-sm btn-ghost btn-square text-green-500"
-            title="WhatsApp"
-          >
-            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L0 24l6.335-1.662c1.72.937 3.659 1.432 5.628 1.433h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-            </svg>
-          </a>
-          <button
-            v-if="authStore.role === ROLES.ADMIN || authStore.role === ROLES.MANAGER"
-            @click="router.push(`/payments?tenantId=${tenant.id}`)"
-            class="btn btn-sm btn-ghost btn-square text-brand-500"
-            title="Ödemeler"
-          >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
-            </svg>
+        <div class="flex gap-2 mt-2">
+          <button @click="viewTenant(tenant)" class="btn btn-sm btn-ghost bg-slate-50 dark:bg-white/[0.04] hover:bg-brand-500 hover:text-white flex-1 font-bold text-xs">
+            Detayları Gör
           </button>
+          
+          <div class="flex gap-1.5">
+            <a
+              :href="`https://wa.me/${tenant.contactPersonPhone?.replace(/\D/g,'')}`"
+              target="_blank"
+              class="w-8 h-8 rounded-xl flex items-center justify-center bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400 hover:bg-emerald-500 hover:text-white transition-all shadow-sm"
+              title="WhatsApp"
+            >
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L0 24l6.335-1.662c1.72.937 3.659 1.432 5.628 1.433h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+              </svg>
+            </a>
+            
+            <button
+              v-if="authStore.role === ROLES.ADMIN || authStore.role === ROLES.MANAGER"
+              @click="router.push(`/payments?tenantId=${tenant.id}`)"
+              class="w-8 h-8 rounded-xl flex items-center justify-center bg-brand-50 text-brand-600 dark:bg-brand-500/10 dark:text-brand-400 hover:bg-brand-500 hover:text-white transition-all shadow-sm"
+              title="Ödemeler"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
+              </svg>
+            </button>
+          </div>
         </div>
       </div>
     </div>

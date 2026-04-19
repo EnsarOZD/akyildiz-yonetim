@@ -1,191 +1,189 @@
-﻿<template>
-  <dialog open class="modal" @keydown.esc.prevent="handleClose">
-    <div class="modal-box max-w-2xl bg-white dark:bg-[#0f1322] border border-gray-200 dark:border-white/[0.07] shadow-2xl p-0">
-      <!-- Header -->
-      <div class="flex items-center justify-between p-6 border-b border-gray-100 dark:border-white/[0.07]">
-        <div class="flex items-center gap-3">
-          <div :class="[
-            'w-9 h-9 rounded-xl flex items-center justify-center text-white shadow-md',
-            type === 0 ? 'bg-emerald-600' : (type === 1 ? 'bg-amber-500' : 'bg-brand-500')
-          ]">
-            <svg v-if="type === 0" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-            </svg>
-            <svg v-else-if="type === 1" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-            </svg>
-            <svg v-else class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/>
-            </svg>
-          </div>
-          <h3 class="text-xl font-bold text-gray-800 dark:text-[#f1f3f9]">
-            Manuel {{ typeLabel }} Girişi
-          </h3>
-        </div>
-        <button @click="handleClose" class="btn btn-ghost btn-sm" :disabled="loading">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
-      </div>
-
-      <!-- Tabs -->
-      <div v-if="!initialData?.id" class="tabs tabs-boxed bg-transparent px-6 pt-4 gap-2">
+<template>
+  <BaseModal
+    :model-value="true"
+    :title="`MANUEL ${typeLabel} GİRİŞİ`"
+    :icon="type === 0 ? '📊' : (type === 1 ? '⚡' : '💧')"
+    size="lg"
+    @close="handleClose"
+  >
+    <div class="space-y-6">
+      <!-- Tabs (Sadece Yeni Kayıtta) -->
+      <div v-if="!initialData?.id" class="flex p-1 bg-white/[0.03] border border-white/[0.08] rounded-xl gap-1">
         <button 
           @click="activeTab = 'individual'" 
-          :class="['tab flex-1 transition-all', activeTab === 'individual' ? 'tab-active bg-primary text-white' : 'hover:bg-gray-100 dark:hover:bg-white/[0.06]']"
+          :class="['flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-[11px] font-black uppercase tracking-widest transition-all', 
+                   activeTab === 'individual' ? 'bg-brand-500 text-white shadow-lg shadow-brand-500/20' : 'text-[#626885] hover:text-[#f1f3f9] hover:bg-white/[0.05]']"
         >
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
           </svg>
           Bireysel Giriş
         </button>
         <button
           @click="activeTab = 'bulk'"
-          :class="['tab flex-1 transition-all', activeTab === 'bulk' ? 'tab-active bg-primary text-white' : 'hover:bg-gray-100 dark:hover:bg-white/[0.06]']"
+          :class="['flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-[11px] font-black uppercase tracking-widest transition-all', 
+                   activeTab === 'bulk' ? 'bg-brand-500 text-white shadow-lg shadow-brand-500/20' : 'text-[#626885] hover:text-[#f1f3f9] hover:bg-white/[0.05]']"
         >
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
           </svg>
           Toplu Giriş
         </button>
       </div>
 
-      <div class="p-6">
-        <!-- Individual View -->
-        <form v-if="activeTab === 'individual'" @submit.prevent="handleSubmit" class="space-y-5">
+      <!-- Bireysel Görünüm -->
+      <form v-if="activeTab === 'individual'" @submit.prevent="handleSubmit" class="space-y-6">
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text">Daire / Ünite *</span>
+          </label>
+          <select 
+            v-model="form.flatId" 
+            class="select select-bordered w-full"
+            required
+            :disabled="!!initialData?.id"
+          >
+            <option disabled value="">Daire seçiniz</option>
+            <option v-for="f in flats" :key="f.id" :value="f.id">
+              {{ f.code || f.unitNumber }} ({{ f.tenantCompanyName || 'Boş' }})
+            </option>
+          </select>
+        </div>
+
+        <div class="grid grid-cols-2 gap-5">
           <div class="form-control">
-            <label class="label">
-              <span class="label-text font-semibold text-gray-700 dark:text-[#f1f3f9]">Daire / Ünite *</span>
-            </label>
-            <select 
-              v-model="form.flatId" 
-              class="select select-bordered w-full bg-white dark:bg-[#1c2238] border-gray-300 dark:border-white/[0.1]"
-              required
-              :disabled="!!initialData?.id"
-            >
-              <option disabled value="">Daire seçiniz</option>
-              <option v-for="f in flats" :key="f.id" :value="f.id">
-                {{ f.code || f.unitNumber }} ({{ f.tenantCompanyName || 'Boş' }})
-              </option>
+            <label class="label"><span class="label-text">Yıl *</span></label>
+            <input type="number" v-model.number="form.periodYear" class="input input-bordered w-full font-bold" required min="2020" />
+          </div>
+          <div class="form-control">
+            <label class="label"><span class="label-text">Ay *</span></label>
+            <select v-model.number="form.periodMonth" class="select select-bordered w-full font-bold" required>
+              <option v-for="m in 12" :key="m" :value="m">{{ m }}. Ay</option>
             </select>
           </div>
+        </div>
 
-          <div class="grid grid-cols-2 gap-4">
-            <div class="form-control">
-              <label class="label"><span class="label-text font-semibold">Yıl *</span></label>
-              <input type="number" v-model.number="form.periodYear" class="input input-bordered w-full" required min="2020" />
-            </div>
-            <div class="form-control">
-              <label class="label"><span class="label-text font-semibold">Ay *</span></label>
-              <select v-model.number="form.periodMonth" class="select select-bordered w-full" required>
-                <option v-for="m in 12" :key="m" :value="m">{{ m }}</option>
-              </select>
+        <div class="grid grid-cols-2 gap-5">
+          <div class="form-control">
+            <label class="label"><span class="label-text">Tutar *</span></label>
+            <div class="relative">
+              <input type="number" v-model.number="form.amount" step="0.01" class="input input-bordered w-full !text-lg font-black pr-12 text-green-400" required min="0" />
+              <span class="absolute right-4 top-1/2 -translate-y-1/2 text-[#626885] font-black uppercase tracking-widest text-[10px]">TL</span>
             </div>
           </div>
-
-          <div class="grid grid-cols-2 gap-4">
-            <div class="form-control">
-              <label class="label"><span class="label-text font-semibold">Tutar (₺) *</span></label>
-              <input type="number" v-model.number="form.amount" step="0.01" class="input input-bordered w-full text-lg font-bold text-success" required min="0" />
-            </div>
-            <div class="form-control">
-              <label class="label"><span class="label-text font-semibold">Son Ödeme *</span></label>
-              <input type="date" v-model="form.dueDate" class="input input-bordered w-full" required />
-            </div>
+          <div class="form-control">
+            <label class="label"><span class="label-text">Son Ödeme *</span></label>
+            <input type="date" v-model="form.dueDate" class="input input-bordered w-full" required />
           </div>
+        </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="form-control">
-              <label class="label"><span class="label-text font-semibold">Fatura Numarası</span></label>
-              <input v-model="form.invoiceNumber" type="text" class="input input-bordered w-full" placeholder="Opsiyonel fatura no..." />
-            </div>
-            <div class="form-control">
-              <label class="label"><span class="label-text font-semibold">Açıklama</span></label>
-              <input v-model="form.description" type="text" class="input input-bordered w-full" placeholder="Opsiyonel not..." />
-            </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div class="form-control">
+            <label class="label"><span class="label-text">Fatura / Makbuz No</span></label>
+            <input v-model="form.invoiceNumber" type="text" class="input input-bordered w-full" placeholder="Belge no (opsiyonel)" />
           </div>
+          <div class="form-control">
+            <label class="label"><span class="label-text">Açıklama</span></label>
+            <input v-model="form.description" type="text" class="input input-bordered w-full" placeholder="Ek notlar (opsiyonel)" />
+          </div>
+        </div>
+      </form>
 
-          <div class="flex justify-end gap-3 pt-6 border-t border-gray-200 dark:border-white/[0.07]">
-            <button type="button" class="btn btn-outline btn-sm" @click="handleClose" :disabled="loading">İptal</button>
-            <button type="submit" class="btn btn-primary btn-sm px-8" :disabled="loading">
-              <span v-if="loading" class="loading loading-spinner loading-xs mr-2"></span>
-              {{ initialData?.id ? 'Güncelle' : 'Kaydet' }}
-            </button>
+      <!-- Toplu Görünüm -->
+      <div v-else class="space-y-6">
+        <div class="bg-white/[0.02] border border-white/[0.08] p-5 rounded-2xl grid grid-cols-2 gap-5">
+          <div class="form-control">
+            <label class="label"><span class="label-text">Dönem Seçimi</span></label>
+            <input type="month" v-model="bulkPeriod" class="input input-bordered w-full" @change="updateBulkDates" />
           </div>
-        </form>
+          <div class="form-control">
+            <label class="label"><span class="label-text">Son Ödeme Tarihi</span></label>
+            <input type="date" v-model="bulkDueDate" class="input input-bordered w-full" />
+          </div>
+        </div>
 
-        <!-- Bulk View -->
-        <div v-else class="space-y-6">
-          <div class="grid grid-cols-2 gap-4 p-4 dark:bg-base-200 rounded-xl">
-            <div class="form-control">
-              <label class="label"><span class="label-text font-semibold">Dönem</span></label>
-              <input type="month" v-model="bulkPeriod" class="input input-bordered w-full input-sm" @change="updateBulkDates" />
-            </div>
-            <div class="form-control">
-              <label class="label"><span class="label-text font-semibold">Son Ödeme</span></label>
-              <input type="date" v-model="bulkDueDate" class="input input-bordered w-full input-sm" />
-            </div>
-          </div>
-
-          <div class="overflow-x-auto max-h-[40vh] border border-gray-200 dark:border-white/[0.07] rounded-lg">
-            <table class="table table-zebra table-sm">
-              <thead class="sticky top-0 bg-white dark:bg-[#0f1322] z-10 shadow-sm">
-                <tr>
-                  <th scope="col" class="w-1/3">Daire / Kiracı</th>
-                  <th scope="col" class="w-1/3 text-center">Tutar (₺)</th>
-                  <th scope="col" class="w-1/3">Açıklama</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="f in bulkEntries" :key="f.id">
-                  <td class="whitespace-nowrap">
-                    <div class="font-bold">{{ f.code }}</div>
-                    <div class="text-[10px] opacity-60">{{ f.tenantName || 'Boş' }}</div>
-                  </td>
-                  <td>
-                    <input 
-                      :id="'bulk-amount-' + f.id"
-                      :name="'bulk-amount-' + f.id"
-                      type="number" 
-                      v-model.number="f.amount" 
-                      min="0" 
-                      step="0.01" 
-                      class="input input-bordered input-xs w-full text-center font-bold text-success" 
-                      placeholder="0.00"
-                      autocomplete="off"
-                    />
-                  </td>
-                  <td>
-                    <input 
-                      :id="'bulk-desc-' + f.id"
-                      :name="'bulk-desc-' + f.id"
-                      v-model="f.description" 
-                      class="input input-bordered input-xs w-full" 
-                      placeholder="Not..."
-                      autocomplete="off"
-                    />
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <div class="flex justify-end gap-3 pt-6 border-t border-gray-200 dark:border-white/[0.07]">
-            <button type="button" class="btn btn-outline btn-sm" @click="handleClose" :disabled="loading">İptal</button>
-            <button @click="handleBulkSubmit" class="btn btn-primary btn-sm px-8" :disabled="loading || !hasBulkData">
-              <span v-if="loading" class="loading loading-spinner loading-xs mr-2"></span>
-              Toplu Kaydet
-            </button>
-          </div>
+        <div class="overflow-x-auto max-h-[40vh] border border-white/[0.08] rounded-2xl">
+          <table class="table table-sm w-full border-collapse">
+            <thead class="sticky top-0 bg-[#151a2e] z-10">
+              <tr class="border-b border-white/[0.08]">
+                <th class="py-4 px-5 text-[10px] font-black text-[#626885] uppercase tracking-widest">Daire / Kiracı</th>
+                <th class="py-4 px-5 text-[10px] font-black text-[#626885] uppercase tracking-widest text-center">Tutar (₺)</th>
+                <th class="py-4 px-5 text-[10px] font-black text-[#626885] uppercase tracking-widest">Açıklama</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-white/[0.02]">
+              <tr v-for="f in bulkEntries" :key="f.id" class="group hover:bg-white/[0.02] transition-colors">
+                <td class="px-5 py-3">
+                  <div class="text-[13px] font-black text-[#f1f3f9] uppercase tracking-tight">{{ f.code }}</div>
+                  <div class="text-[10px] font-bold text-[#626885] uppercase tracking-tighter">{{ f.tenantName || 'Boş Daire' }}</div>
+                </td>
+                <td class="px-5 py-3">
+                  <input 
+                    type="number" 
+                    v-model.number="f.amount" 
+                    min="0" 
+                    step="0.01" 
+                    class="input input-bordered input-sm w-full text-center font-black text-green-400 !bg-white/[0.02]" 
+                    placeholder="0.00"
+                  />
+                </td>
+                <td class="px-5 py-3">
+                  <input 
+                    v-model="f.description" 
+                    class="input input-bordered input-sm w-full !bg-white/[0.02]" 
+                    placeholder="Not..."
+                  />
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
-  </dialog>
+
+    <!-- Footer Butonları -->
+    <template #footer>
+      <button 
+        type="button" 
+        class="btn btn-ghost !bg-transparent border border-white/[0.08] text-[#9aa0b4] hover:bg-white/[0.05]" 
+        @click="handleClose" 
+        :disabled="loading"
+      >
+        Vazgeç
+      </button>
+      
+      <button 
+        v-if="activeTab === 'individual'" 
+        @click="handleSubmit" 
+        class="btn btn-primary px-10" 
+        :disabled="loading"
+      >
+        <span v-if="loading" class="loading loading-spinner loading-xs mr-2"></span>
+        <svg v-else class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
+        </svg>
+        {{ initialData?.id ? 'Değişiklikleri Kaydet' : 'Borcu Kaydet' }}
+      </button>
+
+      <button 
+        v-else 
+        @click="handleBulkSubmit" 
+        class="btn btn-primary px-10" 
+        :disabled="loading || !hasBulkData"
+      >
+        <span v-if="loading" class="loading loading-spinner loading-xs mr-2"></span>
+        <svg v-else class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
+        </svg>
+        Toplu Girişi Tamamla
+      </button>
+    </template>
+  </BaseModal>
 </template>
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
+import BaseModal from '@/presentation/components/common/BaseModal.vue'
 import api from '@/infrastructure/services/api'
 import utilityDebtsService from '@/infrastructure/services/utilityDebtsService'
 import { useErrorHandler } from '@/application/composables/useErrorHandler'

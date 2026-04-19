@@ -1,93 +1,95 @@
-﻿<template>
-  <dialog open class="modal" @keydown.esc.prevent="onEsc" @close.prevent>
-    <div class="modal-box max-w-md bg-white dark:bg-[#0f1322] border border-gray-200 dark:border-white/[0.07]">
-      <!-- Header -->
-      <div class="flex items-center justify-between mb-6 pb-4 border-b border-gray-200 dark:border-white/[0.07]">
-        <div class="flex items-center gap-3">
-          <div class="bg-green-100 dark:bg-green-900/50 text-green-600 dark:text-green-400 rounded-full p-2">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-            </svg>
-          </div>
-          <h3 class="text-xl font-bold text-gray-800 dark:text-[#f1f3f9]">Aidat Oluştur</h3>
-        </div>
-        <button @click="handleClose" class="btn btn-ghost btn-sm" :disabled="loading">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
-      </div>
-
+<template>
+  <BaseModal
+    :model-value="true"
+    title="AİDAT OLUŞTUR"
+    icon="📊"
+    size="md"
+    @close="handleClose"
+  >
+    <div class="space-y-6">
       <!-- Error Info -->
-      <div v-if="errorMsg" class="mb-4 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 text-sm rounded-lg p-3 border border-red-200 dark:border-red-800">
-        {{ errorMsg }}
+      <div v-if="errorMsg" class="bg-red-500/10 border border-red-500/20 rounded-xl p-4 flex items-center gap-3 mb-4">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+        </svg>
+        <span class="text-sm text-red-400 font-medium">{{ errorMsg }}</span>
       </div>
 
-      <!-- Info -->
-      <div class="mb-4 bg-brand-50 dark:bg-brand-500/[0.08] rounded-lg p-4 border border-brand-200 dark:border-brand-700">
-        <div class="flex items-start gap-3">
-          <div class="bg-brand-100 dark:bg-blue-900/50 text-brand-600 dark:text-brand-400 rounded-full p-1 mt-0.5">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      <!-- Bilgilendirme Kutusu -->
+      <div class="bg-brand-500/[0.05] border border-brand-500/20 rounded-2xl p-5">
+        <div class="flex items-start gap-4">
+          <div class="w-10 h-10 rounded-xl bg-brand-500/10 flex items-center justify-center shrink-0 text-brand-400">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
-          <div class="text-sm text-gray-700 dark:text-[#f1f3f9]">
-            <p class="font-medium mb-1">Bilgi</p>
-            <p>Seçilen dönem için yıllık aidat tanımlarından otomatik aidat kayıtları oluşturulur.</p>
+          <div>
+            <h4 class="text-[11px] font-black uppercase tracking-widest text-brand-400 mb-1">Toplu Aidat Oluşturma</h4>
+            <p class="text-xs text-brand-200/70 leading-relaxed font-medium">
+              Seçilen dönem için yıllık aidat tanımlarından otomatik aidat kayıtları oluşturulur.
+            </p>
           </div>
         </div>
       </div>
 
-      <form @submit.prevent="handleSubmit" class="space-y-5">
+      <form @submit.prevent="handleSubmit" class="space-y-6">
         <!-- Dönem -->
         <div class="form-control">
           <label class="label">
-            <span class="label-text font-semibold text-gray-700 dark:text-[#f1f3f9]">Dönem</span>
-            <span class="label-text-alt text-red-500">*</span>
+            <span class="label-text">Dönem *</span>
           </label>
           <input
             ref="periodInput"
             type="month"
             v-model="period"
             :max="maxPeriod"
-            class="input input-bordered w-full bg-white dark:bg-[#1c2238] border-gray-300 dark:border-white/[0.1] text-gray-700 dark:text-[#f1f3f9]"
+            class="input input-bordered w-full font-bold !text-lg"
             required
           />
-          <label class="label">
-            <span class="label-text-alt text-gray-500 dark:text-[#9aa0b4]">Aidatın geçerli olacağı ay/yıl</span>
-          </label>
+          <p class="text-[10px] font-bold text-[#626885] uppercase tracking-widest mt-2 ml-1">Aidatın geçerli olacağı ay/yıl</p>
         </div>
 
         <!-- Son Ödeme Tarihi -->
         <div class="form-control">
           <label class="label">
-            <span class="label-text font-semibold text-gray-700 dark:text-[#f1f3f9]">Son Ödeme Tarihi</span>
-            <span class="label-text-alt text-red-500">*</span>
+            <span class="label-text">Son Ödeme Tarihi *</span>
           </label>
           <input
             type="date"
             v-model="dueDate"
             :min="minDueDate"
-            class="input input-bordered w-full bg-white dark:bg-[#1c2238] border-gray-300 dark:border-white/[0.1] text-gray-700 dark:text-[#f1f3f9]"
+            class="input input-bordered w-full"
             required
           />
-          <label class="label">
-            <span class="label-text-alt text-gray-500 dark:text-[#9aa0b4]">Öneri: Dönemi takip eden ayın 10'u</span>
-          </label>
-        </div>
-
-        <div class="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-white/[0.07]">
-          <button type="button" class="btn btn-outline btn-sm" @click="handleClose" :disabled="loading">
-            İptal
-          </button>
-          <button type="submit" class="btn btn-primary btn-sm" :disabled="isDisabled">
-            <span v-if="loading" class="loading loading-spinner loading-xs mr-2"></span>
-            Oluştur
-          </button>
+          <p class="text-[10px] font-bold text-[#626885] uppercase tracking-widest mt-2 ml-1 italic">Öneri: Dönemi takip eden ayın 10'u</p>
         </div>
       </form>
     </div>
-  </dialog>
+
+    <!-- Footer Butonları -->
+    <template #footer>
+      <button 
+        type="button"
+        class="btn btn-ghost !bg-transparent border border-white/[0.08] text-[#9aa0b4] hover:bg-white/[0.05]" 
+        @click="handleClose" 
+        :disabled="loading"
+      >
+        İptal
+      </button>
+      <button 
+        type="button"
+        class="btn btn-primary px-10" 
+        @click="handleSubmit"
+        :disabled="isDisabled"
+      >
+        <span v-if="loading" class="loading loading-spinner loading-xs mr-2"></span>
+        <svg v-else class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
+        </svg>
+        Aidatları Oluştur
+      </button>
+    </template>
+  </BaseModal>
 </template>
 
 <script setup>

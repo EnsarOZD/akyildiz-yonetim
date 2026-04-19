@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div>
     <!-- Overlay -->
     <transition
@@ -76,37 +76,36 @@
     </transition>
 
     <!-- Bottom nav bar -->
-    <nav class="md:hidden fixed bottom-0 left-0 right-0 z-50
-      bg-white/90 dark:bg-[#0f1322]/95 backdrop-blur-lg
-      border-t border-slate-200/60 dark:border-white/[0.06]
-      shadow-[0_-1px_0_rgba(0,0,0,0.08)]">
-      <div class="flex items-stretch justify-around px-2 pt-1 pb-safe">
+    <nav class="md:hidden fixed bottom-0 left-0 right-0 z-[50]
+      bg-[#0f1322]/80 backdrop-blur-xl
+      border-t border-white/[0.08]
+      shadow-[0_-8px_32px_rgba(0,0,0,0.4)]
+      pb-safe">
+      <div class="flex items-center justify-around h-16 px-2">
         <template v-for="item in visibleNavItems" :key="item.name">
 
           <!-- Normal route link -->
           <router-link
             v-if="item.path"
             :to="item.path"
-            class="flex flex-col items-center justify-end gap-1 flex-1 min-w-0 pb-1.5 pt-1"
+            class="flex flex-col items-center justify-center gap-1 flex-1 min-w-0 h-full relative"
             v-slot="{ isActive }"
           >
-            <div class="relative flex items-center justify-center w-10 h-8 rounded-xl transition-all duration-200"
-              :class="isActive
-                ? 'bg-brand-500 text-white shadow-sm'
-                : 'text-slate-400 dark:text-[#626885]'">
-              <!-- Active indicator pill -->
-              <span v-if="isActive" class="absolute -top-2.5 left-1/2 -translate-x-1/2 w-5 h-0.5 rounded-full bg-brand-500" />
-              <component :is="item.icon" class="w-5 h-5" />
-              <!-- Unread notifications badge -->
-              <span
-                v-if="item.path === '/notifications' && notificationsStore.unreadCount > 0"
-                class="absolute -top-1 -right-1 min-w-[14px] h-3.5 flex items-center justify-center bg-red-500 text-white text-[8px] font-bold rounded-full px-0.5 leading-none shadow"
-              >
-                {{ notificationsStore.unreadCount > 9 ? '9+' : notificationsStore.unreadCount }}
-              </span>
+            <!-- Active indicator pill (Top) -->
+            <transition enter-active-class="transition-all duration-300" enter-from-class="scale-x-0 opacity-0" enter-to-class="scale-x-100 opacity-100">
+              <span v-if="isActive" class="absolute top-0 w-10 h-1 rounded-full bg-brand-500 shadow-[0_0_12px_rgba(107,138,255,0.6)]" />
+            </transition>
+
+            <div class="flex items-center justify-center w-6 h-6 transition-all duration-200"
+              :class="isActive ? 'text-brand-500 scale-110' : 'text-[#626885]'">
+              <component :is="item.icon" class="w-6 h-6" :stroke-width="isActive ? '2.25' : '1.75'" />
+              
+              <!-- Badge -->
+              <span v-if="item.badge" class="absolute top-2 right-1/4 w-2 h-2 bg-red-500 rounded-full border-2 border-[#0f1322]" />
             </div>
-            <span class="text-[10px] font-semibold leading-none truncate max-w-full px-1 transition-colors duration-150"
-              :class="isActive ? 'text-brand-600 dark:text-brand-400' : 'text-slate-400 dark:text-[#626885]'">
+            
+            <span class="text-[10px] font-black tracking-tight leading-none truncate max-w-full px-1 transition-colors duration-150 uppercase"
+              :class="isActive ? 'text-brand-500' : 'text-[#626885]'">
               {{ item.name }}
             </span>
           </router-link>
@@ -115,16 +114,14 @@
           <button
             v-else
             @click="showMoreMenu = !showMoreMenu"
-            class="flex flex-col items-center justify-end gap-1 flex-1 min-w-0 pb-1.5 pt-1"
+            class="flex flex-col items-center justify-center gap-1 flex-1 min-w-0 h-full relative"
           >
-            <div class="flex items-center justify-center w-10 h-8 rounded-xl transition-all duration-200"
-              :class="showMoreMenu
-                ? 'bg-slate-800 dark:bg-[#1c2238] text-white'
-                : 'text-slate-400 dark:text-[#626885]'">
-              <component :is="item.icon" class="w-5 h-5" />
+            <div class="flex items-center justify-center w-6 h-6 transition-all duration-200"
+              :class="showMoreMenu ? 'text-white scale-110' : 'text-[#626885]'">
+              <component :is="item.icon" class="w-6 h-6" />
             </div>
-            <span class="text-[10px] font-semibold leading-none truncate max-w-full px-1 transition-colors duration-150"
-              :class="showMoreMenu ? 'text-slate-700 dark:text-white' : 'text-slate-400 dark:text-[#626885]'">
+            <span class="text-[10px] font-black tracking-tight leading-none truncate max-w-full px-1 transition-colors duration-150 uppercase"
+              :class="showMoreMenu ? 'text-white' : 'text-[#626885]'">
               {{ item.name }}
             </span>
           </button>
@@ -155,30 +152,30 @@ const visibleNavItems = computed(() => {
   const role = (authStore.role || '').toLowerCase()
 
   if (role === 'tenant') return [
-    { name: 'Özet',        path: '/tenant-dashboard', icon: DashboardIcon },
-    { name: 'Talepler',    path: '/service-requests', icon: ChatIcon      },
-    { name: 'Bildirimler', path: '/notifications',    icon: BellIcon      },
-    { name: 'Profil',      path: '/profile',           icon: UserIcon      },
+    { name: 'Ana Sayfa', path: '/tenant-dashboard', icon: DashboardIcon },
+    { name: 'Borçlarım', path: '/my-payments',      icon: WalletIcon    },
+    { name: 'Talepler',  path: '/service-requests', icon: ChatIcon      },
+    { name: 'Profil',    path: '/profile',          icon: UserIcon      },
   ]
 
   if (role === 'owner') return [
-    { name: 'Mülklerim',   path: '/my-properties', icon: BuildingIcon },
-    { name: 'Kiracılar',   path: '/tenants',       icon: UsersIcon     },
-    { name: 'Talepler',    path: '/service-requests', icon: ChatIcon      },
-    { name: 'Profil',      path: '/profile',         icon: UserIcon     },
+    { name: 'Ana Sayfa', path: '/owner-dashboard',  icon: DashboardIcon },
+    { name: 'Mülklerim', path: '/my-properties',     icon: BuildingIcon  },
+    { name: 'Talepler',  path: '/service-requests',  icon: ChatIcon      },
+    { name: 'Profil',    path: '/profile',           icon: UserIcon      },
   ]
 
   if (role === 'observer') return [
-    { name: 'Özet',        path: '/dashboard',     icon: DashboardIcon },
-    { name: 'Raporlar',    path: '/reports',       icon: ChartIcon     },
-    { name: 'Bildirimler', path: '/notifications', icon: BellIcon      },
-    { name: 'Profil',      path: '/profile',        icon: UserIcon      },
+    { name: 'Ana Sayfa', path: '/dashboard',     icon: DashboardIcon },
+    { name: 'Raporlar',  path: '/reports',       icon: ChartIcon     },
+    { name: 'Bildirim',  path: '/notifications', icon: BellIcon, badge: notificationsStore.unreadCount > 0 },
+    { name: 'Profil',    path: '/profile',        icon: UserIcon      },
   ]
 
   // Admin / Manager / DataEntry
   return [
     { name: 'Özet',     path: '/dashboard', icon: DashboardIcon },
-    { name: 'Kiracılar', path: '/tenants',  icon: UsersIcon     },
+    { name: 'Kiracılar', path: '/tenants',   icon: UsersIcon     },
     { name: 'Finans',   path: '/payments',  icon: WalletIcon    },
     { name: 'Raporlar', path: '/reports',   icon: ChartIcon     },
     { name: 'Menü',                         icon: MenuIcon      },

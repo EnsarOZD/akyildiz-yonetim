@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="p-4 sm:p-6 min-h-screen pb-24 md:pb-6">
 
     <!-- Sayfa Başlığı -->
@@ -23,78 +23,128 @@
     </PageHeader>
 
     <!-- Filtreler -->
-    <div class="app-card mb-5">
-      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-        <div class="col-span-2 sm:col-span-1">
-          <label class="text-xs font-semibold text-slate-500 dark:text-[#9aa0b4] mb-1 block">Arama</label>
+    <div class="app-card mb-6">
+      <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+        <div>
+          <label class="text-[10px] font-bold text-slate-400 dark:text-[#626885] uppercase tracking-widest mb-1.5 block px-1">Arama</label>
           <input
             v-model="filters.searchTerm"
             @input="handleSearch"
-            class="input input-bordered input-sm w-full"
+            class="input input-bordered input-sm w-full font-bold text-xs"
             placeholder="Kod veya kat..."
           />
         </div>
         <div>
-          <label class="text-xs font-semibold text-slate-500 dark:text-[#9aa0b4] mb-1 block">Tip</label>
-          <select v-model="filters.type" @change="handleSearch" class="select select-bordered select-sm w-full">
+          <label class="text-[10px] font-bold text-slate-400 dark:text-[#626885] uppercase tracking-widest mb-1.5 block px-1">Tip</label>
+          <select v-model="filters.type" @change="handleSearch" class="select select-bordered select-sm w-full font-bold text-xs">
             <option value="null">Tümü</option>
             <option v-for="t in UNIT_TYPES" :key="t.value" :value="t.value">{{ t.label }}</option>
           </select>
         </div>
         <div>
-          <label class="text-xs font-semibold text-slate-500 dark:text-[#9aa0b4] mb-1 block">Durum</label>
-          <select v-model="filters.isActive" @change="handleSearch" class="select select-bordered select-sm w-full">
+          <label class="text-[10px] font-bold text-slate-400 dark:text-[#626885] uppercase tracking-widest mb-1.5 block px-1">Durum</label>
+          <select v-model="filters.isActive" @change="handleSearch" class="select select-bordered select-sm w-full font-bold text-xs">
             <option value="null">Tümü</option>
             <option value="true">Aktif</option>
             <option value="false">Pasif</option>
           </select>
         </div>
         <div>
-          <label class="text-xs font-semibold text-slate-500 dark:text-[#9aa0b4] mb-1 block">Doluluk</label>
-          <select v-model="filters.isOccupied" @change="handleSearch" class="select select-bordered select-sm w-full">
+          <label class="text-[10px] font-bold text-slate-400 dark:text-[#626885] uppercase tracking-widest mb-1.5 block px-1">Doluluk</label>
+          <select v-model="filters.isOccupied" @change="handleSearch" class="select select-bordered select-sm w-full font-bold text-xs">
             <option value="null">Tümü</option>
             <option value="true">Dolu</option>
             <option value="false">Boş</option>
           </select>
         </div>
         <div>
-          <label class="text-xs font-semibold text-slate-500 dark:text-[#9aa0b4] mb-1 block">Kat No</label>
+          <label class="text-[10px] font-bold text-slate-400 dark:text-[#626885] uppercase tracking-widest mb-1.5 block px-1">Kat No</label>
           <input
             v-model.number="filters.floorNumber"
             @input="handleSearch"
             type="number"
-            class="input input-bordered input-sm w-full"
+            class="input input-bordered input-sm w-full font-bold text-xs"
             placeholder="Örn: 3"
           />
         </div>
       </div>
-      <div class="flex items-center justify-between mt-3 pt-3 border-t border-slate-100 dark:border-slate-700/60">
-        <button @click="clearFilters" class="btn btn-ghost btn-xs text-slate-500 gap-1">
+      <div class="flex items-center justify-between mt-4 pt-4 border-t border-slate-100 dark:border-white/[0.04]">
+        <button @click="clearFilters" class="btn btn-ghost btn-xs text-slate-400 font-bold uppercase tracking-wider gap-2">
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
           </svg>
           Temizle
         </button>
-        <span class="text-xs text-slate-400 dark:text-[#626885]">{{ filteredFlats.length }} ünite</span>
+        <span class="text-[11px] font-bold text-slate-400 dark:text-[#626885] uppercase tracking-widest">{{ filteredFlats.length }} ünite listeleniyor</span>
       </div>
     </div>
 
     <!-- Ünite Kartları -->
-    <div v-if="filteredFlats.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div v-if="filteredFlats.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
       <div
         v-for="flat in paginatedFlats"
         :key="flat.id"
-        class="app-card relative flex flex-col gap-3"
+        class="group app-card relative flex flex-col gap-4 hover:shadow-2xl hover:shadow-brand-500/5 transition-all duration-500"
       >
+        <!-- Ünite Kodu (Badge) -->
+        <div class="flex items-start justify-between gap-4">
+          <div
+            class="w-14 h-14 rounded-2xl flex items-center justify-center text-lg font-black text-white shrink-0 shadow-lg shadow-current/20 transition-transform group-hover:scale-110"
+            :class="getFlatStatusColor(flat)"
+          >
+            {{ flat.code }}
+          </div>
+          <div class="min-w-0 flex-1 pt-1">
+            <p class="text-[17px] font-black text-slate-800 dark:text-white leading-tight uppercase tracking-tight group-hover:text-brand-500 transition-colors">
+              {{ flat.code }}
+            </p>
+            <div class="flex flex-wrap gap-1.5 mt-2">
+              <span class="bg-slate-100 dark:bg-white/[0.04] text-slate-500 dark:text-[#9aa0b4] px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider tabular-nums">{{ floorLabel(flat) }}</span>
+              <span class="bg-brand-50 dark:bg-brand-500/10 text-brand-600 dark:text-brand-400 px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-wider">{{ typeLabel(flat.type) }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Durum Pills -->
+        <div class="flex items-center gap-2">
+          <span :class="[
+            'px-2 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-widest',
+            flat.isActive ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400' 
+            : 'bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400'
+          ]">
+            {{ flat.isActive ? 'Aktif' : 'Pasif' }}
+          </span>
+          <span :class="[
+            'px-2 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-widest',
+            flat.isOccupied ? 'bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400' 
+            : 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400'
+          ]">
+            {{ flat.isOccupied ? 'Dolu' : 'Boş' }}
+          </span>
+        </div>
+
+        <!-- Detaylar -->
+        <div class="space-y-2 pt-4 border-t border-slate-100 dark:border-white/[0.04]">
+          <div class="flex justify-between items-center">
+            <span class="text-[10px] font-bold text-slate-400 dark:text-[#626885] uppercase tracking-widest">Alan</span>
+            <span class="text-xs font-black text-slate-700 dark:text-white tabular-nums tracking-tight">{{ flat.unitArea }} m²</span>
+          </div>
+          <div v-if="flat.monthlyRent && flat.monthlyRent > 0" class="flex justify-between items-center">
+            <span class="text-[10px] font-bold text-slate-400 dark:text-[#626885] uppercase tracking-widest">Aylık Kira</span>
+            <span class="text-xs font-black text-emerald-600 dark:text-emerald-400 tabular-nums tracking-tight">{{ formatCurrency(flat.monthlyRent) }}</span>
+          </div>
+          <p v-if="flat.description" class="text-[10px] font-medium italic text-slate-400 dark:text-[#626885] pt-1 border-t border-dashed border-slate-100 dark:border-white/[0.04] mt-1">{{ flat.description }}</p>
+        </div>
+
         <!-- İşlem Menüsü -->
-        <div class="absolute top-3 right-3 z-10">
+        <div class="absolute top-4 right-4">
           <div class="dropdown dropdown-end">
-            <button tabindex="0" class="btn btn-ghost btn-circle btn-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+            <button tabindex="0" class="w-8 h-8 rounded-xl flex items-center justify-center text-slate-400 hover:bg-slate-50 dark:hover:bg-white/[0.04] transition-colors">
               <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                 <circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/><circle cx="5" cy="12" r="1.5"/>
               </svg>
             </button>
-            <ul tabindex="0" class="dropdown-content menu p-1.5 shadow-card bg-base-100 border border-slate-200 dark:border-white/[0.07] rounded-xl w-40 z-10 text-sm">
+            <ul tabindex="0" class="dropdown-content menu p-1.5 shadow-xl bg-white dark:bg-[#0f1322] border border-slate-200 dark:border-white/[0.07] rounded-xl w-40 z-10 text-xs">
               <li v-if="authStore.role === ROLES.ADMIN || authStore.role === ROLES.MANAGER">
                 <a @click="editFlat(flat)" class="rounded-lg">Düzenle</a>
               </li>
@@ -107,42 +157,6 @@
               </li>
             </ul>
           </div>
-        </div>
-
-        <!-- Ünite Kodu + Durum -->
-        <div class="flex items-center gap-3 pr-8">
-          <div
-            class="w-11 h-11 rounded-xl flex items-center justify-center text-sm font-black text-white shrink-0"
-            :class="getFlatStatusColor(flat)"
-          >
-            {{ flat.code }}
-          </div>
-          <div class="min-w-0">
-            <p class="text-sm font-bold text-slate-800 dark:text-[#f1f3f9]">{{ flat.code }}</p>
-            <div class="flex items-center gap-1.5 mt-0.5 flex-wrap">
-              <span class="badge badge-xs badge-info">{{ floorLabel(flat) }}</span>
-              <span class="badge badge-xs badge-ghost">{{ typeLabel(flat.type) }}</span>
-              <span :class="['badge badge-xs font-semibold', flat.isActive ? 'badge-active' : 'badge-passive']">
-                {{ flat.isActive ? 'Aktif' : 'Pasif' }}
-              </span>
-              <span :class="['badge badge-xs', flat.isOccupied ? 'badge-warning' : 'badge-info']">
-                {{ flat.isOccupied ? 'Dolu' : 'Boş' }}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Detaylar -->
-        <div class="text-xs text-slate-500 dark:text-[#9aa0b4] space-y-1.5 pt-2 border-t border-slate-100 dark:border-slate-700/60">
-          <div class="flex justify-between">
-            <span>Alan</span>
-            <span class="font-semibold text-slate-700 dark:text-[#f1f3f9]">{{ flat.unitArea }} m²</span>
-          </div>
-          <div v-if="flat.monthlyRent && flat.monthlyRent > 0" class="flex justify-between">
-            <span>Aylık Kira</span>
-            <span class="font-semibold text-green-600 dark:text-green-400 tabular-nums">{{ formatCurrency(flat.monthlyRent) }}</span>
-          </div>
-          <p v-if="flat.description" class="text-[10px] italic text-slate-400 dark:text-[#626885] pt-0.5">{{ flat.description }}</p>
         </div>
       </div>
     </div>

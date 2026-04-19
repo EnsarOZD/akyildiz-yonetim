@@ -1,87 +1,67 @@
-﻿<template>
-  <dialog
-    class="modal"
-    :open="visible"
-    role="alertdialog"
-    aria-modal="true"
-    aria-labelledby="dc-title"
-    aria-describedby="dc-desc"
-    @keydown.esc.prevent.stop="onCancel"
+<template>
+  <BaseModal
+    :model-value="visible"
+    :title="title.toUpperCase()"
+    icon="🗑️"
+    size="sm"
+    @close="onCancel"
   >
-    <!-- DaisyUI: backdrop tıklamasıyla kapat -->
-    <form method="dialog" class="modal-backdrop" @click.prevent="onCancel"></form>
-
-    <div class="modal-box max-w-md bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 border border-gray-200 dark:border-white/[0.07] shadow-2xl">
-      <!-- Başlık -->
-      <div class="flex items-center justify-between pb-4 border-b border-gray-200 dark:border-white/[0.07] mb-6">
-        <h3 id="dc-title" class="text-xl font-bold text-gray-800 dark:text-[#f1f3f9] flex items-center gap-2">
-          <span class="text-2xl">⚠️</span>
-          {{ title }}
-        </h3>
-        <button
-          type="button"
-          @click="onCancel"
-          :disabled="loading"
-          :class="['btn btn-sm btn-ghost', loading ? 'btn-disabled' : '']"
-          class="text-gray-500 hover:text-gray-700 dark:text-[#9aa0b4] dark:hover:text-gray-200"
-        >
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+    <div class="space-y-6">
+      <!-- Uyarı İkonu ve Mesajı -->
+      <div class="flex flex-col items-center text-center space-y-4">
+        <div class="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center text-red-500 shadow-lg shadow-red-500/5 transition-transform hover:scale-110">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2M4 7h16" />
           </svg>
-        </button>
-      </div>
-
-      <!-- İçerik -->
-      <div class="py-4">
-        <div class="flex items-center gap-3 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg mb-4">
-          <svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"/>
-          </svg>
-          <p id="dc-desc" class="text-gray-700 dark:text-[#f1f3f9]">
-            <strong class="text-red-600 dark:text-red-400">{{ displayName }}</strong>
-            {{ message || 'kaydını silmek istediğinize emin misiniz?' }}
+        </div>
+        
+        <div class="space-y-2">
+          <p class="text-[13.5px] font-black text-[#f1f3f9] uppercase tracking-tight leading-relaxed">
+            <span class="text-red-400">{{ displayName }}</span> kaydı siliniyor
+          </p>
+          <p class="text-xs text-[#626885] font-medium px-4">
+            {{ message || 'Bu kaydı silmek istediğinize emin misiniz? Bu işlem geri alınamaz.' }}
           </p>
         </div>
-        <p class="text-sm text-gray-500 dark:text-[#9aa0b4]">
-          Not: Silme işlemi geri alınamaz olabilir; yetkilerinize göre ilişkili veriler etkilenebilir.
+      </div>
+
+      <!-- Bilgi Notu -->
+      <div class="bg-red-500/5 border border-red-500/10 rounded-2xl p-4">
+        <p class="text-[10px] font-bold text-red-300 uppercase tracking-widest text-center italic">
+          ⚠️ Kritik Veri: Yetkilerinize göre ilişkili borç ve ödeme kayıtları bu işlemden etkilenebilir.
         </p>
       </div>
-
-      <!-- Butonlar -->
-      <div class="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-white/[0.07]">
-        <button
-          type="button"
-          @click="onCancel"
-          :disabled="loading"
-          :class="['btn btn-outline border-gray-300 dark:border-white/[0.1] text-gray-700 dark:text-[#f1f3f9] hover:bg-gray-50 dark:hover:bg-white/[0.06]', loading ? 'btn-disabled' : '']"
-        >
-          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-          </svg>
-          {{ cancelLabel }}
-        </button>
-
-        <button
-          type="button"
-          @click="onConfirm"
-          :disabled="loading"
-          :class="['btn btn-error bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 border-0 text-white shadow-lg', loading ? 'btn-disabled' : '']"
-        >
-          <svg v-if="!loading" class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-          </svg>
-          <span v-else class="loading loading-spinner loading-sm mr-2"></span>
-          {{ confirmLabel }}
-        </button>
-      </div>
     </div>
-  </dialog>
+
+    <!-- Footer Butonları -->
+    <template #footer>
+      <button 
+        type="button"
+        class="btn btn-ghost !bg-transparent border border-white/[0.08] text-[#9aa0b4] hover:bg-white/[0.05] flex-1" 
+        @click="onCancel"
+        :disabled="loading"
+      >
+        Vazgeç
+      </button>
+      <button 
+        type="button"
+        class="btn btn-error flex-1 font-black uppercase tracking-widest" 
+        :disabled="loading" 
+        @click="onConfirm"
+      >
+        <span v-if="loading" class="loading loading-spinner loading-xs mr-2"></span>
+        <svg v-else class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2M4 7h16" />
+        </svg>
+        {{ confirmLabel }}
+      </button>
+    </template>
+  </BaseModal>
 </template>
 
 <script setup>
 import { computed } from 'vue'
+import BaseModal from '@/presentation/components/common/BaseModal.vue'
 
 const props = defineProps({
   tenant: { type: Object, default: null },

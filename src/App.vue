@@ -1,5 +1,5 @@
 <template>
-  <div :data-theme="authStore.theme" class="min-h-screen">
+  <div data-theme="dark" class="min-h-screen">
     <!-- Hata Durumu (Rendering Crash) -->
     <div v-if="renderError" class="min-h-screen flex flex-col items-center justify-center p-6 bg-base-200 text-center">
       <div class="max-w-md w-full p-8 bg-base-100 rounded-2xl shadow-2xl border-t-4 border-error">
@@ -99,12 +99,8 @@ watch(() => route.path, () => {
   renderError.value = null
 })
 
-// Tema değişikliğini izle ve <html> etiketine 'dark' sınıfını ekle/kaldır
-watch(() => authStore.theme, (theme) => {
-  if (theme === 'dark') {
-    document.documentElement.classList.add('dark')
-  } else {
-    document.documentElement.classList.remove('dark')
-  }
+// Tema her zaman koyu
+watch(() => authStore.theme, () => {
+  document.documentElement.classList.add('dark')
 }, { immediate: true })
 </script>

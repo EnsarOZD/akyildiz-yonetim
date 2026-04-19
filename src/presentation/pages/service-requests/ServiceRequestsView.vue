@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="p-4 sm:p-6 min-h-screen pb-24 md:pb-6">
 
     <PageHeader title="Talep Yönetimi" subtitle="Bakım, hizmet ve teknik talepleri buradan takip edin ve yönetin">
@@ -20,22 +20,22 @@
     </PageHeader>
 
     <!-- Filtreler -->
-    <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
-      <div class="flex p-1 bg-slate-100 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700/50">
+    <div class="flex flex-wrap items-center justify-between gap-4 mb-8">
+      <div class="flex p-1.5 bg-slate-50 dark:bg-white/[0.02] rounded-2xl border border-slate-100 dark:border-white/[0.04] shadow-sm">
         <button v-for="f in filters" :key="f.value"
           @click="activeFilter = f.value; loadRequests()"
           :class="[
-            'px-4 py-1.5 text-xs font-semibold rounded-lg transition-all duration-200',
+            'px-5 py-1.5 text-[11px] font-black uppercase tracking-widest rounded-xl transition-all duration-300',
             activeFilter === f.value 
-              ? 'bg-white dark:bg-[#1c2238] text-brand-600 dark:text-brand-400 shadow-sm' 
-              : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+              ? 'bg-white dark:bg-brand-500 text-brand-600 dark:text-white shadow-xl shadow-brand-500/10' 
+              : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'
           ]">
           {{ f.label }}
         </button>
       </div>
       
       <div class="flex items-center gap-2">
-        <span class="text-xs text-slate-400">{{ requests.length }} talep gösteriliyor</span>
+        <span class="text-[11px] font-bold text-slate-400 uppercase tracking-widest">{{ requests.length }} talep gösteriliyor</span>
       </div>
     </div>
 
@@ -57,60 +57,62 @@
     </div>
 
     <!-- Hizmet Talebi Listesi -->
-    <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-6">
       <div v-for="req in requests" :key="req.id"
-        class="app-card group hover:shadow-xl hover:shadow-blue-500/5 transition-all duration-300 border-l-4"
+        class="app-card group hover:shadow-2xl hover:shadow-brand-500/5 transition-all duration-500 border-l-[6px] !p-6"
         :class="statusBorder(req.status)">
         
-        <div class="flex items-start gap-4">
-          <div class="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0"
+        <div class="flex items-start gap-5">
+          <div class="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 shadow-lg shadow-current/10 transition-transform group-hover:scale-110"
             :class="categoryClass(req.category)">
-            <component :is="categoryIcon(req.category)" class="w-5 h-5" />
+            <component :is="categoryIcon(req.category)" class="w-7 h-7" />
           </div>
           
           <div class="flex-1 min-w-0">
-            <div class="flex items-center justify-between gap-2 mb-1">
-              <span class="text-[10px] uppercase font-bold tracking-widest text-slate-400">{{ categoryLabel(req.category) }}</span>
-              <span :class="statusBadge(req.status)" class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider">{{ statusLabel(req.status) }}</span>
+            <div class="flex items-center justify-between gap-3 mb-2">
+              <span class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-[#626885]">{{ categoryLabel(req.category) }}</span>
+              <span :class="statusBadge(req.status)" class="px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest shadow-sm">
+                {{ statusLabel(req.status) }}
+              </span>
             </div>
             
-            <h3 class="text-sm font-bold text-slate-800 dark:text-[#f1f3f9] truncate mb-1">{{ req.title }}</h3>
-            <p class="text-xs text-slate-600 dark:text-[#9aa0b4] line-clamp-2 mb-3 leading-relaxed">{{ req.description }}</p>
+            <h3 class="text-[15px] font-black text-slate-800 dark:text-white leading-tight uppercase tracking-tight truncate mb-2 group-hover:text-brand-500 transition-colors">{{ req.title }}</h3>
+            <p class="text-xs font-bold text-slate-500 dark:text-[#9aa0b4] line-clamp-2 mb-4 leading-relaxed uppercase">{{ req.description }}</p>
             
-            <div class="flex flex-wrap items-center gap-y-2 gap-x-4 pt-3 border-t border-slate-100 dark:border-slate-700/50">
-              <div class="flex items-center gap-1.5 min-w-0">
-                <div class="w-5 h-5 rounded-full bg-slate-200 dark:bg-[#1c2238] flex items-center justify-center text-[8px] font-bold text-slate-500 overflow-hidden">
-                  <span v-if="!(req.tenantName || req.ownerName)">?</span>
+            <div class="flex flex-wrap items-center gap-y-3 gap-x-5 pt-4 border-t border-slate-100 dark:border-white/[0.04]">
+              <div class="flex items-center gap-2 min-w-0">
+                <div class="w-6 h-6 rounded-xl bg-slate-100 dark:bg-white/[0.04] flex items-center justify-center text-[10px] font-black text-slate-500 overflow-hidden ring-2 ring-white dark:ring-[#1c2238] shadow-sm">
+                  <span v-if="!(req.tenantName || req.ownerName || req.firstName)">?</span>
                   <img v-else-if="req.userPhoto" :src="req.userPhoto" class="w-full h-full object-cover">
-                  <span v-else>{{ (req.tenantName || req.ownerName || '?').charAt(0) }}</span>
+                  <span v-else>{{ (req.tenantName || req.ownerName || req.firstName || '?').charAt(0) }}</span>
                 </div>
-                <span class="text-[11px] font-medium text-slate-500 dark:text-[#9aa0b4] truncate">{{ req.tenantName || req.ownerName || 'Bilinmiyor' }}</span>
+                <span class="text-[11px] font-black text-slate-700 dark:text-[#f1f3f9] uppercase tracking-tight truncate">{{ req.tenantName || req.ownerName || 'Bilinmiyor' }}</span>
               </div>
               
               <div class="flex items-center gap-1.5">
                 <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
-                <span class="text-[11px] text-slate-400">{{ formatDate(req.createdAt) }}</span>
+                <span class="text-[11px] font-bold text-slate-400 dark:text-[#626885] tabular-nums uppercase">{{ formatDate(req.createdAt) }}</span>
               </div>
 
               <!-- Atanan Personel -->
-              <div v-if="req.assignedPersonnelName" class="flex items-center gap-1.5">
-                <div class="w-4 h-4 rounded-full bg-brand-100 text-brand-600 flex items-center justify-center">
+              <div v-if="req.assignedPersonnelName" class="flex items-center gap-2 px-2 py-0.5 bg-brand-50 dark:bg-brand-500/10 rounded-lg">
+                <div class="w-4 h-4 rounded-lg bg-brand-500 text-white flex items-center justify-center shadow-lg shadow-brand-500/20">
                   <svg class="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
                 </div>
-                <span class="text-[11px] font-semibold text-brand-600 dark:text-brand-400">{{ req.assignedPersonnelName }}</span>
+                <span class="text-[10px] font-black text-brand-600 dark:text-brand-400 uppercase tracking-tighter">{{ req.assignedPersonnelName }}</span>
               </div>
             </div>
           </div>
         </div>
 
         <!-- İşlemler -->
-        <div v-if="canManage" class="mt-4 flex items-center justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-700/50">
+        <div v-if="canManage" class="mt-5 flex items-center justify-end gap-3 pt-4 border-t border-slate-100 dark:border-white/[0.04]">
           <button v-if="!req.assignedPersonnelId && req.status !== 'Closed'" 
             @click="openAssign(req)" 
-            class="btn btn-xs btn-outline btn-primary gap-1.5 rounded-lg border-opacity-30">
-            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
+            class="btn btn-xs h-8 bg-brand-50 hover:bg-brand-100 text-brand-600 border-none rounded-xl px-4 text-[10px] font-black uppercase tracking-widest">
+            <svg class="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
             Personel Ata
           </button>
           
@@ -444,10 +446,10 @@ const statusBadge = (s) => ({
 }[s] ?? 'bg-slate-100 text-slate-400')
 
 const statusBorder = (s) => ({
-  Open: 'border-l-blue-500',
+  Open: 'border-l-brand-500',
   InProgress: 'border-l-amber-500',
   Resolved: 'border-l-emerald-500',
-  Closed: 'border-l-slate-300 dark:border-l-slate-700',
+  Closed: 'border-l-slate-300 dark:border-l-[#151a2e]',
 }[s] ?? 'border-l-transparent')
 
 const categoryLabel = (c) => ({

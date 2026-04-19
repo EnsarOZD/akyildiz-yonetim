@@ -1,8 +1,8 @@
-﻿<template>
+<template>
   <TransitionGroup
     name="error-notification"
     tag="div"
-    class="fixed top-4 right-4 z-50 space-y-2 max-w-md"
+    class="fixed top-6 right-6 z-[100] space-y-3 max-w-sm w-full"
     role="alert"
     aria-live="assertive"
     aria-atomic="false"
@@ -10,58 +10,61 @@
     <div
       v-for="error in errors"
       :key="error.id"
-      class="bg-white dark:bg-[#151a2e] border-l-4 border-red-500 shadow-lg rounded-lg p-4 max-w-sm w-full"
+      class="group relative bg-[#0f1322]/90 backdrop-blur-xl border border-red-500/20 shadow-2xl shadow-red-500/10 rounded-2xl p-4 overflow-hidden animate-slide-in"
     >
-      <!-- Header -->
-      <div class="flex items-start justify-between">
-        <div class="flex items-center gap-3">
-          <div class="bg-red-100 dark:bg-red-900/50 text-red-600 dark:text-red-400 rounded-full p-2">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          </div>
-          <div>
-            <h4 class="font-semibold text-gray-900 dark:text-[#f1f3f9] text-sm">
-              {{ error.title }}
-            </h4>
-            <p class="text-gray-600 dark:text-[#9aa0b4] text-sm mt-1">
-              {{ error.message }}
-            </p>
-          </div>
+      <!-- Background Accent Glow -->
+      <div class="absolute -right-4 -top-4 w-12 h-12 bg-red-500/10 blur-2xl rounded-full"></div>
+
+      <!-- Main Content -->
+      <div class="flex items-start gap-4">
+        <!-- Icon -->
+        <div class="shrink-0 w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center text-red-500 shadow-inner">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
         </div>
-        
+
+        <div class="flex-1 min-w-0 pr-6">
+          <h4 class="text-[13px] font-black text-[#f1f3f9] uppercase tracking-tight truncate">
+            {{ error.title }}
+          </h4>
+          <p class="text-[11px] text-[#9aa0b4] font-medium leading-relaxed mt-1 line-clamp-2 italic">
+            {{ error.message }}
+          </p>
+        </div>
+
         <!-- Close Button -->
         <button
           @click="removeError(error.id)"
-          class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors duration-200"
+          class="absolute top-4 right-4 text-[#626885] hover:text-red-400 transition-colors duration-200"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
       </div>
 
       <!-- Actions -->
-      <div v-if="error.action" class="flex items-center gap-2 mt-3 pt-3 border-t border-gray-200 dark:border-white/[0.07]">
+      <div v-if="error.action" class="flex items-center gap-3 mt-4 pt-3 border-t border-white/[0.05]">
         <button
           @click="handleAction(error)"
-          class="text-xs bg-red-100 dark:bg-red-900/50 text-red-600 dark:text-red-400 px-3 py-1 rounded-md hover:bg-red-200 dark:hover:bg-red-900/70 transition-colors duration-200"
+          class="text-[10px] font-black uppercase tracking-widest bg-red-500 text-white px-3 py-1.5 rounded-lg hover:bg-red-600 active:scale-95 transition-all outline-none"
         >
           {{ error.action }}
         </button>
         
         <button
           @click="showDetails(error)"
-          class="text-xs text-gray-500 dark:text-[#9aa0b4] hover:text-gray-700 dark:hover:text-gray-300 transition-colors duration-200"
+          class="text-[10px] font-black uppercase tracking-widest text-[#626885] hover:text-brand-400 transition-colors outline-none"
         >
-          Detaylar
+          Teknik Detaylar
         </button>
       </div>
 
-      <!-- Progress Bar -->
-      <div class="mt-3 h-1 bg-gray-200 dark:bg-[#1c2238] rounded-full overflow-hidden">
+      <!-- Progress Bar (Auto-hide logic) -->
+      <div class="absolute bottom-0 left-0 h-[3px] bg-red-900/20 w-full overflow-hidden">
         <div
-          class="h-full bg-red-500 transition-all duration-300 ease-linear"
+          class="h-full bg-red-500 transition-all duration-100 ease-linear shadow-[0_0_8px_rgba(239,68,68,0.5)]"
           :style="{ width: `${error.progress}%` }"
         ></div>
       </div>
@@ -69,79 +72,64 @@
   </TransitionGroup>
 
   <!-- Error Details Modal -->
-  <dialog
+  <BaseModal
     v-if="selectedError"
-    class="modal modal-open"
-    @click.self="selectedError = null"
+    :model-value="!!selectedError"
+    title="HATA ANALİZ RAPORU"
+    icon="⚠️"
+    size="md"
+    @close="selectedError = null"
   >
-    <div class="modal-box max-w-2xl">
-      <div class="flex items-center justify-between mb-4">
-        <h3 class="font-bold text-lg text-gray-900 dark:text-[#f1f3f9]">
-          Hata Detayları
-        </h3>
-        <button
-          @click="selectedError = null"
-          class="btn btn-sm btn-circle btn-ghost"
-        >
-          ✕
-        </button>
+    <div class="space-y-6">
+      <div class="bg-red-500/5 border border-red-500/10 rounded-2xl p-5 space-y-2">
+        <h4 class="text-xs font-black text-red-400 uppercase tracking-widest">Hata Özeti</h4>
+        <p class="text-sm font-bold text-[#f1f3f9] leading-relaxed">
+          {{ selectedError.title }}: {{ selectedError.message }}
+        </p>
       </div>
 
-      <div class="space-y-4">
-        <!-- Error Info -->
-        <div class="bg-slate-50 dark:bg-[#151a2e] rounded-lg p-4">
-          <h4 class="font-semibold text-gray-900 dark:text-[#f1f3f9] mb-2">
-            {{ selectedError.title }}
-          </h4>
-          <p class="text-gray-600 dark:text-[#9aa0b4] text-sm">
-            {{ selectedError.message }}
-          </p>
-        </div>
-
-        <!-- Technical Details -->
-        <div v-if="selectedError.technicalDetails" class="bg-slate-50 dark:bg-[#151a2e] rounded-lg p-4">
-          <h4 class="font-semibold text-gray-900 dark:text-[#f1f3f9] mb-2">
-            Teknik Detaylar
-          </h4>
-          <pre class="text-xs text-gray-600 dark:text-[#9aa0b4] bg-white dark:bg-[#080b14] p-3 rounded border overflow-x-auto">
+      <!-- Technical Code Block -->
+      <div v-if="selectedError.technicalDetails" class="space-y-2">
+        <h4 class="text-[10px] font-black text-[#626885] uppercase tracking-widest px-1">Teknik Sistem Yanıtı</h4>
+        <div class="bg-[#080b14] border border-white/[0.08] rounded-2xl p-5 overflow-hidden group">
+          <pre class="text-[10px] font-mono text-brand-400 custom-scrollbar overflow-x-auto leading-relaxed max-h-64 scroll-smooth">
             {{ JSON.stringify(selectedError.technicalDetails, null, 2) }}
           </pre>
         </div>
+      </div>
 
-        <!-- Context -->
-        <div v-if="selectedError.context" class="bg-slate-50 dark:bg-[#151a2e] rounded-lg p-4">
-          <h4 class="font-semibold text-gray-900 dark:text-[#f1f3f9] mb-2">
-            Bağlam Bilgileri
-          </h4>
-          <div class="text-sm text-gray-600 dark:text-[#9aa0b4] space-y-1">
-            <div><strong>Zaman:</strong> {{ formatDate(selectedError.timestamp) }}</div>
-            <div><strong>Tip:</strong> {{ selectedError.type }}</div>
-            <div v-if="selectedError.context.component"><strong>Bileşen:</strong> {{ selectedError.context.component }}</div>
-            <div v-if="selectedError.context.action"><strong>İşlem:</strong> {{ selectedError.context.action }}</div>
-          </div>
+      <!-- Meta Info -->
+      <div class="grid grid-cols-2 gap-4">
+        <div class="bg-white/[0.02] border border-white/[0.08] rounded-xl p-3">
+          <span class="text-[9px] font-black text-[#626885] uppercase tracking-widest block mb-1">Zaman Damgası</span>
+          <span class="text-[10px] font-bold text-[#9aa0b4]">{{ formatDate(selectedError.timestamp) }}</span>
+        </div>
+        <div v-if="selectedError.context?.component" class="bg-white/[0.02] border border-white/[0.08] rounded-xl p-3">
+          <span class="text-[9px] font-black text-[#626885] uppercase tracking-widest block mb-1">Kaynak Modül</span>
+          <span class="text-[10px] font-bold text-[#9aa0b4]">{{ selectedError.context.component }}</span>
         </div>
       </div>
-
-      <div class="modal-action">
-        <button
-          @click="selectedError = null"
-          class="btn btn-primary btn-sm"
-        >
-          Kapat
-        </button>
-      </div>
     </div>
-  </dialog>
+
+    <template #footer>
+      <button 
+        class="btn btn-primary w-full font-black uppercase tracking-widest shadow-lg shadow-brand-500/10" 
+        @click="selectedError = null"
+      >
+        Anladım, Kapat
+      </button>
+    </template>
+  </BaseModal>
 </template>
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
 import { errorHandler, ERROR_MESSAGES } from '@/core/utils/errorHandler'
+import BaseModal from '@/presentation/components/common/BaseModal.vue'
 
 const errors = ref([])
 const selectedError = ref(null)
 
-// Hata ekle
 const addError = (error) => {
   const errorId = Date.now() + Math.random()
   const errorData = {
@@ -158,11 +146,10 @@ const addError = (error) => {
 
   errors.value.push(errorData)
 
-  // Otomatik kaldırma için timer
   const timer = setInterval(() => {
     const errorIndex = errors.value.findIndex(e => e.id === errorId)
     if (errorIndex !== -1) {
-      errorData.progress -= 2
+      errorData.progress -= (100 / 50) // 5 seconds (50 * 100ms)
       if (errorData.progress <= 0) {
         removeError(errorId)
         clearInterval(timer)
@@ -171,14 +158,8 @@ const addError = (error) => {
       clearInterval(timer)
     }
   }, 100)
-
-  // 5 saniye sonra otomatik kaldır
-  setTimeout(() => {
-    removeError(errorId)
-  }, 5000)
 }
 
-// Hata kaldır
 const removeError = (errorId) => {
   const index = errors.value.findIndex(e => e.id === errorId)
   if (index !== -1) {
@@ -186,7 +167,6 @@ const removeError = (errorId) => {
   }
 }
 
-// Aksiyon işle
 const handleAction = (error) => {
   switch (error.action) {
     case 'Tekrar Dene':
@@ -207,23 +187,18 @@ const handleAction = (error) => {
   removeError(error.id)
 }
 
-// Detayları göster
 const showDetails = (error) => {
   selectedError.value = error
 }
 
-// Tarih formatla
 const formatDate = (timestamp) => {
   return new Date(timestamp).toLocaleString('tr-TR')
 }
 
-// Error handler listener
 const errorListener = (payload) => {
-  // success/info/warning = SuccessNotification gösterir; burada geçme
   const isSuccessLike = ['success', 'info', 'warning'].includes(payload.type)
   if (isSuccessLike) return
 
-  // Hata mesajını oluştur (logError payload’ında getDisplayMessage yok)
   const defaults = ERROR_MESSAGES[payload.type] || {
     title: 'Hata',
     message: 'Beklenmeyen bir hata oluştu.',
@@ -249,20 +224,25 @@ onUnmounted(() => errorHandler.removeListener(errorListener))
 <style scoped>
 .error-notification-enter-active,
 .error-notification-leave-active {
-  transition: all 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .error-notification-enter-from {
   opacity: 0;
-  transform: translateX(100%);
+  transform: translateX(40px) scale(0.95);
 }
 
 .error-notification-leave-to {
   opacity: 0;
-  transform: translateX(100%);
+  transform: translateX(20px) scale(0.9);
 }
 
 .error-notification-move {
-  transition: transform 0.3s ease;
+  transition: transform 0.4s ease;
+}
+
+@keyframes slide-in {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
 }
 </style> 

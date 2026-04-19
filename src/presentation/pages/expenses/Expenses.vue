@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="p-4 sm:p-6 min-h-screen pb-24 md:pb-6">
 
     <!-- Sayfa Başlığı -->
@@ -52,38 +52,44 @@
 
     <template v-else>
       <!-- İstatistik Kartları -->
-      <div class="grid grid-cols-3 gap-3 sm:gap-4 mb-5">
-        <div class="app-card flex items-center gap-3">
-          <div class="w-9 h-9 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-500 flex items-center justify-center shrink-0">
-            <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M17 13l-5 5m0 0l-5-5m5 5V6"/>
-            </svg>
-          </div>
-          <div class="min-w-0">
-            <p class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-[#626885] truncate">Bu Ay</p>
-            <p class="text-sm font-bold text-slate-800 dark:text-white tabular-nums">{{ formatCurrency(thisMonthExpense) }}</p>
-          </div>
-        </div>
-        <div class="app-card flex items-center gap-3">
-          <div class="w-9 h-9 rounded-xl bg-brand-50 dark:bg-brand-500/[0.08] text-brand-500 flex items-center justify-center shrink-0">
-            <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 7h6m0 0v6m0-6L9 13"/>
-            </svg>
-          </div>
-          <div class="min-w-0">
-            <p class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-[#626885] truncate">Toplam</p>
-            <p class="text-sm font-bold text-slate-800 dark:text-white tabular-nums">{{ formatCurrency(totalExpense) }}</p>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+        <div class="app-card group hover:shadow-xl hover:shadow-red-500/5 transition-all duration-300">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-2xl bg-red-50 dark:bg-red-500/10 text-red-500 flex items-center justify-center shrink-0 transition-transform group-hover:scale-110">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M17 13l-5 5m0 0l-5-5m5 5V6"/>
+              </svg>
+            </div>
+            <div class="min-w-0">
+              <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-[#626885]">Bu Ay</p>
+              <p class="text-xl font-black text-slate-800 dark:text-white tabular-nums tracking-tight mt-0.5">{{ formatCurrency(thisMonthExpense) }}</p>
+            </div>
           </div>
         </div>
-        <div class="app-card flex items-center gap-3">
-          <div class="w-9 h-9 rounded-xl bg-amber-50 dark:bg-amber-900/20 text-amber-500 flex items-center justify-center shrink-0">
-            <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-            </svg>
+        <div class="app-card group hover:shadow-xl hover:shadow-blue-500/5 transition-all duration-300">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-2xl bg-brand-50 dark:bg-brand-500/10 text-brand-500 flex items-center justify-center shrink-0 transition-transform group-hover:scale-110">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 7h6m0 0v6m0-6L9 13"/>
+              </svg>
+            </div>
+            <div class="min-w-0">
+              <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-[#626885]">Toplam</p>
+              <p class="text-xl font-black text-slate-800 dark:text-white tabular-nums tracking-tight mt-0.5">{{ formatCurrency(totalExpense) }}</p>
+            </div>
           </div>
-          <div class="min-w-0">
-            <p class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-[#626885] truncate">Bu Ay İşlem</p>
-            <p class="text-xl font-bold text-slate-800 dark:text-white tabular-nums">{{ thisMonthCount }}</p>
+        </div>
+        <div class="app-card group hover:shadow-xl hover:shadow-amber-500/5 transition-all duration-300">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-2xl bg-amber-50 dark:bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0 transition-transform group-hover:scale-110">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+              </svg>
+            </div>
+            <div class="min-w-0">
+              <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-[#626885]">Bu Ay İşlem</p>
+              <p class="text-2xl font-black text-slate-800 dark:text-white tabular-nums tracking-tight mt-0.5">{{ thisMonthCount }}</p>
+            </div>
           </div>
         </div>
       </div>
@@ -91,33 +97,37 @@
       <!-- Grafik + Tip Dağılımı -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-5">
         <div class="app-card">
-          <h2 class="text-sm font-semibold text-slate-700 dark:text-[#f1f3f9] mb-4">Aylık Gider Grafiği</h2>
-          <div class="h-40 flex items-end gap-1.5">
-            <div v-for="(month, index) in monthlyData" :key="index" class="flex-1 flex flex-col items-center gap-1.5">
+          <h2 class="text-xs font-bold text-slate-400 dark:text-[#626885] uppercase tracking-widest mb-6 px-1">Aylık Gider Grafiği</h2>
+          <div class="h-40 flex items-end gap-3 px-2">
+            <div v-for="(month, index) in monthlyData" :key="index" class="flex-1 group/bar relative flex flex-col items-center gap-3">
               <div
-                class="w-full bg-red-400 dark:bg-red-500 rounded-t transition-all duration-500"
+                class="w-full bg-gradient-to-t from-red-500/80 to-red-500 rounded-t-lg transition-all duration-500 group-hover/bar:from-red-600 group-hover/bar:to-red-400"
                 :style="{ height: `${Math.max((month.expense / maxAmount) * 130, month.expense > 0 ? 4 : 2)}px` }"
-              ></div>
-              <span class="text-[10px] text-slate-400 dark:text-[#626885] font-medium">{{ month.month }}</span>
+              >
+                <div class="opacity-0 group-hover/bar:opacity-100 absolute -top-10 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[10px] px-2 py-1 rounded shadow-xl whitespace-nowrap transition-opacity pointer-events-none font-bold">
+                  {{ formatCurrency(month.expense) }}
+                </div>
+              </div>
+              <span class="text-[10px] text-slate-400 dark:text-[#626885] font-bold uppercase tracking-tighter">{{ month.month }}</span>
             </div>
           </div>
         </div>
         <div class="app-card">
-          <h2 class="text-sm font-semibold text-slate-700 dark:text-[#f1f3f9] mb-4">Tip Dağılımı</h2>
-          <div class="space-y-2.5">
-            <div v-for="type in expenseTypeStats" :key="type.name" class="flex items-center justify-between">
-              <div class="flex items-center gap-2.5">
-                <div class="w-7 h-7 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-500 flex items-center justify-center shrink-0">
-                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <h2 class="text-xs font-bold text-slate-400 dark:text-[#626885] uppercase tracking-widest mb-6 px-1">Tip Dağılımı</h2>
+          <div class="space-y-1">
+            <div v-for="type in expenseTypeStats" :key="type.name" class="flex items-center justify-between p-2 rounded-xl transition-colors hover:bg-slate-50 dark:hover:bg-white/[0.04]">
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-xl bg-red-50 dark:bg-red-500/10 text-red-500 flex items-center justify-center shrink-0">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M17 13l-5 5m0 0l-5-5m5 5V6"/>
                   </svg>
                 </div>
                 <div>
-                  <p class="text-xs font-semibold text-slate-700 dark:text-[#f1f3f9]">{{ type.label }}</p>
-                  <p class="text-[10px] text-slate-400 dark:text-[#626885]">{{ type.count }} gider</p>
+                  <p class="text-[13px] font-bold text-slate-700 dark:text-[#f1f3f9]">{{ type.label }}</p>
+                  <p class="text-[10px] font-bold text-slate-400 dark:text-[#626885] uppercase tracking-tighter">{{ type.count }} gider</p>
                 </div>
               </div>
-              <p class="text-sm font-bold text-red-500 dark:text-red-400 tabular-nums">{{ formatCurrency(type.total) }}</p>
+              <p class="text-[13px] font-black text-red-500 dark:text-red-400 tabular-nums tracking-tight">{{ formatCurrency(type.total) }}</p>
             </div>
             <div v-if="expenseTypeStats.length === 0" class="text-xs text-slate-400 dark:text-[#626885] text-center py-4">Veri yok</div>
           </div>
@@ -126,66 +136,73 @@
 
       <!-- Filtreler + Liste -->
       <div class="app-card !p-0">
-        <!-- Filtreler -->
-        <div class="px-4 py-3 border-b border-slate-100 dark:border-slate-700/60">
-          <CustomFilterBar
-            :search="filters.searchTerm"
-            :period="filters.period"
-            :select-type="filters.type"
-            :select-type-options="expenseTypeOptions"
-            @update:search="val => (filters.searchTerm = val)"
-            @update:period="val => (filters.period = val)"
-            @update:select-type="val => (filters.type = val)"
-            @clearFilters="handleClearFilters"
-          />
+        <!-- Liste Başlığı -->
+        <div class="flex items-center justify-between px-5 py-4 border-b border-white/[0.04]">
+          <div class="flex items-center gap-3">
+            <h3 class="text-[13.5px] font-black text-slate-800 dark:text-[#f1f3f9] uppercase tracking-tight">Gider Listesi</h3>
+            <span class="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-white/[0.04] text-[10px] font-black text-slate-400 uppercase tracking-widest">{{ filteredExpenses.length }} Kayıt</span>
+          </div>
         </div>
 
-        <!-- Boş Durum -->
-        <EmptyState v-if="filteredExpenses.length === 0" title="Gider bulunamadı" description="Seçilen kriterlere uygun gider kaydı yok.">
-          <template #action>
-            <button @click="handleClearFilters" class="btn btn-sm btn-outline">Filtreleri Temizle</button>
-          </template>
-        </EmptyState>
+        <!-- Tablo -->
+        <div class="overflow-x-auto">
+          <table class="table table-sm w-full border-collapse">
+            <thead>
+              <tr class="border-b border-white/[0.08]">
+                <th class="py-4 text-[10px] font-black text-slate-400 dark:text-[#626885] uppercase tracking-widest text-left px-4">Tarih</th>
+                <th class="py-4 text-[10px] font-black text-slate-400 dark:text-[#626885] uppercase tracking-widest text-left px-4">Kategori</th>
+                <th class="py-4 text-[10px] font-black text-slate-400 dark:text-[#626885] uppercase tracking-widest text-left px-4">Açıklama</th>
+                <th class="py-4 text-[10px] font-black text-slate-400 dark:text-[#626885] uppercase tracking-widest text-right px-4">Tutar (Borç)</th>
+                <th class="py-4 text-[10px] font-black text-slate-400 dark:text-[#626885] uppercase tracking-widest text-center px-4">Aksiyon</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y-0">
+              <tr 
+                v-for="e in paginatedExpenses" 
+                :key="e.id"
+                class="group hover:bg-white/[0.02] transition-colors border-b border-white/[0.02]/50 last:border-0"
+              >
+                <!-- Tarih -->
+                <td class="px-4 py-3 whitespace-nowrap text-[11px] font-black text-slate-400 dark:text-[#626885] uppercase tracking-tight">
+                  {{ formatDate(e.expenseDate) || 'Tarih yok' }}
+                </td>
 
-        <!-- Liste -->
-        <div v-else class="divide-y divide-slate-100 dark:divide-white/[0.06]/60">
-          <div
-            v-for="e in paginatedExpenses"
-            :key="e.id"
-            class="table-row-hover flex items-center gap-3 px-4 py-3"
-          >
-            <!-- İkon -->
-            <div class="w-9 h-9 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-500 flex items-center justify-center shrink-0">
-              <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M17 13l-5 5m0 0l-5-5m5 5V6"/>
-              </svg>
-            </div>
+                <!-- Kat/İkon -->
+                <td class="px-4 py-3">
+                  <span class="bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 px-2 py-0.5 rounded-lg text-[9.5px] font-black uppercase tracking-widest">
+                    {{ getExpenseTypeName(e.type) || 'Tip Yok' }}
+                  </span>
+                </td>
 
-            <!-- Bilgi -->
-            <div class="flex-1 min-w-0">
-              <p class="text-sm font-semibold text-slate-800 dark:text-[#f1f3f9] truncate">{{ e.title || 'Açıklama Yok' }}</p>
-              <div class="flex items-center gap-2 flex-wrap">
-                <span class="text-xs text-slate-400 dark:text-[#626885]">{{ formatDate(e.expenseDate) || 'Tarih yok' }}</span>
-                <span class="badge badge-xs badge-info">{{ getExpenseTypeName(e.type) || 'Tip Yok' }}</span>
-              </div>
-            </div>
+                <!-- Bilgi -->
+                <td class="px-4 py-3">
+                  <p class="text-[13.5px] font-black text-slate-800 dark:text-white uppercase tracking-tight truncate group-hover:text-red-500 transition-colors">{{ e.title || 'Açıklama Yok' }}</p>
+                </td>
 
-            <!-- Tutar -->
-            <p class="text-sm font-bold text-red-500 dark:text-red-400 tabular-nums shrink-0">{{ formatCurrency(e.amount) }}</p>
+                <!-- Tutar -->
+                <td class="px-4 py-3 text-right">
+                  <p class="text-[14px] font-black text-red-500 tabular-nums tracking-tight">
+                    {{ formatCurrency(e.amount) }}
+                  </p>
+                </td>
 
-            <!-- İşlem Menüsü -->
-            <div class="shrink-0 dropdown dropdown-end">
-              <button tabindex="0" class="btn btn-ghost btn-xs btn-square text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
-                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                  <circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/><circle cx="5" cy="12" r="1.5"/>
-                </svg>
-              </button>
-              <ul tabindex="0" class="dropdown-content menu p-1.5 shadow-card bg-base-100 border border-slate-200 dark:border-white/[0.07] rounded-xl w-32 z-10 text-xs">
-                <li><a @click="startEdit(e)" class="rounded-lg">Düzenle</a></li>
-                <li><a @click="deleteExpense(e)" class="rounded-lg text-error">Sil</a></li>
-              </ul>
-            </div>
-          </div>
+                <!-- İşlem Menüsü -->
+                <td class="px-4 py-3 text-center">
+                  <div class="dropdown dropdown-end">
+                    <button tabindex="0" class="btn btn-ghost btn-xs btn-square text-slate-400 hover:text-red-500">
+                      <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/><circle cx="5" cy="12" r="1.5"/>
+                      </svg>
+                    </button>
+                    <ul tabindex="0" class="dropdown-content menu p-1.5 shadow-card bg-base-100 border border-slate-200 dark:border-white/[0.07] rounded-xl w-32 z-10 text-xs">
+                      <li><a @click="startEdit(e)" class="rounded-lg">Düzenle</a></li>
+                      <li><a @click="deleteExpense(e)" class="rounded-lg text-error">Sil</a></li>
+                    </ul>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
 
         <!-- Sayfalama -->

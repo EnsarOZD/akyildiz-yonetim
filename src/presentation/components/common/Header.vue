@@ -4,25 +4,35 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex items-center justify-between h-[60px]">
 
-        <!-- Logo -->
-        <router-link to="/" class="flex items-center gap-2.5 flex-shrink-0 group">
-          <div class="w-3 h-3 rounded-full bg-[#6B8AFF] group-hover:scale-125 transition-transform duration-300 shadow-[0_0_10px_rgba(107,138,255,0.5)]"></div>
-          <span class="text-[14px] font-black tracking-[2px] uppercase text-slate-800 dark:text-white hidden md:block">
-            {{ appName }}
-          </span>
-        </router-link>
+        <!-- Left: Logo (Desktop) / Greeting (Mobile) -->
+        <div class="flex items-center gap-4">
+          <!-- Desktop Logo -->
+          <router-link to="/" class="hidden md:flex items-center gap-2.5 flex-shrink-0 group">
+            <div class="w-3 h-3 rounded-full bg-brand-500 group-hover:scale-125 transition-transform duration-300 shadow-[0_0_10px_rgba(107,138,255,0.5)]"></div>
+            <span class="text-[15px] font-black tracking-tighter text-slate-800 dark:text-white">
+              {{ appName }}
+            </span>
+          </router-link>
+
+          <!-- Mobile Greeting -->
+          <div class="flex md:hidden flex-col">
+            <span class="text-premium-label opacity-70">Hoş Geldiniz</span>
+            <span class="text-sm font-black text-slate-800 dark:text-white tracking-tight">
+              Merhaba, {{ userInfo?.firstName || 'Kullanıcı' }}
+            </span>
+          </div>
+        </div>
 
         <!-- Desktop nav tabs -->
-        <nav v-if="tabs.length" class="hidden md:flex items-center gap-0.5 flex-1 justify-center">
+        <nav v-if="tabs.length" class="hidden md:flex items-center gap-1 flex-1 justify-center">
           <router-link
             v-for="tab in tabs"
             :key="tab.value"
             :to="tab.route"
-            class="px-4 py-2 rounded-lg text-[13px] font-black transition-all duration-150 uppercase tracking-widest"
+            class="px-5 py-2.5 rounded-xl text-[13px] font-black transition-all duration-300 tracking-tight"
             :class="isActiveTab(tab.route)
-              ? 'bg-brand-500 text-white shadow-lg shadow-brand-500/25'
-              : 'text-slate-500 dark:text-[#9aa0b4] hover:text-slate-900 dark:hover:text-[#f1f3f9]'"
-            :aria-current="isActiveTab(tab.route) ? 'page' : undefined"
+              ? 'text-brand-500 active-nav-item'
+              : 'text-[#626885] hover:text-[#f1f3f9]'"
           >
             {{ tab.label }}
           </router-link>
@@ -127,21 +137,6 @@
             </transition>
           </div>
 
-          <!-- Theme toggle -->
-          <button
-            @click="authStore.toggleTheme"
-            class="p-2 rounded-lg text-slate-500 dark:text-[#9aa0b4] hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-700 dark:hover:text-[#f1f3f9] transition-all duration-150"
-            :aria-label="authStore.theme === 'dark' ? 'Açık moda geç' : 'Karanlık moda geç'"
-          >
-            <svg v-if="authStore.theme === 'dark'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75"
-                d="M12 3v1m0 16v1m8.66-13.66l-.71.71M4.05 19.07l-.71.71M21 12h-1M4 12H3m16.66 5.66l-.71-.71M4.05 4.93l-.71-.71M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-            </svg>
-            <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75"
-                d="M21 12.79A9 9 0 1111.21 3a7 7 0 109.79 9.79z" />
-            </svg>
-          </button>
 
           <!-- User menu -->
           <div v-if="userInfo" class="relative" ref="userMenuRef">

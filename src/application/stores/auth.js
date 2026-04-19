@@ -10,10 +10,7 @@ export const useAuthStore = defineStore('auth', () => {
   const fullName = ref(null)
   const email = ref(null)
   const isInitialized = ref(false) // 🔄 Backend tamamlandı mı?
-  const theme = ref(
-    localStorage.getItem('theme') ||
-    (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
-  )
+  const theme = ref('dark')
 
   async function fetchUserProfile() {
     // Aynı anda birden fazla çağrı varsa tek isteğe indir
@@ -110,8 +107,8 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   function toggleTheme() {
-    theme.value = theme.value === 'dark' ? 'light' : 'dark'
-    localStorage.setItem('theme', theme.value)
+    // White mode disabled for now
+    theme.value = 'dark'
   }
 
   return {

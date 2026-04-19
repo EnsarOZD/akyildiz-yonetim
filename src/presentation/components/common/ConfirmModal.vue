@@ -1,12 +1,12 @@
-﻿<template>
+<template>
   <dialog v-if="isOpen" class="modal" open @keydown.esc="$emit('cancel')">
     <div
-      class="modal-box flex flex-col p-0 w-full max-w-[95vw] sm:max-w-sm"
+      class="modal-box flex flex-col p-0 w-full max-w-[95vw] sm:max-w-sm bg-[#0f1322] border border-white/[0.08] shadow-2xl"
       :style="{ maxHeight: 'min(90dvh, 800px)' }"
     >
       <!-- Header -->
-      <div class="flex-shrink-0 flex items-center justify-between px-5 py-4 border-b border-gray-200 dark:border-white/[0.07] bg-white dark:bg-[#151a2e] rounded-t-2xl">
-        <h3 class="text-lg font-bold text-gray-800 dark:text-[#f1f3f9] flex items-center gap-2">
+      <div class="flex-shrink-0 flex items-center justify-between px-6 py-5 border-b border-white/[0.08] bg-white/[0.02] rounded-t-2xl">
+        <h3 class="text-[13px] font-black text-[#f1f3f9] flex items-center gap-3 uppercase tracking-widest">
           {{ title }}
         </h3>
         <button
@@ -22,15 +22,15 @@
       </div>
 
       <!-- Content -->
-      <div class="flex-grow overflow-y-auto overscroll-contain px-5 py-5 bg-gray-50 dark:bg-gray-900/30 text-gray-700 dark:text-[#f1f3f9]">
+      <div class="flex-grow overflow-y-auto overscroll-contain px-6 py-8 text-gray-300 text-sm leading-relaxed text-center">
         {{ message }}
       </div>
 
       <!-- Footer -->
-      <div class="flex-shrink-0 flex items-center justify-end gap-3 px-5 py-4 border-t border-gray-200 dark:border-white/[0.07] bg-white dark:bg-[#151a2e] rounded-b-2xl">
+      <div class="flex-shrink-0 flex items-center justify-center gap-3 px-6 py-5 border-t border-white/[0.08] bg-white/[0.01] rounded-b-2xl">
         <button
           type="button"
-          class="btn btn-ghost"
+          class="btn btn-ghost !bg-transparent border border-white/[0.08] text-[#9aa0b4] hover:bg-white/[0.05]"
           :disabled="loading"
           @click="$emit('cancel')"
         >
@@ -38,7 +38,7 @@
         </button>
         <button
           type="button"
-          class="btn"
+          class="btn px-8"
           :class="[confirmClass, loading ? 'loading' : '']"
           :disabled="loading"
           @click="$emit('confirm')"
@@ -49,7 +49,7 @@
       </div>
     </div>
     <!-- Backdrop -->
-    <div class="modal-backdrop bg-black/50" @click="$emit('cancel')" />
+    <div class="modal-backdrop bg-[#030509]/80 backdrop-blur-sm transition-all duration-300" @click="$emit('cancel')" />
   </dialog>
 </template>
 

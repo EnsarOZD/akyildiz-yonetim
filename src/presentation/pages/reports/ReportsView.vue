@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="p-4 sm:p-6 min-h-screen pb-24 md:pb-6">
 
     <!-- Sayfa Başlığı -->
@@ -32,100 +32,112 @@
     </PageHeader>
 
     <!-- Filtreler -->
-    <div class="app-card mb-5">
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-7 gap-3">
-        <div class="form-control">
-          <label class="label py-1"><span class="label-text text-xs font-semibold uppercase tracking-wide">Başlangıç</span></label>
-          <input v-model="filters.startDate" type="date" class="input input-sm input-bordered w-full" />
+    <div class="app-card mb-6">
+      <div class="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-7 gap-4">
+        <div v-for="field in [
+          { label: 'Başlangıç', model: 'startDate', type: 'date' },
+          { label: 'Bitiş', model: 'endDate', type: 'date' }
+        ]" :key="field.label">
+          <label class="text-[10px] font-bold text-slate-400 dark:text-[#626885] uppercase tracking-widest mb-1.5 block px-1">{{ field.label }}</label>
+          <input v-model="filters[field.model]" :type="field.type" class="input input-sm input-bordered w-full font-bold text-xs" />
         </div>
-        <div class="form-control">
-          <label class="label py-1"><span class="label-text text-xs font-semibold uppercase tracking-wide">Bitiş</span></label>
-          <input v-model="filters.endDate" type="date" class="input input-sm input-bordered w-full" />
-        </div>
-        <div class="form-control">
-          <label class="label py-1"><span class="label-text text-xs font-semibold uppercase tracking-wide">Kiracı</span></label>
-          <select v-model="filters.tenantId" class="select select-sm select-bordered w-full">
+        
+        <div>
+          <label class="text-[10px] font-bold text-slate-400 dark:text-[#626885] uppercase tracking-widest mb-1.5 block px-1">Kiracı</label>
+          <select v-model="filters.tenantId" class="select select-sm select-bordered w-full font-bold text-xs">
             <option value="">Tüm Kiracılar</option>
             <option v-for="t in tenants" :key="t.id" :value="t.id">{{ t.companyName }}</option>
           </select>
         </div>
-        <div class="form-control">
-          <label class="label py-1"><span class="label-text text-xs font-semibold uppercase tracking-wide">Mal Sahibi</span></label>
-          <select v-model="filters.ownerId" class="select select-sm select-bordered w-full">
+
+        <div>
+          <label class="text-[10px] font-bold text-slate-400 dark:text-[#626885] uppercase tracking-widest mb-1.5 block px-1">Mal Sahibi</label>
+          <select v-model="filters.ownerId" class="select select-sm select-bordered w-full font-bold text-xs">
             <option value="">Tüm Mal Sahipleri</option>
             <option v-for="o in owners" :key="o.id" :value="o.id">{{ o.firstName }} {{ o.lastName }}</option>
           </select>
         </div>
-        <div class="form-control">
-          <label class="label py-1"><span class="label-text text-xs font-semibold uppercase tracking-wide">İşlem Tipi</span></label>
-          <select v-model="filters.type" class="select select-sm select-bordered w-full">
+
+        <div>
+          <label class="text-[10px] font-bold text-slate-400 dark:text-[#626885] uppercase tracking-widest mb-1.5 block px-1">İşlem Tipi</label>
+          <select v-model="filters.type" class="select select-sm select-bordered w-full font-bold text-xs">
             <option value="all">Tümü</option>
             <option value="debt">Sadece Borçlar</option>
             <option value="payment">Sadece Tahsilatlar</option>
           </select>
         </div>
-        <div class="form-control">
-          <label class="label py-1"><span class="label-text text-xs font-semibold uppercase tracking-wide">Kategori</span></label>
-          <select v-model="filters.utilityType" class="select select-sm select-bordered w-full">
+
+        <div>
+          <label class="text-[10px] font-bold text-slate-400 dark:text-[#626885] uppercase tracking-widest mb-1.5 block px-1">Kategori</label>
+          <select v-model="filters.utilityType" class="select select-sm select-bordered w-full font-bold text-xs">
             <option value="">Tümü</option>
             <option value="Aidat">Aidat</option>
             <option value="Electricity">Elektrik</option>
             <option value="Water">Su</option>
           </select>
         </div>
-        <div class="form-control">
-          <label class="label py-1"><span class="label-text text-xs font-semibold uppercase tracking-wide">Borçlu Türü</span></label>
-          <select v-model="filters.debtorType" class="select select-sm select-bordered w-full">
+
+        <div>
+          <label class="text-[10px] font-bold text-slate-400 dark:text-[#626885] uppercase tracking-widest mb-1.5 block px-1">Borçlu Türü</label>
+          <select v-model="filters.debtorType" class="select select-sm select-bordered w-full font-bold text-xs">
             <option value="All">Tümü</option>
             <option value="OnlyTenants">Yalnızca Kiracılar</option>
             <option value="OnlyOwners">Yalnızca Mal Sahipleri</option>
           </select>
         </div>
       </div>
-      <div class="flex justify-end mt-3 pt-3 border-t border-slate-200 dark:border-white/[0.07]">
-        <button @click="clearFilters" class="btn btn-ghost btn-xs text-slate-400">Filtreleri Temizle</button>
+      <div class="flex justify-end mt-4 pt-4 border-t border-slate-100 dark:border-white/[0.04]">
+        <button @click="clearFilters" class="btn btn-ghost btn-xs text-slate-400 font-bold uppercase tracking-wider">
+          Filtreleri Temizle
+        </button>
       </div>
     </div>
 
     <!-- Özet Kartları -->
-    <div v-if="reportItems.length > 0" class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5">
-      <div class="app-card flex items-center gap-3">
-        <div class="w-9 h-9 rounded-xl bg-red-100 dark:bg-red-900/30 text-red-500 flex items-center justify-center shrink-0">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"/>
-          </svg>
-        </div>
-        <div class="min-w-0">
-          <p class="text-xs text-slate-500 dark:text-[#9aa0b4] leading-none mb-1">Toplam Tahakkuk</p>
-          <p class="text-base font-bold text-slate-800 dark:text-[#f1f3f9] leading-none">{{ formatCurrency(summary.totalDebt) }}</p>
-        </div>
-      </div>
-      <div class="app-card flex items-center gap-3">
-        <div class="w-9 h-9 rounded-xl bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
-          </svg>
-        </div>
-        <div class="min-w-0">
-          <p class="text-xs text-slate-500 dark:text-[#9aa0b4] leading-none mb-1">Toplam Tahsilat</p>
-          <p class="text-base font-bold text-slate-800 dark:text-[#f1f3f9] leading-none">{{ formatCurrency(summary.totalPayment) }}</p>
+    <div v-if="reportItems.length > 0" class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+      <div class="app-card group hover:shadow-xl hover:shadow-red-500/5 transition-all duration-300">
+        <div class="flex items-center gap-4">
+          <div class="w-12 h-12 rounded-2xl bg-red-50 dark:bg-red-500/10 text-red-500 flex items-center justify-center shrink-0 transition-transform group-hover:scale-110">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"/>
+            </svg>
+          </div>
+          <div class="min-w-0">
+            <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-[#626885]">Toplam Tahakkuk</p>
+            <p class="text-xl font-black text-slate-800 dark:text-white tabular-nums tracking-tight mt-0.5">{{ formatCurrency(summary.totalDebt) }}</p>
+          </div>
         </div>
       </div>
-      <div class="app-card flex items-center gap-3">
-        <div :class="[
-          'w-9 h-9 rounded-xl flex items-center justify-center shrink-0',
-          summary.balance >= 0 ? 'bg-brand-100 dark:bg-brand-500/[0.12] text-brand-600 dark:text-brand-400' : 'bg-red-100 dark:bg-red-900/30 text-red-500'
-        ]">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"/>
-          </svg>
+      <div class="app-card group hover:shadow-xl hover:shadow-emerald-500/5 transition-all duration-300">
+        <div class="flex items-center gap-4">
+          <div class="w-12 h-12 rounded-2xl bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 transition-transform group-hover:scale-110">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+            </svg>
+          </div>
+          <div class="min-w-0">
+            <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-[#626885]">Toplam Tahsilat</p>
+            <p class="text-xl font-black text-slate-800 dark:text-white tabular-nums tracking-tight mt-0.5">{{ formatCurrency(summary.totalPayment) }}</p>
+          </div>
         </div>
-        <div class="min-w-0">
-          <p class="text-xs text-slate-500 dark:text-[#9aa0b4] leading-none mb-1">Net Bakiye</p>
-          <p :class="[
-            'text-base font-bold leading-none',
-            summary.balance >= 0 ? 'text-brand-600 dark:text-brand-400' : 'text-red-500'
-          ]">{{ formatCurrency(summary.balance) }}</p>
+      </div>
+      <div class="app-card group hover:shadow-xl hover:shadow-blue-500/5 transition-all duration-300">
+        <div class="flex items-center gap-4">
+          <div :class="[
+            'w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 transition-transform group-hover:scale-110',
+            summary.balance >= 0 ? 'bg-brand-50 dark:bg-brand-500/10 text-brand-600 dark:text-brand-400' : 'bg-red-50 dark:bg-red-500/10 text-red-500'
+          ]">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"/>
+            </svg>
+          </div>
+          <div class="min-w-0">
+            <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-[#626885]">Net Bakiye</p>
+            <p :class="[
+              'text-xl font-black tabular-nums tracking-tight mt-0.5',
+              summary.balance >= 0 ? 'text-brand-600 dark:text-brand-400' : 'text-red-500'
+            ]">{{ formatCurrency(summary.balance) }}</p>
+          </div>
         </div>
       </div>
     </div>
@@ -153,20 +165,20 @@
       <div class="overflow-x-auto">
         <table class="table table-sm w-full" id="report-table">
           <thead>
-            <tr class="bg-slate-50 dark:bg-[#151a2e]/80 text-xs text-slate-500 dark:text-[#9aa0b4] uppercase tracking-wide">
-              <th class="font-semibold">Tarih</th>
-              <th class="font-semibold">Dönem</th>
-              <th class="font-semibold">Kiracı / Ünite</th>
-              <th class="font-semibold">İşlem</th>
-              <th class="font-semibold">Açıklama</th>
-              <th class="font-semibold">Fatura No</th>
-              <th class="font-semibold text-right">Borç (−)</th>
-              <th class="font-semibold text-right">Alacak (+)</th>
-              <th class="font-semibold text-center">Durum</th>
-              <th class="font-semibold text-center">Vade Tarihi</th>
+            <tr class="border-b border-white/[0.08]">
+              <th class="py-4 text-[10px] font-black text-slate-400 dark:text-[#626885] uppercase tracking-widest whitespace-nowrap px-4 text-left">Tarih</th>
+              <th class="py-4 text-[10px] font-black text-slate-400 dark:text-[#626885] uppercase tracking-widest whitespace-nowrap px-4 text-left">Dönem</th>
+              <th class="py-4 text-[10px] font-black text-slate-400 dark:text-[#626885] uppercase tracking-widest whitespace-nowrap px-4 text-left">Kiracı / Ünite</th>
+              <th class="py-4 text-[10px] font-black text-slate-400 dark:text-[#626885] uppercase tracking-widest whitespace-nowrap px-4 text-left">İşlem</th>
+              <th class="py-4 text-[10px] font-black text-slate-400 dark:text-[#626885] uppercase tracking-widest whitespace-nowrap px-4 text-left">Açıklama</th>
+              <th class="py-4 text-[10px] font-black text-slate-400 dark:text-[#626885] uppercase tracking-widest whitespace-nowrap px-4 text-left">Fatura No</th>
+              <th class="py-4 text-[10px] font-black text-slate-400 dark:text-[#626885] uppercase tracking-widest text-right whitespace-nowrap px-4">Borç (−)</th>
+              <th class="py-4 text-[10px] font-black text-slate-400 dark:text-[#626885] uppercase tracking-widest text-right whitespace-nowrap px-4">Alacak (+)</th>
+              <th class="py-4 text-[10px] font-black text-slate-400 dark:text-[#626885] uppercase tracking-widest text-center whitespace-nowrap px-4">Durum</th>
+              <th class="py-4 text-[10px] font-black text-slate-400 dark:text-[#626885] uppercase tracking-widest text-center whitespace-nowrap px-4">Vade</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-slate-100 dark:divide-white/[0.06]/50">
+          <tbody class="divide-y-0">
             <tr v-if="loading">
               <td colspan="10" class="text-center py-10">
                 <span class="loading loading-spinner loading-md text-slate-400"></span>
@@ -189,43 +201,44 @@
               v-else
               v-for="(item, idx) in paginatedReports"
               :key="idx"
-              class="table-row-hover"
+              class="group hover:bg-white/[0.02] transition-colors border-b border-white/[0.02]/50 last:border-0"
             >
-              <td class="whitespace-nowrap text-xs text-slate-500 dark:text-[#9aa0b4]">{{ formatDate(item.date) }}</td>
-              <td class="whitespace-nowrap text-xs font-mono text-slate-500 dark:text-[#9aa0b4]">{{ formatPeriod(item.periodYear, item.periodMonth) }}</td>
-              <td>
-                <p class="text-sm font-semibold text-slate-800 dark:text-[#f1f3f9] leading-tight">{{ item.tenantName }}</p>
-                <p class="text-xs text-slate-400 leading-tight">{{ item.unitCode }}</p>
+              <td class="px-4 py-3 whitespace-nowrap text-[11px] font-black text-slate-400 dark:text-[#626885] uppercase tracking-tight">{{ formatDate(item.date) }}</td>
+              <td class="px-4 py-3 whitespace-nowrap text-[11px] font-mono font-black text-slate-600 dark:text-[#9aa0b4] tracking-tighter">{{ formatPeriod(item.periodYear, item.periodMonth) }}</td>
+              <td class="px-4 py-3">
+                <p class="text-[13.5px] font-black text-slate-800 dark:text-white leading-tight uppercase tracking-tight truncate group-hover:text-brand-500 transition-colors">{{ item.tenantName }}</p>
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">{{ item.unitCode }}</p>
               </td>
-              <td>
+              <td class="px-4 py-3">
                 <span :class="[
-                  'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium',
-                  item.isPayment ? 'badge-active' : 'badge-overdue'
+                  'px-2 py-0.5 rounded-lg text-[9.5px] font-black uppercase tracking-widest',
+                  item.isPayment ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400' 
+                  : 'bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400'
                 ]">
                   {{ item.isPayment ? 'Tahsilat' : 'Borç' }}
                 </span>
               </td>
-              <td class="max-w-[180px] truncate text-xs text-slate-600 dark:text-[#f1f3f9]">{{ item.description }}</td>
-              <td class="text-xs font-mono text-slate-400">{{ item.invoiceNumber || '—' }}</td>
-              <td class="text-right text-sm font-semibold" :class="!item.isPayment ? 'text-red-500' : 'text-slate-300 dark:text-[#626885]'">
+              <td class="px-4 py-3 max-w-[180px] truncate text-[11px] font-black text-slate-500 dark:text-white/70 uppercase tracking-tight">{{ item.description }}</td>
+              <td class="px-4 py-3 text-[11px] font-mono font-black text-slate-400 uppercase tracking-tighter">{{ item.invoiceNumber || '—' }}</td>
+              <td class="px-4 py-3 text-right text-[13px] font-black tabular-nums tracking-tight" :class="!item.isPayment ? 'text-red-500' : 'text-slate-300 dark:text-[#3a3f55]'">
                 {{ !item.isPayment ? formatCurrency(item.amount) : '—' }}
               </td>
-              <td class="text-right text-sm font-semibold" :class="item.isPayment ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-300 dark:text-[#626885]'">
+              <td class="px-4 py-3 text-right text-[13px] font-black tabular-nums tracking-tight" :class="item.isPayment ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-300 dark:text-[#3a3f55]'">
                 {{ item.isPayment ? formatCurrency(item.amount) : '—' }}
               </td>
-              <td class="text-center">
+              <td class="px-4 py-3 text-center">
                 <span v-if="!item.isPayment" :class="[
-                  'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium',
-                  item.isPaid ? 'badge-active' : 'badge-pending'
+                  'px-2 py-0.5 rounded-lg text-[9.5px] font-black uppercase tracking-widest',
+                  item.isPaid ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400' : 'bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400'
                 ]">
                   {{ item.isPaid ? 'Ödendi' : 'Bekliyor' }}
                 </span>
-                <span v-else class="text-slate-300 dark:text-[#626885] text-xs">—</span>
+                <span v-else class="text-slate-300 dark:text-[#3a3f55] text-xs">—</span>
               </td>
-              <td class="whitespace-nowrap text-xs text-center" :class="
-                !item.lastPaymentDate ? 'text-slate-300 dark:text-[#626885]' :
-                (!item.isPaid && new Date(item.lastPaymentDate) < new Date()) ? 'text-red-500 font-medium' :
-                'text-slate-500 dark:text-[#9aa0b4]'
+              <td class="px-4 py-3 whitespace-nowrap text-[11px] font-black text-center uppercase tracking-tight" :class="
+                !item.lastPaymentDate ? 'text-slate-300 dark:text-[#3a3f55]' :
+                (!item.isPaid && new Date(item.lastPaymentDate) < new Date()) ? 'text-red-500' :
+                'text-slate-400 dark:text-[#626885]'
               ">
                 {{ item.lastPaymentDate ? formatDate(item.lastPaymentDate) : '—' }}
               </td>

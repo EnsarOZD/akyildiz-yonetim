@@ -1,264 +1,219 @@
-﻿<template>
-  <div class="p-4 sm:p-6 min-h-screen pb-24 md:pb-6">
+<template>
+  <div class="p-4 sm:p-10 min-h-screen pb-24 md:pb-10 transition-all duration-500">
+    <div class="max-w-6xl mx-auto space-y-6">
 
-    <!-- Sayfa Başlığı -->
-    <PageHeader title="Ödemelerim ve Borçlarım" subtitle="Geçmiş ödemelerinizi ve güncel borç durumunuzu takip edin">
-      <template #icon>
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
-        </svg>
-      </template>
-      <template #actions>
-        <div class="flex items-center gap-2 shrink-0">
-          <button @click="exportToExcel" :disabled="loading || reportItems.length === 0" class="btn btn-sm btn-ghost border border-slate-300 dark:border-white/[0.1]">
-            <svg class="w-4 h-4 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
-            </svg>
-            Excel
-          </button>
-          <button @click="exportToPDF" :disabled="loading || reportItems.length === 0" class="btn btn-sm btn-ghost border border-slate-300 dark:border-white/[0.1]">
-            <svg class="w-4 h-4 text-rose-500 dark:text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
-            </svg>
-            PDF
-          </button>
-          <button @click="fetchData" :disabled="loading" class="btn btn-sm btn-primary">
-            <svg v-if="!loading" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/>
-            </svg>
-            <span v-else class="loading loading-spinner loading-xs"></span>
-            Sorgula
-          </button>
-        </div>
-      </template>
-      <template #subtitle-extra>
-        <p v-if="tenantInfo?.companyName || authStore.companyName" class="text-xs font-semibold text-brand-600 dark:text-brand-400 mt-1">
-          {{ tenantInfo?.companyName || authStore.companyName }}
-          <span v-if="tenantInfo?.flats && tenantInfo.flats.length" class="text-slate-400 font-normal">
-            — Ünite: {{ tenantInfo.flats.map(f => f.code).join(', ') }}
-          </span>
-        </p>
-      </template>
-    </PageHeader>
-
-    <!-- Filtreler -->
-    <div class="app-card mb-5">
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-        <div class="form-control">
-          <label class="label py-1"><span class="label-text text-xs font-semibold uppercase tracking-wide">Başlangıç</span></label>
-          <input v-model="filters.startDate" type="date" class="input input-sm input-bordered w-full" />
-        </div>
-        <div class="form-control">
-          <label class="label py-1"><span class="label-text text-xs font-semibold uppercase tracking-wide">Bitiş</span></label>
-          <input v-model="filters.endDate" type="date" class="input input-sm input-bordered w-full" />
-        </div>
-        <div class="form-control">
-          <label class="label py-1"><span class="label-text text-xs font-semibold uppercase tracking-wide">İşlem Tipi</span></label>
-          <select v-model="filters.type" class="select select-sm select-bordered w-full">
-            <option value="all">Tümü (Borç & Ödeme)</option>
-            <option value="debt">Sadece Borçlar</option>
-            <option value="payment">Sadece Ödemeler</option>
-          </select>
-        </div>
-        <div class="form-control">
-          <label class="label py-1"><span class="label-text text-xs font-semibold uppercase tracking-wide">Ödeme Durumu</span></label>
-          <select v-model="filters.status" class="select select-sm select-bordered w-full" :disabled="filters.type === 'payment'">
-            <option value="all">Tümü</option>
-            <option value="unpaid">Ödenmeyenler</option>
-            <option value="paid">Ödenenler</option>
-          </select>
-        </div>
-      </div>
-      <div class="flex justify-end mt-3 pt-3 border-t border-slate-200 dark:border-white/[0.07]">
-        <button @click="clearFilters" class="btn btn-ghost btn-xs text-slate-400">Filtreleri Temizle</button>
-      </div>
-    </div>
-
-    <!-- Özet Kartları -->
-    <div v-if="reportItems.length > 0 || !loading" class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5">
-      <div class="app-card flex items-center gap-3">
-        <div class="w-9 h-9 rounded-xl bg-red-100 dark:bg-red-900/30 text-red-500 flex items-center justify-center shrink-0">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"/>
-          </svg>
-        </div>
-        <div class="min-w-0">
-          <p class="text-xs text-slate-500 dark:text-[#9aa0b4] leading-none mb-1">Toplam Borç Tahakkuku</p>
-          <p class="text-base font-bold text-slate-800 dark:text-[#f1f3f9] leading-none">{{ formatCurrency(rawSummary.totalDebt) }}</p>
-        </div>
-      </div>
-      <div class="app-card flex items-center gap-3">
-        <div class="w-9 h-9 rounded-xl bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
-          </svg>
-        </div>
-        <div class="min-w-0">
-          <p class="text-xs text-slate-500 dark:text-[#9aa0b4] leading-none mb-1">Toplam Yapılan Ödeme</p>
-          <p class="text-base font-bold text-slate-800 dark:text-[#f1f3f9] leading-none">{{ formatCurrency(rawSummary.totalPayment) }}</p>
-        </div>
-      </div>
-      <div class="app-card flex items-center gap-3">
-        <div :class="[
-          'w-9 h-9 rounded-xl flex items-center justify-center shrink-0',
-          rawSummary.balance >= 0 ? 'bg-brand-100 dark:bg-brand-500/[0.12] text-brand-600 dark:text-brand-400' : 'bg-red-100 dark:bg-red-900/30 text-red-500'
-        ]">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"/>
-          </svg>
-        </div>
-        <div class="min-w-0">
-          <p class="text-xs text-slate-500 dark:text-[#9aa0b4] leading-none mb-1">Güncel Bakiye</p>
-          <p :class="[
-            'text-base font-bold leading-none',
-            rawSummary.balance >= 0 ? 'text-brand-600 dark:text-brand-400' : 'text-red-500'
-          ]">
-            {{ formatCurrency(Math.abs(rawSummary.balance)) }}
-            <span class="text-xs font-medium opacity-70">{{ rawSummary.balance < 0 ? '(Borçlu)' : '(Dengede)' }}</span>
+      <!-- ─── Row 1: Page Header ─── -->
+      <section class="flex flex-col md:flex-row md:items-center justify-between gap-6 animate-slide-up">
+        <div>
+          <h1 class="text-2xl font-black text-high-density text-slate-800 dark:text-white tracking-tighter">
+            Ödemelerim ve Borçlarım
+          </h1>
+          <p class="text-sm font-bold text-slate-400 dark:text-[#626885] mt-1 uppercase tracking-widest flex items-center gap-2">
+            {{ tenantInfo?.companyName || authStore.companyName }}
+            <span v-if="tenantInfo?.flats?.length" class="w-1 h-1 rounded-full bg-slate-300 dark:bg-white/20"></span>
+            <span v-if="tenantInfo?.flats?.length" class="text-brand-500 font-black">UNITE: {{ tenantInfo.flats.map(f => f.code).join(', ') }}</span>
           </p>
         </div>
-      </div>
+
+        <div class="flex items-center gap-2 shrink-0">
+          <div class="flex bg-white dark:bg-[#0f1322] p-1 rounded-2xl border border-slate-200 dark:border-white/[0.08] shadow-sm">
+            <button @click="exportToExcel" :disabled="loading || reportItems.length === 0" 
+              class="flex items-center gap-2 px-4 py-2 text-[11px] font-black uppercase tracking-wider text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-xl transition-all disabled:opacity-30">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+              EXCEL
+            </button>
+            <button @click="exportToPDF" :disabled="loading || reportItems.length === 0" 
+              class="flex items-center gap-2 px-4 py-2 text-[11px] font-black uppercase tracking-wider text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-xl transition-all disabled:opacity-30">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+              PDF
+            </button>
+          </div>
+          <button @click="fetchData" :disabled="loading" 
+            class="px-6 py-3 bg-brand-500 hover:bg-brand-600 text-white rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all shadow-lg shadow-brand-500/25 flex items-center gap-2 disabled:opacity-50">
+            <svg v-if="!loading" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
+            <span v-else class="loading loading-spinner loading-xs"></span>
+            SORGULA
+          </button>
+        </div>
+      </section>
+
+      <!-- ─── Row 2: Summary Cards ─── -->
+      <section v-if="reportItems.length > 0 || !loading" class="grid grid-cols-1 sm:grid-cols-3 gap-4 animate-slide-up">
+        <div class="app-card border-none bg-slate-50 dark:bg-white/[0.02] p-5 flex items-center gap-4">
+          <div class="w-12 h-12 rounded-2xl bg-rose-500/10 text-rose-500 flex items-center justify-center shrink-0">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"/></svg>
+          </div>
+          <div>
+            <p class="text-premium-label mb-1">Toplam Tahakkuk</p>
+            <p class="text-xl font-black text-slate-800 dark:text-white">{{ formatCurrency(rawSummary.totalDebt) }}</p>
+          </div>
+        </div>
+
+        <div class="app-card border-none bg-slate-50 dark:bg-white/[0.02] p-5 flex items-center gap-4">
+          <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+          </div>
+          <div>
+            <p class="text-premium-label mb-1">Toplam Ödenen</p>
+            <p class="text-xl font-black text-slate-800 dark:text-white">{{ formatCurrency(rawSummary.totalPayment) }}</p>
+          </div>
+        </div>
+
+        <div class="app-card-premium p-5 flex items-center gap-4 border-none" 
+          :class="rawSummary.balance >= 0 ? 'bg-brand-gradient' : 'bg-rose-500 shadow-rose-500/20'">
+          <div class="w-12 h-12 rounded-2xl bg-white/20 text-white flex items-center justify-center shrink-0">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"/></svg>
+          </div>
+          <div>
+            <p class="text-[10px] font-black text-white/70 uppercase tracking-widest mb-1">Cari Bakiye</p>
+            <p class="text-xl font-black text-white">{{ formatCurrency(Math.abs(rawSummary.balance)) }}</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ─── Row 3: Filters ─── -->
+      <section class="app-card animate-slide-up p-5">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div class="form-control">
+            <label class="text-premium-label mb-2">BAŞLANGIÇ</label>
+            <input v-model="filters.startDate" type="date" class="bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] rounded-xl px-4 py-2.5 text-sm outline-none focus:border-brand-500 transition-colors" />
+          </div>
+          <div class="form-control">
+            <label class="text-premium-label mb-2">BİTİŞ</label>
+            <input v-model="filters.endDate" type="date" class="bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] rounded-xl px-4 py-2.5 text-sm outline-none focus:border-brand-500 transition-colors" />
+          </div>
+          <div class="form-control">
+            <label class="text-premium-label mb-2">İŞLEM TİPİ</label>
+            <select v-model="filters.type" class="bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] rounded-xl px-4 py-2.5 text-sm outline-none focus:border-brand-500 transition-colors appearance-none">
+              <option value="all">Tümü (Borç & Ödeme)</option>
+              <option value="debt">Sadece Borçlar</option>
+              <option value="payment">Sadece Ödemeler</option>
+            </select>
+          </div>
+          <div class="form-control">
+            <label class="text-premium-label mb-2">DURUM</label>
+            <select v-model="filters.status" :disabled="filters.type === 'payment'" class="bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] rounded-xl px-4 py-2.5 text-sm outline-none focus:border-brand-500 transition-colors appearance-none disabled:opacity-30">
+              <option value="all">Tümü</option>
+              <option value="unpaid">Bekleyenler</option>
+              <option value="paid">Ödenenler</option>
+            </select>
+          </div>
+        </div>
+        <div class="flex justify-end mt-4 pt-4 border-t border-slate-100 dark:border-white/[0.05]">
+          <button @click="clearFilters" class="text-[10px] font-black text-slate-400 hover:text-brand-500 uppercase tracking-widest transition-colors">Filtreleri Temizle</button>
+        </div>
+      </section>
+
+      <!-- ─── Row 4: Transaction List ─── -->
+      <section class="space-y-4 animate-slide-up">
+        <div class="flex items-center justify-between px-1">
+          <h2 class="text-premium-label">İşlem Listesi</h2>
+          <div class="flex items-center gap-4">
+             <span class="text-[10px] font-bold text-slate-400 uppercase">{{ reportItems.length }} Kayıt</span>
+             <select v-model="pageSize" class="bg-transparent text-[10px] font-bold text-brand-500 uppercase outline-none">
+                <option :value="10">10 Satır</option>
+                <option :value="25">25 Satır</option>
+                <option :value="50">50 Satır</option>
+             </select>
+          </div>
+        </div>
+
+        <!-- Desktop Table View -->
+        <div class="hidden md:block app-card !p-0 overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="bg-slate-50 dark:bg-white/[0.02]">
+                  <th class="px-6 py-4 text-premium-label">Tarih</th>
+                  <th class="px-6 py-4 text-premium-label text-center">Dönem</th>
+                  <th class="px-6 py-4 text-premium-label text-center">Tür</th>
+                  <th class="px-6 py-4 text-premium-label">Açıklama</th>
+                  <th class="px-6 py-4 text-premium-label text-right">Miktar</th>
+                  <th class="px-6 py-4 text-premium-label text-center">Durum</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100 dark:divide-white/[0.05]">
+                <tr v-if="loading"><td colspan="6" class="py-20 text-center"><span class="loading loading-spinner text-brand-500"></span></td></tr>
+                <tr v-else-if="reportItems.length === 0"><td colspan="6" class="py-20 text-center text-slate-400 font-bold uppercase text-xs">Kayıt Bulunamadı</td></tr>
+                <tr v-else v-for="(item, idx) in paginatedReports" :key="idx" class="hover:bg-slate-50 dark:hover:bg-white/[0.02] transition-colors group">
+                  <td class="px-6 py-4 text-xs font-black text-slate-500 dark:text-[#9aa0b4]">{{ formatDate(item.date) }}</td>
+                  <td class="px-6 py-4 text-center text-xs font-black text-slate-500 dark:text-[#9aa0b4]">{{ formatPeriod(item.periodYear, item.periodMonth) }}</td>
+                  <td class="px-6 py-4 text-center">
+                    <span :class="item.isPayment ? 'bg-emerald-500/10 text-emerald-500' : 'bg-amber-500/10 text-amber-500'" class="px-3 py-1 rounded-full text-[10px] font-black uppercase">
+                      {{ item.isPayment ? 'Ödeme' : 'Borç' }}
+                    </span>
+                  </td>
+                  <td class="px-6 py-4 text-xs font-bold text-slate-800 dark:text-white max-w-xs truncate">{{ item.description }}</td>
+                  <td class="px-6 py-4 text-right">
+                    <p class="text-sm font-black" :class="item.isPayment ? 'text-emerald-500' : 'text-rose-500'">
+                      {{ item.isPayment ? '+' : '-' }} {{ formatCurrency(item.amount) }}
+                    </p>
+                  </td>
+                  <td class="px-6 py-4 text-center">
+                    <span v-if="!item.isPayment" class="px-3 py-1 rounded-full text-[10px] font-black uppercase" 
+                      :class="item.isPaid ? 'bg-brand-500/10 text-brand-500' : 'bg-rose-500/10 text-rose-500'">
+                      {{ item.isPaid ? 'Ödendi' : 'Bekliyor' }}
+                    </span>
+                    <span v-else class="text-slate-300 dark:text-white/20">—</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Mobile Card View -->
+        <div class="md:hidden space-y-4">
+           <div v-if="loading" class="py-10 text-center"><span class="loading loading-spinner text-brand-500"></span></div>
+           <div v-else-if="reportItems.length === 0" class="py-10 text-center text-slate-400 font-bold uppercase text-xs">Kayıt Bulunmuyor</div>
+           <div v-for="(item, idx) in paginatedReports" :key="idx" class="app-card relative overflow-hidden group">
+              <!-- Indicators -->
+              <div class="absolute left-0 top-0 bottom-0 w-1" :class="item.isPayment ? 'bg-emerald-500' : 'bg-amber-500'"></div>
+              
+              <div class="flex justify-between items-start mb-3">
+                 <div>
+                    <span class="text-premium-label opacity-70">{{ formatDate(item.date) }}</span>
+                    <h3 class="text-sm font-black text-slate-800 dark:text-white mt-0.5 uppercase tracking-tight">{{ item.description }}</h3>
+                 </div>
+                 <div class="text-right">
+                    <p class="text-sm font-black" :class="item.isPayment ? 'text-emerald-500' : 'text-rose-500'">
+                       {{ item.isPayment ? '+' : '-' }}{{ formatCurrency(item.amount) }}
+                    </p>
+                    <span class="text-[10px] font-bold text-slate-400">{{ formatPeriod(item.periodYear, item.periodMonth) }}</span>
+                 </div>
+              </div>
+
+              <div class="flex items-center justify-between pt-3 border-t border-slate-100 dark:border-white/[0.05]">
+                 <span class="text-[10px] font-black uppercase" :class="item.isPayment ? 'text-emerald-500' : 'text-amber-500'">
+                    {{ item.isPayment ? 'TAHSİLAT' : 'TAHAKKUK' }}
+                 </span>
+                 <div v-if="!item.isPayment" class="flex items-center gap-2">
+                    <span class="text-[10px] font-black uppercase" :class="item.isPaid ? 'text-brand-500' : 'text-rose-500'">
+                       {{ item.isPaid ? 'ÖDENDİ' : 'BEKLİYOR' }}
+                    </span>
+                    <span v-if="!item.isPaid && isOverdue(item.lastPaymentDate)" class="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse"></span>
+                 </div>
+              </div>
+           </div>
+        </div>
+
+        <!-- Pagination -->
+        <div v-if="totalPages > 1" class="flex items-center justify-center gap-2 pt-4">
+          <button @click="currentPage--" :disabled="currentPage === 1" class="w-10 h-10 rounded-xl flex items-center justify-center bg-white dark:bg-white/5 border border-slate-200 dark:border-white/[0.08] disabled:opacity-20">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+          </button>
+          <span class="text-xs font-black text-slate-600 dark:text-[#f1f3f9] px-4">SAYFA {{ currentPage }} / {{ totalPages }}</span>
+          <button @click="currentPage++" :disabled="currentPage === totalPages" class="w-10 h-10 rounded-xl flex items-center justify-center bg-white dark:bg-white/5 border border-slate-200 dark:border-white/[0.08] disabled:opacity-20">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+          </button>
+        </div>
+      </section>
     </div>
-
-    <!-- Tablo Kartı -->
-    <div class="app-card !p-0">
-      <!-- Tablo Başlığı -->
-      <div class="flex items-center justify-between px-4 py-3 border-b border-slate-200 dark:border-white/[0.07]">
-        <div class="flex items-center gap-2">
-          <span class="text-sm font-semibold text-slate-700 dark:text-[#f1f3f9]">İşlem Listesi</span>
-          <span class="text-xs text-slate-400">{{ reportItems.length }} kayıt</span>
-        </div>
-        <div class="flex items-center gap-2">
-          <span class="text-xs text-slate-400 hidden sm:block">Sayfa başına</span>
-          <select v-model="pageSize" class="select select-xs select-bordered">
-            <option :value="10">10</option>
-            <option :value="25">25</option>
-            <option :value="50">50</option>
-            <option :value="100">100</option>
-          </select>
-        </div>
-      </div>
-
-      <!-- Tablo -->
-      <div class="overflow-x-auto">
-        <table class="table table-sm w-full" id="report-table">
-          <thead>
-            <tr class="bg-slate-50 dark:bg-[#151a2e]/80 text-xs text-slate-500 dark:text-[#9aa0b4] uppercase tracking-wide">
-              <th class="font-semibold">Tarih</th>
-              <th class="font-semibold">Dönem</th>
-              <th class="font-semibold">İşlem</th>
-              <th class="font-semibold">Açıklama</th>
-              <th class="font-semibold">Fatura No</th>
-              <th class="font-semibold text-right">Borç (−)</th>
-              <th class="font-semibold text-right">Ödeme (+)</th>
-              <th class="font-semibold text-center">Durum</th>
-              <th class="font-semibold text-center">Vade Tarihi</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-slate-100 dark:divide-white/[0.06]/50">
-            <tr v-if="loading">
-              <td colspan="9" class="text-center py-10">
-                <span class="loading loading-spinner loading-md text-slate-400"></span>
-              </td>
-            </tr>
-            <tr v-else-if="reportItems.length === 0">
-              <td colspan="9" class="py-12">
-                <div class="text-center">
-                  <div class="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-[#1c2238] flex items-center justify-center mx-auto mb-3">
-                    <svg class="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                    </svg>
-                  </div>
-                  <p class="text-sm font-medium text-slate-500 dark:text-[#9aa0b4]">Kayıt bulunamadı</p>
-                  <p class="text-xs text-slate-400 mt-1">Farklı filtre kriterleri deneyin</p>
-                </div>
-              </td>
-            </tr>
-            <tr
-              v-else
-              v-for="(item, idx) in paginatedReports"
-              :key="idx"
-              class="table-row-hover"
-            >
-              <td class="whitespace-nowrap text-xs text-slate-500 dark:text-[#9aa0b4]">{{ formatDate(item.date) }}</td>
-              <td class="whitespace-nowrap text-xs font-mono text-slate-500 dark:text-[#9aa0b4]">{{ formatPeriod(item.periodYear, item.periodMonth) }}</td>
-              <td>
-                <span :class="[
-                  'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium',
-                  item.isPayment ? 'badge-active' : 'badge-overdue'
-                ]">
-                  {{ item.isPayment ? 'Ödeme' : 'Borç' }}
-                </span>
-              </td>
-              <td class="max-w-[200px] truncate text-xs text-slate-600 dark:text-[#f1f3f9]">{{ item.description }}</td>
-              <td class="text-xs font-mono text-slate-400">{{ item.invoiceNumber || '—' }}</td>
-              <td class="text-right text-sm font-semibold" :class="!item.isPayment ? 'text-red-500' : 'text-slate-300 dark:text-[#626885]'">
-                {{ !item.isPayment ? formatCurrency(item.amount) : '—' }}
-              </td>
-              <td class="text-right text-sm font-semibold" :class="item.isPayment ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-300 dark:text-[#626885]'">
-                {{ item.isPayment ? formatCurrency(item.amount) : '—' }}
-              </td>
-              <td class="text-center">
-                <span v-if="!item.isPayment" :class="[
-                  'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium',
-                  item.isPaid ? 'badge-active' : 'badge-pending'
-                ]">
-                  {{ item.isPaid ? 'Ödendi' : 'Bekliyor' }}
-                </span>
-                <span v-else class="text-slate-300 dark:text-[#626885] text-xs">—</span>
-              </td>
-              <td class="whitespace-nowrap text-xs text-center" :class="
-                !item.lastPaymentDate ? 'text-slate-300 dark:text-[#626885]' :
-                (!item.isPaid && new Date(item.lastPaymentDate) < new Date()) ? 'text-red-500 font-medium' :
-                'text-slate-500 dark:text-[#9aa0b4]'
-              ">
-                {{ item.lastPaymentDate ? formatDate(item.lastPaymentDate) : '—' }}
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <!-- Pagination -->
-      <div v-if="totalPages > 1" class="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-3 border-t border-slate-200 dark:border-white/[0.07]">
-        <p class="text-xs text-slate-400">
-          {{ reportItems.length }} kayıttan
-          {{ (currentPage - 1) * pageSize + 1 }}–{{ Math.min(currentPage * pageSize, reportItems.length) }} arası
-        </p>
-        <div class="flex items-center gap-1">
-          <button @click="currentPage = 1" :disabled="currentPage === 1" class="btn btn-ghost btn-xs" aria-label="İlk">
-            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/></svg>
-          </button>
-          <button @click="currentPage--" :disabled="currentPage === 1" class="btn btn-ghost btn-xs">
-            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
-          </button>
-          <button
-            v-for="page in displayedPages"
-            :key="page"
-            @click="currentPage = page"
-            :class="[
-              'btn btn-xs',
-              currentPage === page ? 'btn-primary' : 'btn-ghost text-slate-500 dark:text-[#9aa0b4]'
-            ]"
-          >
-            {{ page }}
-          </button>
-          <button @click="currentPage++" :disabled="currentPage === totalPages" class="btn btn-ghost btn-xs">
-            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-          </button>
-          <button @click="currentPage = totalPages" :disabled="currentPage === totalPages" class="btn btn-ghost btn-xs" aria-label="Son">
-            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"/></svg>
-          </button>
-        </div>
-      </div>
-    </div>
-
   </div>
 </template>
 
 <script setup>
 import { ref, reactive, computed, onMounted, watch } from 'vue'
-import PageHeader from '@/presentation/components/ui/PageHeader.vue'
 import { useRoute } from 'vue-router'
 import { useAuthStore } from '@/application/stores/auth'
 import utilityDebtsService from '@/infrastructure/services/utilityDebtsService'
@@ -393,17 +348,6 @@ const paginatedReports = computed(() => {
   return reportItems.value.slice(start, start + pageSize.value)
 })
 
-const displayedPages = computed(() => {
-  const total = totalPages.value
-  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1)
-  const curr = currentPage.value
-  let start = Math.max(1, curr - 3)
-  let end = Math.min(total, curr + 3)
-  if (curr <= 4) end = 7
-  if (curr >= total - 3) start = total - 6
-  return Array.from({ length: end - start + 1 }, (_, i) => start + i)
-})
-
 watch([filters, pageSize], () => { currentPage.value = 1 }, { deep: true })
 
 // Helpers
@@ -413,6 +357,11 @@ const formatCurrency = (val) =>
 const formatDate = (date) => {
   if (!date) return '-'
   return new Date(date).toLocaleDateString('tr-TR')
+}
+
+const isOverdue = (date) => {
+  if (!date) return false
+  return new Date(date) < new Date()
 }
 
 const formatPeriod = (year, month) => {
@@ -574,8 +523,6 @@ const exportToPDF = async () => {
     lastPaid: i.lastPaymentDate ? formatDate(i.lastPaymentDate) : '-'
   }))
 
-  let pdfTotalPages = 1
-
   autoTable(doc, {
     columns: [
       { header: 'Tarih',      dataKey: 'date'     },
@@ -624,7 +571,7 @@ const exportToPDF = async () => {
       if (data.pageNumber > 1) drawPageHeader(false)
     },
     didDrawPage(data) {
-      pdfTotalPages = data.pageCount ?? doc.internal.getNumberOfPages()
+      const pdfTotalPages = data.pageCount ?? doc.internal.getNumberOfPages()
       drawPageFooter(data.pageNumber, pdfTotalPages)
     }
   })
@@ -660,7 +607,13 @@ const exportToPDF = async () => {
 </script>
 
 <style scoped>
-.table th {
-  @apply text-xs uppercase tracking-wider;
+.form-control select {
+   background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='6b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+   background-position: right 0.5rem center;
+   background-repeat: no-repeat;
+   background-size: 1.5em 1.5em;
+   padding-right: 2.5rem;
+   -webkit-print-color-adjust: exact;
+   print-color-adjust: exact;
 }
 </style>

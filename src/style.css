@@ -316,3 +316,114 @@ button:active:not([disabled]) {
 .font-cormorantSC {
   font-family: 'Cormorant SC', serif;
 }
+/* ============================================================
+   Premium Modal Inputs & Form Controls
+   ============================================================ */
+.dark .modal-box .input,
+.dark .modal-box .select,
+.dark .modal-box .textarea {
+  background-color: rgba(255, 255, 255, 0.03) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  color: #f1f3f9 !important;
+  border-radius: 0.75rem;
+  transition: all 0.2s ease;
+}
+
+.dark .modal-box .input:focus,
+.dark .modal-box .select:focus,
+.dark .modal-box .textarea:focus {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+  border-color: rgba(107, 138, 255, 0.5) !important;
+  box-shadow: 0 0 0 4px rgba(107, 138, 255, 0.1);
+  outline: none;
+}
+
+.dark .modal-box .label-text {
+  color: #9aa0b4;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.dark .modal-box .btn-primary {
+  background: linear-gradient(135deg, #6b8aff 0%, #4c6ef5 100%);
+  border: none;
+  box-shadow: 0 4px 12px rgba(107, 138, 255, 0.25);
+}
+
+.dark .modal-box .btn-ghost {
+  color: #9aa0b4;
+}
+
+.dark .modal-box .btn-ghost:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+  color: #f1f3f9;
+}
+
+/* ============================================================
+   Royal Blue Premium — New Standard
+   ============================================================ */
+
+/* High-Density Typography */
+.text-high-density {
+  font-family: 'Inter', sans-serif;
+  letter-spacing: -0.02em;
+  font-weight: 900;
+}
+
+.text-premium-label {
+  font-size: 0.625rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #626885;
+}
+
+/* Premium Card & Backgrounds */
+.bg-brand-gradient {
+  background: linear-gradient(135deg, #6B8AFF 0%, #4F6DFF 100%);
+}
+
+.app-card-premium {
+  background: rgba(15, 19, 34, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+  border-radius: 1.5rem;
+}
+
+.dark .glass-panel {
+  background: rgba(255, 255, 255, 0.02);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Transitions & Animations */
+.animate-slide-up {
+  animation: slide-up 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slide-up {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.active-nav-item {
+  color: #6B8AFF;
+  position: relative;
+}
+
+.active-nav-item::after {
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 20px;
+  height: 3px;
+  background: #6B8AFF;
+  border-radius: 99px;
+  box-shadow: 0 0 10px rgba(107, 138, 255, 0.5);
+}

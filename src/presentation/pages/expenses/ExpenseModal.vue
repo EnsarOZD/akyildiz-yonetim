@@ -1,215 +1,201 @@
-﻿<template>
-  <dialog class="modal" :open="visible">
-    <div class="modal-box max-w-3xl bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 border border-gray-200 dark:border-white/[0.07] shadow-2xl">
-      <!-- Başlık -->
-      <div class="flex items-center justify-between pb-4 border-b border-gray-200 dark:border-white/[0.07] mb-6">
-        <h3 class="text-xl font-bold text-gray-800 dark:text-[#f1f3f9] flex items-center gap-2">
-          <span class="text-2xl">💰</span>
-          {{ editMode ? 'Gider Düzenle' : 'Yeni Gider Ekle' }}
-        </h3>
-        <button @click="handleClose" class="btn btn-sm btn-ghost text-gray-500 hover:text-gray-700 dark:text-[#9aa0b4] dark:hover:text-gray-200">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-          </svg>
-        </button>
-      </div>
+<template>
+  <BaseModal
+    :model-value="visible"
+    :title="editMode ? 'Gider Düzenle' : 'Yeni Gider Ekle'"
+    icon="💰"
+    size="lg"
+    @close="handleClose"
+  >
+    <!-- Error Mesajı -->
+    <div v-if="localError || error" class="bg-red-500/10 border border-red-500/20 rounded-xl p-4 flex items-center gap-3 mb-6">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+      </svg>
+      <span class="text-sm text-red-400 font-medium">{{ localError || error }}</span>
+    </div>
 
-      <!-- Error Mesajı -->
-      <div v-if="error" class="alert alert-error mb-4">
-        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-        <span>{{ error }}</span>
-      </div>
-
-      <!-- Form -->
-      <form @submit.prevent="handleSave" class="space-y-6">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <!-- Gider Tipi -->
-          <div class="form-control">
-            <label class="label">
-              <span class="label-text font-semibold text-gray-700 dark:text-[#f1f3f9]">Gider Tipi *</span>
-            </label>
-            <select 
-              v-model="expense.type" 
-              class="select select-bordered w-full bg-white dark:bg-[#1c2238] border-gray-300 dark:border-white/[0.1] text-gray-800 dark:text-[#f1f3f9] focus:border-brand-500 dark:focus:border-brand-400" 
-              :class="{ 'border-red-500': errors.type }"
-              required
-              ref="typeSelect"
-            >
-              <option disabled value="">Seçiniz</option>
-              <option v-for="type in expenseTypeOptions" :key="type.value" :value="type.value">{{ type.label }}</option>
-            </select>
-            <label v-if="errors.type" class="label">
-              <span class="label-text-alt text-red-500">{{ errors.type }}</span>
-            </label>
-          </div>
-
-          <!-- Tarih -->
-          <div class="form-control">
-            <label class="label">
-              <span class="label-text font-semibold text-gray-700 dark:text-[#f1f3f9]">Tarih *</span>
-            </label>
-            <input 
-              v-model="expense.expenseDate" 
-              type="date" 
-              class="input input-bordered w-full bg-white dark:bg-[#1c2238] border-gray-300 dark:border-white/[0.1] text-gray-800 dark:text-[#f1f3f9] focus:border-brand-500 dark:focus:border-brand-400"
-              :class="{ 'border-red-500': errors.expenseDate }"
-              required 
-            />
-            <label v-if="errors.expenseDate" class="label">
-              <span class="label-text-alt text-red-500">{{ errors.expenseDate }}</span>
-            </label>
-          </div>
-
-          <!-- Tutar -->
-          <div class="form-control">
-            <label class="label">
-              <span class="label-text font-semibold text-gray-700 dark:text-[#f1f3f9]">Tutar *</span>
-            </label>
-            <div class="relative">
-              <input 
-                v-model="displayAmount" 
-                @input="handleAmountInput"
-                @blur="handleAmountBlur"
-                type="text" 
-                inputmode="decimal"
-                class="input input-bordered w-full bg-white dark:bg-[#1c2238] border-gray-300 dark:border-white/[0.1] text-gray-800 dark:text-[#f1f3f9] focus:border-brand-500 dark:focus:border-brand-400 pr-10"
-                :class="{ 'border-red-500': errors.amount }"
-                placeholder="0,00"
-                required 
-              />
-              <span class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 font-bold">₺</span>
-            </div>
-            <label v-if="errors.amount" class="label">
-              <span class="label-text-alt text-red-500">{{ errors.amount }}</span>
-            </label>
-          </div>
-        </div>
-
-        <!-- Başlık -->
+    <!-- Form -->
+    <form @submit.prevent="handleSave" class="space-y-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <!-- Gider Tipi -->
         <div class="form-control">
           <label class="label">
-            <span class="label-text font-semibold text-gray-700 dark:text-[#f1f3f9]">Başlık *</span>
+            <span class="label-text">Gider Tipi *</span>
+          </label>
+          <select 
+            v-model="expense.type" 
+            class="select select-bordered w-full" 
+            :class="{ '!border-red-500/50': errors.type }"
+            required
+            ref="typeSelect"
+          >
+            <option disabled value="">Seçiniz</option>
+            <option v-for="type in expenseTypeOptions" :key="type.value" :value="type.value">{{ type.label }}</option>
+          </select>
+          <p v-if="errors.type" class="text-red-400 text-[10px] font-bold uppercase tracking-wide mt-1.5 ml-1">{{ errors.type }}</p>
+        </div>
+
+        <!-- Tarih -->
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text">Tarih *</span>
           </label>
           <input 
-            v-model="expense.title" 
-            type="text" 
-            class="input input-bordered w-full bg-white dark:bg-[#1c2238] border-gray-300 dark:border-white/[0.1] text-gray-800 dark:text-[#f1f3f9] focus:border-brand-500 dark:focus:border-brand-400"
-            :class="{ 'border-red-500': errors.title }"
-            placeholder="Gider başlığı giriniz" 
+            v-model="expense.expenseDate" 
+            type="date" 
+            class="input input-bordered w-full"
+            :class="{ '!border-red-500/50': errors.expenseDate }"
             required 
           />
-          <label v-if="errors.title" class="label">
-            <span class="label-text-alt text-red-500">{{ errors.title }}</span>
+          <p v-if="errors.expenseDate" class="text-red-400 text-[10px] font-bold uppercase tracking-wide mt-1.5 ml-1">{{ errors.expenseDate }}</p>
+        </div>
+
+        <!-- Tutar -->
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text">Tutar *</span>
           </label>
-        </div>
-
-        <!-- Açıklama ve Fatura No -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div class="form-control">
-            <label class="label">
-              <span class="label-text font-semibold text-gray-700 dark:text-[#f1f3f9]">Açıklama</span>
-            </label>
-            <textarea
-              v-model="expense.description"
-              class="textarea textarea-bordered w-full bg-white dark:bg-[#1c2238] border-gray-300 dark:border-white/[0.1] text-gray-800 dark:text-[#f1f3f9] focus:border-brand-500 dark:focus:border-brand-400"
-              placeholder="Gider açıklaması giriniz"
-              rows="3"
-            ></textarea>
-          </div>
-          <div class="form-control">
-            <label class="label">
-              <span class="label-text font-semibold text-gray-700 dark:text-[#f1f3f9]">Fatura / Makbuz No</span>
-            </label>
-            <input
-              v-model="expense.receiptNumber"
-              type="text"
-              class="input input-bordered w-full bg-white dark:bg-[#1c2238] border-gray-300 dark:border-white/[0.1] text-gray-800 dark:text-[#f1f3f9] focus:border-brand-500 dark:focus:border-brand-400"
-              placeholder="Opsiyonel fatura numarası"
+          <div class="relative">
+            <input 
+              v-model="displayAmount" 
+              @input="handleAmountInput"
+              @blur="handleAmountBlur"
+              type="text" 
+              inputmode="decimal"
+              class="input input-bordered w-full font-bold !text-lg pr-10"
+              :class="{ '!border-red-500/50': errors.amount }"
+              placeholder="0.00"
+              required 
             />
+            <span class="absolute right-4 top-1/2 -translate-y-1/2 text-[#626885] font-black uppercase tracking-widest text-[10px]">TL</span>
           </div>
+          <p v-if="errors.amount" class="text-red-400 text-[10px] font-bold uppercase tracking-wide mt-1.5 ml-1">{{ errors.amount }}</p>
         </div>
+      </div>
 
-        <!-- Önizleme -->
-        <div v-if="showPreview" class="bg-brand-50 dark:bg-brand-500/[0.08] p-4 rounded-lg border border-brand-200 dark:border-brand-700">
-          <h4 class="font-semibold text-brand-700 dark:text-brand-300 mb-2">Önizleme:</h4>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-            <div>
-              <span class="font-medium text-gray-700 dark:text-[#f1f3f9]">Tip:</span>
-              <span class="ml-2 text-gray-600 dark:text-[#9aa0b4]">{{ getExpenseTypeName(expense.type) || 'Seçilmedi' }}</span>
-            </div>
-            <div>
-              <span class="font-medium text-gray-700 dark:text-[#f1f3f9]">Tarih:</span>
-              <span class="ml-2 text-gray-600 dark:text-[#9aa0b4]">{{ formatDate(expense.expenseDate) || 'Seçilmedi' }}</span>
-            </div>
-            <div>
-              <span class="font-medium text-gray-700 dark:text-[#f1f3f9]">Tutar:</span>
-              <span class="ml-2 text-gray-600 dark:text-[#9aa0b4]">{{ formatCurrency(expense.amount) || '0.00' }}</span>
-            </div>
-            <div>
-              <span class="font-medium text-gray-700 dark:text-[#f1f3f9]">Başlık:</span>
-              <span class="ml-2 text-gray-600 dark:text-[#9aa0b4]">{{ expense.title || 'Girilmedi' }}</span>
-            </div>
-          </div>
-        </div>
+      <!-- Başlık -->
+      <div class="form-control">
+        <label class="label">
+          <span class="label-text">Gider Başlığı *</span>
+        </label>
+        <input 
+          v-model="expense.title" 
+          type="text" 
+          class="input input-bordered w-full"
+          :class="{ '!border-red-500/50': errors.title }"
+          placeholder="Örn: Elektrik Faturası - Blok A" 
+          required 
+        />
+        <p v-if="errors.title" class="text-red-400 text-[10px] font-bold uppercase tracking-wide mt-1.5 ml-1">{{ errors.title }}</p>
+      </div>
 
-        <!-- Butonlar -->
-        <div class="flex justify-between items-center pt-4 border-t border-gray-200 dark:border-white/[0.07]">
-          <button 
-            type="button"
-            @click="togglePreview"
-            class="btn btn-ghost btn-sm text-gray-600 dark:text-[#9aa0b4] hover:text-gray-800 dark:hover:text-gray-200"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-              <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-            </svg>
-            {{ showPreview ? 'Önizlemeyi Gizle' : 'Önizle' }}
-          </button>
-          
-          <div class="flex gap-3">
-            <button 
-              class="btn btn-outline border-gray-300 dark:border-white/[0.1] text-gray-700 dark:text-[#f1f3f9] hover:bg-gray-50 dark:hover:bg-white/[0.06]" 
-              type="button" 
-              @click="handleClose"
-              :disabled="props.loading"
-            >
-              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-              </svg>
-              İptal
-            </button>
-            <button 
-              class="btn btn-primary bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 border-0 text-white shadow-lg" 
-              type="submit"
-              :disabled="props.loading || !isFormValid"
-            >
-              <div v-if="props.loading" class="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></div>
-              <svg v-else class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-              </svg>
-              {{ editMode ? 'Güncelle' : 'Kaydet' }}
-            </button>
+      <!-- Açıklama ve Fatura No -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text">Açıklama</span>
+          </label>
+          <textarea
+            v-model="expense.description"
+            class="textarea textarea-bordered w-full min-h-[100px]"
+            placeholder="Gider ile ilgili detaylı bilgi..."
+          ></textarea>
+        </div>
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text">Fatura / Makbuz No</span>
+          </label>
+          <input
+            v-model="expense.receiptNumber"
+            type="text"
+            class="input input-bordered w-full"
+            placeholder="Opsiyonel doküman numarası"
+          />
+        </div>
+      </div>
+
+      <!-- Önizleme -->
+      <transition
+        enter-active-class="transition duration-200 ease-out"
+        enter-from-class="transform scale-95 opacity-0"
+        enter-to-class="transform scale-100 opacity-100"
+        leave-active-class="transition duration-150 ease-in"
+        leave-from-class="transform scale-100 opacity-100"
+        leave-to-class="transform scale-95 opacity-0"
+      >
+        <div v-if="showPreview" class="bg-brand-500/[0.05] p-5 rounded-2xl border border-brand-500/20 space-y-3">
+          <h4 class="text-[11px] font-black uppercase tracking-widest text-brand-400 mb-1">Gider Özeti</h4>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-y-3 gap-x-6 text-[12.5px]">
+            <div class="flex justify-between items-center py-1 border-b border-white/[0.05]">
+              <span class="font-bold text-[#626885] uppercase tracking-wider text-[10px]">Tip</span>
+              <span class="text-[#f1f3f9]">{{ getExpenseTypeName(expense.type) || 'Seçilmedi' }}</span>
+            </div>
+            <div class="flex justify-between items-center py-1 border-b border-white/[0.05]">
+              <span class="font-bold text-[#626885] uppercase tracking-wider text-[10px]">Tarih</span>
+              <span class="text-[#f1f3f9]">{{ formatDate(expense.expenseDate) || '–' }}</span>
+            </div>
+            <div class="flex justify-between items-center py-1 border-b border-white/[0.05]">
+              <span class="font-bold text-[#626885] uppercase tracking-wider text-[10px]">Tutar</span>
+              <span class="text-green-400 font-black">{{ formatCurrency(expense.amount) || '0.00' }}</span>
+            </div>
+            <div class="flex justify-between items-center py-1 border-b border-white/[0.05]">
+              <span class="font-bold text-[#626885] uppercase tracking-wider text-[10px]">Fiş No</span>
+              <span class="text-[#f1f3f9] truncate max-w-[120px]">{{ expense.receiptNumber || '–' }}</span>
+            </div>
           </div>
         </div>
-      </form>
-    </div>
-  </dialog>
+      </transition>
+    </form>
+
+    <template #footer>
+      <button 
+        type="button"
+        @click="togglePreview"
+        class="btn btn-ghost btn-sm mr-auto"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+        </svg>
+        {{ showPreview ? 'Özeti Gizle' : 'Gideri Önizle' }}
+      </button>
+      
+      <button 
+        class="btn btn-outline border-white/[0.08] text-[#9aa0b4] hover:bg-white/[0.04]" 
+        type="button" 
+        @click="handleClose"
+        :disabled="props.loading"
+      >
+        Vazgeç
+      </button>
+      <button 
+        class="btn btn-primary" 
+        @click="handleSave"
+        :disabled="props.loading || !isFormValid"
+      >
+        <div v-if="props.loading" class="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></div>
+        <svg v-else class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
+        </svg>
+        {{ editMode ? 'Güncelle' : 'Gideri Kaydet' }}
+      </button>
+    </template>
+  </BaseModal>
 </template>
 
 <script setup>
 import { computed, ref, watch, nextTick, onMounted } from 'vue'
+import BaseModal from '@/presentation/components/common/BaseModal.vue'
 import { useDirtyGuard } from '@/application/composables/useDirtyGuard'
 import { formatCurrency, parseCurrency, formatInputCurrency } from '@/core/utils/currencyUtils'
 
-const props = defineProps(['visible', 'expense', 'types', 'editMode', 'loading'])
+const props = defineProps(['visible', 'expense', 'types', 'editMode', 'loading', 'error'])
 const emit = defineEmits(['close', 'save'])
 
 const { isDirty, resetDirty } = useDirtyGuard(() => props.expense)
 const typeSelect = ref(null)
 const showPreview = ref(false)
-const error = ref(null)
+const localError = ref(null)
 const errors = ref({})
 const displayAmount = ref('')
 
@@ -334,7 +320,7 @@ watch(() => props.visible, (newVisible) => {
       }
     })
     // Reset form state
-    error.value = null
+    localError.value = null
     errors.value = {}
     showPreview.value = false
     resetDirty()
@@ -382,11 +368,11 @@ watch(() => props.visible, (newVisible) => {
 
 async function handleSave() {
   if (!validateForm()) {
-    error.value = 'Lütfen form hatalarını düzeltin'
+    localError.value = 'Lütfen form hatalarını düzeltin'
     return
   }
   
-  error.value = null
+  localError.value = null
   
   try {
     // Validate amount format
@@ -403,7 +389,7 @@ async function handleSave() {
     
     emit('save', expenseData)
   } catch (err) {
-    error.value = err.message || 'Gider kaydedilirken bir hata oluştu'
+    localError.value = err.message || 'Gider kaydedilirken bir hata oluştu'
   }
 }
 
@@ -417,7 +403,7 @@ function handleClose() {
   }
 
   // Reset form state
-  error.value = null
+  localError.value = null
   errors.value = {}
   showPreview.value = false
   

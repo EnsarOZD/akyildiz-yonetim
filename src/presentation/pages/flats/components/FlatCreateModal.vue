@@ -1,87 +1,90 @@
-﻿<template>
-  <dialog id="createFlatModal" class="modal" :open="visible">
-    <div class="modal-box max-w-4xl bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 border border-gray-200 dark:border-white/[0.07] shadow-2xl">
-      <!-- Başlık -->
-      <div class="flex items-center justify-between pb-4 border-b border-gray-200 dark:border-white/[0.07] mb-6">
-        <h3 class="text-xl font-bold text-gray-800 dark:text-[#f1f3f9] flex items-center gap-2">
-          <span class="text-2xl">🏢</span>
-          Yeni Ünite Ekle
-        </h3>
-        <button @click="$emit('close')" class="btn btn-sm btn-ghost text-gray-500 hover:text-gray-700 dark:text-[#9aa0b4] dark:hover:text-gray-200">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-          </svg>
-        </button>
-      </div>
+<template>
+  <BaseModal
+    :model-value="visible"
+    title="YENİ ÜNİTE EKLE"
+    icon="🏢"
+    size="lg"
+    @close="$emit('close')"
+  >
+    <div class="space-y-8">
+      <!-- Form Kısmı -->
+      <form @submit.prevent="handleSave" id="flatForm" class="space-y-8">
+        
+        <!-- Temel Bilgiler Grubu -->
+        <div class="space-y-4">
+          <div class="flex items-center gap-3 px-1">
+            <div class="w-8 h-8 rounded-lg bg-brand-500/10 flex items-center justify-center text-brand-400">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <h4 class="text-[11px] font-black uppercase tracking-widest text-[#f1f3f9]">Temel Ünite Bilgileri</h4>
+          </div>
 
-      <!-- Form -->
-      <div class="overflow-y-auto max-h-[70vh] pr-2">
-        <form @submit.prevent="handleSave" id="flatForm" class="space-y-6">
-
-          <!-- Temel Bilgiler -->
-          <div class="card bg-base-200 p-4">
-            <h4 class="text-lg font-semibold mb-4 text-gray-700 dark:text-[#f1f3f9]">📋 Temel Bilgiler</h4>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="bg-white/[0.02] border border-white/[0.08] rounded-2xl p-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <!-- Code -->
               <div class="form-control">
                 <label class="label">
-                  <span class="label-text font-semibold text-gray-700 dark:text-[#f1f3f9]">Ünite Kodu (Code) *</span>
+                  <span class="label-text">Ünite Kodu (Code) *</span>
                 </label>
                 <input
                   v-model.trim="flat.code"
                   @input="onCodeInput"
-                  class="input input-bordered w-full bg-white dark:bg-[#1c2238] border-gray-300 dark:border-white/[0.1] text-gray-800 dark:text-[#f1f3f9] focus:border-brand-500 dark:focus:border-brand-400"
-                  placeholder="Örn: A-201, 3A, GA, OTOPARK"
+                  class="input input-bordered w-full font-bold !text-lg"
+                  placeholder="Örn: A-201, GA, OTOPARK"
                   required
                 />
-                <label v-if="codeError" class="label">
-                  <span class="label-text-alt text-error">{{ codeError }}</span>
-                </label>
-                <small class="text-xs text-gray-500">
-                  İpucu: <code>A-201</code> yazarsanız kat otomatik <b>2</b> alınır. <code>GA</code> giriş-A bölümü anlamına gelir.
-                </small>
+                <div v-if="codeError" class="mt-2 flex items-center gap-2 text-red-400 text-[10px] font-bold uppercase tracking-tight">
+                  <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-width="3"/></svg>
+                  {{ codeError }}
+                </div>
+                <div v-else class="mt-2 text-[10px] text-[#626885] font-medium leading-relaxed italic">
+                  İpucu: <code class="text-brand-400 font-black">A-201</code> yazarsanız kat otomatik 2 alınır.
+                </div>
               </div>
 
-              <!-- Type (0:Floor, 1:Entry, 2:Parking) -->
+              <!-- Type -->
               <div class="form-control">
-                <label class="label"><span class="label-text font-semibold text-gray-700 dark:text-[#f1f3f9]">Tip *</span></label>
-                <select v-model.number="flat.type" class="select select-bordered w-full bg-white dark:bg-[#1c2238] border-gray-300 dark:border-white/[0.1] text-gray-800 dark:text-[#f1f3f9] focus:border-brand-500 dark:focus:border-brand-400" required>
-                  <option :value="0">Kat</option>
-                  <option :value="1">Giriş</option>
-                  <option :value="2">Otopark</option>
+                <label class="label"><span class="label-text">Ünite Tipi *</span></label>
+                <select v-model.number="flat.type" class="select select-bordered w-full font-bold" required>
+                  <option :value="0">Normal Kat / Daire</option>
+                  <option :value="1">Bina Girişi</option>
+                  <option :value="2">Otopark Alanı</option>
                 </select>
               </div>
 
-              <!-- FloorNumber (Parking değilse) -->
+              <!-- FloorNumber -->
               <div class="form-control" v-if="flat.type !== 2">
-                <label class="label"><span class="label-text font-semibold text-gray-700 dark:text-[#f1f3f9]">Kat (FloorNumber) *</span></label>
+                <label class="label"><span class="label-text">Kat (Floor) *</span></label>
                 <input
                   type="number"
                   v-model.number="flat.floorNumber"
                   :disabled="flat.type === 1"
-                  class="input input-bordered w-full bg-white dark:bg-[#1c2238] border-gray-300 dark:border-white/[0.1] text-gray-800 dark:text-[#f1f3f9] focus:border-brand-500 dark:focus:border-brand-400"
-                  placeholder="Örn: 3"
+                  class="input input-bordered w-full font-bold"
+                  placeholder="0"
                   required
                 />
-                <small v-if="flat.type === 1" class="text-xs text-gray-500">Giriş için kat = 0 kabul edilir.</small>
+                <p v-if="flat.type === 1" class="mt-2 text-[10px] text-[#626885] font-bold uppercase italic tracking-tighter">İpucu: Giriş için kat varsayılan 0'dır.</p>
               </div>
 
               <!-- Alan -->
               <div class="form-control">
-                <label class="label"><span class="label-text font-semibold text-gray-700 dark:text-[#f1f3f9]">Alan (m²) *</span></label>
-                <input type="number" v-model.number="flat.unitArea" min="1" step="0.01" class="input input-bordered w-full bg-white dark:bg-[#1c2238] border-gray-300 dark:border-white/[0.1] text-gray-800 dark:text-[#f1f3f9] focus:border-brand-500 dark:focus:border-brand-400" required />
+                <label class="label"><span class="label-text">Alan (m²) *</span></label>
+                <div class="relative">
+                  <input type="number" v-model.number="flat.unitArea" min="1" step="0.01" class="input input-bordered w-full font-black !text-lg pr-12" required />
+                  <span class="absolute right-4 top-1/2 -translate-y-1/2 text-[#626885] font-black uppercase text-[10px] tracking-widest">m²</span>
+                </div>
               </div>
 
-
-              <!-- Mal Sahibi (Owner) -->
+              <!-- Mal Sahibi -->
               <div class="md:col-span-2">
                 <div class="form-control">
-                  <label class="label"><span class="label-text font-semibold text-gray-700 dark:text-[#f1f3f9]">Mal Sahibi (opsiyonel)</span></label>
-
+                  <label class="label"><span class="label-text">Mal Sahibi Tanımı</span></label>
                   <select
                     v-model="flat.ownerId"
-                    class="select select-bordered w-full bg-white dark:bg-[#1c2238] border-gray-300 dark:border-white/[0.1] text-gray-800 dark:text-[#f1f3f9] focus:border-brand-500 dark:focus:border-brand-400">
-                    <option :value="null">— Seçilmedi —</option>
+                    class="select select-bordered w-full font-bold">
+                    <option :value="null">— Mal Sahibi Atanmadı —</option>
                     <option v-for="o in owners" :key="o.id" :value="o.id">
                       {{ ownerLabel(o) }}
                     </option>
@@ -89,46 +92,70 @@
                 </div>
               </div>
 
-              <!-- Kira / Hisse -->
+              <!-- Kira -->
               <div class="form-control">
-                <label class="label"><span class="label-text font-semibold text-gray-700 dark:text-[#f1f3f9]">Aylık Kira</span></label>
-                <input type="number" v-model.number="flat.monthlyRent" min="0" step="0.01" class="input input-bordered w-full bg-white dark:bg-[#1c2238] border-gray-300 dark:border-white/[0.1] text-gray-800 dark:text-[#f1f3f9]" />
+                <label class="label"><span class="label-text">Aylık Kira Bedeli</span></label>
+                <div class="relative">
+                  <input type="number" v-model.number="flat.monthlyRent" min="0" step="0.01" class="input input-bordered w-full font-black pr-12" />
+                  <span class="absolute right-4 top-1/2 -translate-y-1/2 text-[#626885] font-black uppercase text-[10px] tracking-widest">TL</span>
+                </div>
               </div>
 
               <!-- Durum -->
-              <div class="form-control">
-                <label class="label cursor-pointer">
-                  <span class="label-text font-semibold text-gray-700 dark:text-[#f1f3f9]">Aktif Ünite</span>
+              <div class="form-control justify-center">
+                <label class="label cursor-pointer flex justify-start gap-4 p-0">
                   <input type="checkbox" v-model="flat.isActive" class="toggle toggle-success" />
+                  <span class="label-text font-black uppercase tracking-widest text-[11px] text-[#9aa0b4]">Aktif Ünite</span>
                 </label>
               </div>
             </div>
           </div>
+        </div>
 
-          <!-- Açıklama -->
-          <div class="form-control">
-            <label class="label"><span class="label-text font-semibold text-gray-700 dark:text-[#f1f3f9]">Açıklama</span></label>
-            <textarea v-model.trim="flat.description" rows="3" class="textarea textarea-bordered w-full bg-white dark:bg-[#1c2238] border-gray-300 dark:border-white/[0.1] text-gray-800 dark:text-[#f1f3f9]" placeholder="Kısa bir açıklama girin (zorunlu)"></textarea>
+        <!-- Açıklama -->
+        <div class="space-y-4">
+           <div class="flex items-center gap-3 px-1 text-[#f1f3f9]">
+            <h4 class="text-[11px] font-black uppercase tracking-widest">Açıklama ve Notlar</h4>
           </div>
-        </form>
-      </div>
-
-      <!-- Actions -->
-      <div class="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-white/[0.07] mt-6">
-        <button type="button" @click="$emit('close')" class="btn btn-outline border-gray-300 dark:border-white/[0.1] text-gray-700 dark:text-[#f1f3f9] hover:bg-gray-50 dark:hover:bg-white/[0.06]">
-          İptal
-        </button>
-        <button form="flatForm" type="submit" :disabled="saving" class="btn btn-success bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 border-0 text-white shadow-lg">
-          <span v-if="saving" class="loading loading-spinner mr-2"></span>
-          Kaydet
-        </button>
-      </div>
+          <div class="form-control">
+            <textarea 
+              v-model.trim="flat.description" 
+              rows="3" 
+              class="textarea textarea-bordered w-full !bg-white/[0.02] border-white/[0.08]" 
+              placeholder="Ünite hakkında ek notlar girin..."></textarea>
+          </div>
+        </div>
+      </form>
     </div>
-  </dialog>
+
+    <!-- Footer -->
+    <template #footer>
+      <button 
+        type="button" 
+        @click="$emit('close')" 
+        class="btn btn-ghost !bg-transparent border border-white/[0.08] text-[#9aa0b4] hover:bg-white/[0.05] flex-1"
+      >
+        Vazgeç
+      </button>
+      <button 
+        form="flatForm" 
+        type="submit" 
+        :disabled="saving" 
+        class="btn btn-primary flex-1 shadow-lg shadow-brand-500/20"
+      >
+        <span v-if="saving" class="loading loading-spinner loading-xs mr-2"></span>
+        <svg v-else class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+        </svg>
+        Üniteyi Kaydet
+      </button>
+    </template>
+  </BaseModal>
 </template>
 
 <script setup>
-import { ref, watch, computed } from 'vue'
+import { ref, watch } from 'vue'
+import BaseModal from '@/presentation/components/common/BaseModal.vue'
 import flatsService from '@/infrastructure/services/flatsService'
 import ownersService from '@/infrastructure/services/ownersService'
 
@@ -167,9 +194,6 @@ const ownerLabel = (o) => {
   const info = o.phone || o.email || ''
   return info ? `${name} (${info})` : name
 }
-const debouncedOwnerQuery = () => {
-  fetchOwners()
-}
 
 // ---- Görünürlük
 watch(() => props.visible, v => {
@@ -179,7 +203,6 @@ watch(() => props.visible, v => {
     fetchOwners()
   }
 })
-
 
 // ---- Type değişince bağlı alanları senkronla
 watch(() => flat.value.type, (t) => {
@@ -268,7 +291,6 @@ function extractGroupInfo(code, type) {
 
 // ---- Kaydet
 async function handleSave () {
-  // basit alan kontrolleri
   if (!flat.value.code || !flat.value.unitArea) return
   if (flat.value.type !== 2 && (flat.value.floorNumber === null || flat.value.floorNumber === undefined)) return
 
@@ -276,7 +298,6 @@ async function handleSave () {
   codeError.value = ''
 
   try {
-    // 1) benzersizlik kontrolü
     const exists = await flatsService.getFlats({ code: String(flat.value.code).trim().toUpperCase() })
     if (Array.isArray(exists) && exists.length > 0) {
       codeError.value = `Bu kod zaten kullanılıyor: ${flat.value.code}`
@@ -286,7 +307,6 @@ async function handleSave () {
 
     const { groupStrategy, groupKey, section } = extractGroupInfo(flat.value.code, Number(flat.value.type))
 
-    // 2) payload
     const payload = {
       code: String(flat.value.code || '').trim().toUpperCase(),
       type: Number(flat.value.type),                     // 0/1/2

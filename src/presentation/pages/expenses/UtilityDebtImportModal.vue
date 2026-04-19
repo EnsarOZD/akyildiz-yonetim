@@ -1,54 +1,68 @@
-﻿<template>
-  <BaseModal :modelValue="true" title="Excel'den Borç Aktarımı" @close="$emit('close')">
+<template>
+  <BaseModal
+    :model-value="true"
+    title="EXCEL'DEN BORÇ AKTARIMI"
+    icon="📊"
+    size="md"
+    @close="$emit('close')"
+  >
     <div class="space-y-6">
       <!-- Bilgilendirme -->
-      <div class="bg-brand-50 dark:bg-brand-500/[0.08] border border-brand-100 dark:border-brand-700 p-4 rounded-xl">
-        <h3 class="text-brand-700 dark:text-brand-300 font-semibold flex items-center gap-2 mb-2">
-          <span>ℹ️</span> Aktarım Talimatları
-        </h3>
-        <ul class="text-sm text-brand-700 dark:text-brand-400 space-y-1 list-disc list-inside">
-          <li>Excel dosyanızda <b>Firma, Tarih, Ödeme Türü, Tutar, Açıklama</b> sütunları bulunmalıdır.</li>
-          <li>Firma ismi sistemdeki Kiracı veya Mülk Sahibi adı ile tam eşleşmelidir.</li>
-          <li>Ödeme Türü: <b>Aidat, Elektrik, Su</b> gibi değerler alabilir.</li>
-          <li>Tutar sütunu sadece sayısal değer içermelidir.</li>
-        </ul>
+      <div class="bg-brand-500/[0.05] border border-brand-500/20 rounded-2xl p-5">
+        <div class="flex items-start gap-4">
+          <div class="w-10 h-10 rounded-xl bg-brand-500/10 flex items-center justify-center shrink-0 text-brand-400 font-bold">ℹ️</div>
+          <div>
+            <h4 class="text-[11px] font-black uppercase tracking-widest text-brand-400 mb-1">Aktarım Talimatları</h4>
+            <ul class="text-[11px] text-brand-200/70 space-y-1.5 font-medium leading-relaxed">
+              <li class="flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-brand-400"></span> Firma, Tarih, Ödeme Türü, Tutar, Açıklama sütunları zorunludur.</li>
+              <li class="flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-brand-400"></span> Firma ismi Kiracı veya Mülk Sahibi adı ile tam eşleşmelidir.</li>
+              <li class="flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-brand-400"></span> Tutar sütunu sadece sayısal (örn: 1250.50) olmalıdır.</li>
+            </ul>
+          </div>
+        </div>
       </div>
 
       <!-- 1. Yükleme Ekranı -->
       <div v-if="!importResult" class="space-y-6">
         <!-- Sürükle Bırak Alanı -->
         <div 
-          class="border-2 border-dash rounded-2xl p-8 transition-all duration-300 text-center"
+          class="relative group border-2 border-dashed rounded-3xl p-10 transition-all duration-500 text-center overflow-hidden"
           :class="[
             isDragging 
-              ? 'border-brand-500 bg-brand-50 dark:bg-brand-500/[0.08] scale-[1.02]' 
-              : 'border-gray-200 dark:border-white/[0.07] hover:border-gray-300 dark:hover:border-gray-600'
+              ? 'border-brand-500 bg-brand-500/[0.08] scale-[1.01]' 
+              : 'border-white/[0.08] bg-white/[0.01] hover:border-white/[0.2] hover:bg-white/[0.02]'
           ]"
           @dragover.prevent="isDragging = true"
           @dragleave.prevent="isDragging = false"
           @drop.prevent="handleDrop"
         >
-          <div v-if="!selectedFile">
-            <div class="bg-slate-100 dark:bg-[#151a2e] w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-              <span class="text-3xl">📊</span>
+          <!-- Background Glow -->
+          <div class="absolute inset-0 bg-gradient-to-b from-brand-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+
+          <div v-if="!selectedFile" class="relative z-10">
+            <div class="w-20 h-20 rounded-2xl bg-white/[0.03] border border-white/[0.08] flex items-center justify-center mx-auto mb-6 shadow-xl transition-transform group-hover:scale-110 duration-500">
+              <svg class="w-10 h-10 text-brand-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+              </svg>
             </div>
-            <p class="text-gray-600 dark:text-[#9aa0b4] mb-2">Excel dosyanızı buraya sürükleyin</p>
-            <p class="text-xs text-gray-400 mb-4">veya</p>
-            <button @click="$refs.fileInput.click()" class="btn btn-primary btn-sm px-6">
+            <p class="text-[13px] font-black text-[#f1f3f9] uppercase tracking-widest mb-2">Excel dosyanızı sürükleyin</p>
+            <p class="text-xs text-[#626885] font-bold uppercase tracking-tighter mb-6">veya bilgisayarınızdan seçin</p>
+            
+            <button @click="$refs.fileInput.click()" class="btn btn-primary px-8 shadow-lg shadow-brand-500/20">
                 Dosya Seç
             </button>
           </div>
           
-          <div v-else class="flex items-center justify-center gap-4">
-            <div class="bg-green-100 dark:bg-green-900/50 text-green-600 dark:text-green-400 p-3 rounded-lg">
-               <span class="text-2xl">📄</span>
+          <div v-else class="relative z-10 flex flex-col items-center">
+            <div class="w-20 h-20 rounded-2xl bg-green-500/10 border border-green-500/20 flex items-center justify-center mb-4 shadow-xl">
+               <span class="text-3xl">📄</span>
             </div>
-            <div class="text-left">
-              <p class="font-semibold text-gray-800 dark:text-[#f1f3f9]">{{ selectedFile.name }}</p>
-              <p class="text-xs text-gray-500">{{ (selectedFile.size / 1024).toFixed(1) }} KB</p>
+            <div class="mb-6">
+              <p class="text-[14px] font-black text-[#f1f3f9] uppercase tracking-tight mb-1">{{ selectedFile.name }}</p>
+              <p class="text-[10px] font-bold text-[#626885] uppercase tracking-widest">{{ (selectedFile.size / 1024).toFixed(1) }} KB</p>
             </div>
-            <button @click="selectedFile = null" class="btn btn-ghost btn-circle btn-sm text-red-500">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+            <button @click="selectedFile = null" class="btn btn-ghost !bg-red-500/10 text-red-400 hover:bg-red-500/20 px-6">
+              Dosyayı Kaldır
             </button>
           </div>
 
@@ -62,59 +76,68 @@
         </div>
 
         <!-- Hata Özeti -->
-        <div v-if="importError" class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-4 rounded-xl text-sm">
-          <p class="text-red-700 dark:text-red-300 font-semibold mb-1">Aktarım Sırasında Bazı Sorunlar Oluştu:</p>
-          <p class="text-red-600 dark:text-red-400 italic">{{ importError }}</p>
+        <div v-if="importError" class="bg-red-500/10 border border-red-500/20 p-5 rounded-2xl animate-shake">
+          <div class="flex items-center gap-3 text-red-400 mb-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+            </svg>
+            <span class="text-xs font-black uppercase tracking-widest">Aktarım Hatası</span>
+          </div>
+          <p class="text-xs text-red-300 font-medium leading-relaxed italic">{{ importError }}</p>
         </div>
       </div>
 
       <!-- 2. Sonuç Raporu Ekranı -->
-      <div v-else class="space-y-4">
-        <div class="flex items-center gap-4 p-4 dark:bg-gray-800/50 rounded-xl">
-          <div class="flex-1 text-center border-r dark:border-white/[0.07]">
-            <p class="text-xs text-gray-500 mb-1">Başarılı Satır</p>
-            <p class="text-2xl font-bold text-green-600 dark:text-green-400">{{ importResult.successCount }}</p>
+      <div v-else class="space-y-6 animate-fade-in">
+        <div class="grid grid-cols-2 gap-4">
+          <div class="p-5 bg-green-500/5 border border-green-500/10 rounded-2xl text-center">
+            <p class="text-[10px] font-black text-[#626885] uppercase tracking-widest mb-2">Başarılı İşlem</p>
+            <p class="text-3xl font-black text-green-400 tabular-nums">{{ importResult.successCount }}</p>
           </div>
-          <div class="flex-1 text-center">
-            <p class="text-xs text-gray-500 mb-1">Hatalı Satır</p>
-            <p class="text-2xl font-bold text-red-600 dark:text-red-400">{{ importResult.failedCount }}</p>
+          <div class="p-5 bg-red-500/5 border border-red-500/10 rounded-2xl text-center">
+            <p class="text-[10px] font-black text-[#626885] uppercase tracking-widest mb-2">Hatalı İşlem</p>
+            <p class="text-3xl font-black text-red-400 tabular-nums">{{ importResult.failedCount }}</p>
           </div>
         </div>
 
         <!-- Hata Listesi -->
-        <div v-if="importResult.errors && importResult.errors.length > 0" class="space-y-2">
-          <p class="text-sm font-semibold text-gray-700 dark:text-[#f1f3f9]">Konum / Hata Detayları:</p>
-          <div class="max-h-48 overflow-y-auto border border-gray-100 dark:border-white/[0.05] rounded-xl p-3 dark:bg-gray-800/30 text-xs">
-            <ul class="space-y-1 list-disc list-inside text-red-600 dark:text-red-400">
-              <li v-for="(err, idx) in importResult.errors" :key="idx">{{ err }}</li>
+        <div v-if="importResult.errors && importResult.errors.length > 0" class="space-y-3">
+          <h5 class="text-[10px] font-black text-[#626885] uppercase tracking-widest px-1">Hata Detayları</h5>
+          <div class="max-h-56 overflow-y-auto border border-white/[0.08] bg-white/[0.01] rounded-2xl p-4 custom-scrollbar">
+            <ul class="space-y-3">
+              <li v-for="(err, idx) in importResult.errors" :key="idx" class="flex items-start gap-3 p-3 bg-red-500/5 border border-red-500/10 rounded-xl">
+                 <span class="text-red-400 font-black text-[10px] mt-1 shrink-0">#{{ idx + 1 }}</span>
+                 <p class="text-[11px] text-red-200/80 font-medium leading-relaxed">{{ err }}</p>
+              </li>
             </ul>
           </div>
         </div>
-        <div v-else class="text-center py-4 bg-green-50 dark:bg-green-900/10 text-green-700 dark:text-green-400 rounded-xl text-sm">
-          🎉 Dosyadaki tüm kayıtlar hatasız bir şekilde sisteme işlendi.
+        <div v-else class="flex flex-col items-center justify-center py-10 bg-green-500/5 border border-green-500/10 rounded-3xl animate-bounce-subtle">
+          <div class="w-16 h-16 rounded-full bg-green-500/10 flex items-center justify-center text-3xl mb-4">✨</div>
+          <p class="text-[13px] font-black text-green-400 uppercase tracking-widest px-6 text-center">
+            Tüm kayıtlar hatasız şekilde işlendi
+          </p>
         </div>
       </div>
-
-      <!-- Aksiyonlar -->
-      <div class="flex justify-end gap-3 pt-4 border-t dark:border-white/[0.07]">
-        <!-- İçe aktarma ekranı butonları -->
-        <template v-if="!importResult">
-          <button @click="$emit('close')" class="btn btn-ghost">Vazgeç</button>
-          <button 
-            @click="startImport" 
-            class="btn btn-primary px-8" 
-            :disabled="!selectedFile || isImporting"
-          >
-            <span v-if="isImporting" class="loading loading-spinner loading-sm"></span>
-            {{ isImporting ? 'Aktarılıyor...' : 'Aktarımı Başlat' }}
-          </button>
-        </template>
-        <!-- Sonuç ekranı butonu -->
-        <template v-else>
-          <button @click="$emit('close')" class="btn btn-primary px-8">Kapat</button>
-        </template>
-      </div>
     </div>
+
+    <!-- Footer Butonları -->
+    <template #footer>
+      <template v-if="!importResult">
+        <button @click="$emit('close')" class="btn btn-ghost !bg-transparent border border-white/[0.08] text-[#9aa0b4] hover:bg-white/[0.05] flex-1">Vazgeç</button>
+        <button 
+          @click="startImport" 
+          class="btn btn-primary flex-1 shadow-lg shadow-brand-500/20" 
+          :disabled="!selectedFile || isImporting"
+        >
+          <span v-if="isImporting" class="loading loading-spinner loading-xs mr-2"></span>
+          {{ isImporting ? 'Aktarılıyor...' : 'Aktarımı Başlat' }}
+        </button>
+      </template>
+      <template v-else>
+        <button @click="$emit('close')" class="btn btn-primary w-full shadow-lg shadow-brand-500/20 font-black uppercase tracking-widest">Pencereyi Kapat</button>
+      </template>
+    </template>
   </BaseModal>
 </template>
 
@@ -157,7 +180,7 @@ const startImport = async () => {
     
     if (response.data) {
       importResult.value = response.data
-      emit('refresh') // Tabloyu arkada güncelle
+      emit('refresh')
       showSuccess(response.message || 'Aktarım tamamlandı.')
     } else if (response.isSuccess) {
       showSuccess('Aktarım tamamlandı.')
