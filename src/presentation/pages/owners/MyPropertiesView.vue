@@ -145,11 +145,13 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import PageHeader from '@/presentation/components/ui/PageHeader.vue'
 import dashboardService from '@/infrastructure/services/dashboardService'
+import { useAuthStore } from '@/application/stores/auth'
 import { formatCurrency } from '@/core/utils/currencyUtils'
 
+const authStore = useAuthStore()
 const loading = ref(true)
 const debts = ref([])
 const payments = ref([])
@@ -232,5 +234,14 @@ const loadData = async () => {
   }
 }
 
-onMounted(loadData)
+onMounted(() => {
+  // Wait for auth to finish initializing before fetching data.
+  if (authStore.isInitialized) {
+    loadData()
+  } else {
+    const stop = watch(() => authStore.isInitialized, (ready) => {
+      if (ready) { stop(); loadData() }
+    })
+  }
+})
 </script>

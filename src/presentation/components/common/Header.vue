@@ -1,27 +1,27 @@
 <template>
   <header data-testid="sidebar"
-    class="sticky top-0 z-50 bg-white/80 dark:bg-[#0f1623]/90 backdrop-blur-md border-b border-slate-200/60 dark:border-slate-800/60 shadow-sm">
+    class="sticky top-0 z-50 bg-white/95 dark:bg-[#0f1322]/95 backdrop-blur-md border-b border-slate-200/50 dark:border-white/[0.06] shadow-sm">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex items-center justify-between h-14">
+      <div class="flex items-center justify-between h-[60px]">
 
         <!-- Logo -->
         <router-link to="/" class="flex items-center gap-2.5 flex-shrink-0">
-          <img :src="logoUrl" class="h-8 w-8" :alt="appName" />
-          <span class="text-base font-semibold font-cormorantSC uppercase tracking-wide text-slate-800 dark:text-slate-100 hidden md:block">
+          <div class="w-2 h-2 rounded-full bg-brand-500 dark:bg-brand-400 flex-shrink-0"></div>
+          <span class="text-[13.5px] font-bold tracking-[1.2px] uppercase text-slate-800 dark:text-[#f1f3f9] hidden md:block">
             {{ appName }}
           </span>
         </router-link>
 
         <!-- Desktop nav tabs -->
-        <nav v-if="tabs.length" class="hidden md:flex items-center gap-0.5">
+        <nav v-if="tabs.length" class="hidden md:flex items-center gap-0.5 flex-1 justify-center">
           <router-link
             v-for="tab in tabs"
             :key="tab.value"
             :to="tab.route"
-            class="px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all duration-150"
+            class="px-3.5 py-2 rounded-lg text-[13px] font-medium transition-all duration-150"
             :class="isActiveTab(tab.route)
-              ? 'bg-blue-600 text-white shadow-sm'
-              : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-800 dark:hover:text-slate-200'"
+              ? 'bg-brand-500 text-white dark:bg-brand-500 dark:text-white shadow-sm'
+              : 'text-slate-600 dark:text-[#9aa0b4] hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-[#f1f3f9]'"
             :aria-current="isActiveTab(tab.route) ? 'page' : undefined"
           >
             {{ tab.label }}
@@ -35,7 +35,7 @@
           <div v-if="userInfo" class="relative" ref="notificationsRef">
             <button
               @click="toggleNotifications"
-              class="relative p-2 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-700 dark:hover:text-slate-300 transition-all duration-150"
+              class="relative p-2 rounded-lg text-slate-500 dark:text-[#9aa0b4] hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-700 dark:hover:text-[#f1f3f9] transition-all duration-150"
               aria-label="Bildirimleri göster"
               :aria-expanded="showNotificationsDropdown"
             >
@@ -63,14 +63,14 @@
               leave-to-class="opacity-0 translate-y-1 scale-95"
             >
               <div v-if="showNotificationsDropdown"
-                class="absolute right-0 mt-2 w-80 rounded-xl shadow-card-lg border border-slate-200 dark:border-slate-700
-                  bg-white dark:bg-slate-900 overflow-hidden origin-top-right">
+                class="absolute right-0 mt-2 w-80 rounded-xl shadow-card-lg border border-slate-200 dark:border-white/[0.08]
+                  bg-white dark:bg-[#0f1322] overflow-hidden origin-top-right">
 
                 <!-- Header -->
-                <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100 dark:border-slate-800">
-                  <span class="text-sm font-semibold text-slate-800 dark:text-slate-100">Bildirimler</span>
+                <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100 dark:border-white/[0.06]">
+                  <span class="text-sm font-semibold text-slate-800 dark:text-[#f1f3f9]">Bildirimler</span>
                   <button @click="notificationsStore.markAllAsRead"
-                    class="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 font-medium transition-colors">
+                    class="text-xs text-brand-600 dark:text-brand-400 hover:text-brand-700 font-medium transition-colors">
                     Tümünü oku
                   </button>
                 </div>
@@ -82,7 +82,7 @@
                     <span class="loading loading-spinner loading-sm text-blue-600"></span>
                   </div>
                   <div v-else-if="notificationsStore.items.length === 0"
-                    class="py-10 text-center text-sm text-slate-500 dark:text-slate-400">
+                    class="py-10 text-center text-sm text-slate-500 dark:text-[#9aa0b4]">
                     Henüz bildirim yok
                   </div>
                   <div v-else>
@@ -90,9 +90,9 @@
                       v-for="item in notificationsStore.items.slice(0, 6)"
                       :key="item.id"
                       @click="handleNotificationClick(item)"
-                      class="relative flex gap-3 px-4 py-3 border-b border-slate-50 dark:border-slate-800/50
-                        hover:bg-slate-50 dark:hover:bg-slate-800/40 cursor-pointer transition-colors"
-                      :class="!item.isRead ? 'bg-blue-50/40 dark:bg-blue-950/20' : ''"
+                      class="relative flex gap-3 px-4 py-3 border-b border-slate-50 dark:border-white/[0.04]
+                        hover:bg-slate-50 dark:hover:bg-white/[0.04] cursor-pointer transition-colors"
+                      :class="!item.isRead ? 'bg-blue-50/40 dark:bg-brand-500/[0.06]' : ''"
                     >
                       <!-- Unread dot -->
                       <span v-if="!item.isRead"
@@ -106,9 +106,9 @@
                       </div>
                       <!-- Content -->
                       <div class="min-w-0 flex-1">
-                        <p class="text-sm font-medium text-slate-800 dark:text-slate-100 line-clamp-1">{{ item.title }}</p>
-                        <p class="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 mt-0.5 leading-relaxed">{{ item.message }}</p>
-                        <p class="text-[10px] text-slate-400 mt-1">{{ formatDate(item.createdAt) }}</p>
+                        <p class="text-sm font-medium text-slate-800 dark:text-[#f1f3f9] line-clamp-1">{{ item.title }}</p>
+                        <p class="text-xs text-slate-500 dark:text-[#9aa0b4] line-clamp-2 mt-0.5 leading-relaxed">{{ item.message }}</p>
+                        <p class="text-[10px] text-slate-400 dark:text-[#626885] mt-1">{{ formatDate(item.createdAt) }}</p>
                       </div>
                     </div>
                   </div>
@@ -116,8 +116,8 @@
 
                 <!-- Footer -->
                 <router-link to="/notifications" @click="showNotificationsDropdown = false"
-                  class="flex items-center justify-center gap-1.5 py-2.5 text-xs font-semibold text-blue-600 dark:text-blue-400
-                    hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors border-t border-slate-100 dark:border-slate-800">
+                  class="flex items-center justify-center gap-1.5 py-2.5 text-xs font-semibold text-brand-600 dark:text-brand-400
+                    hover:bg-slate-50 dark:hover:bg-white/[0.04] transition-colors border-t border-slate-100 dark:border-white/[0.06]">
                   Tüm bildirimleri gör
                   <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
@@ -130,7 +130,7 @@
           <!-- Theme toggle -->
           <button
             @click="authStore.toggleTheme"
-            class="p-2 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-700 dark:hover:text-slate-300 transition-all duration-150"
+            class="p-2 rounded-lg text-slate-500 dark:text-[#9aa0b4] hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-700 dark:hover:text-[#f1f3f9] transition-all duration-150"
             :aria-label="authStore.theme === 'dark' ? 'Açık moda geç' : 'Karanlık moda geç'"
           >
             <svg v-if="authStore.theme === 'dark'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -147,14 +147,14 @@
           <div v-if="userInfo" class="relative" ref="userMenuRef">
             <button
               @click="toggleUserDropdown"
-              class="flex items-center gap-2 pl-1.5 pr-2.5 py-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-150"
+              class="flex items-center gap-2 pl-1 pr-2.5 py-1 rounded-full hover:bg-slate-100 dark:hover:bg-white/[0.06] transition-all duration-150"
               :aria-expanded="showUserDropdown"
             >
               <!-- Avatar initials -->
-              <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-500 to-violet-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+              <div class="w-[28px] h-[28px] rounded-full bg-gradient-to-br from-brand-500 to-brand-400 flex items-center justify-center text-white text-[11px] font-bold flex-shrink-0">
                 {{ userInitials }}
               </div>
-              <span class="hidden sm:block text-sm font-medium text-slate-700 dark:text-slate-300 max-w-[100px] truncate">
+              <span class="hidden sm:block text-[12.5px] font-semibold text-slate-700 dark:text-[#f1f3f9] max-w-[100px] truncate">
                 {{ userInfo.firstName }}
               </span>
               <svg class="w-3.5 h-3.5 text-slate-400 flex-shrink-0 transition-transform duration-150"
@@ -173,22 +173,22 @@
               leave-to-class="opacity-0 translate-y-1 scale-95"
             >
               <div v-if="showUserDropdown"
-                class="absolute right-0 mt-2 w-52 rounded-xl shadow-card-lg border border-slate-200 dark:border-slate-700
-                  bg-white dark:bg-slate-900 py-1.5 origin-top-right overflow-hidden">
+                class="absolute right-0 mt-2 w-52 rounded-xl shadow-card-lg border border-slate-200 dark:border-white/[0.08]
+                  bg-white dark:bg-[#0f1322] py-1.5 origin-top-right overflow-hidden">
 
                 <!-- User info -->
-                <div class="px-3.5 py-2.5 border-b border-slate-100 dark:border-slate-800 mb-1">
-                  <p class="text-sm font-semibold text-slate-800 dark:text-slate-100 truncate">
+                <div class="px-3.5 py-2.5 border-b border-slate-100 dark:border-white/[0.06] mb-1">
+                  <p class="text-sm font-semibold text-slate-800 dark:text-[#f1f3f9] truncate">
                     {{ userInfo.firstName }} {{ userInfo.lastName }}
                   </p>
-                  <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{{ roleLabel }}</p>
+                  <p class="text-xs text-slate-500 dark:text-[#9aa0b4] mt-0.5">{{ roleLabel }}</p>
                 </div>
 
                 <router-link
                   v-if="userInfo.role.toLowerCase() === ROLES.ADMIN"
                   to="/admin"
                   @click="showUserDropdown = false"
-                  class="flex items-center gap-2.5 px-3.5 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                  class="flex items-center gap-2.5 px-3.5 py-2 text-sm text-slate-700 dark:text-[#f1f3f9] hover:bg-slate-50 dark:hover:bg-white/[0.04] transition-colors"
                 >
                   <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M10.343 3.94c.09-.542.56-.94 1.11-.94h1.094c.55 0 1.02.398 1.11.94l.149.894c.07.424.384.764.78.93.398.164.855.142 1.205-.108l.737-.527a1.125 1.125 0 011.45.12l.773.774c.39.389.44 1.002.12 1.45l-.527.737c-.25.35-.272.806-.107 1.204.165.397.505.71.93.78l.894.15c.542.09.94.56.94 1.109v1.094c0 .55-.398 1.02-.94 1.11l-.894.149c-.424.07-.764.383-.929.78-.165.398-.143.854.107 1.204l.527.738a1.125 1.125 0 01-.12 1.45l-.774.773a1.125 1.125 0 01-1.449.12l-.738-.527c-.35-.25-.806-.272-1.203-.107-.397.165-.71.505-.781.929l-.149.894c-.09.542-.56.94-1.11.94h-1.094c-.55 0-1.019-.398-1.11-.94l-.148-.894c-.071-.424-.384-.764-.781-.93-.398-.164-.854-.142-1.204.108l-.738.527a1.125 1.125 0 01-1.45-.12l-.773-.774a1.125 1.125 0 01-.12-1.45l.527-.737c.25-.35.273-.806.108-1.204-.165-.397-.505-.71-.93-.78l-.894-.15a1.125 1.125 0 01-.94-1.11v-1.094c0-.55.398-1.02.94-1.11l.894-.149c.424-.07.765-.383.93-.78.165-.398.143-.854-.108-1.204l-.526-.738a1.125 1.125 0 01.12-1.45l.774-.773a1.125 1.125 0 011.45-.12l.737.527c.35.25.807.272 1.204.107.397-.165.71-.505.78-.929l.15-.894z" />
@@ -200,9 +200,9 @@
                 <router-link
                   to="/profile"
                   @click="showUserDropdown = false"
-                  class="flex items-center gap-2.5 px-3.5 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                  class="flex items-center gap-2.5 px-3.5 py-2 text-sm text-slate-700 dark:text-[#f1f3f9] hover:bg-slate-50 dark:hover:bg-white/[0.04] transition-colors"
                 >
-                  <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg class="w-4 h-4 text-slate-400 dark:text-[#626885]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
                   </svg>
                   Profilim
@@ -210,7 +210,7 @@
 
                 <button
                   @click="changePassword"
-                  class="w-full flex items-center gap-2.5 px-3.5 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                  class="w-full flex items-center gap-2.5 px-3.5 py-2 text-sm text-slate-700 dark:text-[#f1f3f9] hover:bg-slate-50 dark:hover:bg-white/[0.04] transition-colors"
                 >
                   <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
@@ -218,10 +218,10 @@
                   Şifre Değiştir
                 </button>
 
-                <div class="border-t border-slate-100 dark:border-slate-800 mt-1 pt-1">
+                <div class="border-t border-slate-100 dark:border-white/[0.06] mt-1 pt-1">
                   <button
                     @click="logout"
-                    class="w-full flex items-center gap-2.5 px-3.5 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
+                    class="w-full flex items-center gap-2.5 px-3.5 py-2 text-sm text-red-600 dark:text-[#fb7185] hover:bg-red-50 dark:hover:bg-[#fb7185]/[0.08] transition-colors"
                   >
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />

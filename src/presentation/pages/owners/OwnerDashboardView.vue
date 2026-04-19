@@ -254,7 +254,15 @@ const debtTypeClass = (t) => ({
   Water: 'bg-blue-50 dark:bg-blue-900/20 text-blue-600',
 }[t] ?? 'bg-slate-50 dark:bg-slate-700 text-slate-500')
 
-onMounted(loadData)
+onMounted(() => {
+  if (authStore.isInitialized) {
+    loadData()
+  } else {
+    const stop = watch(() => authStore.isInitialized, (ready) => {
+      if (ready) { stop(); loadData() }
+    })
+  }
+})
 </script>
 
 <style scoped>

@@ -24,7 +24,7 @@
       leave-to-class="translate-y-full"
     >
       <div v-if="showMoreMenu"
-        class="md:hidden fixed inset-x-0 bottom-0 z-[60] bg-white dark:bg-slate-900 rounded-t-3xl shadow-[0_-8px_32px_rgba(0,0,0,0.12)] border-t border-slate-200/60 dark:border-slate-700/60">
+        class="md:hidden fixed inset-x-0 bottom-0 z-[60] bg-white dark:bg-[#0f1322] rounded-t-3xl shadow-[0_-8px_32px_rgba(0,0,0,0.2)] border-t border-slate-200/60 dark:border-white/[0.06]">
         <div class="px-5 pt-4 pb-safe-offset">
           <!-- Handle -->
           <div class="w-10 h-1 bg-slate-200 dark:bg-slate-700 rounded-full mx-auto mb-5" @click="showMoreMenu = false" />
@@ -77,9 +77,9 @@
 
     <!-- Bottom nav bar -->
     <nav class="md:hidden fixed bottom-0 left-0 right-0 z-50
-      bg-white/90 dark:bg-slate-900/95 backdrop-blur-lg
-      border-t border-slate-200/60 dark:border-slate-700/60
-      shadow-[0_-1px_0_rgba(0,0,0,0.05)]">
+      bg-white/90 dark:bg-[#0f1322]/95 backdrop-blur-lg
+      border-t border-slate-200/60 dark:border-white/[0.06]
+      shadow-[0_-1px_0_rgba(0,0,0,0.08)]">
       <div class="flex items-stretch justify-around px-2 pt-1 pb-safe">
         <template v-for="item in visibleNavItems" :key="item.name">
 
@@ -92,10 +92,10 @@
           >
             <div class="relative flex items-center justify-center w-10 h-8 rounded-xl transition-all duration-200"
               :class="isActive
-                ? 'bg-blue-600 text-white shadow-sm'
-                : 'text-slate-400 dark:text-slate-500'">
+                ? 'bg-brand-500 text-white shadow-sm'
+                : 'text-slate-400 dark:text-[#626885]'">
               <!-- Active indicator pill -->
-              <span v-if="isActive" class="absolute -top-2.5 left-1/2 -translate-x-1/2 w-5 h-0.5 rounded-full bg-blue-600" />
+              <span v-if="isActive" class="absolute -top-2.5 left-1/2 -translate-x-1/2 w-5 h-0.5 rounded-full bg-brand-500" />
               <component :is="item.icon" class="w-5 h-5" />
               <!-- Unread notifications badge -->
               <span
@@ -106,7 +106,7 @@
               </span>
             </div>
             <span class="text-[10px] font-semibold leading-none truncate max-w-full px-1 transition-colors duration-150"
-              :class="isActive ? 'text-blue-600 dark:text-blue-400' : 'text-slate-400 dark:text-slate-500'">
+              :class="isActive ? 'text-brand-600 dark:text-brand-400' : 'text-slate-400 dark:text-[#626885]'">
               {{ item.name }}
             </span>
           </router-link>

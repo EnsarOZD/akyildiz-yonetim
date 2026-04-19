@@ -1,21 +1,19 @@
 <template>
-  <header class="page-header relative overflow-hidden mb-8 animate-in fade-in slide-in-from-top-4 duration-500">
-    <!-- Decorative Gradient Background -->
-    <div class="absolute inset-0 bg-gradient-to-r from-blue-50/50 to-transparent dark:from-blue-900/10 dark:to-transparent pointer-events-none"></div>
-    
+  <header class="page-header relative overflow-hidden mb-8 animate-in fade-in slide-in-from-top-4 duration-500
+    bg-white dark:bg-[#0f1322] border border-slate-200/60 dark:border-white/[0.06] rounded-xl shadow-sm">
     <!-- Accent Line -->
-    <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-blue-600 dark:bg-blue-500 rounded-r-full"></div>
+    <div class="absolute left-0 top-0 bottom-0 w-1 bg-brand-500 dark:bg-brand-400 rounded-r-full"></div>
 
-    <div class="relative px-5 py-4 sm:py-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div class="relative px-6 py-4 sm:py-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
       <div class="flex items-center gap-4">
         <!-- Optional Icon Slot -->
-        <div v-if="$slots.icon" class="w-12 h-12 rounded-2xl bg-white dark:bg-slate-800 shadow-sm border border-slate-100 dark:border-slate-700 flex items-center justify-center text-blue-600 dark:text-blue-400 shrink-0">
+        <div v-if="$slots.icon" class="w-11 h-11 rounded-xl bg-brand-500/10 dark:bg-brand-500/[0.12] shadow-sm flex items-center justify-center text-brand-600 dark:text-brand-400 shrink-0">
           <slot name="icon"></slot>
         </div>
-        
+
         <div>
           <h1 class="page-title">{{ title }}</h1>
-          <p v-if="subtitle" class="page-subtitle mt-1.5 opacity-80">{{ subtitle }}</p>
+          <p v-if="subtitle" class="page-subtitle mt-1 opacity-80">{{ subtitle }}</p>
         </div>
       </div>
 
@@ -24,9 +22,6 @@
         <slot name="actions"></slot>
       </div>
     </div>
-
-    <!-- Bottom Border / Glass separator -->
-    <div class="absolute bottom-0 left-0 right-0 h-px bg-slate-200/60 dark:bg-slate-700/40"></div>
   </header>
 </template>
 

@@ -103,10 +103,13 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import PageHeader from '@/presentation/components/ui/PageHeader.vue'
 import dashboardService from '@/infrastructure/services/dashboardService'
+import { useAuthStore } from '@/application/stores/auth'
 import { formatCurrency } from '@/core/utils/currencyUtils'
+
+const authStore = useAuthStore()
 
 const loading = ref(true)
 const properties = ref([])
@@ -126,7 +129,7 @@ const getTenantDebt = (flatId) => getFlatDebts(flatId).reduce((s, d) => s + Numb
 const debtTypeLabel = (t) => ({ Aidat: 'Aidat', Electricity: 'Elektrik', Water: 'Su' }[t] ?? 'Diğer')
 const debtTypeIcon  = (t) => ({ Aidat: '📋', Electricity: '⚡', Water: '💧' }[t] ?? '💰')
 
-onMounted(async () => {
+const loadData = async () => {
   try {
     const result = await dashboardService.getOwnerDashboard()
     if (result) {
@@ -137,6 +140,16 @@ onMounted(async () => {
     console.error('Kiracı verisi yüklenemedi:', e)
   } finally {
     loading.value = false
+  }
+}
+
+onMounted(() => {
+  if (authStore.isInitialized) {
+    loadData()
+  } else {
+    const stop = watch(() => authStore.isInitialized, (ready) => {
+      if (ready) { stop(); loadData() }
+    })
   }
 })
 </script>

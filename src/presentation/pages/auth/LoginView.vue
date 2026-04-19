@@ -4,11 +4,11 @@
     <!-- ═══════════════════════════════════════════════════
          LEFT PANEL — Branding (desktop only)
     ═══════════════════════════════════════════════════ -->
-    <div class="hidden lg:flex lg:w-[52%] relative overflow-hidden bg-gradient-to-br from-slate-900 via-[#0d1b3e] to-[#0b1220] flex-col justify-between p-12">
+    <div class="hidden lg:flex lg:w-[52%] relative overflow-hidden bg-gradient-to-br from-[#080b14] via-[#0d1530] to-[#0f1322] flex-col justify-between p-12">
       <!-- Ambient blobs -->
-      <div class="pointer-events-none absolute -top-24 -left-24 w-96 h-96 bg-blue-600/20 rounded-full blur-3xl animate-blob"></div>
-      <div class="pointer-events-none absolute bottom-0 right-0 w-80 h-80 bg-violet-600/15 rounded-full blur-3xl animate-blob animation-delay-2000"></div>
-      <div class="pointer-events-none absolute top-1/2 left-1/3 w-64 h-64 bg-cyan-600/10 rounded-full blur-3xl animate-blob animation-delay-4000"></div>
+      <div class="pointer-events-none absolute -top-24 -left-24 w-96 h-96 bg-brand-500/15 rounded-full blur-3xl animate-blob"></div>
+      <div class="pointer-events-none absolute bottom-0 right-0 w-80 h-80 bg-brand-400/10 rounded-full blur-3xl animate-blob animation-delay-2000"></div>
+      <div class="pointer-events-none absolute top-1/2 left-1/3 w-64 h-64 bg-brand-600/8 rounded-full blur-3xl animate-blob animation-delay-4000"></div>
 
       <!-- Grid dot overlay -->
       <div class="pointer-events-none absolute inset-0 opacity-[0.04]"
@@ -26,7 +26,7 @@
       <div class="relative z-10">
         <h1 class="text-4xl xl:text-5xl font-bold text-white leading-tight mb-4">
           Profesyonel<br />
-          <span class="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">Yönetim</span><br />
+          <span class="bg-gradient-to-r from-brand-400 to-[#93c5fd] bg-clip-text text-transparent">Yönetim</span><br />
           Sistemi
         </h1>
         <p class="text-slate-400 text-base max-w-sm leading-relaxed">
@@ -36,8 +36,8 @@
         <!-- Feature list -->
         <ul class="mt-8 space-y-3">
           <li v-for="f in features" :key="f" class="flex items-center gap-3 text-slate-300 text-sm">
-            <span class="flex-shrink-0 w-5 h-5 rounded-full bg-blue-500/20 flex items-center justify-center ring-1 ring-blue-500/40">
-              <svg class="w-3 h-3 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <span class="flex-shrink-0 w-5 h-5 rounded-full bg-brand-500/20 flex items-center justify-center ring-1 ring-brand-500/40">
+              <svg class="w-3 h-3 text-brand-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
               </svg>
             </span>
@@ -53,7 +53,7 @@
     <!-- ═══════════════════════════════════════════════════
          RIGHT PANEL — Login form
     ═══════════════════════════════════════════════════ -->
-    <div class="flex-1 flex flex-col items-center justify-center bg-white dark:bg-[#0f1623] px-6 py-12 sm:px-12">
+    <div class="flex-1 flex flex-col items-center justify-center bg-white dark:bg-[#0f1322] px-6 py-12 sm:px-12">
 
       <!-- Mobile logo -->
       <div class="lg:hidden flex flex-col items-center mb-8">
@@ -228,7 +228,7 @@
           enter-from-class="opacity-0 scale-95"
           enter-to-class="opacity-100 scale-100"
         >
-          <div v-if="showResetModal" class="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl max-w-md w-full p-6 border border-slate-200 dark:border-slate-700 animate-scale-in">
+          <div v-if="showResetModal" class="bg-white dark:bg-[#0f1322] rounded-2xl shadow-2xl max-w-md w-full p-6 border border-slate-200 dark:border-white/[0.08] animate-scale-in">
             <div class="flex items-center justify-between mb-1">
               <h3 class="text-base font-bold text-slate-800 dark:text-white">Şifre Sıfırlama</h3>
               <button @click="showResetModal = false" class="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 transition-colors">

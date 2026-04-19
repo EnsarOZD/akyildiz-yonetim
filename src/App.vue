@@ -34,13 +34,13 @@
         <div class="min-h-screen bg-base-200">
           <!-- Header -->
           <Header />
-          
+
           <!-- Bildirim İzni Banner -->
           <NotificationPermissionBanner />
-          
-          <div class="w-full max-w-7xl mx-auto bg-base-100 md:shadow-lg md:rounded-xl overflow-hidden mb-20 md:mb-0">
+
+          <div class="w-full max-w-7xl mx-auto mb-20 md:mb-0">
             <!-- İçerik -->
-            <router-view key="private-view" class="p-4 sm:p-6 shadow-none" />
+            <router-view key="private-view" />
           </div>
         </div>
         
