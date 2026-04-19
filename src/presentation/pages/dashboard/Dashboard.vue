@@ -129,8 +129,8 @@
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M21 12a2.25 2.25 0 00-2.25-2.25H15a3 3 0 11-6 0H5.25A2.25 2.25 0 003 12m18 0v6a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 18v-6m18 0V9M3 12V9m18 0a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 9m18 0V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v3"/></svg>
                   </div>
                   <div>
-                    <p class="text-[11px] font-bold text-slate-400 dark:text-[#626885] uppercase tracking-wider mb-1">Kasa Bakiyesi</p>
-                    <p class="text-2xl font-extrabold text-slate-800 dark:text-emerald-500 leading-tight tabular-nums">{{ formatCurrency(balance) }}</p>
+                    <p class="text-[11px] font-black text-slate-400 dark:text-[#626885] uppercase tracking-widest mb-1 shadow-sm">Kasa Bakiyesi</p>
+                    <p class="text-[28px] font-black text-slate-800 dark:text-emerald-500 leading-tight tabular-nums tracking-tighter">{{ formatCurrency(balance) }}</p>
                   </div>
                 </router-link>
 
@@ -140,9 +140,9 @@
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M2.25 18L9 11.25l4.306 4.307a1.125 1.125 0 001.591 0L21.75 9m-9 11.25h9a2.25 2.25 0 002.25-2.25V9m-2.25 11.25l-2.25-2.25"/></svg>
                   </div>
                   <div>
-                    <p class="text-[11px] font-bold text-slate-400 dark:text-[#626885] uppercase tracking-wider mb-1">Toplam Gelir</p>
-                    <p class="text-2xl font-extrabold text-brand-500 leading-tight tabular-nums">{{ formatCurrency(totalIncome) }}</p>
-                    <p class="text-[11px] text-slate-500 dark:text-[#9aa0b4] mt-1">+{{ formatCurrency(thisMonthTenantPayments) }} bu ay</p>
+                    <p class="text-[11px] font-black text-slate-400 dark:text-[#626885] uppercase tracking-widest mb-1 shadow-sm">Toplam Gelir</p>
+                    <p class="text-[28px] font-black text-brand-500 leading-tight tabular-nums tracking-tighter">{{ formatCurrency(totalIncome) }}</p>
+                    <p class="text-[11px] font-bold text-slate-500 dark:text-[#9aa0b4] mt-1">+{{ formatCurrency(thisMonthTenantPayments) }} <span class="font-medium opacity-80 uppercase tracking-tighter">bu ay</span></p>
                   </div>
                 </router-link>
 
@@ -152,9 +152,9 @@
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M19.5 13.5L12 21m0 0l-7.5-7.5M12 21V3"/></svg>
                   </div>
                   <div>
-                    <p class="text-[11px] font-bold text-slate-400 dark:text-[#626885] uppercase tracking-wider mb-1">Toplam Gider</p>
-                    <p class="text-2xl font-extrabold text-red-500 leading-tight tabular-nums">{{ formatCurrency(totalExpense) }}</p>
-                    <p class="text-[11px] text-slate-500 dark:text-[#9aa0b4] mt-1">{{ expenses.length }} kalem</p>
+                    <p class="text-[11px] font-black text-slate-400 dark:text-[#626885] uppercase tracking-widest mb-1 shadow-sm">Toplam Gider</p>
+                    <p class="text-[28px] font-black text-red-500 leading-tight tabular-nums tracking-tighter">{{ formatCurrency(totalExpense) }}</p>
+                    <p class="text-[11px] font-bold text-slate-500 dark:text-[#9aa0b4] mt-1 uppercase tracking-tighter">{{ expenses.length }} kalem</p>
                   </div>
                 </router-link>
 
@@ -177,8 +177,8 @@
               </div>
 
               <div>
-                <p class="text-xs font-semibold text-slate-500 dark:text-[#9aa0b4] mb-1">Geciken Toplam</p>
-                <p class="text-3xl font-black text-slate-800 dark:text-red-500 tabular-nums">
+                <p class="text-xs font-black text-slate-500 dark:text-[#9aa0b4] mb-1 uppercase tracking-widest">Geciken Toplam</p>
+                <p class="text-[36px] font-black text-slate-800 dark:text-red-500 tabular-nums tracking-tighter leading-none mb-2">
                   {{ formatCurrency(overdueTotalAmount) }}
                 </p>
                 <div v-if="overdueItems.length > 0 && oldestOverdueDate" class="flex items-center gap-1.5 mt-2 text-xs text-slate-500 dark:text-[#9aa0b4]">
@@ -221,7 +221,7 @@
                         :style="{ height: `${Math.max(4, (month.expense / maxAmount) * 140)}px` }"
                         :title="`Gider: ${formatCurrency(month.expense)}`"></div>
                     </div>
-                    <span class="text-[10px] font-bold text-slate-400 dark:text-[#626885] whitespace-nowrap uppercase">{{ month.month }}</span>
+                    <span class="text-[10px] font-black text-slate-400 dark:text-[#626885] whitespace-nowrap tracking-wider">{{ month.month }}</span>
                   </div>
                 </div>
               </div>

@@ -6,8 +6,8 @@
 
         <!-- Logo -->
         <router-link to="/" class="flex items-center gap-2.5 flex-shrink-0 group">
-          <div class="w-2.5 h-2.5 rounded-full bg-brand-500 group-hover:scale-125 transition-transform duration-300 shadow-[0_0_10px_rgba(107,138,255,0.5)]"></div>
-          <span class="text-[14px] font-extrabold tracking-[1.5px] uppercase text-slate-800 dark:text-white hidden md:block">
+          <div class="w-3 h-3 rounded-full bg-[#6B8AFF] group-hover:scale-125 transition-transform duration-300 shadow-[0_0_10px_rgba(107,138,255,0.5)]"></div>
+          <span class="text-[14px] font-black tracking-[2px] uppercase text-slate-800 dark:text-white hidden md:block">
             {{ appName }}
           </span>
         </router-link>
@@ -18,10 +18,10 @@
             v-for="tab in tabs"
             :key="tab.value"
             :to="tab.route"
-            class="px-3.5 py-2 rounded-lg text-[13px] font-medium transition-all duration-150"
+            class="px-4 py-2 rounded-lg text-[13px] font-black transition-all duration-150 uppercase tracking-widest"
             :class="isActiveTab(tab.route)
-              ? 'bg-brand-500 text-white shadow-lg shadow-brand-500/20'
-              : 'text-slate-600 dark:text-[#9aa0b4] hover:text-slate-900 dark:hover:text-[#f1f3f9]'"
+              ? 'bg-brand-500 text-white shadow-lg shadow-brand-500/25'
+              : 'text-slate-500 dark:text-[#9aa0b4] hover:text-slate-900 dark:hover:text-[#f1f3f9]'"
             :aria-current="isActiveTab(tab.route) ? 'page' : undefined"
           >
             {{ tab.label }}

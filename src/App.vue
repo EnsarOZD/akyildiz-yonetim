@@ -38,7 +38,7 @@
           <!-- Bildirim İzni Banner -->
           <NotificationPermissionBanner />
 
-          <div class="w-full max-w-7xl mx-auto mb-20 md:mb-0 px-4 sm:px-6 lg:px-8">
+          <div class="w-full max-w-[1440px] mx-auto mb-20 md:mb-0 px-4 sm:px-10">
             <!-- İçerik -->
             <router-view key="private-view" />
           </div>
