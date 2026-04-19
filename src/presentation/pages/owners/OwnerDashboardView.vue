@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="p-4 sm:p-6 min-h-screen pb-24 md:pb-6">
     <div class="max-w-6xl mx-auto">
 
@@ -29,7 +29,7 @@
 
           <div class="app-card p-6 border-l-4 border-l-blue-500">
             <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Kiracı Toplam Bakiyesi</p>
-            <p class="text-2xl font-black text-blue-600 dark:text-blue-400">{{ formatCurrency(data.totalTenantDebt) }}</p>
+            <p class="text-2xl font-black text-brand-600 dark:text-brand-400">{{ formatCurrency(data.totalTenantDebt) }}</p>
             <p class="mt-3 text-[10px] font-medium text-slate-500 italic">Bağımsız bölümlerdeki toplam alacak</p>
           </div>
 
@@ -61,28 +61,28 @@
               :class="[
                 'app-card p-4 transition-all duration-300 cursor-pointer border-l-4 group',
                 selectedFlatId === prop.flatId 
-                  ? 'border-l-blue-600 shadow-lg shadow-blue-500/10 ring-1 ring-blue-500/20 translate-x-1' 
+                  ? 'border-l-blue-600 shadow-lg shadow-blue-500/10 ring-1 ring-brand-500/20 translate-x-1' 
                   : 'border-l-transparent hover:border-l-slate-300 dark:hover:border-l-slate-700'
               ]">
               <div class="flex items-center justify-between">
                 <div class="flex items-center gap-3">
                   <div :class="[
                     'w-10 h-10 rounded-xl flex items-center justify-center transition-colors',
-                    selectedFlatId === prop.flatId ? 'bg-blue-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-400'
+                    selectedFlatId === prop.flatId ? 'bg-brand-500 text-white' : 'bg-slate-100 dark:bg-[#151a2e] text-slate-400'
                   ]">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
                     </svg>
                   </div>
                   <div>
-                    <h3 class="text-base font-bold text-slate-800 dark:text-slate-100 group-hover:text-blue-600 transition-colors">No: {{ prop.code }}</h3>
+                    <h3 class="text-base font-bold text-slate-800 dark:text-[#f1f3f9] group-hover:text-brand-600 transition-colors">No: {{ prop.code }}</h3>
                     <p class="text-[10px] font-bold tracking-tight" :class="prop.isOccupied ? 'text-emerald-500' : 'text-slate-400'">
                       {{ prop.isOccupied ? `Kiracı: ${prop.tenantName}` : 'Daire Boş (Müstakil)' }}
                     </p>
                   </div>
                 </div>
                 <div class="text-right">
-                  <p class="text-xs font-black text-slate-700 dark:text-slate-300">{{ formatCurrency(getPropertyDebtTotal(prop.flatId)) }}</p>
+                  <p class="text-xs font-black text-slate-700 dark:text-[#f1f3f9]">{{ formatCurrency(getPropertyDebtTotal(prop.flatId)) }}</p>
                   <p class="text-[9px] font-bold uppercase text-slate-400 mt-1">Borç Bakiyesi</p>
                 </div>
               </div>
@@ -118,20 +118,20 @@
                     <div class="w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-900/20 text-emerald-600 mx-auto mb-3 flex items-center justify-center">
                       <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                     </div>
-                    <p class="text-sm font-bold text-slate-700 dark:text-slate-300">Bu üniteye ait borç bulunmamaktadır.</p>
+                    <p class="text-sm font-bold text-slate-700 dark:text-[#f1f3f9]">Bu üniteye ait borç bulunmamaktadır.</p>
                   </div>
                   
-                  <div v-else class="divide-y divide-slate-50 dark:divide-slate-800">
+                  <div v-else class="divide-y divide-slate-50 dark:divide-white/[0.04]">
                     <div v-for="debt in selectedPropertyDebts" :key="debt.id" class="p-4 flex items-center justify-between transition-colors hover:bg-slate-50/50 dark:hover:bg-slate-700/20">
                       <div class="flex items-center gap-3">
                         <div class="w-8 h-8 rounded-lg flex items-center justify-center text-xs" :class="debtTypeClass(debt.type)">
                           {{ debtTypeIcon(debt.type) }}
                         </div>
                         <div>
-                          <p class="text-sm font-bold text-slate-800 dark:text-slate-100">{{ debtTypeLabel(debt.type) }}</p>
+                          <p class="text-sm font-bold text-slate-800 dark:text-[#f1f3f9]">{{ debtTypeLabel(debt.type) }}</p>
                           <p class="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">
                             {{ debt.periodMonth }}/{{ debt.periodYear }} · 
-                            <span :class="debt.isVacantDebt ? 'text-amber-600' : 'text-blue-500'">{{ debt.isVacantDebt ? 'Benim Borcum' : `Kiracı: ${debt.tenantName}` }}</span>
+                            <span :class="debt.isVacantDebt ? 'text-amber-600' : 'text-brand-500'">{{ debt.isVacantDebt ? 'Benim Borcum' : `Kiracı: ${debt.tenantName}` }}</span>
                           </p>
                         </div>
                       </div>
@@ -148,10 +148,10 @@
 
             <!-- Boş Seçim Durumu -->
             <div v-else class="app-card h-full flex flex-col items-center justify-center p-12 text-center bg-slate-50/30 dark:bg-slate-800/20 border-dashed border-2">
-              <div class="w-16 h-16 rounded-3xl bg-slate-100 dark:bg-slate-800 text-slate-300 flex items-center justify-center mb-4">
+              <div class="w-16 h-16 rounded-3xl bg-slate-100 dark:bg-[#151a2e] text-slate-300 flex items-center justify-center mb-4">
                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
               </div>
-              <h3 class="text-base font-bold text-slate-700 dark:text-slate-300">Portföy Detayı</h3>
+              <h3 class="text-base font-bold text-slate-700 dark:text-[#f1f3f9]">Portföy Detayı</h3>
               <p class="text-xs text-slate-500 mt-1 max-w-[240px]">Herhangi bir ünitenin detaylarını, kiracı durumunu ve borç geçmişini görmek için soldaki listeden seçim yapın.</p>
             </div>
           </div>
@@ -162,14 +162,14 @@
           <h2 class="text-lg font-bold text-slate-800 dark:text-white font-cormorantSC mb-4 px-1">Son Ödemelerim</h2>
           <div class="app-card p-0 overflow-hidden">
             <div v-if="data.recentPayments.length === 0" class="p-8 text-center text-slate-400 italic text-sm">Henüz bir ödeme kaydı bulunmamaktadır.</div>
-            <div v-else class="divide-y divide-slate-50 dark:divide-slate-800">
+            <div v-else class="divide-y divide-slate-50 dark:divide-white/[0.04]">
               <div v-for="p in data.recentPayments" :key="p.id" class="p-4 flex items-center justify-between table-row-hover">
                 <div class="flex items-center gap-3">
                   <div class="w-9 h-9 rounded-xl bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 flex items-center justify-center">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                   </div>
                   <div>
-                    <p class="text-sm font-bold text-slate-800 dark:text-slate-100">{{ p.description || p.type || 'Tahsilat' }}</p>
+                    <p class="text-sm font-bold text-slate-800 dark:text-[#f1f3f9]">{{ p.description || p.type || 'Tahsilat' }}</p>
                     <p class="text-[10px] font-medium text-slate-400">{{ formatDate(p.paymentDate) }}</p>
                   </div>
                 </div>
@@ -251,8 +251,8 @@ const debtTypeIcon = (t) => ({ Aidat: '📋', Electricity: '⚡', Water: '💧' 
 const debtTypeClass = (t) => ({
   Aidat: 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600',
   Electricity: 'bg-amber-50 dark:bg-amber-900/20 text-amber-600',
-  Water: 'bg-blue-50 dark:bg-blue-900/20 text-blue-600',
-}[t] ?? 'bg-slate-50 dark:bg-slate-700 text-slate-500')
+  Water: 'bg-brand-50 dark:bg-brand-500/[0.08] text-brand-600',
+}[t] ?? 'bg-slate-50 dark:bg-[#1c2238] text-slate-500')
 
 onMounted(() => {
   if (authStore.isInitialized) {

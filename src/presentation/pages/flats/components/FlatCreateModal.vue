@@ -1,13 +1,13 @@
-<template>
+﻿<template>
   <dialog id="createFlatModal" class="modal" :open="visible">
-    <div class="modal-box max-w-4xl bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 border border-gray-200 dark:border-gray-700 shadow-2xl">
+    <div class="modal-box max-w-4xl bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 border border-gray-200 dark:border-white/[0.07] shadow-2xl">
       <!-- Başlık -->
-      <div class="flex items-center justify-between pb-4 border-b border-gray-200 dark:border-gray-700 mb-6">
-        <h3 class="text-xl font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2">
+      <div class="flex items-center justify-between pb-4 border-b border-gray-200 dark:border-white/[0.07] mb-6">
+        <h3 class="text-xl font-bold text-gray-800 dark:text-[#f1f3f9] flex items-center gap-2">
           <span class="text-2xl">🏢</span>
           Yeni Ünite Ekle
         </h3>
-        <button @click="$emit('close')" class="btn btn-sm btn-ghost text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+        <button @click="$emit('close')" class="btn btn-sm btn-ghost text-gray-500 hover:text-gray-700 dark:text-[#9aa0b4] dark:hover:text-gray-200">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
           </svg>
@@ -20,17 +20,17 @@
 
           <!-- Temel Bilgiler -->
           <div class="card bg-base-200 p-4">
-            <h4 class="text-lg font-semibold mb-4 text-gray-700 dark:text-gray-300">📋 Temel Bilgiler</h4>
+            <h4 class="text-lg font-semibold mb-4 text-gray-700 dark:text-[#f1f3f9]">📋 Temel Bilgiler</h4>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <!-- Code -->
               <div class="form-control">
                 <label class="label">
-                  <span class="label-text font-semibold text-gray-700 dark:text-gray-300">Ünite Kodu (Code) *</span>
+                  <span class="label-text font-semibold text-gray-700 dark:text-[#f1f3f9]">Ünite Kodu (Code) *</span>
                 </label>
                 <input
                   v-model.trim="flat.code"
                   @input="onCodeInput"
-                  class="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400"
+                  class="input input-bordered w-full bg-white dark:bg-[#1c2238] border-gray-300 dark:border-white/[0.1] text-gray-800 dark:text-[#f1f3f9] focus:border-brand-500 dark:focus:border-brand-400"
                   placeholder="Örn: A-201, 3A, GA, OTOPARK"
                   required
                 />
@@ -44,8 +44,8 @@
 
               <!-- Type (0:Floor, 1:Entry, 2:Parking) -->
               <div class="form-control">
-                <label class="label"><span class="label-text font-semibold text-gray-700 dark:text-gray-300">Tip *</span></label>
-                <select v-model.number="flat.type" class="select select-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400" required>
+                <label class="label"><span class="label-text font-semibold text-gray-700 dark:text-[#f1f3f9]">Tip *</span></label>
+                <select v-model.number="flat.type" class="select select-bordered w-full bg-white dark:bg-[#1c2238] border-gray-300 dark:border-white/[0.1] text-gray-800 dark:text-[#f1f3f9] focus:border-brand-500 dark:focus:border-brand-400" required>
                   <option :value="0">Kat</option>
                   <option :value="1">Giriş</option>
                   <option :value="2">Otopark</option>
@@ -54,12 +54,12 @@
 
               <!-- FloorNumber (Parking değilse) -->
               <div class="form-control" v-if="flat.type !== 2">
-                <label class="label"><span class="label-text font-semibold text-gray-700 dark:text-gray-300">Kat (FloorNumber) *</span></label>
+                <label class="label"><span class="label-text font-semibold text-gray-700 dark:text-[#f1f3f9]">Kat (FloorNumber) *</span></label>
                 <input
                   type="number"
                   v-model.number="flat.floorNumber"
                   :disabled="flat.type === 1"
-                  class="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400"
+                  class="input input-bordered w-full bg-white dark:bg-[#1c2238] border-gray-300 dark:border-white/[0.1] text-gray-800 dark:text-[#f1f3f9] focus:border-brand-500 dark:focus:border-brand-400"
                   placeholder="Örn: 3"
                   required
                 />
@@ -68,19 +68,19 @@
 
               <!-- Alan -->
               <div class="form-control">
-                <label class="label"><span class="label-text font-semibold text-gray-700 dark:text-gray-300">Alan (m²) *</span></label>
-                <input type="number" v-model.number="flat.unitArea" min="1" step="0.01" class="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400" required />
+                <label class="label"><span class="label-text font-semibold text-gray-700 dark:text-[#f1f3f9]">Alan (m²) *</span></label>
+                <input type="number" v-model.number="flat.unitArea" min="1" step="0.01" class="input input-bordered w-full bg-white dark:bg-[#1c2238] border-gray-300 dark:border-white/[0.1] text-gray-800 dark:text-[#f1f3f9] focus:border-brand-500 dark:focus:border-brand-400" required />
               </div>
 
 
               <!-- Mal Sahibi (Owner) -->
               <div class="md:col-span-2">
                 <div class="form-control">
-                  <label class="label"><span class="label-text font-semibold text-gray-700 dark:text-gray-300">Mal Sahibi (opsiyonel)</span></label>
+                  <label class="label"><span class="label-text font-semibold text-gray-700 dark:text-[#f1f3f9]">Mal Sahibi (opsiyonel)</span></label>
 
                   <select
                     v-model="flat.ownerId"
-                    class="select select-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400">
+                    class="select select-bordered w-full bg-white dark:bg-[#1c2238] border-gray-300 dark:border-white/[0.1] text-gray-800 dark:text-[#f1f3f9] focus:border-brand-500 dark:focus:border-brand-400">
                     <option :value="null">— Seçilmedi —</option>
                     <option v-for="o in owners" :key="o.id" :value="o.id">
                       {{ ownerLabel(o) }}
@@ -91,14 +91,14 @@
 
               <!-- Kira / Hisse -->
               <div class="form-control">
-                <label class="label"><span class="label-text font-semibold text-gray-700 dark:text-gray-300">Aylık Kira</span></label>
-                <input type="number" v-model.number="flat.monthlyRent" min="0" step="0.01" class="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200" />
+                <label class="label"><span class="label-text font-semibold text-gray-700 dark:text-[#f1f3f9]">Aylık Kira</span></label>
+                <input type="number" v-model.number="flat.monthlyRent" min="0" step="0.01" class="input input-bordered w-full bg-white dark:bg-[#1c2238] border-gray-300 dark:border-white/[0.1] text-gray-800 dark:text-[#f1f3f9]" />
               </div>
 
               <!-- Durum -->
               <div class="form-control">
                 <label class="label cursor-pointer">
-                  <span class="label-text font-semibold text-gray-700 dark:text-gray-300">Aktif Ünite</span>
+                  <span class="label-text font-semibold text-gray-700 dark:text-[#f1f3f9]">Aktif Ünite</span>
                   <input type="checkbox" v-model="flat.isActive" class="toggle toggle-success" />
                 </label>
               </div>
@@ -107,15 +107,15 @@
 
           <!-- Açıklama -->
           <div class="form-control">
-            <label class="label"><span class="label-text font-semibold text-gray-700 dark:text-gray-300">Açıklama</span></label>
-            <textarea v-model.trim="flat.description" rows="3" class="textarea textarea-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200" placeholder="Kısa bir açıklama girin (zorunlu)"></textarea>
+            <label class="label"><span class="label-text font-semibold text-gray-700 dark:text-[#f1f3f9]">Açıklama</span></label>
+            <textarea v-model.trim="flat.description" rows="3" class="textarea textarea-bordered w-full bg-white dark:bg-[#1c2238] border-gray-300 dark:border-white/[0.1] text-gray-800 dark:text-[#f1f3f9]" placeholder="Kısa bir açıklama girin (zorunlu)"></textarea>
           </div>
         </form>
       </div>
 
       <!-- Actions -->
-      <div class="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700 mt-6">
-        <button type="button" @click="$emit('close')" class="btn btn-outline border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">
+      <div class="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-white/[0.07] mt-6">
+        <button type="button" @click="$emit('close')" class="btn btn-outline border-gray-300 dark:border-white/[0.1] text-gray-700 dark:text-[#f1f3f9] hover:bg-gray-50 dark:hover:bg-white/[0.06]">
           İptal
         </button>
         <button form="flatForm" type="submit" :disabled="saving" class="btn btn-success bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 border-0 text-white shadow-lg">

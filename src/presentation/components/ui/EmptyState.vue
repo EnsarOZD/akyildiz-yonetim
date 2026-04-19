@@ -1,7 +1,7 @@
-<template>
+﻿<template>
   <div class="flex flex-col items-center justify-center py-16 px-4 text-center animate-fade-in">
     <!-- Icon container -->
-    <div class="w-16 h-16 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-4">
+    <div class="w-16 h-16 rounded-2xl bg-slate-100 dark:bg-[#151a2e] flex items-center justify-center mb-4">
       <slot name="icon">
         <svg class="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
@@ -10,8 +10,8 @@
       </slot>
     </div>
 
-    <h3 class="text-base font-semibold text-slate-700 dark:text-slate-200">{{ title }}</h3>
-    <p v-if="description" class="mt-1 text-sm text-slate-500 dark:text-slate-400 max-w-xs">{{ description }}</p>
+    <h3 class="text-base font-semibold text-slate-700 dark:text-[#f1f3f9]">{{ title }}</h3>
+    <p v-if="description" class="mt-1 text-sm text-slate-500 dark:text-[#9aa0b4] max-w-xs">{{ description }}</p>
 
     <div v-if="$slots.action" class="mt-5">
       <slot name="action" />

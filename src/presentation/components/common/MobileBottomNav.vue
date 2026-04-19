@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div>
     <!-- Overlay -->
     <transition
@@ -27,7 +27,7 @@
         class="md:hidden fixed inset-x-0 bottom-0 z-[60] bg-white dark:bg-[#0f1322] rounded-t-3xl shadow-[0_-8px_32px_rgba(0,0,0,0.2)] border-t border-slate-200/60 dark:border-white/[0.06]">
         <div class="px-5 pt-4 pb-safe-offset">
           <!-- Handle -->
-          <div class="w-10 h-1 bg-slate-200 dark:bg-slate-700 rounded-full mx-auto mb-5" @click="showMoreMenu = false" />
+          <div class="w-10 h-1 bg-slate-200 dark:bg-[#1c2238] rounded-full mx-auto mb-5" @click="showMoreMenu = false" />
 
           <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3 px-1">Diğer</p>
 
@@ -39,16 +39,16 @@
                 class="flex flex-col items-center gap-2 p-3 rounded-2xl transition-colors"
                 :class="item.danger
                   ? 'hover:bg-red-50 dark:hover:bg-red-950/30'
-                  : 'hover:bg-slate-50 dark:hover:bg-slate-800'"
+                  : 'hover:bg-slate-50 dark:hover:bg-white/[0.04]'"
               >
                 <div class="w-11 h-11 rounded-2xl flex items-center justify-center"
                   :class="item.danger
                     ? 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'
-                    : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'">
+                    : 'bg-slate-100 dark:bg-[#151a2e] text-slate-600 dark:text-[#f1f3f9]'">
                   <component :is="item.icon" class="w-5 h-5" />
                 </div>
                 <span class="text-[11px] font-medium leading-tight text-center"
-                  :class="item.danger ? 'text-red-600 dark:text-red-400' : 'text-slate-600 dark:text-slate-400'">
+                  :class="item.danger ? 'text-red-600 dark:text-red-400' : 'text-slate-600 dark:text-[#9aa0b4]'">
                   {{ item.name }}
                 </span>
               </button>
@@ -57,18 +57,18 @@
                 v-else
                 :to="item.path"
                 @click="showMoreMenu = false"
-                class="flex flex-col items-center gap-2 p-3 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                class="flex flex-col items-center gap-2 p-3 rounded-2xl hover:bg-slate-50 dark:hover:bg-white/[0.04] transition-colors"
               >
-                <div class="w-11 h-11 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 flex items-center justify-center">
+                <div class="w-11 h-11 rounded-2xl bg-slate-100 dark:bg-[#151a2e] text-slate-600 dark:text-[#f1f3f9] flex items-center justify-center">
                   <component :is="item.icon" class="w-5 h-5" />
                 </div>
-                <span class="text-[11px] font-medium text-slate-600 dark:text-slate-400 leading-tight text-center">{{ item.name }}</span>
+                <span class="text-[11px] font-medium text-slate-600 dark:text-[#9aa0b4] leading-tight text-center">{{ item.name }}</span>
               </router-link>
             </template>
           </div>
 
           <button @click="showMoreMenu = false"
-            class="w-full mt-4 py-3 rounded-xl bg-slate-100 dark:bg-slate-800 text-sm font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+            class="w-full mt-4 py-3 rounded-xl bg-slate-100 dark:bg-[#151a2e] text-sm font-semibold text-slate-600 dark:text-[#9aa0b4] hover:bg-slate-200 dark:hover:bg-white/[0.06] transition-colors">
             Kapat
           </button>
         </div>
@@ -119,12 +119,12 @@
           >
             <div class="flex items-center justify-center w-10 h-8 rounded-xl transition-all duration-200"
               :class="showMoreMenu
-                ? 'bg-slate-800 dark:bg-slate-700 text-white'
-                : 'text-slate-400 dark:text-slate-500'">
+                ? 'bg-slate-800 dark:bg-[#1c2238] text-white'
+                : 'text-slate-400 dark:text-[#626885]'">
               <component :is="item.icon" class="w-5 h-5" />
             </div>
             <span class="text-[10px] font-semibold leading-none truncate max-w-full px-1 transition-colors duration-150"
-              :class="showMoreMenu ? 'text-slate-700 dark:text-white' : 'text-slate-400 dark:text-slate-500'">
+              :class="showMoreMenu ? 'text-slate-700 dark:text-white' : 'text-slate-400 dark:text-[#626885]'">
               {{ item.name }}
             </span>
           </button>

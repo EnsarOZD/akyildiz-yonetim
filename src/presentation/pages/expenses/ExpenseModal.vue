@@ -1,13 +1,13 @@
-<template>
+﻿<template>
   <dialog class="modal" :open="visible">
-    <div class="modal-box max-w-3xl bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 border border-gray-200 dark:border-gray-700 shadow-2xl">
+    <div class="modal-box max-w-3xl bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 border border-gray-200 dark:border-white/[0.07] shadow-2xl">
       <!-- Başlık -->
-      <div class="flex items-center justify-between pb-4 border-b border-gray-200 dark:border-gray-700 mb-6">
-        <h3 class="text-xl font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2">
+      <div class="flex items-center justify-between pb-4 border-b border-gray-200 dark:border-white/[0.07] mb-6">
+        <h3 class="text-xl font-bold text-gray-800 dark:text-[#f1f3f9] flex items-center gap-2">
           <span class="text-2xl">💰</span>
           {{ editMode ? 'Gider Düzenle' : 'Yeni Gider Ekle' }}
         </h3>
-        <button @click="handleClose" class="btn btn-sm btn-ghost text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+        <button @click="handleClose" class="btn btn-sm btn-ghost text-gray-500 hover:text-gray-700 dark:text-[#9aa0b4] dark:hover:text-gray-200">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
           </svg>
@@ -28,11 +28,11 @@
           <!-- Gider Tipi -->
           <div class="form-control">
             <label class="label">
-              <span class="label-text font-semibold text-gray-700 dark:text-gray-300">Gider Tipi *</span>
+              <span class="label-text font-semibold text-gray-700 dark:text-[#f1f3f9]">Gider Tipi *</span>
             </label>
             <select 
               v-model="expense.type" 
-              class="select select-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400" 
+              class="select select-bordered w-full bg-white dark:bg-[#1c2238] border-gray-300 dark:border-white/[0.1] text-gray-800 dark:text-[#f1f3f9] focus:border-brand-500 dark:focus:border-brand-400" 
               :class="{ 'border-red-500': errors.type }"
               required
               ref="typeSelect"
@@ -48,12 +48,12 @@
           <!-- Tarih -->
           <div class="form-control">
             <label class="label">
-              <span class="label-text font-semibold text-gray-700 dark:text-gray-300">Tarih *</span>
+              <span class="label-text font-semibold text-gray-700 dark:text-[#f1f3f9]">Tarih *</span>
             </label>
             <input 
               v-model="expense.expenseDate" 
               type="date" 
-              class="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400"
+              class="input input-bordered w-full bg-white dark:bg-[#1c2238] border-gray-300 dark:border-white/[0.1] text-gray-800 dark:text-[#f1f3f9] focus:border-brand-500 dark:focus:border-brand-400"
               :class="{ 'border-red-500': errors.expenseDate }"
               required 
             />
@@ -65,7 +65,7 @@
           <!-- Tutar -->
           <div class="form-control">
             <label class="label">
-              <span class="label-text font-semibold text-gray-700 dark:text-gray-300">Tutar *</span>
+              <span class="label-text font-semibold text-gray-700 dark:text-[#f1f3f9]">Tutar *</span>
             </label>
             <div class="relative">
               <input 
@@ -74,7 +74,7 @@
                 @blur="handleAmountBlur"
                 type="text" 
                 inputmode="decimal"
-                class="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400 pr-10"
+                class="input input-bordered w-full bg-white dark:bg-[#1c2238] border-gray-300 dark:border-white/[0.1] text-gray-800 dark:text-[#f1f3f9] focus:border-brand-500 dark:focus:border-brand-400 pr-10"
                 :class="{ 'border-red-500': errors.amount }"
                 placeholder="0,00"
                 required 
@@ -90,12 +90,12 @@
         <!-- Başlık -->
         <div class="form-control">
           <label class="label">
-            <span class="label-text font-semibold text-gray-700 dark:text-gray-300">Başlık *</span>
+            <span class="label-text font-semibold text-gray-700 dark:text-[#f1f3f9]">Başlık *</span>
           </label>
           <input 
             v-model="expense.title" 
             type="text" 
-            class="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400"
+            class="input input-bordered w-full bg-white dark:bg-[#1c2238] border-gray-300 dark:border-white/[0.1] text-gray-800 dark:text-[#f1f3f9] focus:border-brand-500 dark:focus:border-brand-400"
             :class="{ 'border-red-500': errors.title }"
             placeholder="Gider başlığı giriniz" 
             required 
@@ -109,57 +109,57 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div class="form-control">
             <label class="label">
-              <span class="label-text font-semibold text-gray-700 dark:text-gray-300">Açıklama</span>
+              <span class="label-text font-semibold text-gray-700 dark:text-[#f1f3f9]">Açıklama</span>
             </label>
             <textarea
               v-model="expense.description"
-              class="textarea textarea-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400"
+              class="textarea textarea-bordered w-full bg-white dark:bg-[#1c2238] border-gray-300 dark:border-white/[0.1] text-gray-800 dark:text-[#f1f3f9] focus:border-brand-500 dark:focus:border-brand-400"
               placeholder="Gider açıklaması giriniz"
               rows="3"
             ></textarea>
           </div>
           <div class="form-control">
             <label class="label">
-              <span class="label-text font-semibold text-gray-700 dark:text-gray-300">Fatura / Makbuz No</span>
+              <span class="label-text font-semibold text-gray-700 dark:text-[#f1f3f9]">Fatura / Makbuz No</span>
             </label>
             <input
               v-model="expense.receiptNumber"
               type="text"
-              class="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400"
+              class="input input-bordered w-full bg-white dark:bg-[#1c2238] border-gray-300 dark:border-white/[0.1] text-gray-800 dark:text-[#f1f3f9] focus:border-brand-500 dark:focus:border-brand-400"
               placeholder="Opsiyonel fatura numarası"
             />
           </div>
         </div>
 
         <!-- Önizleme -->
-        <div v-if="showPreview" class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
-          <h4 class="font-semibold text-blue-800 dark:text-blue-200 mb-2">Önizleme:</h4>
+        <div v-if="showPreview" class="bg-brand-50 dark:bg-brand-500/[0.08] p-4 rounded-lg border border-brand-200 dark:border-brand-700">
+          <h4 class="font-semibold text-brand-700 dark:text-brand-300 mb-2">Önizleme:</h4>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
             <div>
-              <span class="font-medium text-gray-700 dark:text-gray-300">Tip:</span>
-              <span class="ml-2 text-gray-600 dark:text-gray-400">{{ getExpenseTypeName(expense.type) || 'Seçilmedi' }}</span>
+              <span class="font-medium text-gray-700 dark:text-[#f1f3f9]">Tip:</span>
+              <span class="ml-2 text-gray-600 dark:text-[#9aa0b4]">{{ getExpenseTypeName(expense.type) || 'Seçilmedi' }}</span>
             </div>
             <div>
-              <span class="font-medium text-gray-700 dark:text-gray-300">Tarih:</span>
-              <span class="ml-2 text-gray-600 dark:text-gray-400">{{ formatDate(expense.expenseDate) || 'Seçilmedi' }}</span>
+              <span class="font-medium text-gray-700 dark:text-[#f1f3f9]">Tarih:</span>
+              <span class="ml-2 text-gray-600 dark:text-[#9aa0b4]">{{ formatDate(expense.expenseDate) || 'Seçilmedi' }}</span>
             </div>
             <div>
-              <span class="font-medium text-gray-700 dark:text-gray-300">Tutar:</span>
-              <span class="ml-2 text-gray-600 dark:text-gray-400">{{ formatCurrency(expense.amount) || '0.00' }}</span>
+              <span class="font-medium text-gray-700 dark:text-[#f1f3f9]">Tutar:</span>
+              <span class="ml-2 text-gray-600 dark:text-[#9aa0b4]">{{ formatCurrency(expense.amount) || '0.00' }}</span>
             </div>
             <div>
-              <span class="font-medium text-gray-700 dark:text-gray-300">Başlık:</span>
-              <span class="ml-2 text-gray-600 dark:text-gray-400">{{ expense.title || 'Girilmedi' }}</span>
+              <span class="font-medium text-gray-700 dark:text-[#f1f3f9]">Başlık:</span>
+              <span class="ml-2 text-gray-600 dark:text-[#9aa0b4]">{{ expense.title || 'Girilmedi' }}</span>
             </div>
           </div>
         </div>
 
         <!-- Butonlar -->
-        <div class="flex justify-between items-center pt-4 border-t border-gray-200 dark:border-gray-700">
+        <div class="flex justify-between items-center pt-4 border-t border-gray-200 dark:border-white/[0.07]">
           <button 
             type="button"
             @click="togglePreview"
-            class="btn btn-ghost btn-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
+            class="btn btn-ghost btn-sm text-gray-600 dark:text-[#9aa0b4] hover:text-gray-800 dark:hover:text-gray-200"
           >
             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -170,7 +170,7 @@
           
           <div class="flex gap-3">
             <button 
-              class="btn btn-outline border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700" 
+              class="btn btn-outline border-gray-300 dark:border-white/[0.1] text-gray-700 dark:text-[#f1f3f9] hover:bg-gray-50 dark:hover:bg-white/[0.06]" 
               type="button" 
               @click="handleClose"
               :disabled="props.loading"

@@ -1,12 +1,12 @@
-<template>
+﻿<template>
   <BaseModal :modelValue="true" title="Excel'den Borç Aktarımı" @close="$emit('close')">
     <div class="space-y-6">
       <!-- Bilgilendirme -->
-      <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 p-4 rounded-xl">
-        <h3 class="text-blue-800 dark:text-blue-300 font-semibold flex items-center gap-2 mb-2">
+      <div class="bg-brand-50 dark:bg-brand-500/[0.08] border border-brand-100 dark:border-brand-700 p-4 rounded-xl">
+        <h3 class="text-brand-700 dark:text-brand-300 font-semibold flex items-center gap-2 mb-2">
           <span>ℹ️</span> Aktarım Talimatları
         </h3>
-        <ul class="text-sm text-blue-700 dark:text-blue-400 space-y-1 list-disc list-inside">
+        <ul class="text-sm text-brand-700 dark:text-brand-400 space-y-1 list-disc list-inside">
           <li>Excel dosyanızda <b>Firma, Tarih, Ödeme Türü, Tutar, Açıklama</b> sütunları bulunmalıdır.</li>
           <li>Firma ismi sistemdeki Kiracı veya Mülk Sahibi adı ile tam eşleşmelidir.</li>
           <li>Ödeme Türü: <b>Aidat, Elektrik, Su</b> gibi değerler alabilir.</li>
@@ -21,18 +21,18 @@
           class="border-2 border-dash rounded-2xl p-8 transition-all duration-300 text-center"
           :class="[
             isDragging 
-              ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 scale-[1.02]' 
-              : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+              ? 'border-brand-500 bg-brand-50 dark:bg-brand-500/[0.08] scale-[1.02]' 
+              : 'border-gray-200 dark:border-white/[0.07] hover:border-gray-300 dark:hover:border-gray-600'
           ]"
           @dragover.prevent="isDragging = true"
           @dragleave.prevent="isDragging = false"
           @drop.prevent="handleDrop"
         >
           <div v-if="!selectedFile">
-            <div class="bg-gray-100 dark:bg-gray-800 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+            <div class="bg-slate-100 dark:bg-[#151a2e] w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
               <span class="text-3xl">📊</span>
             </div>
-            <p class="text-gray-600 dark:text-gray-400 mb-2">Excel dosyanızı buraya sürükleyin</p>
+            <p class="text-gray-600 dark:text-[#9aa0b4] mb-2">Excel dosyanızı buraya sürükleyin</p>
             <p class="text-xs text-gray-400 mb-4">veya</p>
             <button @click="$refs.fileInput.click()" class="btn btn-primary btn-sm px-6">
                 Dosya Seç
@@ -44,7 +44,7 @@
                <span class="text-2xl">📄</span>
             </div>
             <div class="text-left">
-              <p class="font-semibold text-gray-800 dark:text-gray-200">{{ selectedFile.name }}</p>
+              <p class="font-semibold text-gray-800 dark:text-[#f1f3f9]">{{ selectedFile.name }}</p>
               <p class="text-xs text-gray-500">{{ (selectedFile.size / 1024).toFixed(1) }} KB</p>
             </div>
             <button @click="selectedFile = null" class="btn btn-ghost btn-circle btn-sm text-red-500">
@@ -70,8 +70,8 @@
 
       <!-- 2. Sonuç Raporu Ekranı -->
       <div v-else class="space-y-4">
-        <div class="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
-          <div class="flex-1 text-center border-r dark:border-gray-700">
+        <div class="flex items-center gap-4 p-4 dark:bg-gray-800/50 rounded-xl">
+          <div class="flex-1 text-center border-r dark:border-white/[0.07]">
             <p class="text-xs text-gray-500 mb-1">Başarılı Satır</p>
             <p class="text-2xl font-bold text-green-600 dark:text-green-400">{{ importResult.successCount }}</p>
           </div>
@@ -83,8 +83,8 @@
 
         <!-- Hata Listesi -->
         <div v-if="importResult.errors && importResult.errors.length > 0" class="space-y-2">
-          <p class="text-sm font-semibold text-gray-700 dark:text-gray-300">Konum / Hata Detayları:</p>
-          <div class="max-h-48 overflow-y-auto border border-gray-100 dark:border-gray-800 rounded-xl p-3 bg-gray-50 dark:bg-gray-800/30 text-xs">
+          <p class="text-sm font-semibold text-gray-700 dark:text-[#f1f3f9]">Konum / Hata Detayları:</p>
+          <div class="max-h-48 overflow-y-auto border border-gray-100 dark:border-white/[0.05] rounded-xl p-3 dark:bg-gray-800/30 text-xs">
             <ul class="space-y-1 list-disc list-inside text-red-600 dark:text-red-400">
               <li v-for="(err, idx) in importResult.errors" :key="idx">{{ err }}</li>
             </ul>
@@ -96,7 +96,7 @@
       </div>
 
       <!-- Aksiyonlar -->
-      <div class="flex justify-end gap-3 pt-4 border-t dark:border-gray-700">
+      <div class="flex justify-end gap-3 pt-4 border-t dark:border-white/[0.07]">
         <!-- İçe aktarma ekranı butonları -->
         <template v-if="!importResult">
           <button @click="$emit('close')" class="btn btn-ghost">Vazgeç</button>

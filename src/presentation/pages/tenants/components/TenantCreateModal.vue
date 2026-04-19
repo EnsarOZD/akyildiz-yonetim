@@ -1,13 +1,13 @@
-<template>
+﻿<template>
   <dialog id="createTenantModal" class="modal" :open="visible">
-    <div class="modal-box max-w-4xl bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 border border-gray-200 dark:border-gray-700 shadow-2xl">
+    <div class="modal-box max-w-4xl bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 border border-gray-200 dark:border-white/[0.07] shadow-2xl">
       <!-- Başlık -->
-      <div class="flex items-center justify-between pb-4 border-b border-gray-200 dark:border-gray-700 mb-6">
-        <h3 class="text-xl font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2">
+      <div class="flex items-center justify-between pb-4 border-b border-gray-200 dark:border-white/[0.07] mb-6">
+        <h3 class="text-xl font-bold text-gray-800 dark:text-[#f1f3f9] flex items-center gap-2">
           <span class="text-2xl">🏢</span>
           Yeni İş Yeri Kiracısı Ekle
         </h3>
-        <button @click="$emit('close')" class="btn btn-sm btn-ghost text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+        <button @click="$emit('close')" class="btn btn-sm btn-ghost text-gray-500 hover:text-gray-700 dark:text-[#9aa0b4] dark:hover:text-gray-200">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
           </svg>
@@ -19,16 +19,16 @@
         <form @submit.prevent="handleSave" id="tenantForm" class="space-y-6">
           <!-- İş Yeri Bilgileri -->
           <div class="card bg-base-200 p-4">
-            <h4 class="text-lg font-semibold mb-4 text-gray-700 dark:text-gray-300">🏢 İş Yeri Bilgileri</h4>
+            <h4 class="text-lg font-semibold mb-4 text-gray-700 dark:text-[#f1f3f9]">🏢 İş Yeri Bilgileri</h4>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div class="form-control">
                 <label class="label">
-                  <span class="label-text font-semibold text-gray-700 dark:text-gray-300">Şirket Adı *</span>
+                  <span class="label-text font-semibold text-gray-700 dark:text-[#f1f3f9]">Şirket Adı *</span>
                 </label>
                 <input
                   v-model="tenant.companyName"
-                  class="input input-bordered w-full bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200"
-                  :class="formErrors.companyName ? 'input-error' : 'border-gray-300 dark:border-gray-600'"
+                  class="input input-bordered w-full bg-white dark:bg-[#1c2238] text-gray-800 dark:text-[#f1f3f9]"
+                  :class="formErrors.companyName ? 'input-error' : 'border-gray-300 dark:border-white/[0.1]'"
                   placeholder="ABC Ticaret Ltd. Şti."
                 />
                 <p v-if="formErrors.companyName" class="text-error text-xs mt-1">{{ formErrors.companyName }}</p>
@@ -37,12 +37,12 @@
 
               <div class="form-control">
                 <label class="label">
-                  <span class="label-text font-semibold text-gray-700 dark:text-gray-300">İş Türü *</span>
+                  <span class="label-text font-semibold text-gray-700 dark:text-[#f1f3f9]">İş Türü *</span>
                 </label>
                 <select
                   v-model="tenant.businessType"
-                  class="select select-bordered w-full bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200"
-                  :class="formErrors.businessType ? 'select-error' : 'border-gray-300 dark:border-gray-600'"
+                  class="select select-bordered w-full bg-white dark:bg-[#1c2238] text-gray-800 dark:text-[#f1f3f9]"
+                  :class="formErrors.businessType ? 'select-error' : 'border-gray-300 dark:border-white/[0.1]'"
                 >
                   <option value="">İş türü seçin</option>
                   <option value="Ticaret">Ticaret</option>
@@ -57,12 +57,12 @@
 
               <div class="form-control">
                 <label class="label">
-                  <span class="label-text font-semibold text-gray-700 dark:text-gray-300">Kimlik/Vergi Numarası *</span>
+                  <span class="label-text font-semibold text-gray-700 dark:text-[#f1f3f9]">Kimlik/Vergi Numarası *</span>
                 </label>
                 <input
                   v-model="tenant.identityNumber"
-                  class="input input-bordered w-full bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200"
-                  :class="formErrors.identityNumber ? 'input-error' : 'border-gray-300 dark:border-gray-600'"
+                  class="input input-bordered w-full bg-white dark:bg-[#1c2238] text-gray-800 dark:text-[#f1f3f9]"
+                  :class="formErrors.identityNumber ? 'input-error' : 'border-gray-300 dark:border-white/[0.1]'"
                   placeholder="TC veya Vergi No"
                   type="text"
                   inputmode="numeric"
@@ -74,36 +74,36 @@
 
           <!-- İletişim Kişisi Bilgileri -->
           <div class="card bg-base-200 p-4">
-            <h4 class="text-lg font-semibold mb-4 text-gray-700 dark:text-gray-300">👤 İletişim Kişisi Bilgileri</h4>
+            <h4 class="text-lg font-semibold mb-4 text-gray-700 dark:text-[#f1f3f9]">👤 İletişim Kişisi Bilgileri</h4>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div class="form-control">
-                <label class="label"><span class="label-text font-semibold text-gray-700 dark:text-gray-300">İletişim Kişisi *</span></label>
-                <input v-model="tenant.contactPersonName" class="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400" placeholder="Ahmet Yılmaz" required />
+                <label class="label"><span class="label-text font-semibold text-gray-700 dark:text-[#f1f3f9]">İletişim Kişisi *</span></label>
+                <input v-model="tenant.contactPersonName" class="input input-bordered w-full bg-white dark:bg-[#1c2238] border-gray-300 dark:border-white/[0.1] text-gray-800 dark:text-[#f1f3f9] focus:border-brand-500 dark:focus:border-brand-400" placeholder="Ahmet Yılmaz" required />
               </div>
               <div class="form-control">
-                <label class="label"><span class="label-text font-semibold text-gray-700 dark:text-gray-300">Telefon *</span></label>
-                <input v-model="tenant.contactPersonPhone" class="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400" placeholder="+90 (5XX) XXX XX XX" required />
+                <label class="label"><span class="label-text font-semibold text-gray-700 dark:text-[#f1f3f9]">Telefon *</span></label>
+                <input v-model="tenant.contactPersonPhone" class="input input-bordered w-full bg-white dark:bg-[#1c2238] border-gray-300 dark:border-white/[0.1] text-gray-800 dark:text-[#f1f3f9] focus:border-brand-500 dark:focus:border-brand-400" placeholder="+90 (5XX) XXX XX XX" required />
               </div>
               <div class="form-control">
-                <label class="label"><span class="label-text font-semibold text-gray-700 dark:text-gray-300">E-posta</span></label>
-                <input type="email" v-model="tenant.contactPersonEmail" class="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400" placeholder="ornek@email.com" />
+                <label class="label"><span class="label-text font-semibold text-gray-700 dark:text-[#f1f3f9]">E-posta</span></label>
+                <input type="email" v-model="tenant.contactPersonEmail" class="input input-bordered w-full bg-white dark:bg-[#1c2238] border-gray-300 dark:border-white/[0.1] text-gray-800 dark:text-[#f1f3f9] focus:border-brand-500 dark:focus:border-brand-400" placeholder="ornek@email.com" />
               </div>
             </div>
           </div>
 
           <!-- Ünite Seçimi -->
           <div class="card bg-base-200 p-4">
-            <h4 class="text-lg font-semibold mb-4 text-gray-700 dark:text-gray-300">📍 Ünite Seçimi</h4>
+            <h4 class="text-lg font-semibold mb-4 text-gray-700 dark:text-[#f1f3f9]">📍 Ünite Seçimi</h4>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
               <!-- Kat filtresi -->
               <div class="form-control">
-                <label class="label"><span class="label-text font-semibold text-gray-700 dark:text-gray-300">Kat Filtresi</span></label>
+                <label class="label"><span class="label-text font-semibold text-gray-700 dark:text-[#f1f3f9]">Kat Filtresi</span></label>
                 <div class="flex gap-2">
                   <select
                     v-model="tenant.floorNumber"
                     @change="onFloorChange"
-                    class="select select-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400">
+                    class="select select-bordered w-full bg-white dark:bg-[#1c2238] border-gray-300 dark:border-white/[0.1] text-gray-800 dark:text-[#f1f3f9] focus:border-brand-500 dark:focus:border-brand-400">
                     <option :value="null">Tüm katlar</option>
                     <option v-for="floor in availableFloors" :key="floor" :value="floor">
                       {{ floor }}. Kat
@@ -117,12 +117,12 @@
 
               <!-- Ünite seçimi (ÇOKLU) -->
               <div class="form-control md:col-span-2">
-                <label class="label"><span class="label-text font-semibold text-gray-700 dark:text-gray-300">Ünite Seçin (çoklu)</span></label>
+                <label class="label"><span class="label-text font-semibold text-gray-700 dark:text-[#f1f3f9]">Ünite Seçin (çoklu)</span></label>
                 <select
                   multiple
                   v-model="tenant.selectedFlatIds"
                   :size="multiSelectSize"
-                  class="select select-bordered w-full h-56 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400">
+                  class="select select-bordered w-full h-56 bg-white dark:bg-[#1c2238] border-gray-300 dark:border-white/[0.1] text-gray-800 dark:text-[#f1f3f9] focus:border-brand-500 dark:focus:border-brand-400">
                   <option
                     v-for="flat in availableFlatsForTenant"
                     :key="flat.id"
@@ -132,7 +132,7 @@
                 </select>
 
                 <label class="label">
-                  <span class="label-text-alt text-blue-600">
+                  <span class="label-text-alt text-brand-600">
                     💡 Ünite seçmezseniz yalnızca kat seçimiyle o kattaki ilk uygun ünite atanır.
                   </span>
                 </label>
@@ -142,11 +142,11 @@
 
           <!-- Aidat -->
           <div class="card bg-base-200 p-4">
-            <h4 class="text-lg font-semibold mb-4 text-gray-700 dark:text-gray-300">💰 Aidat Bilgisi</h4>
+            <h4 class="text-lg font-semibold mb-4 text-gray-700 dark:text-[#f1f3f9]">💰 Aidat Bilgisi</h4>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div class="form-control">
-                <label class="label"><span class="label-text font-semibold text-gray-700 dark:text-gray-300">Aylık Aidat (₺) *</span></label>
-                <input type="number" v-model.number="tenant.monthlyAidat" class="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400" placeholder="500" min="0" step="0.01" required />
+                <label class="label"><span class="label-text font-semibold text-gray-700 dark:text-[#f1f3f9]">Aylık Aidat (₺) *</span></label>
+                <input type="number" v-model.number="tenant.monthlyAidat" class="input input-bordered w-full bg-white dark:bg-[#1c2238] border-gray-300 dark:border-white/[0.1] text-gray-800 dark:text-[#f1f3f9] focus:border-brand-500 dark:focus:border-brand-400" placeholder="500" min="0" step="0.01" required />
               </div>
             </div>
           </div>
@@ -154,7 +154,7 @@
           <!-- Aktiflik -->
           <div class="form-control">
             <label class="label cursor-pointer">
-              <span class="label-text font-semibold text-gray-700 dark:text-gray-300">Aktif Kiracı</span>
+              <span class="label-text font-semibold text-gray-700 dark:text-[#f1f3f9]">Aktif Kiracı</span>
               <input type="checkbox" v-model="tenant.isActive" class="toggle toggle-success" />
             </label>
           </div>
@@ -163,8 +163,8 @@
       </div>
 
       <!-- Sabit Butonlar -->
-      <div class="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700 mt-6">
-        <button type="button" @click="handleClose" class="btn btn-outline border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">
+      <div class="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-white/[0.07] mt-6">
+        <button type="button" @click="handleClose" class="btn btn-outline border-gray-300 dark:border-white/[0.1] text-gray-700 dark:text-[#f1f3f9] hover:bg-gray-50 dark:hover:bg-white/[0.06]">
           <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
           </svg>

@@ -1,23 +1,23 @@
-<template>
+﻿<template>
   <div
     v-if="totalCount > 0"
-    class="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700"
+    class="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6 pt-4 border-t border-gray-200 dark:border-white/[0.07]"
   >
     <!-- Sol: kayıt bilgisi + sayfa boyutu -->
-    <div class="flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
+    <div class="flex items-center gap-3 text-sm text-gray-500 dark:text-[#9aa0b4]">
       <span>
-        <span class="font-medium text-gray-700 dark:text-gray-300">{{ rangeStart }}</span>
+        <span class="font-medium text-gray-700 dark:text-[#f1f3f9]">{{ rangeStart }}</span>
         –
-        <span class="font-medium text-gray-700 dark:text-gray-300">{{ rangeEnd }}</span>
+        <span class="font-medium text-gray-700 dark:text-[#f1f3f9]">{{ rangeEnd }}</span>
         /
-        <span class="font-medium text-gray-700 dark:text-gray-300">{{ totalCount }}</span>
+        <span class="font-medium text-gray-700 dark:text-[#f1f3f9]">{{ totalCount }}</span>
         kayıt
       </span>
       <select
         v-if="pageSizeOptions.length > 0"
         :value="pageSize"
         @change="onPageSizeChange"
-        class="select select-xs select-bordered bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+        class="select select-xs select-bordered bg-white dark:bg-[#1c2238] dark:border-white/[0.1] dark:text-[#f1f3f9]"
       >
         <option v-for="opt in pageSizeOptions" :key="opt" :value="opt">{{ opt }} / sayfa</option>
       </select>
@@ -46,7 +46,7 @@
         v-for="page in displayedPages"
         :key="page"
         class="btn btn-sm"
-        :class="page === currentPage ? 'btn-primary' : 'btn-ghost text-gray-700 dark:text-gray-300'"
+        :class="page === currentPage ? 'btn-primary' : 'btn-ghost text-gray-700 dark:text-[#f1f3f9]'"
         @click="$emit('update:currentPage', page)"
         :aria-current="page === currentPage ? 'page' : undefined"
       >

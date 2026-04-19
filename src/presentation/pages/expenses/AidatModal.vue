@@ -1,15 +1,15 @@
-<template>
+﻿<template>
   <dialog open class="modal" @keydown.esc.prevent="onEsc" @close.prevent>
-    <div class="modal-box max-w-md bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+    <div class="modal-box max-w-md bg-white dark:bg-[#0f1322] border border-gray-200 dark:border-white/[0.07]">
       <!-- Header -->
-      <div class="flex items-center justify-between mb-6 pb-4 border-b border-gray-200 dark:border-gray-700">
+      <div class="flex items-center justify-between mb-6 pb-4 border-b border-gray-200 dark:border-white/[0.07]">
         <div class="flex items-center gap-3">
           <div class="bg-green-100 dark:bg-green-900/50 text-green-600 dark:text-green-400 rounded-full p-2">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
             </svg>
           </div>
-          <h3 class="text-xl font-bold text-gray-800 dark:text-gray-100">Aidat Oluştur</h3>
+          <h3 class="text-xl font-bold text-gray-800 dark:text-[#f1f3f9]">Aidat Oluştur</h3>
         </div>
         <button @click="handleClose" class="btn btn-ghost btn-sm" :disabled="loading">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -24,14 +24,14 @@
       </div>
 
       <!-- Info -->
-      <div class="mb-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 border border-blue-200 dark:border-blue-800">
+      <div class="mb-4 bg-brand-50 dark:bg-brand-500/[0.08] rounded-lg p-4 border border-brand-200 dark:border-brand-700">
         <div class="flex items-start gap-3">
-          <div class="bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 rounded-full p-1 mt-0.5">
+          <div class="bg-brand-100 dark:bg-blue-900/50 text-brand-600 dark:text-brand-400 rounded-full p-1 mt-0.5">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
-          <div class="text-sm text-gray-700 dark:text-gray-300">
+          <div class="text-sm text-gray-700 dark:text-[#f1f3f9]">
             <p class="font-medium mb-1">Bilgi</p>
             <p>Seçilen dönem için yıllık aidat tanımlarından otomatik aidat kayıtları oluşturulur.</p>
           </div>
@@ -42,7 +42,7 @@
         <!-- Dönem -->
         <div class="form-control">
           <label class="label">
-            <span class="label-text font-semibold text-gray-700 dark:text-gray-300">Dönem</span>
+            <span class="label-text font-semibold text-gray-700 dark:text-[#f1f3f9]">Dönem</span>
             <span class="label-text-alt text-red-500">*</span>
           </label>
           <input
@@ -50,33 +50,33 @@
             type="month"
             v-model="period"
             :max="maxPeriod"
-            class="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300"
+            class="input input-bordered w-full bg-white dark:bg-[#1c2238] border-gray-300 dark:border-white/[0.1] text-gray-700 dark:text-[#f1f3f9]"
             required
           />
           <label class="label">
-            <span class="label-text-alt text-gray-500 dark:text-gray-400">Aidatın geçerli olacağı ay/yıl</span>
+            <span class="label-text-alt text-gray-500 dark:text-[#9aa0b4]">Aidatın geçerli olacağı ay/yıl</span>
           </label>
         </div>
 
         <!-- Son Ödeme Tarihi -->
         <div class="form-control">
           <label class="label">
-            <span class="label-text font-semibold text-gray-700 dark:text-gray-300">Son Ödeme Tarihi</span>
+            <span class="label-text font-semibold text-gray-700 dark:text-[#f1f3f9]">Son Ödeme Tarihi</span>
             <span class="label-text-alt text-red-500">*</span>
           </label>
           <input
             type="date"
             v-model="dueDate"
             :min="minDueDate"
-            class="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300"
+            class="input input-bordered w-full bg-white dark:bg-[#1c2238] border-gray-300 dark:border-white/[0.1] text-gray-700 dark:text-[#f1f3f9]"
             required
           />
           <label class="label">
-            <span class="label-text-alt text-gray-500 dark:text-gray-400">Öneri: Dönemi takip eden ayın 10'u</span>
+            <span class="label-text-alt text-gray-500 dark:text-[#9aa0b4]">Öneri: Dönemi takip eden ayın 10'u</span>
           </label>
         </div>
 
-        <div class="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+        <div class="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-white/[0.07]">
           <button type="button" class="btn btn-outline btn-sm" @click="handleClose" :disabled="loading">
             İptal
           </button>

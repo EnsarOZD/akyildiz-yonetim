@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="p-4 sm:p-6 min-h-screen pb-24 md:pb-6">
 
     <!-- Sayfa Başlığı -->
@@ -21,14 +21,14 @@
     <!-- Özet Kartları -->
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
       <div class="app-card flex items-center gap-3">
-        <div class="w-9 h-9 rounded-xl bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
+        <div class="w-9 h-9 rounded-xl bg-brand-100 dark:bg-brand-500/[0.12] text-brand-600 dark:text-brand-400 flex items-center justify-center shrink-0">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
           </svg>
         </div>
         <div class="min-w-0">
-          <p class="text-xs text-slate-500 dark:text-slate-400 leading-none mb-1">Kiracılar</p>
-          <p class="text-lg font-bold text-slate-800 dark:text-slate-100 leading-none">{{ totalTenants }}</p>
+          <p class="text-xs text-slate-500 dark:text-[#9aa0b4] leading-none mb-1">Kiracılar</p>
+          <p class="text-lg font-bold text-slate-800 dark:text-[#f1f3f9] leading-none">{{ totalTenants }}</p>
         </div>
       </div>
       <div class="app-card flex items-center gap-3">
@@ -38,8 +38,8 @@
           </svg>
         </div>
         <div class="min-w-0">
-          <p class="text-xs text-slate-500 dark:text-slate-400 leading-none mb-1">Mal Sahipleri</p>
-          <p class="text-lg font-bold text-slate-800 dark:text-slate-100 leading-none">{{ tabCounts.owners || '—' }}</p>
+          <p class="text-xs text-slate-500 dark:text-[#9aa0b4] leading-none mb-1">Mal Sahipleri</p>
+          <p class="text-lg font-bold text-slate-800 dark:text-[#f1f3f9] leading-none">{{ tabCounts.owners || '—' }}</p>
         </div>
       </div>
 
@@ -50,8 +50,8 @@
           </svg>
         </div>
         <div class="min-w-0">
-          <p class="text-xs text-slate-500 dark:text-slate-400 leading-none mb-1">Kullanıcılar</p>
-          <p class="text-lg font-bold text-slate-800 dark:text-slate-100 leading-none">{{ tabCounts.users || '—' }}</p>
+          <p class="text-xs text-slate-500 dark:text-[#9aa0b4] leading-none mb-1">Kullanıcılar</p>
+          <p class="text-lg font-bold text-slate-800 dark:text-[#f1f3f9] leading-none">{{ tabCounts.users || '—' }}</p>
         </div>
       </div>
 
@@ -62,8 +62,8 @@
           </svg>
         </div>
         <div class="min-w-0">
-          <p class="text-xs text-slate-500 dark:text-slate-400 leading-none mb-1">Duyurular</p>
-          <p class="text-lg font-bold text-slate-800 dark:text-slate-100 leading-none">—</p>
+          <p class="text-xs text-slate-500 dark:text-[#9aa0b4] leading-none mb-1">Duyurular</p>
+          <p class="text-lg font-bold text-slate-800 dark:text-[#f1f3f9] leading-none">—</p>
         </div>
       </div>
     </div>
@@ -71,7 +71,7 @@
     <!-- Sekmeler -->
     <div class="app-card !p-0">
       <!-- Sekme Başlıkları -->
-      <div class="flex border-b border-slate-200 dark:border-slate-700 overflow-x-auto">
+      <div class="flex border-b border-slate-200 dark:border-white/[0.07] overflow-x-auto">
         <button
           v-for="tab in tabs"
           :key="tab.key"
@@ -79,15 +79,15 @@
           :class="[
             'flex items-center gap-2 px-5 py-3.5 text-sm font-medium whitespace-nowrap border-b-2 transition-colors',
             activeTab === tab.key
-              ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-              : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+              ? 'border-brand-500 text-brand-600 dark:text-brand-400'
+              : 'border-transparent text-slate-500 dark:text-[#9aa0b4] hover:text-slate-700 dark:hover:text-slate-200'
           ]"
         >
           <component :is="tab.icon" class="w-4 h-4" />
           {{ tab.label }}
           <span
             v-if="tab.badge"
-            class="inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1.5 rounded-full text-xs font-semibold bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300"
+            class="inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1.5 rounded-full text-xs font-semibold bg-slate-100 dark:bg-[#1c2238] text-slate-600 dark:text-[#f1f3f9]"
           >
             {{ tab.badge }}
           </span>

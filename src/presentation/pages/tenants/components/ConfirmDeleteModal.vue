@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <dialog
     class="modal"
     :open="visible"
@@ -11,10 +11,10 @@
     <!-- DaisyUI: backdrop tıklamasıyla kapat -->
     <form method="dialog" class="modal-backdrop" @click.prevent="onCancel"></form>
 
-    <div class="modal-box max-w-md bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 border border-gray-200 dark:border-gray-700 shadow-2xl">
+    <div class="modal-box max-w-md bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 border border-gray-200 dark:border-white/[0.07] shadow-2xl">
       <!-- Başlık -->
-      <div class="flex items-center justify-between pb-4 border-b border-gray-200 dark:border-gray-700 mb-6">
-        <h3 id="dc-title" class="text-xl font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2">
+      <div class="flex items-center justify-between pb-4 border-b border-gray-200 dark:border-white/[0.07] mb-6">
+        <h3 id="dc-title" class="text-xl font-bold text-gray-800 dark:text-[#f1f3f9] flex items-center gap-2">
           <span class="text-2xl">⚠️</span>
           {{ title }}
         </h3>
@@ -23,7 +23,7 @@
           @click="onCancel"
           :disabled="loading"
           :class="['btn btn-sm btn-ghost', loading ? 'btn-disabled' : '']"
-          class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+          class="text-gray-500 hover:text-gray-700 dark:text-[#9aa0b4] dark:hover:text-gray-200"
         >
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -38,23 +38,23 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"/>
           </svg>
-          <p id="dc-desc" class="text-gray-700 dark:text-gray-300">
+          <p id="dc-desc" class="text-gray-700 dark:text-[#f1f3f9]">
             <strong class="text-red-600 dark:text-red-400">{{ displayName }}</strong>
             {{ message || 'kaydını silmek istediğinize emin misiniz?' }}
           </p>
         </div>
-        <p class="text-sm text-gray-500 dark:text-gray-400">
+        <p class="text-sm text-gray-500 dark:text-[#9aa0b4]">
           Not: Silme işlemi geri alınamaz olabilir; yetkilerinize göre ilişkili veriler etkilenebilir.
         </p>
       </div>
 
       <!-- Butonlar -->
-      <div class="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+      <div class="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-white/[0.07]">
         <button
           type="button"
           @click="onCancel"
           :disabled="loading"
-          :class="['btn btn-outline border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700', loading ? 'btn-disabled' : '']"
+          :class="['btn btn-outline border-gray-300 dark:border-white/[0.1] text-gray-700 dark:text-[#f1f3f9] hover:bg-gray-50 dark:hover:bg-white/[0.06]', loading ? 'btn-disabled' : '']"
         >
           <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>

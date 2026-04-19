@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="p-4 sm:p-6 min-h-screen pb-24 md:pb-6">
 
     <!-- Sayfa Başlığı -->
@@ -25,13 +25,13 @@
     <!-- İstatistik Kartları -->
     <div class="grid grid-cols-3 gap-3 sm:gap-4 mb-5">
       <div class="app-card flex items-center gap-3">
-        <div class="w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-900/20 text-blue-500 flex items-center justify-center shrink-0">
+        <div class="w-9 h-9 rounded-xl bg-brand-50 dark:bg-brand-500/[0.08] text-brand-500 flex items-center justify-center shrink-0">
           <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
           </svg>
         </div>
         <div class="min-w-0">
-          <p class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 truncate">Mal Sahibi</p>
+          <p class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-[#626885] truncate">Mal Sahibi</p>
           <p class="text-xl font-bold text-slate-800 dark:text-white tabular-nums">{{ totalOwnersCount }}</p>
         </div>
       </div>
@@ -42,7 +42,7 @@
           </svg>
         </div>
         <div class="min-w-0">
-          <p class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 truncate">Sahip Ünite</p>
+          <p class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-[#626885] truncate">Sahip Ünite</p>
           <p class="text-xl font-bold text-slate-800 dark:text-white tabular-nums">{{ totalOwnedUnitsCount }}</p>
         </div>
       </div>
@@ -53,7 +53,7 @@
           </svg>
         </div>
         <div class="min-w-0">
-          <p class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 truncate">Boş Ünite</p>
+          <p class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-[#626885] truncate">Boş Ünite</p>
           <p class="text-xl font-bold text-slate-800 dark:text-white tabular-nums">{{ vacantUnitsCount }}</p>
         </div>
       </div>
@@ -73,16 +73,16 @@
 
       <!-- Tablo Başlıkları -->
       <div v-if="filteredOwnersWithUnits.length > 0" class="hidden sm:grid grid-cols-12 gap-4 px-4 py-2.5 bg-slate-50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-700/60">
-        <div class="col-span-5 text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">Mal Sahibi</div>
-        <div class="col-span-4 text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">Üniteler</div>
-        <div v-if="authStore.role === ROLES.ADMIN || authStore.role === ROLES.MANAGER" class="col-span-3 text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 text-right">İşlemler</div>
+        <div class="col-span-5 text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-[#626885]">Mal Sahibi</div>
+        <div class="col-span-4 text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-[#626885]">Üniteler</div>
+        <div v-if="authStore.role === ROLES.ADMIN || authStore.role === ROLES.MANAGER" class="col-span-3 text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-[#626885] text-right">İşlemler</div>
       </div>
 
       <!-- Boş Durum -->
       <EmptyState v-if="filteredOwnersWithUnits.length === 0" title="Mal sahibi bulunamadı" />
 
       <!-- Liste -->
-      <div v-else class="divide-y divide-slate-100 dark:divide-slate-700/60">
+      <div v-else class="divide-y divide-slate-100 dark:divide-white/[0.06]/60">
         <div
           v-for="owner in filteredOwnersWithUnits"
           :key="owner.id"
@@ -94,8 +94,8 @@
               {{ getAvatarInitial(owner.name) }}
             </div>
             <div class="min-w-0">
-              <p class="text-sm font-semibold text-slate-800 dark:text-slate-100 truncate">{{ owner.name }}</p>
-              <p class="text-xs text-slate-400 dark:text-slate-500 truncate">{{ owner.email }}</p>
+              <p class="text-sm font-semibold text-slate-800 dark:text-[#f1f3f9] truncate">{{ owner.name }}</p>
+              <p class="text-xs text-slate-400 dark:text-[#626885] truncate">{{ owner.email }}</p>
             </div>
           </div>
 
@@ -109,13 +109,13 @@
                   'px-1.5 py-0.5 rounded text-[10px] font-semibold',
                   owner.vacantUnits.includes(unit)
                     ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300'
-                    : 'bg-slate-100 text-slate-600 dark:bg-slate-700/60 dark:text-slate-400'
+                    : 'bg-slate-100 text-slate-600 dark:bg-slate-700/60 dark:text-[#9aa0b4]'
                 ]"
               >
                 {{ unit }}
               </span>
             </div>
-            <span v-else class="text-xs text-slate-400 dark:text-slate-500">—</span>
+            <span v-else class="text-xs text-slate-400 dark:text-[#626885]">—</span>
           </div>
 
           <!-- İşlemler -->
@@ -126,7 +126,7 @@
                   <circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/><circle cx="5" cy="12" r="1.5"/>
                 </svg>
               </button>
-              <ul tabindex="0" class="dropdown-content menu p-1.5 shadow-card bg-base-100 border border-slate-200 dark:border-slate-700 rounded-xl w-36 z-10 text-xs">
+              <ul tabindex="0" class="dropdown-content menu p-1.5 shadow-card bg-base-100 border border-slate-200 dark:border-white/[0.07] rounded-xl w-36 z-10 text-xs">
                 <li><a @click="startEdit(owner)" class="rounded-lg">Düzenle</a></li>
                 <li><a @click="askDelete(owner)" class="rounded-lg text-error">Sil</a></li>
               </ul>
@@ -292,7 +292,7 @@ const getAvatarInitial = (name) => {
 const getAvatarColor = (name) => {
   if (!name) return 'bg-gray-500';
   const colors = [
-    'bg-blue-500', 'bg-purple-500', 'bg-amber-500', 'bg-emerald-500',
+    'bg-brand-500', 'bg-purple-500', 'bg-amber-500', 'bg-emerald-500',
     'bg-red-500', 'bg-pink-500', 'bg-indigo-500', 'bg-teal-500'
   ];
   const charCodeSum = name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);

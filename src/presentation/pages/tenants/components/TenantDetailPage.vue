@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div v-if="loading" class="flex justify-center items-center h-96">
     <span class="loading loading-spinner loading-lg"></span>
   </div>
@@ -30,7 +30,7 @@
               {{ formatCurrency(tenant.totalBalance) }}
             </div>
           </div>
-          <div class="w-px h-8 bg-slate-200 dark:bg-slate-700 mx-1 hidden sm:block"></div>
+          <div class="w-px h-8 bg-slate-200 dark:bg-[#1c2238] mx-1 hidden sm:block"></div>
           <div class="flex items-center gap-2">
             <span :class="['badge badge-sm font-bold px-3 py-2', tenant.isActive ? 'badge-success' : 'badge-ghost']">
               {{ tenant.isActive ? 'Aktif' : 'Pasif' }}
@@ -38,7 +38,7 @@
             <button 
               v-if="authStore.role === 'admin' || authStore.role === 'manager'"
               @click="showEditModal = true"
-              class="btn btn-sm btn-outline border-slate-300 dark:border-slate-600"
+              class="btn btn-sm btn-outline border-slate-300 dark:border-white/[0.1]"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -101,16 +101,16 @@
               class="px-4 py-1.5 rounded-full text-sm font-semibold border transition-all"
               :class="timelineFilter === f.val
                 ? 'bg-gray-800 dark:bg-white text-white dark:text-gray-900 border-transparent'
-                : 'border-gray-200 dark:border-gray-700 text-gray-500 hover:border-gray-400'">
+                : 'border-gray-200 dark:border-white/[0.07] text-gray-500 hover:border-gray-400'">
               {{ f.label }}
             </button>
           </div>
 
           <!-- Tablo -->
-          <div class="overflow-x-auto rounded-2xl border border-gray-100 dark:border-gray-700">
+          <div class="overflow-x-auto rounded-2xl border border-gray-100 dark:border-white/[0.07]">
             <table class="w-full text-sm">
               <thead>
-                <tr class="bg-gray-50 dark:bg-gray-800/60 text-xs uppercase tracking-widest text-gray-500 dark:text-gray-400">
+                <tr class="bg-gray-50 dark:bg-[#151a2e]/80 text-xs uppercase tracking-widest text-gray-500 dark:text-[#9aa0b4]">
                   <th class="px-4 py-3 text-left font-bold rounded-tl-2xl">Tarih</th>
                   <th class="px-4 py-3 text-left font-bold">Tür</th>
                   <th class="px-4 py-3 text-left font-bold">Açıklama</th>
@@ -132,7 +132,7 @@
                     </span>
                   </td>
                   <td class="px-4 py-3">
-                    <div class="font-semibold text-gray-800 dark:text-gray-200">{{ item.description }}</div>
+                    <div class="font-semibold text-gray-800 dark:text-[#f1f3f9]">{{ item.description }}</div>
                     <div class="text-xs text-gray-400 mt-0.5">{{ item.typeLabel }}</div>
                   </td>
                   <td class="px-4 py-3 text-right font-bold whitespace-nowrap"
@@ -271,7 +271,7 @@
 
           <!-- İş Yeri Bilgileri -->
           <div class="card bg-base-200 p-4">
-            <h4 class="text-lg font-semibold mb-4 text-gray-700 dark:text-gray-300">🏢 İş Yeri Bilgileri</h4>
+            <h4 class="text-lg font-semibold mb-4 text-gray-700 dark:text-[#f1f3f9]">🏢 İş Yeri Bilgileri</h4>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
               <div><strong>Şirket Adı:</strong> {{ tenant.companyName }}</div>
               <div><strong>İş Türü:</strong> {{ tenant.businessType }}</div>
@@ -281,7 +281,7 @@
 
           <!-- İletişim -->
           <div class="card bg-base-200 p-4">
-            <h4 class="text-lg font-semibold mb-4 text-gray-700 dark:text-gray-300">👤 İletişim Kişisi</h4>
+            <h4 class="text-lg font-semibold mb-4 text-gray-700 dark:text-[#f1f3f9]">👤 İletişim Kişisi</h4>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
               <div><strong>İletişim Kişisi:</strong> {{ tenant.contactPersonName }}</div>
               <div><strong>Telefon:</strong> <a :href="`tel:${tenant.contactPersonPhone}`" class="link link-primary">{{ tenant.contactPersonPhone }}</a></div>
@@ -291,7 +291,7 @@
 
           <!-- Ünite Bilgileri -->
           <div class="card bg-base-200 p-4">
-            <h4 class="text-lg font-semibold mb-4 text-gray-700 dark:text-gray-300">📍 Ünite Bilgileri</h4>
+            <h4 class="text-lg font-semibold mb-4 text-gray-700 dark:text-[#f1f3f9]">📍 Ünite Bilgileri</h4>
             <div v-if="tenant.flats && tenant.flats.length > 0">
               <div
                 v-for="flat in tenant.flats"
@@ -308,7 +308,7 @@
 
           <!-- Aidat -->
           <div class="card bg-base-200 p-4">
-            <h4 class="text-lg font-semibold mb-4 text-gray-700 dark:text-gray-300">💰 Aidat Bilgileri</h4>
+            <h4 class="text-lg font-semibold mb-4 text-gray-700 dark:text-[#f1f3f9]">💰 Aidat Bilgileri</h4>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
               <div><strong>Aylık Aidat:</strong> {{ formatCurrency(tenant.monthlyAidat) }}</div>
             </div>

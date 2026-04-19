@@ -1,16 +1,16 @@
-<template>
+﻿<template>
   <dialog open class="modal" @keydown.esc.prevent="handleClose">
-    <div class="modal-box max-w-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-2xl">
+    <div class="modal-box max-w-sm bg-white dark:bg-[#0f1322] border border-gray-200 dark:border-white/[0.07] shadow-2xl">
       <!-- Header -->
-      <div class="flex items-center justify-between mb-4 pb-2 border-b border-gray-100 dark:border-gray-700">
-        <h3 class="text-lg font-bold text-gray-800 dark:text-gray-100 italic">
+      <div class="flex items-center justify-between mb-4 pb-2 border-b border-gray-100 dark:border-white/[0.07]">
+        <h3 class="text-lg font-bold text-gray-800 dark:text-[#f1f3f9] italic">
           Ortak Gider Paylaştır
         </h3>
         <button @click="handleClose" class="btn btn-ghost btn-sm" :disabled="loading">✕</button>
       </div>
 
       <!-- Info -->
-      <div class="text-xs text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 p-3 rounded mb-4">
+      <div class="text-xs text-brand-600 dark:text-brand-400 bg-brand-50 dark:bg-brand-500/[0.08] p-3 rounded mb-4">
         <p>Bu işlem, seçilen dönem için <b>"Ortak Alan"</b> veya <b>"Mescit"</b> açıklamalı gider kaydını bulur ve tüm aktif kiracılara eşit olarak paylaştırır.</p>
       </div>
 

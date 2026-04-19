@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="min-h-screen flex">
 
     <!-- ═══════════════════════════════════════════════════
@@ -67,14 +67,14 @@
       <div class="w-full max-w-sm">
         <div class="mb-8">
           <h2 class="text-2xl font-bold text-slate-800 dark:text-white">Giriş Yap</h2>
-          <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Hesabınıza erişmek için bilgilerinizi girin</p>
+          <p class="mt-1 text-sm text-slate-500 dark:text-[#9aa0b4]">Hesabınıza erişmek için bilgilerinizi girin</p>
         </div>
 
         <form @submit.prevent="handleLogin" class="space-y-5">
 
           <!-- Email -->
           <div>
-            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5" for="email">
+            <label class="block text-sm font-medium text-slate-700 dark:text-[#f1f3f9] mb-1.5" for="email">
               E-posta
             </label>
             <div class="relative">
@@ -92,18 +92,18 @@
                 autocomplete="email"
                 required
                 class="block w-full pl-10 pr-4 py-2.5 rounded-lg border text-sm transition-colors duration-150
-                  bg-white dark:bg-slate-800/60
-                  border-slate-200 dark:border-slate-700
-                  text-slate-800 dark:text-slate-100
-                  placeholder-slate-400 dark:placeholder-slate-500
-                  focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 dark:focus:border-blue-500"
+                  bg-white dark:bg-[#151a2e]/80
+                  border-slate-200 dark:border-white/[0.07]
+                  text-slate-800 dark:text-[#f1f3f9]
+                  placeholder-slate-400 dark:placeholder-[#626885]
+                  focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 dark:focus:border-brand-500"
               />
             </div>
           </div>
 
           <!-- Password -->
           <div>
-            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5" for="password">
+            <label class="block text-sm font-medium text-slate-700 dark:text-[#f1f3f9] mb-1.5" for="password">
               Şifre
             </label>
             <div class="relative">
@@ -121,11 +121,11 @@
                 autocomplete="current-password"
                 required
                 class="block w-full pl-10 pr-12 py-2.5 rounded-lg border text-sm transition-colors duration-150
-                  bg-white dark:bg-slate-800/60
-                  border-slate-200 dark:border-slate-700
-                  text-slate-800 dark:text-slate-100
-                  placeholder-slate-400 dark:placeholder-slate-500
-                  focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 dark:focus:border-blue-500"
+                  bg-white dark:bg-[#151a2e]/80
+                  border-slate-200 dark:border-white/[0.07]
+                  text-slate-800 dark:text-[#f1f3f9]
+                  placeholder-slate-400 dark:placeholder-[#626885]
+                  focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 dark:focus:border-brand-500"
               />
               <button
                 type="button"
@@ -150,8 +150,8 @@
               <div
                 class="w-4 h-4 rounded border-2 flex items-center justify-center transition-colors duration-150"
                 :class="rememberMe
-                  ? 'bg-blue-600 border-blue-600'
-                  : 'border-slate-300 dark:border-slate-600 group-hover:border-blue-400'"
+                  ? 'bg-brand-500 border-brand-500'
+                  : 'border-slate-300 dark:border-white/[0.1] group-hover:border-brand-400'"
                 @click="rememberMe = !rememberMe"
               >
                 <svg v-if="rememberMe" class="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 20 20">
@@ -159,12 +159,12 @@
                 </svg>
               </div>
               <input type="checkbox" v-model="rememberMe" class="sr-only" />
-              <span class="text-sm text-slate-600 dark:text-slate-400">Beni hatırla</span>
+              <span class="text-sm text-slate-600 dark:text-[#9aa0b4]">Beni hatırla</span>
             </label>
             <button
               type="button"
               @click="showResetModal = true"
-              class="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium transition-colors"
+              class="text-sm text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300 font-medium transition-colors"
             >
               Şifremi unuttum
             </button>
@@ -186,11 +186,11 @@
             data-testid="login-btn"
             :disabled="loading"
             class="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg text-sm font-semibold
-              bg-blue-600 hover:bg-blue-700 active:bg-blue-800
+              bg-brand-500 hover:bg-brand-600 active:bg-brand-700
               text-white shadow-sm
               transition-all duration-150
               disabled:opacity-60 disabled:cursor-not-allowed disabled:pointer-events-none
-              focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900"
+              focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900"
           >
             <svg v-if="loading" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -205,7 +205,7 @@
         </form>
 
         <!-- Footer -->
-        <p class="mt-8 text-center text-xs text-slate-400 dark:text-slate-600">
+        <p class="mt-8 text-center text-xs text-slate-400 dark:text-[#626885]">
           © {{ new Date().getFullYear() }} {{ appName }}. Tüm hakları saklıdır.
         </p>
       </div>
@@ -231,24 +231,24 @@
           <div v-if="showResetModal" class="bg-white dark:bg-[#0f1322] rounded-2xl shadow-2xl max-w-md w-full p-6 border border-slate-200 dark:border-white/[0.08] animate-scale-in">
             <div class="flex items-center justify-between mb-1">
               <h3 class="text-base font-bold text-slate-800 dark:text-white">Şifre Sıfırlama</h3>
-              <button @click="showResetModal = false" class="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 transition-colors">
+              <button @click="showResetModal = false" class="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-white/[0.04] text-slate-400 hover:text-slate-600 transition-colors">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
             </div>
-            <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">Kayıtlı e-posta adresinize şifre sıfırlama bağlantısı göndereceğiz.</p>
+            <p class="text-sm text-slate-500 dark:text-[#9aa0b4] mb-4">Kayıtlı e-posta adresinize şifre sıfırlama bağlantısı göndereceğiz.</p>
 
             <input
               v-model="resetEmail"
               type="email"
               placeholder="ornek@sirket.com"
               class="block w-full px-3.5 py-2.5 rounded-lg border text-sm
-                bg-white dark:bg-slate-800
-                border-slate-200 dark:border-slate-700
-                text-slate-800 dark:text-slate-100
+                bg-white dark:bg-[#0f1322]
+                border-slate-200 dark:border-white/[0.07]
+                text-slate-800 dark:text-[#f1f3f9]
                 placeholder-slate-400
-                focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500"
+                focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500"
             />
 
             <div v-if="resetMessage" class="mt-3 flex items-center gap-2 p-3 bg-emerald-50 dark:bg-emerald-950/40 rounded-lg border border-emerald-200 dark:border-emerald-800/50 text-emerald-700 dark:text-emerald-400">
@@ -268,7 +268,7 @@
               <button
                 @click="handlePasswordReset"
                 :disabled="resetLoading"
-                class="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-semibold bg-blue-600 hover:bg-blue-700 text-white transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                class="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-semibold bg-brand-500 hover:bg-brand-600 text-white transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 <svg v-if="resetLoading" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
                   <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -278,7 +278,7 @@
               </button>
               <button
                 @click="showResetModal = false"
-                class="flex-1 py-2.5 rounded-lg text-sm font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition-colors"
+                class="flex-1 py-2.5 rounded-lg text-sm font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-[#151a2e] dark:hover:bg-white/[0.06] text-slate-700 dark:text-[#f1f3f9] transition-colors"
               >
                 İptal
               </button>

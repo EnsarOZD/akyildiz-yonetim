@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="p-4 sm:p-6 min-h-screen pb-24 md:pb-6">
 
     <!-- Sayfa Başlığı -->
@@ -26,7 +26,7 @@
     <div class="app-card mb-5">
       <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
         <div class="col-span-2 sm:col-span-1">
-          <label class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1 block">Arama</label>
+          <label class="text-xs font-semibold text-slate-500 dark:text-[#9aa0b4] mb-1 block">Arama</label>
           <input
             v-model="filters.searchTerm"
             @input="handleSearch"
@@ -35,14 +35,14 @@
           />
         </div>
         <div>
-          <label class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1 block">Tip</label>
+          <label class="text-xs font-semibold text-slate-500 dark:text-[#9aa0b4] mb-1 block">Tip</label>
           <select v-model="filters.type" @change="handleSearch" class="select select-bordered select-sm w-full">
             <option value="null">Tümü</option>
             <option v-for="t in UNIT_TYPES" :key="t.value" :value="t.value">{{ t.label }}</option>
           </select>
         </div>
         <div>
-          <label class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1 block">Durum</label>
+          <label class="text-xs font-semibold text-slate-500 dark:text-[#9aa0b4] mb-1 block">Durum</label>
           <select v-model="filters.isActive" @change="handleSearch" class="select select-bordered select-sm w-full">
             <option value="null">Tümü</option>
             <option value="true">Aktif</option>
@@ -50,7 +50,7 @@
           </select>
         </div>
         <div>
-          <label class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1 block">Doluluk</label>
+          <label class="text-xs font-semibold text-slate-500 dark:text-[#9aa0b4] mb-1 block">Doluluk</label>
           <select v-model="filters.isOccupied" @change="handleSearch" class="select select-bordered select-sm w-full">
             <option value="null">Tümü</option>
             <option value="true">Dolu</option>
@@ -58,7 +58,7 @@
           </select>
         </div>
         <div>
-          <label class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1 block">Kat No</label>
+          <label class="text-xs font-semibold text-slate-500 dark:text-[#9aa0b4] mb-1 block">Kat No</label>
           <input
             v-model.number="filters.floorNumber"
             @input="handleSearch"
@@ -75,7 +75,7 @@
           </svg>
           Temizle
         </button>
-        <span class="text-xs text-slate-400 dark:text-slate-500">{{ filteredFlats.length }} ünite</span>
+        <span class="text-xs text-slate-400 dark:text-[#626885]">{{ filteredFlats.length }} ünite</span>
       </div>
     </div>
 
@@ -94,7 +94,7 @@
                 <circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/><circle cx="5" cy="12" r="1.5"/>
               </svg>
             </button>
-            <ul tabindex="0" class="dropdown-content menu p-1.5 shadow-card bg-base-100 border border-slate-200 dark:border-slate-700 rounded-xl w-40 z-10 text-sm">
+            <ul tabindex="0" class="dropdown-content menu p-1.5 shadow-card bg-base-100 border border-slate-200 dark:border-white/[0.07] rounded-xl w-40 z-10 text-sm">
               <li v-if="authStore.role === ROLES.ADMIN || authStore.role === ROLES.MANAGER">
                 <a @click="editFlat(flat)" class="rounded-lg">Düzenle</a>
               </li>
@@ -118,7 +118,7 @@
             {{ flat.code }}
           </div>
           <div class="min-w-0">
-            <p class="text-sm font-bold text-slate-800 dark:text-slate-100">{{ flat.code }}</p>
+            <p class="text-sm font-bold text-slate-800 dark:text-[#f1f3f9]">{{ flat.code }}</p>
             <div class="flex items-center gap-1.5 mt-0.5 flex-wrap">
               <span class="badge badge-xs badge-info">{{ floorLabel(flat) }}</span>
               <span class="badge badge-xs badge-ghost">{{ typeLabel(flat.type) }}</span>
@@ -133,16 +133,16 @@
         </div>
 
         <!-- Detaylar -->
-        <div class="text-xs text-slate-500 dark:text-slate-400 space-y-1.5 pt-2 border-t border-slate-100 dark:border-slate-700/60">
+        <div class="text-xs text-slate-500 dark:text-[#9aa0b4] space-y-1.5 pt-2 border-t border-slate-100 dark:border-slate-700/60">
           <div class="flex justify-between">
             <span>Alan</span>
-            <span class="font-semibold text-slate-700 dark:text-slate-200">{{ flat.unitArea }} m²</span>
+            <span class="font-semibold text-slate-700 dark:text-[#f1f3f9]">{{ flat.unitArea }} m²</span>
           </div>
           <div v-if="flat.monthlyRent && flat.monthlyRent > 0" class="flex justify-between">
             <span>Aylık Kira</span>
             <span class="font-semibold text-green-600 dark:text-green-400 tabular-nums">{{ formatCurrency(flat.monthlyRent) }}</span>
           </div>
-          <p v-if="flat.description" class="text-[10px] italic text-slate-400 dark:text-slate-500 pt-0.5">{{ flat.description }}</p>
+          <p v-if="flat.description" class="text-[10px] italic text-slate-400 dark:text-[#626885] pt-0.5">{{ flat.description }}</p>
         </div>
       </div>
     </div>

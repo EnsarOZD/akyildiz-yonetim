@@ -1,5 +1,5 @@
-<template>
-  <div class="p-4 sm:p-6 bg-gray-50 min-h-screen font-sans dark:bg-gray-900">
+﻿<template>
+  <div class="p-4 sm:p-6 min-h-screen dark:bg-base-200">
     <div class="max-w-7xl mx-auto">
       
       <!-- Başlık -->
@@ -15,17 +15,17 @@
               <span class="text-[10px] font-bold uppercase tracking-wider text-red-400">Toplam Geciken</span>
               <span class="text-sm font-bold text-red-500">{{ formatCurrency(totalOverdueAmount) }}</span>
             </div>
-            <div class="w-px h-8 bg-slate-200 dark:bg-slate-700 mx-1"></div>
+            <div class="w-px h-8 bg-slate-200 dark:bg-[#1c2238] mx-1"></div>
             <div class="flex flex-col items-end">
               <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Adet</span>
-              <span class="text-sm font-bold text-slate-700 dark:text-slate-200">{{ overdueCount }}</span>
+              <span class="text-sm font-bold text-slate-700 dark:text-[#f1f3f9]">{{ overdueCount }}</span>
             </div>
           </div>
         </template>
       </PageHeader>
 
       <!-- Filtreler -->
-      <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 mb-6">
+      <div class="bg-white dark:bg-[#0f1322] p-6 rounded-xl shadow-md border border-gray-200 dark:border-white/[0.07] mb-6">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div>
             <label class="label">Arama</label>
@@ -68,10 +68,10 @@
       </div>
 
       <!-- Tablo -->
-      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 overflow-hidden">
+      <div class="bg-white dark:bg-[#0f1322] rounded-xl shadow-md border border-gray-200 dark:border-white/[0.07] overflow-hidden">
         <div class="overflow-x-auto">
           <table class="table w-full">
-            <thead class="bg-gray-50 dark:bg-gray-700">
+            <thead class="bg-slate-50 dark:bg-[#1c2238]">
               <tr>
                 <th scope="col" class="text-left p-4">Mal Sahibi</th>
                 <th scope="col" class="text-left p-4">Kat</th>
@@ -83,21 +83,21 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="overdue in filteredOverdue" :key="overdue.id" class="border-b border-gray-200 dark:border-gray-700 hover:bg-red-50 dark:hover:bg-red-900/20">
+              <tr v-for="overdue in filteredOverdue" :key="overdue.id" class="border-b border-gray-200 dark:border-white/[0.07] hover:bg-red-50 dark:hover:bg-red-900/20">
                 <td class="p-4">
                   <div>
-                    <p class="font-medium text-gray-800 dark:text-gray-100">{{ overdue.ownerName }}</p>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ overdue.ownerEmail }}</p>
+                    <p class="font-medium text-gray-800 dark:text-[#f1f3f9]">{{ overdue.ownerName }}</p>
+                    <p class="text-sm text-gray-500 dark:text-[#9aa0b4]">{{ overdue.ownerEmail }}</p>
                   </div>
                 </td>
-                <td class="p-4 text-gray-800 dark:text-gray-100">{{ overdue.unit }}</td>
+                <td class="p-4 text-gray-800 dark:text-[#f1f3f9]">{{ overdue.unit }}</td>
                 <td class="p-4">
                   <span 
                     :class="{
                       'bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-400': overdue.type === 'aidat',
-                      'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-400': overdue.type === 'su',
+                      'bg-brand-100 text-brand-700 dark:bg-blue-900/50 dark:text-brand-400': overdue.type === 'su',
                       'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-400': overdue.type === 'elektrik',
-                      'bg-gray-100 text-gray-800 dark:bg-gray-900/50 dark:text-gray-400': overdue.type === 'diger'
+                      'bg-gray-100 text-gray-800 dark:bg-gray-900/50 dark:text-[#9aa0b4]': overdue.type === 'diger'
                     }"
                     class="px-2 py-1 rounded-full text-xs font-medium"
                   >
@@ -107,7 +107,7 @@
                 <td class="p-4">
                   <span class="font-semibold text-red-600 dark:text-red-400">{{ formatCurrency(overdue.amount) }}</span>
                 </td>
-                <td class="p-4 text-gray-800 dark:text-gray-100">{{ formatDate(overdue.dueDate) }}</td>
+                <td class="p-4 text-gray-800 dark:text-[#f1f3f9]">{{ formatDate(overdue.dueDate) }}</td>
                 <td class="p-4">
                   <span 
                     :class="{
@@ -154,7 +154,7 @@
               <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
-          <p class="text-gray-500 dark:text-gray-400">Geciken ödeme bulunmuyor.</p>
+          <p class="text-gray-500 dark:text-[#9aa0b4]">Geciken ödeme bulunmuyor.</p>
         </div>
       </div>
     </div>

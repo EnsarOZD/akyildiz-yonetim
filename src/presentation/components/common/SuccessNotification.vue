@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <TransitionGroup
     name="success-notification"
     tag="div"
@@ -35,10 +35,10 @@
             </svg>
           </div>
           <div>
-            <h4 class="font-semibold text-gray-900 dark:text-gray-100 text-sm">
+            <h4 class="font-semibold text-gray-900 dark:text-[#f1f3f9] text-sm">
               {{ notification.title }}
             </h4>
-            <p class="text-gray-600 dark:text-gray-400 text-sm mt-1">
+            <p class="text-gray-600 dark:text-[#9aa0b4] text-sm mt-1">
               {{ notification.message }}
             </p>
           </div>
@@ -56,7 +56,7 @@
       </div>
 
       <!-- Progress Bar -->
-      <div class="mt-3 h-1 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+      <div class="mt-3 h-1 bg-gray-200 dark:bg-[#1c2238] rounded-full overflow-hidden">
         <div
           :class="getProgressClasses(notification.type)"
           class="h-full transition-all duration-300 ease-linear"
@@ -119,12 +119,12 @@ const removeNotification = (notificationId) => {
 
 // Bildirim sınıfları
 const getNotificationClasses = (type) => {
-  const baseClasses = 'bg-white dark:bg-gray-800'
+  const baseClasses = 'bg-white dark:bg-[#151a2e]'
   switch (type) {
     case 'success':
       return `${baseClasses} border-l-4 border-green-500`
     case 'info':
-      return `${baseClasses} border-l-4 border-blue-500`
+      return `${baseClasses} border-l-4 border-brand-500`
     case 'warning':
       return `${baseClasses} border-l-4 border-yellow-500`
     default:
@@ -138,7 +138,7 @@ const getIconClasses = (type) => {
     case 'success':
       return 'bg-green-100 dark:bg-green-900/50 text-green-600 dark:text-green-400'
     case 'info':
-      return 'bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400'
+      return 'bg-brand-100 dark:bg-blue-900/50 text-brand-600 dark:text-brand-400'
     case 'warning':
       return 'bg-yellow-100 dark:bg-yellow-900/50 text-yellow-600 dark:text-yellow-400'
     default:
@@ -152,7 +152,7 @@ const getProgressClasses = (type) => {
     case 'success':
       return 'bg-green-500'
     case 'info':
-      return 'bg-blue-500'
+      return 'bg-brand-500'
     case 'warning':
       return 'bg-yellow-500'
     default:

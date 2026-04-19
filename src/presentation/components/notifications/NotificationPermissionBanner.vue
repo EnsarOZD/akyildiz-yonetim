@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <!-- Mobil: bottom sheet; Masaüstü: üst banner -->
   <transition
     enter-active-class="transition ease-out duration-300"
@@ -14,13 +14,13 @@
     >
       <!-- Mobil: kart; Masaüstü: tam genişlik banner -->
       <div class="md:hidden">
-        <div class="app-card !p-0 shadow-xl border-blue-300 dark:border-blue-700 overflow-hidden">
+        <div class="app-card !p-0 shadow-xl border-brand-300 dark:border-brand-600 overflow-hidden">
           <!-- Renk çizgisi -->
           <div class="h-1 bg-gradient-to-r from-blue-500 to-violet-500" />
           <div class="p-4">
             <div class="flex items-start gap-3">
               <!-- İkon -->
-              <div class="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
+              <div class="w-10 h-10 rounded-xl bg-brand-100 dark:bg-blue-900/40 text-brand-600 dark:text-brand-400 flex items-center justify-center shrink-0">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75"
                     d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
@@ -28,17 +28,17 @@
               </div>
               <!-- Metin -->
               <div class="flex-1 min-w-0">
-                <p class="text-sm font-semibold text-slate-800 dark:text-slate-100">
+                <p class="text-sm font-semibold text-slate-800 dark:text-[#f1f3f9]">
                   {{ deniedState ? 'Bildirimler Engellendi' : 'Bildirimleri Etkinleştir' }}
                 </p>
-                <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">
+                <p class="text-xs text-slate-500 dark:text-[#9aa0b4] mt-0.5 leading-relaxed">
                   {{ deniedState
                     ? 'Tarayıcı ayarlarından bu site için bildirimlere izin verin.'
                     : 'Borç, tahsilat ve duyurular için anlık bildirim alın.' }}
                 </p>
               </div>
               <!-- Kapat -->
-              <button @click="dismiss" class="p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-400 shrink-0">
+              <button @click="dismiss" class="p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-white/[0.06] text-slate-400 shrink-0">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
@@ -77,7 +77,7 @@
       </div>
 
       <!-- Masaüstü banner -->
-      <div class="hidden md:flex items-center justify-between gap-4 bg-blue-600 text-white px-6 py-3 shadow-md text-sm">
+      <div class="hidden md:flex items-center justify-between gap-4 bg-brand-500 text-white px-6 py-3 shadow-md text-sm">
         <div class="flex items-center gap-3">
           <div class="p-1.5 bg-white/20 rounded-full shrink-0">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -95,7 +95,7 @@
           <button v-if="!deniedState"
             @click="subscribe"
             :disabled="loading"
-            class="px-3 py-1.5 bg-white text-blue-600 font-semibold rounded-lg text-xs hover:bg-blue-50 transition disabled:opacity-50"
+            class="px-3 py-1.5 bg-white text-brand-600 font-semibold rounded-lg text-xs hover:bg-brand-50 transition disabled:opacity-50"
           >
             <span v-if="loading" class="loading loading-spinner loading-xs mr-1"></span>
             Bildirimleri Aç

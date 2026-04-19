@@ -1,9 +1,9 @@
-<template>
+﻿<template>
   <!-- Loading -->
   <div v-if="!authStore.isInitialized" class="flex items-center justify-center min-h-screen">
     <div class="flex flex-col items-center gap-3">
-      <div class="w-10 h-10 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-      <p class="text-sm text-slate-500 dark:text-slate-400">Yükleniyor...</p>
+      <div class="w-10 h-10 border-2 border-brand-500 border-t-transparent rounded-full animate-spin"></div>
+      <p class="text-sm text-slate-500 dark:text-[#9aa0b4]">Yükleniyor...</p>
     </div>
   </div>
 
@@ -24,7 +24,7 @@
             <select
               v-model="dateFilter"
               @change="loadDashboardData"
-              class="select select-sm select-bordered bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-sm rounded-lg"
+              class="select select-sm select-bordered bg-white dark:bg-[#0f1322] border-slate-200 dark:border-white/[0.07] text-slate-700 dark:text-[#f1f3f9] text-sm rounded-lg"
             >
               <option value="all">Tüm Zamanlar</option>
               <option value="this_month">Bu Ay</option>
@@ -36,9 +36,9 @@
               @click="loadDashboardData"
               :disabled="loading"
               class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium
-                bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700
-                text-slate-600 dark:text-slate-300
-                hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors disabled:opacity-50"
+                bg-white dark:bg-[#0f1322] border border-slate-200 dark:border-white/[0.07]
+                text-slate-600 dark:text-[#f1f3f9]
+                hover:bg-slate-50 dark:hover:bg-white/[0.06] transition-colors disabled:opacity-50"
             >
               <svg class="w-4 h-4" :class="loading ? 'animate-spin' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -53,10 +53,10 @@
       <div v-if="loading" class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
         <div v-for="i in 3" :key="i" class="app-card p-5 animate-pulse">
           <div class="flex items-center gap-4">
-            <div class="w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-700"></div>
+            <div class="w-12 h-12 rounded-xl bg-slate-100 dark:bg-[#1c2238]"></div>
             <div class="flex-1 space-y-2">
-              <div class="h-3 bg-slate-100 dark:bg-slate-700 rounded w-2/3"></div>
-              <div class="h-6 bg-slate-100 dark:bg-slate-700 rounded w-1/2"></div>
+              <div class="h-3 bg-slate-100 dark:bg-[#1c2238] rounded w-2/3"></div>
+              <div class="h-6 bg-slate-100 dark:bg-[#1c2238] rounded w-1/2"></div>
             </div>
           </div>
         </div>
@@ -70,9 +70,9 @@
           </svg>
         </div>
         <div class="flex-1 min-w-0">
-          <p class="text-sm font-semibold text-slate-800 dark:text-slate-100">Veri yüklenemedi</p>
-          <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{{ error }}</p>
-          <button @click="loadDashboardData" class="mt-3 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline">Tekrar dene</button>
+          <p class="text-sm font-semibold text-slate-800 dark:text-[#f1f3f9]">Veri yüklenemedi</p>
+          <p class="text-xs text-slate-500 dark:text-[#9aa0b4] mt-0.5">{{ error }}</p>
+          <button @click="loadDashboardData" class="mt-3 text-xs font-semibold text-brand-600 dark:text-brand-400 hover:underline">Tekrar dene</button>
         </div>
       </div>
 
@@ -93,8 +93,8 @@
                 <span class="w-1.5 h-1.5 rounded-full bg-violet-500 animate-pulse"></span>
                 Son Duyuru
               </p>
-              <p class="text-sm font-semibold text-slate-800 dark:text-slate-100 line-clamp-1">{{ notificationsStore.latestAnnouncement.title }}</p>
-              <p class="text-xs text-slate-500 dark:text-slate-400 line-clamp-1 mt-0.5">{{ notificationsStore.latestAnnouncement.message }}</p>
+              <p class="text-sm font-semibold text-slate-800 dark:text-[#f1f3f9] line-clamp-1">{{ notificationsStore.latestAnnouncement.title }}</p>
+              <p class="text-xs text-slate-500 dark:text-[#9aa0b4] line-clamp-1 mt-0.5">{{ notificationsStore.latestAnnouncement.message }}</p>
             </div>
             <router-link to="/notifications"
               class="flex-shrink-0 inline-flex items-center gap-1 text-xs font-semibold text-violet-600 dark:text-violet-400 hover:underline">
@@ -122,21 +122,21 @@
                 <span class="badge-active text-[10px] font-bold px-2 py-0.5 rounded-full">Güncel</span>
               </div>
               <div>
-                <p class="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Kasa Bakiyesi</p>
-                <p class="text-xl font-bold text-slate-800 dark:text-slate-100 mt-0.5">{{ formatCurrency(balance) }}</p>
+                <p class="text-xs font-medium text-slate-500 dark:text-[#9aa0b4] uppercase tracking-wider">Kasa Bakiyesi</p>
+                <p class="text-xl font-bold text-slate-800 dark:text-[#f1f3f9] mt-0.5">{{ formatCurrency(balance) }}</p>
               </div>
             </router-link>
 
             <!-- Toplam Gelir -->
             <router-link to="/payments" class="app-card p-5 flex flex-col justify-between hover:shadow-card-md transition-shadow group">
-              <div class="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
+              <div class="w-10 h-10 rounded-xl bg-brand-100 dark:bg-brand-500/[0.12] text-brand-600 dark:text-brand-400 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
                 </svg>
               </div>
               <div>
-                <p class="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Toplam Gelir</p>
-                <p class="text-xl font-bold text-blue-600 dark:text-blue-400 mt-0.5">{{ formatCurrency(totalIncome) }}</p>
+                <p class="text-xs font-medium text-slate-500 dark:text-[#9aa0b4] uppercase tracking-wider">Toplam Gelir</p>
+                <p class="text-xl font-bold text-brand-600 dark:text-brand-400 mt-0.5">{{ formatCurrency(totalIncome) }}</p>
                 <p class="text-xs text-slate-400 mt-0.5">+{{ formatCurrency(thisMonthTenantPayments) }} bu ay</p>
               </div>
             </router-link>
@@ -149,7 +149,7 @@
                 </svg>
               </div>
               <div>
-                <p class="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Toplam Gider</p>
+                <p class="text-xs font-medium text-slate-500 dark:text-[#9aa0b4] uppercase tracking-wider">Toplam Gider</p>
                 <p class="text-xl font-bold text-red-600 dark:text-red-400 mt-0.5">{{ formatCurrency(totalExpense) }}</p>
                 <p class="text-xs text-slate-400 mt-0.5">{{ expenses.length }} kalem</p>
               </div>
@@ -167,32 +167,32 @@
 
             <!-- Bekleyen Alacaklar -->
             <router-link to="/utilities" class="app-card p-5 hover:shadow-card-md transition-shadow flex-1">
-              <h4 class="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-3 flex items-center gap-2">
+              <h4 class="text-sm font-semibold text-slate-700 dark:text-[#f1f3f9] mb-3 flex items-center gap-2">
                 <span class="w-1 h-5 bg-amber-500 rounded-full"></span>
                 Bekleyen Alacaklar
               </h4>
               <div class="space-y-2">
                 <div class="flex items-center justify-between text-sm">
-                  <span class="flex items-center gap-2 text-slate-600 dark:text-slate-400">
+                  <span class="flex items-center gap-2 text-slate-600 dark:text-[#9aa0b4]">
                     <span class="w-2 h-2 rounded-full bg-emerald-500"></span>Aidat
                   </span>
-                  <span class="font-semibold text-slate-800 dark:text-slate-100">{{ formatCurrency(totalAidatDebt) }}</span>
+                  <span class="font-semibold text-slate-800 dark:text-[#f1f3f9]">{{ formatCurrency(totalAidatDebt) }}</span>
                 </div>
                 <div class="flex items-center justify-between text-sm">
-                  <span class="flex items-center gap-2 text-slate-600 dark:text-slate-400">
+                  <span class="flex items-center gap-2 text-slate-600 dark:text-[#9aa0b4]">
                     <span class="w-2 h-2 rounded-full bg-amber-500"></span>Elektrik
                   </span>
-                  <span class="font-semibold text-slate-800 dark:text-slate-100">{{ formatCurrency(totalElectricityDebt) }}</span>
+                  <span class="font-semibold text-slate-800 dark:text-[#f1f3f9]">{{ formatCurrency(totalElectricityDebt) }}</span>
                 </div>
                 <div class="flex items-center justify-between text-sm">
-                  <span class="flex items-center gap-2 text-slate-600 dark:text-slate-400">
-                    <span class="w-2 h-2 rounded-full bg-blue-500"></span>Su
+                  <span class="flex items-center gap-2 text-slate-600 dark:text-[#9aa0b4]">
+                    <span class="w-2 h-2 rounded-full bg-brand-500"></span>Su
                   </span>
-                  <span class="font-semibold text-slate-800 dark:text-slate-100">{{ formatCurrency(totalWaterDebt) }}</span>
+                  <span class="font-semibold text-slate-800 dark:text-[#f1f3f9]">{{ formatCurrency(totalWaterDebt) }}</span>
                 </div>
-                <div class="h-px bg-slate-100 dark:bg-slate-700 my-1"></div>
+                <div class="h-px bg-slate-100 dark:bg-[#1c2238] my-1"></div>
                 <div class="flex items-center justify-between text-sm font-semibold">
-                  <span class="text-slate-500 dark:text-slate-400">Toplam</span>
+                  <span class="text-slate-500 dark:text-[#9aa0b4]">Toplam</span>
                   <span class="text-amber-600 dark:text-amber-400">{{ formatCurrency(totalUtilityDebts) }}</span>
                 </div>
               </div>
@@ -203,31 +203,31 @@
         <!-- ─── Observer: Özet Kartları ───────────────── -->
         <section v-else-if="userRole?.toLowerCase() === 'observer'" class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
           <div class="app-card p-5 border-l-4 border-amber-400">
-            <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Bekleyen Borç</p>
-            <p class="text-2xl font-bold text-slate-800 dark:text-slate-100">{{ formatCurrency(totalUtilityDebts) }}</p>
-            <div class="mt-2 space-y-1 text-xs text-slate-500 dark:text-slate-400">
+            <p class="text-xs font-semibold text-slate-500 dark:text-[#9aa0b4] uppercase tracking-wider mb-1">Bekleyen Borç</p>
+            <p class="text-2xl font-bold text-slate-800 dark:text-[#f1f3f9]">{{ formatCurrency(totalUtilityDebts) }}</p>
+            <div class="mt-2 space-y-1 text-xs text-slate-500 dark:text-[#9aa0b4]">
               <div class="flex justify-between"><span class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Aidat</span><span>{{ formatCurrency(totalAidatDebt) }}</span></div>
               <div class="flex justify-between"><span class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>Elektrik</span><span>{{ formatCurrency(totalElectricityDebt) }}</span></div>
-              <div class="flex justify-between"><span class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>Su</span><span>{{ formatCurrency(totalWaterDebt) }}</span></div>
+              <div class="flex justify-between"><span class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-brand-500"></span>Su</span><span>{{ formatCurrency(totalWaterDebt) }}</span></div>
             </div>
           </div>
           <div class="app-card p-5" :class="overdueItems.length > 0 ? 'border-l-4 border-red-400' : ''">
-            <p class="text-xs font-semibold uppercase tracking-wider mb-1" :class="overdueItems.length > 0 ? 'text-red-500' : 'text-slate-500 dark:text-slate-400'">Geciken Borçlar</p>
-            <p class="text-2xl font-bold text-slate-800 dark:text-slate-100">{{ formatCurrency(overdueTotalAmount) }}</p>
-            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+            <p class="text-xs font-semibold uppercase tracking-wider mb-1" :class="overdueItems.length > 0 ? 'text-red-500' : 'text-slate-500 dark:text-[#9aa0b4]'">Geciken Borçlar</p>
+            <p class="text-2xl font-bold text-slate-800 dark:text-[#f1f3f9]">{{ formatCurrency(overdueTotalAmount) }}</p>
+            <p class="text-xs text-slate-500 dark:text-[#9aa0b4] mt-1">
               <span :class="overdueItems.length > 0 ? 'text-red-500 font-bold' : ''">{{ overdueItems.length }}</span> adet kalem
             </p>
           </div>
           <div class="app-card p-5 border-l-4 border-emerald-400">
-            <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Toplam Tahsilat</p>
-            <p class="text-2xl font-bold text-slate-800 dark:text-slate-100">{{ formatCurrency(totalIncome) }}</p>
-            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">+{{ formatCurrency(thisMonthTenantPayments) }} bu ay</p>
+            <p class="text-xs font-semibold text-slate-500 dark:text-[#9aa0b4] uppercase tracking-wider mb-1">Toplam Tahsilat</p>
+            <p class="text-2xl font-bold text-slate-800 dark:text-[#f1f3f9]">{{ formatCurrency(totalIncome) }}</p>
+            <p class="text-xs text-slate-500 dark:text-[#9aa0b4] mt-1">+{{ formatCurrency(thisMonthTenantPayments) }} bu ay</p>
           </div>
         </section>
 
         <!-- ─── Hızlı İşlemler ─────────────────────── -->
         <section v-if="userRole === 'admin' || userRole === 'manager'" class="mb-6">
-          <h2 class="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3 px-0.5">Hızlı İşlemler</h2>
+          <h2 class="text-sm font-semibold text-slate-500 dark:text-[#9aa0b4] uppercase tracking-wider mb-3 px-0.5">Hızlı İşlemler</h2>
           <div class="grid grid-cols-3 sm:grid-cols-5 lg:grid-cols-6 gap-3">
 
             <!-- Borç Ekle -->
@@ -239,19 +239,19 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                   </svg>
                 </div>
-                <span class="text-xs font-semibold text-slate-700 dark:text-slate-200 text-center">Borç Ekle</span>
+                <span class="text-xs font-semibold text-slate-700 dark:text-[#f1f3f9] text-center">Borç Ekle</span>
               </div>
-              <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow-card-lg bg-white dark:bg-slate-800 rounded-xl w-48 mt-1 border border-slate-200 dark:border-slate-700 text-sm">
-                <li><a @click="openManualDebtModal(0)" class="text-slate-700 dark:text-slate-200 rounded-lg flex items-center gap-2">
+              <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow-card-lg bg-white dark:bg-[#0f1322] rounded-xl w-48 mt-1 border border-slate-200 dark:border-white/[0.07] text-sm">
+                <li><a @click="openManualDebtModal(0)" class="text-slate-700 dark:text-[#f1f3f9] rounded-lg flex items-center gap-2">
                   <svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                   Aidat Ekle
                 </a></li>
-                <li><a @click="openManualDebtModal(1)" class="text-slate-700 dark:text-slate-200 rounded-lg flex items-center gap-2">
+                <li><a @click="openManualDebtModal(1)" class="text-slate-700 dark:text-[#f1f3f9] rounded-lg flex items-center gap-2">
                   <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                   Elektrik Ekle
                 </a></li>
-                <li><a @click="openManualDebtModal(2)" class="text-slate-700 dark:text-slate-200 rounded-lg flex items-center gap-2">
-                  <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3c-4.418 4.863-5 8-5 10a5 5 0 0010 0c0-2-0.582-5.137-5-10z"/></svg>
+                <li><a @click="openManualDebtModal(2)" class="text-slate-700 dark:text-[#f1f3f9] rounded-lg flex items-center gap-2">
+                  <svg class="w-4 h-4 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3c-4.418 4.863-5 8-5 10a5 5 0 0010 0c0-2-0.582-5.137-5-10z"/></svg>
                   Su Ekle
                 </a></li>
               </ul>
@@ -264,7 +264,7 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
                 </svg>
               </div>
-              <span class="text-xs font-semibold text-slate-700 dark:text-slate-200 text-center">Tahsilat Al</span>
+              <span class="text-xs font-semibold text-slate-700 dark:text-[#f1f3f9] text-center">Tahsilat Al</span>
             </router-link>
 
             <!-- Gider Ekle -->
@@ -274,7 +274,7 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
-              <span class="text-xs font-semibold text-slate-700 dark:text-slate-200 text-center">Gider Ekle</span>
+              <span class="text-xs font-semibold text-slate-700 dark:text-[#f1f3f9] text-center">Gider Ekle</span>
             </router-link>
 
             <!-- Kiracılar -->
@@ -284,7 +284,7 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                 </svg>
               </div>
-              <span class="text-xs font-semibold text-slate-700 dark:text-slate-200 text-center">Kiracılar</span>
+              <span class="text-xs font-semibold text-slate-700 dark:text-[#f1f3f9] text-center">Kiracılar</span>
             </router-link>
 
             <!-- Raporlar -->
@@ -294,17 +294,17 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
               </div>
-              <span class="text-xs font-semibold text-slate-700 dark:text-slate-200 text-center">Raporlar</span>
+              <span class="text-xs font-semibold text-slate-700 dark:text-[#f1f3f9] text-center">Raporlar</span>
             </router-link>
 
             <!-- Talepler -->
             <router-link to="/service-requests" class="app-card p-4 flex flex-col items-center gap-2 hover:shadow-card-md group transition-shadow">
-              <div class="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center group-hover:scale-105 transition-transform">
+              <div class="w-10 h-10 rounded-xl bg-brand-100 dark:bg-brand-500/[0.12] text-brand-600 dark:text-brand-400 flex items-center justify-center group-hover:scale-105 transition-transform">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
                 </svg>
               </div>
-              <span class="text-xs font-semibold text-slate-700 dark:text-slate-200 text-center">Talepler</span>
+              <span class="text-xs font-semibold text-slate-700 dark:text-[#f1f3f9] text-center">Talepler</span>
             </router-link>
 
             <!-- Duyuru Yap -->
@@ -323,8 +323,8 @@
 
         <!-- ─── Geciken Ödemeler ───────────────────── -->
         <section class="app-card overflow-hidden mb-5">
-          <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100 dark:border-slate-800">
-            <h2 class="text-sm font-semibold text-slate-800 dark:text-slate-100">Geciken Ödemeler</h2>
+          <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100 dark:border-white/[0.05]">
+            <h2 class="text-sm font-semibold text-slate-800 dark:text-[#f1f3f9]">Geciken Ödemeler</h2>
             <span class="badge-overdue text-xs font-bold px-2.5 py-1 rounded-full">{{ overdueItems.length }} adet</span>
           </div>
 
@@ -337,8 +337,8 @@
                 </svg>
               </div>
               <div class="min-w-0 flex-1">
-                <p class="text-sm font-medium text-slate-800 dark:text-slate-100 truncate">{{ item.company }}</p>
-                <p class="text-xs text-slate-500 dark:text-slate-400">{{ item.floor }} · {{ item.typeLabel }}</p>
+                <p class="text-sm font-medium text-slate-800 dark:text-[#f1f3f9] truncate">{{ item.company }}</p>
+                <p class="text-xs text-slate-500 dark:text-[#9aa0b4]">{{ item.floor }} · {{ item.typeLabel }}</p>
               </div>
               <div class="text-right flex-shrink-0">
                 <p class="text-sm font-semibold text-red-600 dark:text-red-400">{{ formatCurrency(item.amount) }}</p>
@@ -353,11 +353,11 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <p class="text-sm font-medium text-slate-700 dark:text-slate-200">Geciken ödeme yok</p>
+            <p class="text-sm font-medium text-slate-700 dark:text-[#f1f3f9]">Geciken ödeme yok</p>
           </div>
 
           <div v-if="overdueItems.length > 0"
-            class="px-5 py-3 border-t border-slate-100 dark:border-slate-800">
+            class="px-5 py-3 border-t border-slate-100 dark:border-white/[0.05]">
             <router-link to="/overdue"
               class="inline-flex items-center gap-1 text-xs font-semibold text-red-600 dark:text-red-400 hover:underline">
               Tümünü gör
@@ -375,9 +375,9 @@
 
         <!-- ─── Aylık Gelir/Gider Grafiği ─────────── -->
         <section v-if="userRole === 'admin' || userRole === 'manager'" class="app-card overflow-hidden mb-5">
-          <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100 dark:border-slate-800">
-            <h2 class="text-sm font-semibold text-slate-800 dark:text-slate-100">Aylık Gelir / Gider</h2>
-            <div class="flex items-center gap-4 text-xs text-slate-500 dark:text-slate-400">
+          <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100 dark:border-white/[0.05]">
+            <h2 class="text-sm font-semibold text-slate-800 dark:text-[#f1f3f9]">Aylık Gelir / Gider</h2>
+            <div class="flex items-center gap-4 text-xs text-slate-500 dark:text-[#9aa0b4]">
               <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-500"></span>Gelir</span>
               <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-red-400"></span>Gider</span>
             </div>
@@ -401,10 +401,10 @@
 
         <!-- ─── Son İşlemler ──────────────────────── -->
         <section class="app-card overflow-hidden">
-          <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100 dark:border-slate-800">
-            <h2 class="text-sm font-semibold text-slate-800 dark:text-slate-100">Son İşlemler</h2>
+          <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100 dark:border-white/[0.05]">
+            <h2 class="text-sm font-semibold text-slate-800 dark:text-[#f1f3f9]">Son İşlemler</h2>
             <select v-model="dashboardType"
-              class="select select-xs select-bordered bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 rounded-lg text-xs">
+              class="select select-xs select-bordered bg-white dark:bg-[#0f1322] border-slate-200 dark:border-white/[0.07] text-slate-600 dark:text-[#f1f3f9] rounded-lg text-xs">
               <option value="">Tümü</option>
               <option value="income">Gelir</option>
               <option v-if="userRole !== 'observer'" value="expense">Gider</option>
@@ -432,11 +432,11 @@
                 </svg>
               </div>
               <div class="min-w-0 flex-1">
-                <p class="text-sm font-medium text-slate-800 dark:text-slate-100 truncate">
+                <p class="text-sm font-medium text-slate-800 dark:text-[#f1f3f9] truncate">
                   {{ activity.type === 'debt' ? (activity.company || 'Borç') : (activity.payer || activity.description || 'İşlem') }}
                   <span v-if="activity.type === 'debt'" class="text-xs font-normal text-slate-400 ml-1">({{ activity.typeLabel }})</span>
                 </p>
-                <p class="text-xs text-slate-500 dark:text-slate-400">{{ formatDate(activity.paymentDate || activity.expenseDate || activity.dueDate || activity.date) }}</p>
+                <p class="text-xs text-slate-500 dark:text-[#9aa0b4]">{{ formatDate(activity.paymentDate || activity.expenseDate || activity.dueDate || activity.date) }}</p>
               </div>
               <p class="text-sm font-semibold flex-shrink-0"
                 :class="{
@@ -449,17 +449,17 @@
             </div>
           </div>
           <div v-else class="px-5 py-10 flex flex-col items-center gap-2">
-            <div class="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center">
+            <div class="w-10 h-10 rounded-xl bg-slate-100 dark:bg-[#151a2e] text-slate-400 flex items-center justify-center">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
               </svg>
             </div>
-            <p class="text-sm font-medium text-slate-600 dark:text-slate-300">Henüz işlem bulunmuyor</p>
+            <p class="text-sm font-medium text-slate-600 dark:text-[#f1f3f9]">Henüz işlem bulunmuyor</p>
           </div>
 
-          <div class="px-5 py-3 border-t border-slate-100 dark:border-slate-800">
+          <div class="px-5 py-3 border-t border-slate-100 dark:border-white/[0.05]">
             <router-link to="/transactions"
-              class="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline">
+              class="inline-flex items-center gap-1 text-xs font-semibold text-brand-600 dark:text-brand-400 hover:underline">
               Tüm işlemleri gör
               <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
@@ -485,7 +485,7 @@
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
         </svg>
       </div>
-      <p class="text-sm font-medium text-slate-700 dark:text-slate-200">Bu sayfayı görüntüleme yetkiniz bulunmamaktadır.</p>
+      <p class="text-sm font-medium text-slate-700 dark:text-[#f1f3f9]">Bu sayfayı görüntüleme yetkiniz bulunmamaktadır.</p>
       <p class="text-xs text-slate-400 mt-1">Mevcut rol: {{ userRole || 'Tanımlanmamış' }}</p>
     </div>
   </div>

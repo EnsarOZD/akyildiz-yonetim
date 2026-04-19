@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <header data-testid="sidebar"
     class="sticky top-0 z-50 bg-white/95 dark:bg-[#0f1322]/95 backdrop-blur-md border-b border-slate-200/50 dark:border-white/[0.06] shadow-sm">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -79,7 +79,7 @@
                 <div class="max-h-80 overflow-y-auto">
                   <div v-if="notificationsStore.loading && notificationsStore.items.length === 0"
                     class="py-10 flex justify-center">
-                    <span class="loading loading-spinner loading-sm text-blue-600"></span>
+                    <span class="loading loading-spinner loading-sm text-brand-600"></span>
                   </div>
                   <div v-else-if="notificationsStore.items.length === 0"
                     class="py-10 text-center text-sm text-slate-500 dark:text-[#9aa0b4]">
@@ -92,11 +92,11 @@
                       @click="handleNotificationClick(item)"
                       class="relative flex gap-3 px-4 py-3 border-b border-slate-50 dark:border-white/[0.04]
                         hover:bg-slate-50 dark:hover:bg-white/[0.04] cursor-pointer transition-colors"
-                      :class="!item.isRead ? 'bg-blue-50/40 dark:bg-brand-500/[0.06]' : ''"
+                      :class="!item.isRead ? 'bg-brand-50/40 dark:bg-brand-500/[0.06]' : ''"
                     >
                       <!-- Unread dot -->
                       <span v-if="!item.isRead"
-                        class="absolute left-2 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-blue-500 flex-shrink-0" />
+                        class="absolute left-2 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-brand-500 flex-shrink-0" />
                       <!-- Icon -->
                       <div class="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center mt-0.5"
                         :class="notifIconBg(item.type)">
@@ -298,7 +298,7 @@ const isActiveTab = (tabRoute) => {
 const notifTypes = {
   Debt:            { bg: 'bg-red-100 dark:bg-red-900/30',    color: 'text-red-600 dark:text-red-400',    path: 'M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z' },
   Payment:         { bg: 'bg-emerald-100 dark:bg-emerald-900/30', color: 'text-emerald-600 dark:text-emerald-400', path: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z' },
-  PaymentCreated:  { bg: 'bg-blue-100 dark:bg-blue-900/30',   color: 'text-blue-600 dark:text-blue-400',  path: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1' },
+  PaymentCreated:  { bg: 'bg-brand-100 dark:bg-brand-500/[0.12]',   color: 'text-brand-600 dark:text-brand-400',  path: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1' },
   Announcement:    { bg: 'bg-amber-100 dark:bg-amber-900/30', color: 'text-amber-600 dark:text-amber-400', path: 'M11 5.882V19.24a1.76 1.76 0 0 1 -3.417 .592l-2.147-6.15M18 13a3 3 0 1 0 0-6M5.436 13.683A4.001 4.001 0 0 1 7 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 0 1 -1.564 -.317z' },
 }
 const notifIconBg    = (type) => (notifTypes[type] || notifTypes.Announcement).bg

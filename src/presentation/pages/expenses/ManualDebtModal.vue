@@ -1,12 +1,12 @@
-<template>
+﻿<template>
   <dialog open class="modal" @keydown.esc.prevent="handleClose">
-    <div class="modal-box max-w-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-2xl p-0">
+    <div class="modal-box max-w-2xl bg-white dark:bg-[#0f1322] border border-gray-200 dark:border-white/[0.07] shadow-2xl p-0">
       <!-- Header -->
-      <div class="flex items-center justify-between p-6 border-b border-gray-100 dark:border-gray-700">
+      <div class="flex items-center justify-between p-6 border-b border-gray-100 dark:border-white/[0.07]">
         <div class="flex items-center gap-3">
           <div :class="[
             'w-9 h-9 rounded-xl flex items-center justify-center text-white shadow-md',
-            type === 0 ? 'bg-emerald-600' : (type === 1 ? 'bg-amber-500' : 'bg-blue-500')
+            type === 0 ? 'bg-emerald-600' : (type === 1 ? 'bg-amber-500' : 'bg-brand-500')
           ]">
             <svg v-if="type === 0" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
@@ -18,7 +18,7 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/>
             </svg>
           </div>
-          <h3 class="text-xl font-bold text-gray-800 dark:text-gray-100">
+          <h3 class="text-xl font-bold text-gray-800 dark:text-[#f1f3f9]">
             Manuel {{ typeLabel }} Girişi
           </h3>
         </div>
@@ -33,7 +33,7 @@
       <div v-if="!initialData?.id" class="tabs tabs-boxed bg-transparent px-6 pt-4 gap-2">
         <button 
           @click="activeTab = 'individual'" 
-          :class="['tab flex-1 transition-all', activeTab === 'individual' ? 'tab-active bg-primary text-white' : 'hover:bg-gray-100 dark:hover:bg-gray-700']"
+          :class="['tab flex-1 transition-all', activeTab === 'individual' ? 'tab-active bg-primary text-white' : 'hover:bg-gray-100 dark:hover:bg-white/[0.06]']"
         >
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
@@ -42,7 +42,7 @@
         </button>
         <button
           @click="activeTab = 'bulk'"
-          :class="['tab flex-1 transition-all', activeTab === 'bulk' ? 'tab-active bg-primary text-white' : 'hover:bg-gray-100 dark:hover:bg-gray-700']"
+          :class="['tab flex-1 transition-all', activeTab === 'bulk' ? 'tab-active bg-primary text-white' : 'hover:bg-gray-100 dark:hover:bg-white/[0.06]']"
         >
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
@@ -56,11 +56,11 @@
         <form v-if="activeTab === 'individual'" @submit.prevent="handleSubmit" class="space-y-5">
           <div class="form-control">
             <label class="label">
-              <span class="label-text font-semibold text-gray-700 dark:text-gray-300">Daire / Ünite *</span>
+              <span class="label-text font-semibold text-gray-700 dark:text-[#f1f3f9]">Daire / Ünite *</span>
             </label>
             <select 
               v-model="form.flatId" 
-              class="select select-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600"
+              class="select select-bordered w-full bg-white dark:bg-[#1c2238] border-gray-300 dark:border-white/[0.1]"
               required
               :disabled="!!initialData?.id"
             >
@@ -106,7 +106,7 @@
             </div>
           </div>
 
-          <div class="flex justify-end gap-3 pt-6 border-t border-gray-200 dark:border-gray-700">
+          <div class="flex justify-end gap-3 pt-6 border-t border-gray-200 dark:border-white/[0.07]">
             <button type="button" class="btn btn-outline btn-sm" @click="handleClose" :disabled="loading">İptal</button>
             <button type="submit" class="btn btn-primary btn-sm px-8" :disabled="loading">
               <span v-if="loading" class="loading loading-spinner loading-xs mr-2"></span>
@@ -117,7 +117,7 @@
 
         <!-- Bulk View -->
         <div v-else class="space-y-6">
-          <div class="grid grid-cols-2 gap-4 p-4 bg-gray-50 dark:bg-gray-900 rounded-xl">
+          <div class="grid grid-cols-2 gap-4 p-4 dark:bg-base-200 rounded-xl">
             <div class="form-control">
               <label class="label"><span class="label-text font-semibold">Dönem</span></label>
               <input type="month" v-model="bulkPeriod" class="input input-bordered w-full input-sm" @change="updateBulkDates" />
@@ -128,9 +128,9 @@
             </div>
           </div>
 
-          <div class="overflow-x-auto max-h-[40vh] border border-gray-200 dark:border-gray-700 rounded-lg">
+          <div class="overflow-x-auto max-h-[40vh] border border-gray-200 dark:border-white/[0.07] rounded-lg">
             <table class="table table-zebra table-sm">
-              <thead class="sticky top-0 bg-white dark:bg-gray-800 z-10 shadow-sm">
+              <thead class="sticky top-0 bg-white dark:bg-[#0f1322] z-10 shadow-sm">
                 <tr>
                   <th scope="col" class="w-1/3">Daire / Kiracı</th>
                   <th scope="col" class="w-1/3 text-center">Tutar (₺)</th>
@@ -171,7 +171,7 @@
             </table>
           </div>
 
-          <div class="flex justify-end gap-3 pt-6 border-t border-gray-200 dark:border-gray-700">
+          <div class="flex justify-end gap-3 pt-6 border-t border-gray-200 dark:border-white/[0.07]">
             <button type="button" class="btn btn-outline btn-sm" @click="handleClose" :disabled="loading">İptal</button>
             <button @click="handleBulkSubmit" class="btn btn-primary btn-sm px-8" :disabled="loading || !hasBulkData">
               <span v-if="loading" class="loading loading-spinner loading-xs mr-2"></span>

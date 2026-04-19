@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="p-4 sm:p-6 min-h-screen pb-24 md:pb-6">
 
     <!-- Sayfa Başlığı -->
@@ -10,13 +10,13 @@
       </template>
       <template #actions>
         <div class="flex items-center gap-2 shrink-0">
-          <button @click="exportToExcel" :disabled="loading || reportItems.length === 0" class="btn btn-sm btn-ghost border border-slate-300 dark:border-slate-600">
+          <button @click="exportToExcel" :disabled="loading || reportItems.length === 0" class="btn btn-sm btn-ghost border border-slate-300 dark:border-white/[0.1]">
             <svg class="w-4 h-4 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
             </svg>
             Excel
           </button>
-          <button @click="exportToPDF" :disabled="loading || reportItems.length === 0" class="btn btn-sm btn-ghost border border-slate-300 dark:border-slate-600">
+          <button @click="exportToPDF" :disabled="loading || reportItems.length === 0" class="btn btn-sm btn-ghost border border-slate-300 dark:border-white/[0.1]">
             <svg class="w-4 h-4 text-rose-500 dark:text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
             </svg>
@@ -32,7 +32,7 @@
         </div>
       </template>
       <template #subtitle-extra>
-        <p v-if="tenantInfo?.companyName || authStore.companyName" class="text-xs font-semibold text-blue-600 dark:text-blue-400 mt-1">
+        <p v-if="tenantInfo?.companyName || authStore.companyName" class="text-xs font-semibold text-brand-600 dark:text-brand-400 mt-1">
           {{ tenantInfo?.companyName || authStore.companyName }}
           <span v-if="tenantInfo?.flats && tenantInfo.flats.length" class="text-slate-400 font-normal">
             — Ünite: {{ tenantInfo.flats.map(f => f.code).join(', ') }}
@@ -69,7 +69,7 @@
           </select>
         </div>
       </div>
-      <div class="flex justify-end mt-3 pt-3 border-t border-slate-200 dark:border-slate-700">
+      <div class="flex justify-end mt-3 pt-3 border-t border-slate-200 dark:border-white/[0.07]">
         <button @click="clearFilters" class="btn btn-ghost btn-xs text-slate-400">Filtreleri Temizle</button>
       </div>
     </div>
@@ -83,8 +83,8 @@
           </svg>
         </div>
         <div class="min-w-0">
-          <p class="text-xs text-slate-500 dark:text-slate-400 leading-none mb-1">Toplam Borç Tahakkuku</p>
-          <p class="text-base font-bold text-slate-800 dark:text-slate-100 leading-none">{{ formatCurrency(rawSummary.totalDebt) }}</p>
+          <p class="text-xs text-slate-500 dark:text-[#9aa0b4] leading-none mb-1">Toplam Borç Tahakkuku</p>
+          <p class="text-base font-bold text-slate-800 dark:text-[#f1f3f9] leading-none">{{ formatCurrency(rawSummary.totalDebt) }}</p>
         </div>
       </div>
       <div class="app-card flex items-center gap-3">
@@ -94,24 +94,24 @@
           </svg>
         </div>
         <div class="min-w-0">
-          <p class="text-xs text-slate-500 dark:text-slate-400 leading-none mb-1">Toplam Yapılan Ödeme</p>
-          <p class="text-base font-bold text-slate-800 dark:text-slate-100 leading-none">{{ formatCurrency(rawSummary.totalPayment) }}</p>
+          <p class="text-xs text-slate-500 dark:text-[#9aa0b4] leading-none mb-1">Toplam Yapılan Ödeme</p>
+          <p class="text-base font-bold text-slate-800 dark:text-[#f1f3f9] leading-none">{{ formatCurrency(rawSummary.totalPayment) }}</p>
         </div>
       </div>
       <div class="app-card flex items-center gap-3">
         <div :class="[
           'w-9 h-9 rounded-xl flex items-center justify-center shrink-0',
-          rawSummary.balance >= 0 ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400' : 'bg-red-100 dark:bg-red-900/30 text-red-500'
+          rawSummary.balance >= 0 ? 'bg-brand-100 dark:bg-brand-500/[0.12] text-brand-600 dark:text-brand-400' : 'bg-red-100 dark:bg-red-900/30 text-red-500'
         ]">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"/>
           </svg>
         </div>
         <div class="min-w-0">
-          <p class="text-xs text-slate-500 dark:text-slate-400 leading-none mb-1">Güncel Bakiye</p>
+          <p class="text-xs text-slate-500 dark:text-[#9aa0b4] leading-none mb-1">Güncel Bakiye</p>
           <p :class="[
             'text-base font-bold leading-none',
-            rawSummary.balance >= 0 ? 'text-blue-600 dark:text-blue-400' : 'text-red-500'
+            rawSummary.balance >= 0 ? 'text-brand-600 dark:text-brand-400' : 'text-red-500'
           ]">
             {{ formatCurrency(Math.abs(rawSummary.balance)) }}
             <span class="text-xs font-medium opacity-70">{{ rawSummary.balance < 0 ? '(Borçlu)' : '(Dengede)' }}</span>
@@ -123,9 +123,9 @@
     <!-- Tablo Kartı -->
     <div class="app-card !p-0">
       <!-- Tablo Başlığı -->
-      <div class="flex items-center justify-between px-4 py-3 border-b border-slate-200 dark:border-slate-700">
+      <div class="flex items-center justify-between px-4 py-3 border-b border-slate-200 dark:border-white/[0.07]">
         <div class="flex items-center gap-2">
-          <span class="text-sm font-semibold text-slate-700 dark:text-slate-200">İşlem Listesi</span>
+          <span class="text-sm font-semibold text-slate-700 dark:text-[#f1f3f9]">İşlem Listesi</span>
           <span class="text-xs text-slate-400">{{ reportItems.length }} kayıt</span>
         </div>
         <div class="flex items-center gap-2">
@@ -143,7 +143,7 @@
       <div class="overflow-x-auto">
         <table class="table table-sm w-full" id="report-table">
           <thead>
-            <tr class="bg-slate-50 dark:bg-slate-800/60 text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide">
+            <tr class="bg-slate-50 dark:bg-[#151a2e]/80 text-xs text-slate-500 dark:text-[#9aa0b4] uppercase tracking-wide">
               <th class="font-semibold">Tarih</th>
               <th class="font-semibold">Dönem</th>
               <th class="font-semibold">İşlem</th>
@@ -155,7 +155,7 @@
               <th class="font-semibold text-center">Vade Tarihi</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-slate-100 dark:divide-slate-700/50">
+          <tbody class="divide-y divide-slate-100 dark:divide-white/[0.06]/50">
             <tr v-if="loading">
               <td colspan="9" class="text-center py-10">
                 <span class="loading loading-spinner loading-md text-slate-400"></span>
@@ -164,12 +164,12 @@
             <tr v-else-if="reportItems.length === 0">
               <td colspan="9" class="py-12">
                 <div class="text-center">
-                  <div class="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-700 flex items-center justify-center mx-auto mb-3">
+                  <div class="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-[#1c2238] flex items-center justify-center mx-auto mb-3">
                     <svg class="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                     </svg>
                   </div>
-                  <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Kayıt bulunamadı</p>
+                  <p class="text-sm font-medium text-slate-500 dark:text-[#9aa0b4]">Kayıt bulunamadı</p>
                   <p class="text-xs text-slate-400 mt-1">Farklı filtre kriterleri deneyin</p>
                 </div>
               </td>
@@ -180,8 +180,8 @@
               :key="idx"
               class="table-row-hover"
             >
-              <td class="whitespace-nowrap text-xs text-slate-500 dark:text-slate-400">{{ formatDate(item.date) }}</td>
-              <td class="whitespace-nowrap text-xs font-mono text-slate-500 dark:text-slate-400">{{ formatPeriod(item.periodYear, item.periodMonth) }}</td>
+              <td class="whitespace-nowrap text-xs text-slate-500 dark:text-[#9aa0b4]">{{ formatDate(item.date) }}</td>
+              <td class="whitespace-nowrap text-xs font-mono text-slate-500 dark:text-[#9aa0b4]">{{ formatPeriod(item.periodYear, item.periodMonth) }}</td>
               <td>
                 <span :class="[
                   'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium',
@@ -190,12 +190,12 @@
                   {{ item.isPayment ? 'Ödeme' : 'Borç' }}
                 </span>
               </td>
-              <td class="max-w-[200px] truncate text-xs text-slate-600 dark:text-slate-300">{{ item.description }}</td>
+              <td class="max-w-[200px] truncate text-xs text-slate-600 dark:text-[#f1f3f9]">{{ item.description }}</td>
               <td class="text-xs font-mono text-slate-400">{{ item.invoiceNumber || '—' }}</td>
-              <td class="text-right text-sm font-semibold" :class="!item.isPayment ? 'text-red-500' : 'text-slate-300 dark:text-slate-600'">
+              <td class="text-right text-sm font-semibold" :class="!item.isPayment ? 'text-red-500' : 'text-slate-300 dark:text-[#626885]'">
                 {{ !item.isPayment ? formatCurrency(item.amount) : '—' }}
               </td>
-              <td class="text-right text-sm font-semibold" :class="item.isPayment ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-300 dark:text-slate-600'">
+              <td class="text-right text-sm font-semibold" :class="item.isPayment ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-300 dark:text-[#626885]'">
                 {{ item.isPayment ? formatCurrency(item.amount) : '—' }}
               </td>
               <td class="text-center">
@@ -205,12 +205,12 @@
                 ]">
                   {{ item.isPaid ? 'Ödendi' : 'Bekliyor' }}
                 </span>
-                <span v-else class="text-slate-300 dark:text-slate-600 text-xs">—</span>
+                <span v-else class="text-slate-300 dark:text-[#626885] text-xs">—</span>
               </td>
               <td class="whitespace-nowrap text-xs text-center" :class="
-                !item.lastPaymentDate ? 'text-slate-300 dark:text-slate-600' :
+                !item.lastPaymentDate ? 'text-slate-300 dark:text-[#626885]' :
                 (!item.isPaid && new Date(item.lastPaymentDate) < new Date()) ? 'text-red-500 font-medium' :
-                'text-slate-500 dark:text-slate-400'
+                'text-slate-500 dark:text-[#9aa0b4]'
               ">
                 {{ item.lastPaymentDate ? formatDate(item.lastPaymentDate) : '—' }}
               </td>
@@ -220,7 +220,7 @@
       </div>
 
       <!-- Pagination -->
-      <div v-if="totalPages > 1" class="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-3 border-t border-slate-200 dark:border-slate-700">
+      <div v-if="totalPages > 1" class="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-3 border-t border-slate-200 dark:border-white/[0.07]">
         <p class="text-xs text-slate-400">
           {{ reportItems.length }} kayıttan
           {{ (currentPage - 1) * pageSize + 1 }}–{{ Math.min(currentPage * pageSize, reportItems.length) }} arası
@@ -238,7 +238,7 @@
             @click="currentPage = page"
             :class="[
               'btn btn-xs',
-              currentPage === page ? 'btn-primary' : 'btn-ghost text-slate-500 dark:text-slate-400'
+              currentPage === page ? 'btn-primary' : 'btn-ghost text-slate-500 dark:text-[#9aa0b4]'
             ]"
           >
             {{ page }}

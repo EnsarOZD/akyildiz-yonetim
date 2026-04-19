@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="p-4 sm:p-6 min-h-screen pb-24 md:pb-6">
 
     <!-- Sayfa Başlığı -->
@@ -47,18 +47,18 @@
           </svg>
         </div>
         <div class="min-w-0">
-          <p class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 truncate">Bu Ay</p>
+          <p class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-[#626885] truncate">Bu Ay</p>
           <p class="text-sm font-bold text-slate-800 dark:text-white tabular-nums">{{ formatCurrency(thisMonthIncome) }}</p>
         </div>
       </div>
       <div class="app-card flex items-center gap-3">
-        <div class="w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
+        <div class="w-9 h-9 rounded-xl bg-brand-50 dark:bg-brand-500/[0.08] text-brand-600 dark:text-brand-400 flex items-center justify-center shrink-0">
           <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
           </svg>
         </div>
         <div class="min-w-0">
-          <p class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 truncate">Toplam</p>
+          <p class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-[#626885] truncate">Toplam</p>
           <p class="text-sm font-bold text-slate-800 dark:text-white tabular-nums">{{ formatCurrency(totalIncome) }}</p>
         </div>
       </div>
@@ -69,7 +69,7 @@
           </svg>
         </div>
         <div class="min-w-0">
-          <p class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 truncate">Bu Ay İşlem</p>
+          <p class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-[#626885] truncate">Bu Ay İşlem</p>
           <p class="text-xl font-bold text-slate-800 dark:text-white tabular-nums">{{ thisMonthCount }}</p>
         </div>
       </div>
@@ -80,7 +80,7 @@
           </svg>
         </div>
         <div class="min-w-0">
-          <p class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 truncate">Avans</p>
+          <p class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-[#626885] truncate">Avans</p>
           <p class="text-sm font-bold text-slate-800 dark:text-white tabular-nums">{{ formatCurrency(totalAdvance) }}</p>
         </div>
       </div>
@@ -91,21 +91,21 @@
 
       <!-- Aylık Ödeme Grafiği -->
       <div class="app-card">
-        <h2 class="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-4">Aylık Ödeme Grafiği</h2>
+        <h2 class="text-sm font-semibold text-slate-700 dark:text-[#f1f3f9] mb-4">Aylık Ödeme Grafiği</h2>
         <div class="h-40 flex items-end gap-1.5">
           <div v-for="(month, index) in monthlyPaymentData" :key="index" class="flex-1 flex flex-col items-center gap-1.5">
             <div
-              class="w-full bg-blue-500 dark:bg-blue-400 rounded-t transition-all duration-500"
+              class="w-full bg-brand-500 dark:bg-brand-400 rounded-t transition-all duration-500"
               :style="{ height: `${Math.max((month.total / maxMonthlyPayment) * 130, month.total > 0 ? 4 : 2)}px` }"
             ></div>
-            <span class="text-[10px] text-slate-400 dark:text-slate-500 font-medium">{{ month.month }}</span>
+            <span class="text-[10px] text-slate-400 dark:text-[#626885] font-medium">{{ month.month }}</span>
           </div>
         </div>
       </div>
 
       <!-- Ödeme Tipi Dağılımı -->
       <div class="app-card">
-        <h2 class="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-4">Tip Dağılımı</h2>
+        <h2 class="text-sm font-semibold text-slate-700 dark:text-[#f1f3f9] mb-4">Tip Dağılımı</h2>
         <div class="space-y-2.5">
           <div v-for="type in paymentTypeStats" :key="type.name" class="flex items-center justify-between">
             <div class="flex items-center gap-2.5">
@@ -115,20 +115,20 @@
                 </svg>
               </div>
               <div>
-                <p class="text-xs font-semibold text-slate-700 dark:text-slate-200">{{ type.label }}</p>
-                <p class="text-[10px] text-slate-400 dark:text-slate-500">{{ type.count }} ödeme</p>
+                <p class="text-xs font-semibold text-slate-700 dark:text-[#f1f3f9]">{{ type.label }}</p>
+                <p class="text-[10px] text-slate-400 dark:text-[#626885]">{{ type.count }} ödeme</p>
               </div>
             </div>
             <p class="text-sm font-bold text-green-600 dark:text-green-400 tabular-nums">{{ formatCurrency(type.total) }}</p>
           </div>
-          <div v-if="paymentTypeStats.length === 0" class="text-xs text-slate-400 dark:text-slate-500 text-center py-4">Veri yok</div>
+          <div v-if="paymentTypeStats.length === 0" class="text-xs text-slate-400 dark:text-[#626885] text-center py-4">Veri yok</div>
         </div>
       </div>
     </div>
 
     <!-- Avans Hesapları -->
     <div v-if="advanceAccounts.length > 0" class="app-card mb-5">
-      <h3 class="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-3 flex items-center gap-2">
+      <h3 class="text-sm font-semibold text-slate-700 dark:text-[#f1f3f9] mb-3 flex items-center gap-2">
         <svg class="w-4 h-4 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
         </svg>
@@ -141,11 +141,11 @@
           class="p-3 rounded-xl bg-purple-50 dark:bg-purple-900/10 border border-purple-100 dark:border-purple-900/30"
         >
           <div class="flex items-center justify-between mb-1">
-            <span class="text-xs font-semibold text-slate-700 dark:text-slate-200 truncate">{{ getTenantCompany(advance.tenantId) }}</span>
+            <span class="text-xs font-semibold text-slate-700 dark:text-[#f1f3f9] truncate">{{ getTenantCompany(advance.tenantId) }}</span>
             <span class="badge badge-xs badge-success">Aktif</span>
           </div>
           <p class="text-base font-bold text-purple-600 dark:text-purple-400 tabular-nums">{{ formatCurrency(Number(advance.balance ?? advance.amount ?? 0)) }}</p>
-          <p class="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">{{ formatDate(advance.updatedAt || advance.lastMovementAt || advance.createdAt || advance.paymentDate) }}</p>
+          <p class="text-[10px] text-slate-400 dark:text-[#626885] mt-0.5">{{ formatDate(advance.updatedAt || advance.lastMovementAt || advance.createdAt || advance.paymentDate) }}</p>
         </div>
       </div>
     </div>
@@ -175,7 +175,7 @@
           leave-to-class="opacity-0 scale-95"
         >
           <div v-if="selectedIds.length > 0" class="flex items-center gap-2 shrink-0">
-            <span class="text-xs font-semibold text-slate-600 dark:text-slate-300">{{ selectedIds.length }} seçildi</span>
+            <span class="text-xs font-semibold text-slate-600 dark:text-[#f1f3f9]">{{ selectedIds.length }} seçildi</span>
             <button @click="showBulkDeleteConfirm = true" class="btn btn-error btn-xs text-white gap-1">
               <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -195,7 +195,7 @@
           :indeterminate="isPartiallySelected"
           @change="toggleSelectAll"
         />
-        <span class="text-[10px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Tümünü Seç</span>
+        <span class="text-[10px] font-semibold text-slate-400 dark:text-[#626885] uppercase tracking-wider">Tümünü Seç</span>
       </div>
 
       <!-- Yükleniyor -->
@@ -213,11 +213,11 @@
       </div>
 
       <!-- Ödeme Listesi -->
-      <div v-else class="divide-y divide-slate-100 dark:divide-slate-700/60">
+      <div v-else class="divide-y divide-slate-100 dark:divide-white/[0.06]/60">
         <div
           v-for="p in paymentsView"
           :key="p.id"
-          :class="['flex items-center gap-3 px-4 py-3 transition-colors', selectedIds.includes(p.id) ? 'bg-blue-50/60 dark:bg-blue-900/10' : 'table-row-hover']"
+          :class="['flex items-center gap-3 px-4 py-3 transition-colors', selectedIds.includes(p.id) ? 'bg-brand-50/60 dark:bg-blue-900/10' : 'table-row-hover']"
         >
           <!-- Checkbox -->
           <input
@@ -234,20 +234,20 @@
 
           <!-- Bilgi -->
           <div class="flex-1 min-w-0">
-            <p class="text-sm font-semibold text-slate-800 dark:text-slate-100 truncate">{{ p.company }}</p>
+            <p class="text-sm font-semibold text-slate-800 dark:text-[#f1f3f9] truncate">{{ p.company }}</p>
             <div class="flex items-center gap-2 flex-wrap">
-              <span class="text-xs text-slate-400 dark:text-slate-500">{{ formatDate(getPaymentDate(p)) }}</span>
+              <span class="text-xs text-slate-400 dark:text-[#626885]">{{ formatDate(getPaymentDate(p)) }}</span>
               <span v-if="p.periodYear && p.periodYear > 2000" class="badge badge-xs badge-ghost tabular-nums">
                 {{ p.periodYear }}-{{ String(p.periodMonth).padStart(2, '0') }}
               </span>
-              <span class="text-xs text-slate-400 dark:text-slate-500 truncate max-w-[140px]" :title="p.description">{{ getPaymentDisplayLabel(p) }}</span>
+              <span class="text-xs text-slate-400 dark:text-[#626885] truncate max-w-[140px]" :title="p.description">{{ getPaymentDisplayLabel(p) }}</span>
             </div>
           </div>
 
           <!-- Tutar -->
           <div class="shrink-0 text-right">
             <p class="text-sm font-bold text-green-600 dark:text-green-400 tabular-nums">{{ formatCurrency(p.amount) }}</p>
-            <p v-if="p.bank" class="text-[10px] text-slate-400 dark:text-slate-500">{{ p.bank }}</p>
+            <p v-if="p.bank" class="text-[10px] text-slate-400 dark:text-[#626885]">{{ p.bank }}</p>
           </div>
 
           <!-- İşlem Menüsü -->
@@ -258,7 +258,7 @@
                   <circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/><circle cx="5" cy="12" r="1.5"/>
                 </svg>
               </button>
-              <ul tabindex="0" class="dropdown-content menu p-1.5 shadow-card bg-base-100 border border-slate-200 dark:border-slate-700 rounded-xl w-32 z-10 text-xs">
+              <ul tabindex="0" class="dropdown-content menu p-1.5 shadow-card bg-base-100 border border-slate-200 dark:border-white/[0.07] rounded-xl w-32 z-10 text-xs">
                 <li><a @click="startEdit(p)" class="rounded-lg">Düzenle</a></li>
                 <li><a @click="deletePayment(p.id)" class="rounded-lg text-error">Sil</a></li>
               </ul>

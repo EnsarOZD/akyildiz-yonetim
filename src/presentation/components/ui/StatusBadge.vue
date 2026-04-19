@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <span
     class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap"
     :class="classes"
@@ -26,7 +26,7 @@ const map = {
   warning: { badge: 'badge-pending', dot: 'bg-amber-500'   },
   overdue: { badge: 'badge-overdue', dot: 'bg-red-500'     },
   error:   { badge: 'badge-overdue', dot: 'bg-red-500'     },
-  info:    { badge: 'badge-info',    dot: 'bg-blue-500'    },
+  info:    { badge: 'badge-info',    dot: 'bg-brand-500'    },
 }
 
 const entry    = computed(() => map[props.variant] || map.default)

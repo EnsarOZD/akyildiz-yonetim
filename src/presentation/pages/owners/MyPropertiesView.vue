@@ -1,5 +1,5 @@
-<template>
-  <div class="p-4 sm:p-6 bg-gray-50 dark:bg-gray-900 min-h-screen pb-20 md:pb-6">
+﻿<template>
+  <div class="p-4 sm:p-6 dark:bg-base-200 min-h-screen pb-20 md:pb-6">
     <div class="max-w-5xl mx-auto">
 
       <!-- Başlık -->
@@ -14,7 +14,7 @@
       <!-- Özet Kartları -->
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
         <!-- Toplam Borç -->
-        <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-5">
+        <div class="bg-white dark:bg-[#0f1322] rounded-2xl border border-gray-100 dark:border-white/[0.07] shadow-sm p-5">
           <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Toplam Borç</p>
           <p
             class="text-3xl font-black"
@@ -31,9 +31,9 @@
         </div>
 
         <!-- Vadesi Geçen -->
-        <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-5">
+        <div class="bg-white dark:bg-[#0f1322] rounded-2xl border border-gray-100 dark:border-white/[0.07] shadow-sm p-5">
           <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Vadesi Geçen</p>
-          <p class="text-3xl font-black" :class="overdueDebt > 0 ? 'text-orange-500' : 'text-gray-300 dark:text-gray-600'">
+          <p class="text-3xl font-black" :class="overdueDebt > 0 ? 'text-orange-500' : 'text-gray-300 dark:text-[#626885]'">
             {{ formatCurrency(overdueDebt) }}
           </p>
           <p class="mt-2 text-xs text-gray-400">
@@ -42,7 +42,7 @@
         </div>
 
         <!-- Son Ödeme -->
-        <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-5">
+        <div class="bg-white dark:bg-[#0f1322] rounded-2xl border border-gray-100 dark:border-white/[0.07] shadow-sm p-5">
           <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Son Ödeme</p>
           <p class="text-xl font-bold text-gray-800 dark:text-white mt-1">
             {{ lastPaymentDate || '—' }}
@@ -55,8 +55,8 @@
       </div>
 
       <!-- Bekleyen Borçlar -->
-      <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden mb-6">
-        <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
+      <div class="bg-white dark:bg-[#0f1322] rounded-2xl border border-gray-100 dark:border-white/[0.07] shadow-sm overflow-hidden mb-6">
+        <div class="px-6 py-4 border-b border-gray-100 dark:border-white/[0.07] flex items-center justify-between">
           <h2 class="text-base font-bold text-gray-800 dark:text-white">Bekleyen Borçlar</h2>
           <span v-if="pendingDebts.length > 0" class="badge badge-warning badge-sm">{{ pendingDebts.length }} kalem</span>
         </div>
@@ -73,12 +73,12 @@
               <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
             </svg>
           </div>
-          <p class="font-semibold text-gray-700 dark:text-gray-300">Tebrikler!</p>
+          <p class="font-semibold text-gray-700 dark:text-[#f1f3f9]">Tebrikler!</p>
           <p class="text-sm text-gray-400 mt-1">Ödenmemiş borcunuz bulunmamaktadır.</p>
         </div>
 
         <!-- Liste -->
-        <div v-else class="divide-y divide-gray-50 dark:divide-gray-700">
+        <div v-else class="divide-y divide-gray-50 dark:divide-white/[0.06]">
           <div
             v-for="debt in pendingDebts"
             :key="debt.id"
@@ -92,7 +92,7 @@
                 <p class="font-semibold text-sm text-gray-800 dark:text-white">{{ debtTypeLabel(debt.type) }}</p>
                 <p class="text-xs text-gray-400">
                   {{ debt.periodMonth }}/{{ debt.periodYear }}
-                  <span v-if="debt.flatCode" class="ml-1 text-gray-300 dark:text-gray-600">·</span>
+                  <span v-if="debt.flatCode" class="ml-1 text-gray-300 dark:text-[#626885]">·</span>
                   <span v-if="debt.flatCode" class="ml-1">Ünite {{ debt.flatCode }}</span>
                 </p>
               </div>
@@ -110,8 +110,8 @@
       </div>
 
       <!-- Son Ödemeler -->
-      <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
-        <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
+      <div class="bg-white dark:bg-[#0f1322] rounded-2xl border border-gray-100 dark:border-white/[0.07] shadow-sm overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-100 dark:border-white/[0.07]">
           <h2 class="text-base font-bold text-gray-800 dark:text-white">Son Ödemeler</h2>
         </div>
 
@@ -123,7 +123,7 @@
           Henüz ödeme kaydı bulunmuyor.
         </div>
 
-        <div v-else class="divide-y divide-gray-50 dark:divide-gray-700">
+        <div v-else class="divide-y divide-gray-50 dark:divide-white/[0.06]">
           <div
             v-for="payment in recentPayments"
             :key="payment.id"
@@ -210,12 +210,12 @@ const debtTypeClass = (type) => {
   const map = {
     0: 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600',
     1: 'bg-amber-50 dark:bg-amber-900/20 text-amber-600',
-    2: 'bg-blue-50 dark:bg-blue-900/20 text-blue-600',
+    2: 'bg-brand-50 dark:bg-brand-500/[0.08] text-brand-600',
     Aidat: 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600',
     Electricity: 'bg-amber-50 dark:bg-amber-900/20 text-amber-600',
-    Water: 'bg-blue-50 dark:bg-blue-900/20 text-blue-600',
+    Water: 'bg-brand-50 dark:bg-brand-500/[0.08] text-brand-600',
   }
-  return map[type] ?? 'bg-gray-50 dark:bg-gray-700 text-gray-500'
+  return map[type] ?? 'bg-slate-50 dark:bg-[#1c2238] text-gray-500'
 }
 
 // ─── Data ────────────────────────────────────────────────────────────────────

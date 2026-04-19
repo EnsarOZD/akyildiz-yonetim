@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="p-4 sm:p-6 min-h-screen pb-24 md:pb-6">
 
     <!-- Sayfa Başlığı -->
@@ -37,13 +37,13 @@
     <!-- İstatistik Kartları -->
     <div class="grid grid-cols-3 gap-3 sm:gap-4 mb-5">
       <div class="app-card flex items-center gap-3">
-        <div class="w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
+        <div class="w-9 h-9 rounded-xl bg-brand-50 dark:bg-brand-500/[0.08] text-brand-600 dark:text-brand-400 flex items-center justify-center shrink-0">
           <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
           </svg>
         </div>
         <div class="min-w-0">
-          <p class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 truncate">Aktif Kiracı</p>
+          <p class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-[#626885] truncate">Aktif Kiracı</p>
           <p class="text-xl font-bold text-slate-800 dark:text-white tabular-nums">{{ stats.activeCount }}</p>
         </div>
       </div>
@@ -54,7 +54,7 @@
           </svg>
         </div>
         <div class="min-w-0">
-          <p class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 truncate">Doluluk</p>
+          <p class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-[#626885] truncate">Doluluk</p>
           <p class="text-xl font-bold text-slate-800 dark:text-white tabular-nums">%{{ stats.occupancyRate }}</p>
         </div>
       </div>
@@ -65,7 +65,7 @@
           </svg>
         </div>
         <div class="min-w-0">
-          <p class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 truncate">Bakiye</p>
+          <p class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-[#626885] truncate">Bakiye</p>
           <p class="text-sm font-bold text-slate-800 dark:text-white tabular-nums">{{ formatCurrency(stats.totalDebt) }}</p>
         </div>
       </div>
@@ -75,7 +75,7 @@
     <div class="app-card mb-5">
       <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <div class="col-span-2 lg:col-span-1">
-          <label class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1 block">Arama</label>
+          <label class="text-xs font-semibold text-slate-500 dark:text-[#9aa0b4] mb-1 block">Arama</label>
           <input
             v-model="filters.searchTerm"
             @input="handleSearch"
@@ -84,7 +84,7 @@
           />
         </div>
         <div>
-          <label class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1 block">Durum</label>
+          <label class="text-xs font-semibold text-slate-500 dark:text-[#9aa0b4] mb-1 block">Durum</label>
           <select v-model="filters.isActive" @change="handleSearch" class="select select-bordered select-sm w-full">
             <option value="">Tümü</option>
             <option value="true">Aktif</option>
@@ -92,14 +92,14 @@
           </select>
         </div>
         <div>
-          <label class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1 block">Kat</label>
+          <label class="text-xs font-semibold text-slate-500 dark:text-[#9aa0b4] mb-1 block">Kat</label>
           <select v-model="filters.floorNumber" @change="handleSearch" class="select select-bordered select-sm w-full">
             <option value="">Tüm Katlar</option>
             <option v-for="floor in availableFloors" :key="floor" :value="floor">{{ floor }}. Kat</option>
           </select>
         </div>
         <div>
-          <label class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1 block">İş Türü</label>
+          <label class="text-xs font-semibold text-slate-500 dark:text-[#9aa0b4] mb-1 block">İş Türü</label>
           <select v-model="filters.businessType" @change="handleSearch" class="select select-bordered select-sm w-full">
             <option value="">Tümü</option>
             <option value="Ticaret">Ticaret</option>
@@ -118,7 +118,7 @@
           </svg>
           Temizle
         </button>
-        <span class="text-xs text-slate-400 dark:text-slate-500">{{ filteredTenants.length }} kiracı</span>
+        <span class="text-xs text-slate-400 dark:text-[#626885]">{{ filteredTenants.length }} kiracı</span>
       </div>
     </div>
 
@@ -137,7 +137,7 @@
                 <circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/><circle cx="5" cy="12" r="1.5"/>
               </svg>
             </button>
-            <ul tabindex="0" class="dropdown-content menu p-1.5 shadow-card bg-base-100 border border-slate-200 dark:border-slate-700 rounded-xl w-40 z-10 text-sm">
+            <ul tabindex="0" class="dropdown-content menu p-1.5 shadow-card bg-base-100 border border-slate-200 dark:border-white/[0.07] rounded-xl w-40 z-10 text-sm">
               <li><a @click="viewTenant(tenant)" class="rounded-lg">Detayları Gör</a></li>
               <li><a @click="editTenant(tenant)" class="rounded-lg">Düzenle</a></li>
               <li v-if="authStore.role === ROLES.ADMIN"><a @click="openDeleteModal(tenant)" class="rounded-lg text-error">Sil</a></li>
@@ -151,7 +151,7 @@
             {{ getAvatarInitial(tenant.companyName) }}
           </div>
           <div class="min-w-0">
-            <p class="text-sm font-bold text-slate-800 dark:text-slate-100 truncate">{{ tenant.companyName }}</p>
+            <p class="text-sm font-bold text-slate-800 dark:text-[#f1f3f9] truncate">{{ tenant.companyName }}</p>
             <div class="flex items-center gap-1.5 mt-0.5 flex-wrap">
               <span :class="['badge badge-xs font-semibold', tenant.isActive ? 'badge-active' : 'badge-passive']">
                 {{ tenant.isActive ? 'Aktif' : 'Pasif' }}
@@ -165,7 +165,7 @@
 
         <!-- Bakiye -->
         <div class="flex items-center justify-between py-2 px-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-700/60">
-          <span class="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Bakiye</span>
+          <span class="text-xs font-semibold text-slate-400 dark:text-[#626885] uppercase tracking-wider">Bakiye</span>
           <span :class="['text-sm font-bold tabular-nums', tenant.totalBalance > 0 ? 'text-red-500' : 'text-green-500']">
             {{ formatCurrency(tenant.totalBalance) }}
           </span>
@@ -187,7 +187,7 @@
           <button
             v-if="authStore.role === ROLES.ADMIN || authStore.role === ROLES.MANAGER"
             @click="router.push(`/payments?tenantId=${tenant.id}`)"
-            class="btn btn-sm btn-ghost btn-square text-blue-500"
+            class="btn btn-sm btn-ghost btn-square text-brand-500"
             title="Ödemeler"
           >
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

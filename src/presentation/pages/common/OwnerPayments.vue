@@ -1,5 +1,5 @@
-<template>
-  <div class="p-4 sm:p-6 bg-gray-50 min-h-screen font-sans dark:bg-gray-900">
+﻿<template>
+  <div class="p-4 sm:p-6 min-h-screen dark:bg-base-200">
     <div class="max-w-7xl mx-auto">
       
       <!-- Başlık -->
@@ -13,9 +13,9 @@
           <div class="flex items-center gap-3">
             <div class="flex flex-col items-end">
               <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Toplam Tahsilat</span>
-              <span class="text-sm font-bold text-slate-700 dark:text-slate-200">{{ formatCurrency(totalAmount) }}</span>
+              <span class="text-sm font-bold text-slate-700 dark:text-[#f1f3f9]">{{ formatCurrency(totalAmount) }}</span>
             </div>
-            <div class="w-px h-8 bg-slate-200 dark:bg-slate-700 mx-1"></div>
+            <div class="w-px h-8 bg-slate-200 dark:bg-[#1c2238] mx-1"></div>
             <div class="flex flex-col items-end">
               <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-400">Bu Ay</span>
               <span class="text-sm font-bold text-emerald-500">{{ formatCurrency(thisMonthPayments) }}</span>
@@ -25,7 +25,7 @@
       </PageHeader>
 
       <!-- Filtreler -->
-      <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 mb-6">
+      <div class="bg-white dark:bg-[#0f1322] p-6 rounded-xl shadow-md border border-gray-200 dark:border-white/[0.07] mb-6">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div>
             <label class="label">Arama</label>
@@ -64,10 +64,10 @@
       </div>
 
       <!-- Tablo -->
-      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 overflow-hidden">
+      <div class="bg-white dark:bg-[#0f1322] rounded-xl shadow-md border border-gray-200 dark:border-white/[0.07] overflow-hidden">
         <div class="overflow-x-auto">
           <table class="table w-full">
-            <thead class="bg-gray-50 dark:bg-gray-700">
+            <thead class="bg-slate-50 dark:bg-[#1c2238]">
               <tr>
                 <th scope="col" class="text-left p-4">Mal Sahibi</th>
                 <th scope="col" class="text-left p-4">Kat</th>
@@ -79,32 +79,32 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="payment in filteredPayments" :key="payment.id" class="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50">
+              <tr v-for="payment in filteredPayments" :key="payment.id" class="border-b border-gray-200 dark:border-white/[0.07] hover:bg-gray-50 dark:hover:bg-gray-700/50">
                 <td class="p-4">
                   <div>
-                    <p class="font-medium text-gray-800 dark:text-gray-100">{{ payment.ownerName }}</p>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ payment.ownerEmail }}</p>
+                    <p class="font-medium text-gray-800 dark:text-[#f1f3f9]">{{ payment.ownerName }}</p>
+                    <p class="text-sm text-gray-500 dark:text-[#9aa0b4]">{{ payment.ownerEmail }}</p>
                   </div>
                 </td>
-                <td class="p-4 text-gray-800 dark:text-gray-100">{{ payment.unit }}</td>
+                <td class="p-4 text-gray-800 dark:text-[#f1f3f9]">{{ payment.unit }}</td>
                 <td class="p-4">
                   <span 
                     :class="{
                       'bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-400': payment.type === 'aidat',
-                      'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-400': payment.type === 'su',
+                      'bg-brand-100 text-brand-700 dark:bg-blue-900/50 dark:text-brand-400': payment.type === 'su',
                       'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-400': payment.type === 'elektrik',
-                      'bg-gray-100 text-gray-800 dark:bg-gray-900/50 dark:text-gray-400': payment.type === 'diger'
+                      'bg-gray-100 text-gray-800 dark:bg-gray-900/50 dark:text-[#9aa0b4]': payment.type === 'diger'
                     }"
                     class="px-2 py-1 rounded-full text-xs font-medium"
                   >
                     {{ getPaymentTypeText(payment.type) }}
                   </span>
                 </td>
-                <td class="p-4 text-gray-800 dark:text-gray-100">{{ payment.description || '-' }}</td>
+                <td class="p-4 text-gray-800 dark:text-[#f1f3f9]">{{ payment.description || '-' }}</td>
                 <td class="p-4">
                   <span class="font-semibold text-green-600 dark:text-green-400">{{ formatCurrency(payment.amount) }}</span>
                 </td>
-                <td class="p-4 text-gray-800 dark:text-gray-100">{{ formatDate(payment.date) }}</td>
+                <td class="p-4 text-gray-800 dark:text-[#f1f3f9]">{{ formatDate(payment.date) }}</td>
                 <td class="p-4">
                   <div class="flex items-center gap-2">
                     <button 
@@ -128,12 +128,12 @@
 
         <!-- Boş durum -->
         <div v-if="filteredPayments.length === 0" class="text-center py-12">
-          <div class="bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 rounded-full p-3 w-fit mx-auto mb-3">
+          <div class="bg-gray-100 dark:bg-[#1c2238] text-gray-500 dark:text-[#9aa0b4] rounded-full p-3 w-fit mx-auto mb-3">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
             </svg>
           </div>
-          <p class="text-gray-500 dark:text-gray-400">Arama kriterlerinize uygun ödeme kaydı bulunamadı.</p>
+          <p class="text-gray-500 dark:text-[#9aa0b4]">Arama kriterlerinize uygun ödeme kaydı bulunamadı.</p>
         </div>
       </div>
     </div>

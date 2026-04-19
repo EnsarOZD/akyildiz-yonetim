@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="app-card p-5 flex items-center gap-4">
     <!-- Icon -->
     <div
@@ -14,9 +14,9 @@
 
     <!-- Content -->
     <div class="min-w-0 flex-1">
-      <p class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 truncate">{{ label }}</p>
-      <p class="mt-0.5 text-2xl font-bold text-slate-800 dark:text-slate-100 leading-none">{{ value }}</p>
-      <p v-if="sub" class="mt-1 text-xs text-slate-500 dark:text-slate-400 truncate">{{ sub }}</p>
+      <p class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-[#9aa0b4] truncate">{{ label }}</p>
+      <p class="mt-0.5 text-2xl font-bold text-slate-800 dark:text-[#f1f3f9] leading-none">{{ value }}</p>
+      <p v-if="sub" class="mt-1 text-xs text-slate-500 dark:text-[#9aa0b4] truncate">{{ sub }}</p>
     </div>
 
     <!-- Trend badge (optional) -->
@@ -49,12 +49,12 @@ const props = defineProps({
 })
 
 const palettes = {
-  blue:   { bg: 'bg-blue-100 dark:bg-blue-900/30',   icon: 'text-blue-600 dark:text-blue-400' },
+  blue:   { bg: 'bg-brand-100 dark:bg-brand-500/[0.12]',   icon: 'text-brand-600 dark:text-brand-400' },
   green:  { bg: 'bg-emerald-100 dark:bg-emerald-900/30', icon: 'text-emerald-600 dark:text-emerald-400' },
   red:    { bg: 'bg-red-100 dark:bg-red-900/30',     icon: 'text-red-600 dark:text-red-400' },
   amber:  { bg: 'bg-amber-100 dark:bg-amber-900/30', icon: 'text-amber-600 dark:text-amber-400' },
   purple: { bg: 'bg-violet-100 dark:bg-violet-900/30', icon: 'text-violet-600 dark:text-violet-400' },
-  slate:  { bg: 'bg-slate-100 dark:bg-slate-700',    icon: 'text-slate-500 dark:text-slate-400' },
+  slate:  { bg: 'bg-slate-100 dark:bg-[#1c2238]',    icon: 'text-slate-500 dark:text-[#9aa0b4]' },
 }
 
 const iconBg    = computed(() => (palettes[props.color] || palettes.blue).bg)

@@ -1,14 +1,14 @@
-<template>
-  <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 overflow-hidden">
+﻿<template>
+  <div class="bg-white dark:bg-[#0f1322] rounded-xl shadow-md border border-gray-200 dark:border-white/[0.07] overflow-hidden">
     <!-- Header area -->
-    <div class="p-6 border-b border-gray-100 dark:border-gray-700 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div class="p-6 border-b border-gray-100 dark:border-white/[0.07] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
       <div class="flex items-center gap-3">
         <div class="p-2 bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 rounded-lg">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
           </svg>
         </div>
-        <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100">Genel Borç Durumu</h2>
+        <h2 class="text-xl font-bold text-gray-800 dark:text-[#f1f3f9]">Genel Borç Durumu</h2>
       </div>
       
       <div class="relative max-w-xs w-full">
@@ -21,7 +21,7 @@
           v-model="search" 
           type="text" 
           placeholder="Ara: Kiracı, Mal Sahibi veya Ünite..." 
-          class="input input-bordered input-sm w-full pl-10 bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600"
+          class="input input-bordered input-sm w-full pl-10 dark:bg-[#1c2238] border-gray-200 dark:border-white/[0.1]"
         >
       </div>
     </div>
@@ -30,27 +30,27 @@
     <div class="overflow-x-auto">
       <table class="table w-full">
         <thead class="bg-gray-50/50 dark:bg-gray-700/50">
-          <tr class="text-gray-500 dark:text-gray-400 border-b dark:border-gray-700">
+          <tr class="text-gray-500 dark:text-[#9aa0b4] border-b dark:border-white/[0.07]">
             <th scope="col" class="font-semibold text-xs uppercase tracking-wider py-4">AD SOYAD/FİRMA</th>
             <th scope="col" class="font-semibold text-xs uppercase tracking-wider py-4 text-center">TİP</th>
             <th scope="col" class="font-semibold text-xs uppercase tracking-wider py-4 text-center">BLOK/NO</th>
-            <th scope="col" @click="sortBy('aidatDebt')" class="font-semibold text-xs uppercase tracking-wider py-4 text-right cursor-pointer hover:text-blue-500">
+            <th scope="col" @click="sortBy('aidatDebt')" class="font-semibold text-xs uppercase tracking-wider py-4 text-right cursor-pointer hover:text-brand-500">
               AİDAT <span v-if="sortKey === 'aidatDebt'">{{ sortOrder === 1 ? '↑' : '↓' }}</span>
             </th>
-            <th scope="col" @click="sortBy('electricityDebt')" class="font-semibold text-xs uppercase tracking-wider py-4 text-right cursor-pointer hover:text-blue-500">
+            <th scope="col" @click="sortBy('electricityDebt')" class="font-semibold text-xs uppercase tracking-wider py-4 text-right cursor-pointer hover:text-brand-500">
               ELEKTRİK <span v-if="sortKey === 'electricityDebt'">{{ sortOrder === 1 ? '↑' : '↓' }}</span>
             </th>
-            <th scope="col" @click="sortBy('waterDebt')" class="font-semibold text-xs uppercase tracking-wider py-4 text-right cursor-pointer hover:text-blue-500">
+            <th scope="col" @click="sortBy('waterDebt')" class="font-semibold text-xs uppercase tracking-wider py-4 text-right cursor-pointer hover:text-brand-500">
               SU <span v-if="sortKey === 'waterDebt'">{{ sortOrder === 1 ? '↑' : '↓' }}</span>
             </th>
-            <th scope="col" @click="sortBy('totalDebt')" class="font-semibold text-xs uppercase tracking-wider py-4 text-right cursor-pointer hover:text-blue-500 text-orange-600 dark:text-orange-400">
+            <th scope="col" @click="sortBy('totalDebt')" class="font-semibold text-xs uppercase tracking-wider py-4 text-right cursor-pointer hover:text-brand-500 text-orange-600 dark:text-orange-400">
               TOPLAM <span v-if="sortKey === 'totalDebt'">{{ sortOrder === 1 ? '↑' : '↓' }}</span>
             </th>
           </tr>
         </thead>
-        <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+        <tbody class="divide-y divide-gray-100 dark:divide-white/[0.06]">
           <tr v-if="loading" v-for="i in 3" :key="i" class="animate-pulse">
-            <td colspan="7" class="py-4 px-6"><div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-full"></div></td>
+            <td colspan="7" class="py-4 px-6"><div class="h-4 bg-gray-200 dark:bg-[#1c2238] rounded w-full"></div></td>
           </tr>
           <tr v-else-if="filteredDebts.length === 0" class="text-center py-12">
             <td colspan="7" class="py-12 text-gray-400 italic">Kayıt bulunamadı.</td>
@@ -62,7 +62,7 @@
             class="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors"
           >
             <td class="py-4">
-              <div class="font-medium text-gray-800 dark:text-gray-100">{{ item.displayName }}</div>
+              <div class="font-medium text-gray-800 dark:text-[#f1f3f9]">{{ item.displayName }}</div>
             </td>
             <td class="py-4 text-center">
               <span 
@@ -72,20 +72,20 @@
                 {{ item.entityType === 'Tenant' ? 'Kiracı' : 'Mal Sahibi' }}
               </span>
             </td>
-            <td class="py-4 text-center font-mono text-sm text-gray-600 dark:text-gray-400">
+            <td class="py-4 text-center font-mono text-sm text-gray-600 dark:text-[#9aa0b4]">
               {{ item.apartmentNumber || '-' }}
             </td>
-            <td class="py-4 text-right font-medium" :class="item.aidatDebt > 0 ? 'text-gray-700 dark:text-gray-200' : 'text-gray-300 dark:text-gray-600'">
+            <td class="py-4 text-right font-medium" :class="item.aidatDebt > 0 ? 'text-gray-700 dark:text-[#f1f3f9]' : 'text-gray-300 dark:text-gray-600'">
               {{ formatCurrency(item.aidatDebt) }}
             </td>
-            <td class="py-4 text-right font-medium" :class="item.electricityDebt > 0 ? 'text-gray-700 dark:text-gray-200' : 'text-gray-300 dark:text-gray-600'">
+            <td class="py-4 text-right font-medium" :class="item.electricityDebt > 0 ? 'text-gray-700 dark:text-[#f1f3f9]' : 'text-gray-300 dark:text-gray-600'">
               {{ formatCurrency(item.electricityDebt) }}
             </td>
-            <td class="py-4 text-right font-medium" :class="item.waterDebt > 0 ? 'text-gray-700 dark:text-gray-200' : 'text-gray-300 dark:text-gray-600'">
+            <td class="py-4 text-right font-medium" :class="item.waterDebt > 0 ? 'text-gray-700 dark:text-[#f1f3f9]' : 'text-gray-300 dark:text-gray-600'">
               {{ formatCurrency(item.waterDebt) }}
             </td>
             <td class="py-4 text-right font-bold text-gray-900 dark:text-white">
-              <div class="p-2 bg-gray-50 dark:bg-gray-800/50 rounded-lg inline-block min-w-[100px]">
+              <div class="p-2 dark:bg-gray-800/50 rounded-lg inline-block min-w-[100px]">
                 {{ formatCurrency(item.totalDebt) }}
               </div>
             </td>
@@ -95,7 +95,7 @@
     </div>
 
     <!-- Info Footer -->
-    <div class="p-4 bg-gray-50 dark:bg-gray-700/30 text-xs text-gray-500 border-t dark:border-gray-700 flex justify-between items-center">
+    <div class="p-4 dark:bg-gray-700/30 text-xs text-gray-500 border-t dark:border-white/[0.07] flex justify-between items-center">
       <div>Toplam {{ filteredDebts.length }} kayıt listeleniyor.</div>
       <div class="flex items-center gap-4">
         <div class="flex items-center gap-1">

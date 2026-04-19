@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black">
     <!-- Navigation -->
     <nav class="bg-gray-900/80 backdrop-blur-sm border-b border-gray-700 sticky top-0 z-50">
@@ -87,7 +87,7 @@
       </div>
 
       <!-- Floating elements -->
-      <div class="pointer-events-none absolute top-20 left-20 w-72 h-72 bg-blue-600 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
+      <div class="pointer-events-none absolute top-20 left-20 w-72 h-72 bg-brand-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
       <div class="pointer-events-none absolute top-40 right-20 w-72 h-72 bg-purple-600 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
       <div class="pointer-events-none absolute -bottom-8 left-40 w-72 h-72 bg-pink-600 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
     </section>
@@ -204,7 +204,7 @@
             </p>
             <div class="grid grid-cols-2 gap-6">
               <div class="text-center">
-                <div class="text-3xl font-bold text-blue-400 mb-2">100+</div>
+                <div class="text-3xl font-bold text-brand-400 mb-2">100+</div>
                 <div class="text-gray-300">Mutlu Müşteri</div>
               </div>
               <div class="text-center">

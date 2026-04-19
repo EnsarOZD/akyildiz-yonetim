@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="p-4 sm:p-6 min-h-screen pb-24 md:pb-6">
 
     <!-- Sayfa Başlığı -->
@@ -10,7 +10,7 @@
       </template>
       <template #actions>
         <div class="flex items-center gap-3">
-          <select v-model="dateFilter" @change="fetchExpenses" class="select select-sm select-bordered h-10 border-slate-200 dark:border-slate-700 bg-white/50 dark:bg-slate-800/50">
+          <select v-model="dateFilter" @change="fetchExpenses" class="select select-sm select-bordered h-10 border-slate-200 dark:border-white/[0.07] bg-white/50 dark:bg-slate-800/50">
             <option value="all">Tüm Zamanlar</option>
             <option value="this_month">Bu Ay</option>
             <option value="last_month">Geçen Ay</option>
@@ -60,18 +60,18 @@
             </svg>
           </div>
           <div class="min-w-0">
-            <p class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 truncate">Bu Ay</p>
+            <p class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-[#626885] truncate">Bu Ay</p>
             <p class="text-sm font-bold text-slate-800 dark:text-white tabular-nums">{{ formatCurrency(thisMonthExpense) }}</p>
           </div>
         </div>
         <div class="app-card flex items-center gap-3">
-          <div class="w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-900/20 text-blue-500 flex items-center justify-center shrink-0">
+          <div class="w-9 h-9 rounded-xl bg-brand-50 dark:bg-brand-500/[0.08] text-brand-500 flex items-center justify-center shrink-0">
             <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 7h6m0 0v6m0-6L9 13"/>
             </svg>
           </div>
           <div class="min-w-0">
-            <p class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 truncate">Toplam</p>
+            <p class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-[#626885] truncate">Toplam</p>
             <p class="text-sm font-bold text-slate-800 dark:text-white tabular-nums">{{ formatCurrency(totalExpense) }}</p>
           </div>
         </div>
@@ -82,7 +82,7 @@
             </svg>
           </div>
           <div class="min-w-0">
-            <p class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 truncate">Bu Ay İşlem</p>
+            <p class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-[#626885] truncate">Bu Ay İşlem</p>
             <p class="text-xl font-bold text-slate-800 dark:text-white tabular-nums">{{ thisMonthCount }}</p>
           </div>
         </div>
@@ -91,19 +91,19 @@
       <!-- Grafik + Tip Dağılımı -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-5">
         <div class="app-card">
-          <h2 class="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-4">Aylık Gider Grafiği</h2>
+          <h2 class="text-sm font-semibold text-slate-700 dark:text-[#f1f3f9] mb-4">Aylık Gider Grafiği</h2>
           <div class="h-40 flex items-end gap-1.5">
             <div v-for="(month, index) in monthlyData" :key="index" class="flex-1 flex flex-col items-center gap-1.5">
               <div
                 class="w-full bg-red-400 dark:bg-red-500 rounded-t transition-all duration-500"
                 :style="{ height: `${Math.max((month.expense / maxAmount) * 130, month.expense > 0 ? 4 : 2)}px` }"
               ></div>
-              <span class="text-[10px] text-slate-400 dark:text-slate-500 font-medium">{{ month.month }}</span>
+              <span class="text-[10px] text-slate-400 dark:text-[#626885] font-medium">{{ month.month }}</span>
             </div>
           </div>
         </div>
         <div class="app-card">
-          <h2 class="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-4">Tip Dağılımı</h2>
+          <h2 class="text-sm font-semibold text-slate-700 dark:text-[#f1f3f9] mb-4">Tip Dağılımı</h2>
           <div class="space-y-2.5">
             <div v-for="type in expenseTypeStats" :key="type.name" class="flex items-center justify-between">
               <div class="flex items-center gap-2.5">
@@ -113,13 +113,13 @@
                   </svg>
                 </div>
                 <div>
-                  <p class="text-xs font-semibold text-slate-700 dark:text-slate-200">{{ type.label }}</p>
-                  <p class="text-[10px] text-slate-400 dark:text-slate-500">{{ type.count }} gider</p>
+                  <p class="text-xs font-semibold text-slate-700 dark:text-[#f1f3f9]">{{ type.label }}</p>
+                  <p class="text-[10px] text-slate-400 dark:text-[#626885]">{{ type.count }} gider</p>
                 </div>
               </div>
               <p class="text-sm font-bold text-red-500 dark:text-red-400 tabular-nums">{{ formatCurrency(type.total) }}</p>
             </div>
-            <div v-if="expenseTypeStats.length === 0" class="text-xs text-slate-400 dark:text-slate-500 text-center py-4">Veri yok</div>
+            <div v-if="expenseTypeStats.length === 0" class="text-xs text-slate-400 dark:text-[#626885] text-center py-4">Veri yok</div>
           </div>
         </div>
       </div>
@@ -148,7 +148,7 @@
         </EmptyState>
 
         <!-- Liste -->
-        <div v-else class="divide-y divide-slate-100 dark:divide-slate-700/60">
+        <div v-else class="divide-y divide-slate-100 dark:divide-white/[0.06]/60">
           <div
             v-for="e in paginatedExpenses"
             :key="e.id"
@@ -163,9 +163,9 @@
 
             <!-- Bilgi -->
             <div class="flex-1 min-w-0">
-              <p class="text-sm font-semibold text-slate-800 dark:text-slate-100 truncate">{{ e.title || 'Açıklama Yok' }}</p>
+              <p class="text-sm font-semibold text-slate-800 dark:text-[#f1f3f9] truncate">{{ e.title || 'Açıklama Yok' }}</p>
               <div class="flex items-center gap-2 flex-wrap">
-                <span class="text-xs text-slate-400 dark:text-slate-500">{{ formatDate(e.expenseDate) || 'Tarih yok' }}</span>
+                <span class="text-xs text-slate-400 dark:text-[#626885]">{{ formatDate(e.expenseDate) || 'Tarih yok' }}</span>
                 <span class="badge badge-xs badge-info">{{ getExpenseTypeName(e.type) || 'Tip Yok' }}</span>
               </div>
             </div>
@@ -180,7 +180,7 @@
                   <circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/><circle cx="5" cy="12" r="1.5"/>
                 </svg>
               </button>
-              <ul tabindex="0" class="dropdown-content menu p-1.5 shadow-card bg-base-100 border border-slate-200 dark:border-slate-700 rounded-xl w-32 z-10 text-xs">
+              <ul tabindex="0" class="dropdown-content menu p-1.5 shadow-card bg-base-100 border border-slate-200 dark:border-white/[0.07] rounded-xl w-32 z-10 text-xs">
                 <li><a @click="startEdit(e)" class="rounded-lg">Düzenle</a></li>
                 <li><a @click="deleteExpense(e)" class="rounded-lg text-error">Sil</a></li>
               </ul>

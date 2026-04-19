@@ -1,15 +1,15 @@
-<template>
+﻿<template>
   <dialog open class="modal">
-    <div class="modal-box max-w-md bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+    <div class="modal-box max-w-md bg-white dark:bg-[#0f1322] border border-gray-200 dark:border-white/[0.07]">
       <!-- Header -->
-      <div class="flex items-center justify-between mb-6 pb-4 border-b border-gray-200 dark:border-gray-700">
+      <div class="flex items-center justify-between mb-6 pb-4 border-b border-gray-200 dark:border-white/[0.07]">
         <div class="flex items-center gap-3">
           <div class="bg-yellow-100 dark:bg-yellow-900/50 text-yellow-600 dark:text-yellow-400 rounded-full p-2">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
             </svg>
           </div>
-          <h3 class="text-xl font-bold text-gray-800 dark:text-gray-100">Aidat Kaydı Düzenle</h3>
+          <h3 class="text-xl font-bold text-gray-800 dark:text-[#f1f3f9]">Aidat Kaydı Düzenle</h3>
         </div>
         <button @click="$emit('close')" class="btn btn-ghost btn-sm">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -20,16 +20,16 @@
 
       <div class="space-y-6">
         <!-- Bilgi Alanları -->
-        <div class="bg-gray-50 dark:bg-gray-900 rounded-lg p-4 space-y-4">
-          <h4 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-3">Kayıt Bilgileri</h4>
+        <div class="bg-gray-50 dark:bg-base-200 rounded-lg p-4 space-y-4">
+          <h4 class="text-lg font-semibold text-gray-800 dark:text-[#f1f3f9] mb-3">Kayıt Bilgileri</h4>
 
           <div class="form-control">
             <label class="label">
-              <span class="label-text font-semibold text-gray-700 dark:text-gray-300">Kat/Daire</span>
+              <span class="label-text font-semibold text-gray-700 dark:text-[#f1f3f9]">Kat/Daire</span>
             </label>
             <input
               type="text"
-              class="input input-bordered w-full bg-gray-100 dark:bg-gray-600 border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400"
+              class="input input-bordered w-full bg-gray-100 dark:bg-[#1c2238] border-gray-300 dark:border-white/[0.1] text-gray-500 dark:text-[#9aa0b4]"
               :value="record.unit || record.flatNumber || '-'"
               disabled
             />
@@ -37,18 +37,18 @@
 
           <div class="form-control">
             <label class="label">
-              <span class="label-text font-semibold text-gray-700 dark:text-gray-300">Şirket/Kişi</span>
+              <span class="label-text font-semibold text-gray-700 dark:text-[#f1f3f9]">Şirket/Kişi</span>
             </label>
             <input
               type="text"
-              class="input input-bordered w-full bg-gray-100 dark:bg-gray-600 border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400"
+              class="input input-bordered w-full bg-gray-100 dark:bg-[#1c2238] border-gray-300 dark:border-white/[0.1] text-gray-500 dark:text-[#9aa0b4]"
               :value="record.tenantCompany || record.tenantName || record.ownerName || '-'"
               disabled
             />
           </div>
 
           <!-- Dönem ve Tarih -->
-          <div class="grid grid-cols-2 gap-4 mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+          <div class="grid grid-cols-2 gap-4 mt-4 pt-4 border-t border-gray-200 dark:border-white/[0.07]">
             <div class="form-control">
               <label class="label"><span class="label-text font-semibold">Yıl</span></label>
               <input type="number" v-model.number="local.periodYear" class="input input-bordered w-full" min="2020" />
@@ -68,12 +68,12 @@
         </div>
 
         <!-- Düzenlenebilir Alanlar -->
-        <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 space-y-4">
-          <h4 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-3">Tutar ve Açıklama</h4>
+        <div class="bg-brand-50 dark:bg-brand-500/[0.08] rounded-lg p-4 space-y-4">
+          <h4 class="text-lg font-semibold text-gray-800 dark:text-[#f1f3f9] mb-3">Tutar ve Açıklama</h4>
 
           <div class="form-control">
             <label class="label">
-              <span class="label-text font-semibold text-gray-700 dark:text-gray-300">Toplam Tutar *</span>
+              <span class="label-text font-semibold text-gray-700 dark:text-[#f1f3f9]">Toplam Tutar *</span>
             </label>
             <div class="relative">
               <input
@@ -81,7 +81,7 @@
                 v-model="displayAmount"
                 @input="handleAmountInput"
                 @blur="handleAmountBlur"
-                class="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 pr-10"
+                class="input input-bordered w-full bg-white dark:bg-[#1c2238] border-gray-300 dark:border-white/[0.1] text-gray-700 dark:text-[#f1f3f9] pr-10"
                 :class="{ 'border-red-500': amountError }"
                 placeholder="0,00"
                 required
@@ -93,19 +93,19 @@
 
           <div class="form-control">
             <label class="label">
-              <span class="label-text font-semibold text-gray-700 dark:text-gray-300">Fatura Numarası</span>
+              <span class="label-text font-semibold text-gray-700 dark:text-[#f1f3f9]">Fatura Numarası</span>
             </label>
             <input
               v-model="local.invoiceNumber"
               type="text"
-              class="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300"
+              class="input input-bordered w-full bg-white dark:bg-[#1c2238] border-gray-300 dark:border-white/[0.1] text-gray-700 dark:text-[#f1f3f9]"
               placeholder="Opsiyonel fatura no..."
             />
           </div>
 
           <div class="form-control">
             <label class="label">
-              <span class="label-text font-semibold text-gray-700 dark:text-gray-300">Açıklama</span>
+              <span class="label-text font-semibold text-gray-700 dark:text-[#f1f3f9]">Açıklama</span>
             </label>
             <textarea
               v-model="local.description"
@@ -123,7 +123,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
               </svg>
             </div>
-            <div class="text-sm text-gray-700 dark:text-gray-300">
+            <div class="text-sm text-gray-700 dark:text-[#f1f3f9]">
               <p class="font-medium mb-1">Dikkat</p>
               <p>Bu değişiklik aidat kaydını kalıcı olarak günceller.</p>
             </div>
@@ -131,7 +131,7 @@
         </div>
 
         <!-- Actions -->
-        <div class="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+        <div class="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-white/[0.07]">
           <button class="btn btn-outline btn-sm" @click="$emit('close')">
             İptal
           </button>

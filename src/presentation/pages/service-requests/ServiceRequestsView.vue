@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="p-4 sm:p-6 min-h-screen pb-24 md:pb-6">
 
     <PageHeader title="Talep Yönetimi" subtitle="Bakım, hizmet ve teknik talepleri buradan takip edin ve yönetin">
@@ -27,7 +27,7 @@
           :class="[
             'px-4 py-1.5 text-xs font-semibold rounded-lg transition-all duration-200',
             activeFilter === f.value 
-              ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm' 
+              ? 'bg-white dark:bg-[#1c2238] text-brand-600 dark:text-brand-400 shadow-sm' 
               : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
           ]">
           {{ f.label }}
@@ -46,14 +46,14 @@
 
     <!-- Boş Durum -->
     <div v-else-if="requests.length === 0" class="app-card p-16 text-center border-dashed border-2">
-      <div class="w-16 h-16 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-300 flex items-center justify-center mx-auto mb-4">
+      <div class="w-16 h-16 rounded-2xl bg-slate-100 dark:bg-[#151a2e] text-slate-300 flex items-center justify-center mx-auto mb-4">
         <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
         </svg>
       </div>
-      <h3 class="text-base font-bold text-slate-800 dark:text-slate-200">Henüz talep yok</h3>
+      <h3 class="text-base font-bold text-slate-800 dark:text-[#f1f3f9]">Henüz talep yok</h3>
       <p class="text-sm text-slate-500 mt-1 max-w-xs mx-auto">Herhangi bir arıza, temizlik veya güvenlik talebiniz olduğunda buradan kolayca iletebilirsiniz.</p>
-      <button @click="showCreate = true" class="btn btn-sm btn-ghost text-blue-500 mt-4">Yeni Talep Oluştur</button>
+      <button @click="showCreate = true" class="btn btn-sm btn-ghost text-brand-500 mt-4">Yeni Talep Oluştur</button>
     </div>
 
     <!-- Hizmet Talebi Listesi -->
@@ -74,17 +74,17 @@
               <span :class="statusBadge(req.status)" class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider">{{ statusLabel(req.status) }}</span>
             </div>
             
-            <h3 class="text-sm font-bold text-slate-800 dark:text-slate-100 truncate mb-1">{{ req.title }}</h3>
-            <p class="text-xs text-slate-600 dark:text-slate-400 line-clamp-2 mb-3 leading-relaxed">{{ req.description }}</p>
+            <h3 class="text-sm font-bold text-slate-800 dark:text-[#f1f3f9] truncate mb-1">{{ req.title }}</h3>
+            <p class="text-xs text-slate-600 dark:text-[#9aa0b4] line-clamp-2 mb-3 leading-relaxed">{{ req.description }}</p>
             
             <div class="flex flex-wrap items-center gap-y-2 gap-x-4 pt-3 border-t border-slate-100 dark:border-slate-700/50">
               <div class="flex items-center gap-1.5 min-w-0">
-                <div class="w-5 h-5 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-[8px] font-bold text-slate-500 overflow-hidden">
+                <div class="w-5 h-5 rounded-full bg-slate-200 dark:bg-[#1c2238] flex items-center justify-center text-[8px] font-bold text-slate-500 overflow-hidden">
                   <span v-if="!(req.tenantName || req.ownerName)">?</span>
                   <img v-else-if="req.userPhoto" :src="req.userPhoto" class="w-full h-full object-cover">
                   <span v-else>{{ (req.tenantName || req.ownerName || '?').charAt(0) }}</span>
                 </div>
-                <span class="text-[11px] font-medium text-slate-500 dark:text-slate-400 truncate">{{ req.tenantName || req.ownerName || 'Bilinmiyor' }}</span>
+                <span class="text-[11px] font-medium text-slate-500 dark:text-[#9aa0b4] truncate">{{ req.tenantName || req.ownerName || 'Bilinmiyor' }}</span>
               </div>
               
               <div class="flex items-center gap-1.5">
@@ -96,10 +96,10 @@
 
               <!-- Atanan Personel -->
               <div v-if="req.assignedPersonnelName" class="flex items-center gap-1.5">
-                <div class="w-4 h-4 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center">
+                <div class="w-4 h-4 rounded-full bg-brand-100 text-brand-600 flex items-center justify-center">
                   <svg class="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
                 </div>
-                <span class="text-[11px] font-semibold text-blue-600 dark:text-blue-400">{{ req.assignedPersonnelName }}</span>
+                <span class="text-[11px] font-semibold text-brand-600 dark:text-brand-400">{{ req.assignedPersonnelName }}</span>
               </div>
             </div>
           </div>
@@ -115,13 +115,13 @@
           </button>
           
           <div class="dropdown dropdown-end">
-            <button tabindex="0" class="btn btn-xs btn-ghost hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg">
+            <button tabindex="0" class="btn btn-xs btn-ghost hover:bg-slate-100 dark:hover:bg-white/[0.06] rounded-lg">
               <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
               </svg>
             </button>
-            <ul tabindex="0" class="dropdown-content z-[1] menu p-1.5 shadow-xl bg-white dark:bg-slate-800 rounded-xl w-44 border border-slate-200 dark:border-slate-700 text-xs">
-              <li v-if="req.status === 'Open'"><a @click="updateStatus(req.id, 'InProgress')" class="rounded-lg py-2"><svg class="w-3.5 h-3.5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/></svg> İşleme Al</a></li>
+            <ul tabindex="0" class="dropdown-content z-[1] menu p-1.5 shadow-xl bg-white dark:bg-[#0f1322] rounded-xl w-44 border border-slate-200 dark:border-white/[0.07] text-xs">
+              <li v-if="req.status === 'Open'"><a @click="updateStatus(req.id, 'InProgress')" class="rounded-lg py-2"><svg class="w-3.5 h-3.5 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/></svg> İşleme Al</a></li>
               <li v-if="req.status === 'InProgress'"><a @click="openResolve(req)" class="rounded-lg py-2"><svg class="w-3.5 h-3.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> Tamamlandı Olarak İşaretle</a></li>
               <li v-if="req.status !== 'Closed'"><div class="divider my-0"></div></li>
               <li v-if="req.status !== 'Closed'"><a @click="openClose(req)" class="rounded-lg py-2 text-error"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> Talebi Kapat</a></li>
@@ -141,7 +141,7 @@
         <div class="space-y-4">
           <div class="form-control">
             <label class="label py-1"><span class="label-text text-xs font-bold text-slate-500 uppercase">Talep Başlığı</span></label>
-            <input v-model="form.title" type="text" placeholder="Kısa ve öz bir başlık..." class="input input-bordered bg-slate-50 dark:bg-slate-800/50 w-full focus:ring-2 focus:ring-blue-500/20" />
+            <input v-model="form.title" type="text" placeholder="Kısa ve öz bir başlık..." class="input input-bordered bg-slate-50 dark:bg-slate-800/50 w-full focus:ring-2 focus:ring-brand-500/20" />
           </div>
           
           <div class="form-control">
@@ -181,7 +181,7 @@
         <div class="form-control mb-6">
           <label class="label py-1"><span class="label-text text-xs font-bold text-slate-500 uppercase">Görevlendirilecek Personel</span></label>
           <div v-if="personnelLoading" class="flex justify-center py-4">
-            <span class="loading loading-spinner loading-sm text-blue-500"></span>
+            <span class="loading loading-spinner loading-sm text-brand-500"></span>
           </div>
           <select v-else v-model="selectedPersonnelId" class="select select-bordered w-full bg-slate-50 dark:bg-slate-800/50">
             <option value="">Lütfen seçim yapın...</option>
@@ -246,7 +246,7 @@
 
     <!-- Silme Modal -->
     <div v-if="deleteTarget" class="modal modal-open">
-      <div class="modal-box max-w-sm bg-white dark:bg-slate-900 border-2 border-error/20">
+      <div class="modal-box max-w-sm bg-white dark:bg-[#0f1322] border-2 border-error/20">
         <div class="w-12 h-12 rounded-full bg-error/10 text-error flex items-center justify-center mx-auto mb-4">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
         </div>
@@ -437,10 +437,10 @@ const formatDate = (d) => {
 
 const statusLabel = (s) => ({ Open: 'Yeni', InProgress: 'İşlemde', Resolved: 'Çözüldü', Closed: 'Kapalı' }[s] ?? s)
 const statusBadge = (s) => ({
-  Open: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400',
+  Open: 'bg-brand-100 text-brand-600 dark:bg-brand-500/[0.12] dark:text-brand-400',
   InProgress: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400',
   Resolved: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400',
-  Closed: 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400',
+  Closed: 'bg-slate-100 text-slate-500 dark:bg-[#151a2e] dark:text-[#9aa0b4]',
 }[s] ?? 'bg-slate-100 text-slate-400')
 
 const statusBorder = (s) => ({
@@ -472,10 +472,10 @@ const categoryIcon = (c) => {
 
 const categoryClass = (c) => ({
   Maintenance: 'bg-amber-100 text-amber-600 dark:bg-amber-900/40 dark:text-amber-400',
-  Cleaning: 'bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400',
+  Cleaning: 'bg-brand-100 text-brand-600 dark:bg-blue-900/40 dark:text-brand-400',
   Noise: 'bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-400',
   Security: 'bg-violet-100 text-violet-600 dark:bg-violet-900/40 dark:text-violet-400',
-  Other: 'bg-slate-100 text-slate-500 dark:bg-slate-700 dark:text-slate-400',
+  Other: 'bg-slate-100 text-slate-500 dark:bg-[#1c2238] dark:text-[#9aa0b4]',
 }[c] ?? 'bg-slate-100 text-slate-500')
 
 onMounted(loadRequests)

@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="space-y-5">
     <!-- Başlık -->
     <PageHeader v-if="!hideHeader" title="Sistem Ayarları" subtitle="Kullanıcıları yönetin ve yetkilendirin">
@@ -29,7 +29,7 @@
     <!-- Kullanıcı Listesi Kartı -->
     <div class="app-card !p-0">
       <!-- Arama -->
-      <div class="px-4 py-3 border-b border-slate-200 dark:border-slate-700">
+      <div class="px-4 py-3 border-b border-slate-200 dark:border-white/[0.07]">
         <div class="relative">
           <input
             v-model="search"
@@ -46,16 +46,16 @@
 
       <!-- Boş Durum -->
       <div v-if="filteredUsers.length === 0" class="py-12 text-center">
-        <div class="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-700 flex items-center justify-center mx-auto mb-3">
+        <div class="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-[#1c2238] flex items-center justify-center mx-auto mb-3">
           <svg class="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
           </svg>
         </div>
-        <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Kullanıcı bulunamadı</p>
+        <p class="text-sm font-medium text-slate-500 dark:text-[#9aa0b4]">Kullanıcı bulunamadı</p>
       </div>
 
       <!-- Kullanıcı Listesi -->
-      <div v-else class="divide-y divide-slate-100 dark:divide-slate-700/50">
+      <div v-else class="divide-y divide-slate-100 dark:divide-white/[0.06]/50">
         <div
           v-for="user in filteredUsers"
           :key="user.id"
@@ -69,7 +69,7 @@
 
           <!-- İsim + Email -->
           <div class="flex-1 min-w-0">
-            <p class="text-sm font-semibold text-slate-800 dark:text-slate-100 truncate">
+            <p class="text-sm font-semibold text-slate-800 dark:text-[#f1f3f9] truncate">
               {{ user.firstName }} {{ user.lastName }}
             </p>
             <p class="text-xs text-slate-400 truncate">{{ user.email }}</p>
@@ -96,7 +96,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/>
               </svg>
             </label>
-            <ul tabindex="0" class="dropdown-content menu menu-sm p-1.5 shadow-lg bg-base-100 border border-slate-200 dark:border-slate-700 rounded-xl w-40 z-30">
+            <ul tabindex="0" class="dropdown-content menu menu-sm p-1.5 shadow-lg bg-base-100 border border-slate-200 dark:border-white/[0.07] rounded-xl w-40 z-30">
               <li><a @click="editUser(user)" class="text-sm">Düzenle</a></li>
               <li><a @click="triggerPasswordReset(user)" class="text-sm text-warning">Şifre Sıfırla</a></li>
               <li v-if="user.isActive !== false">
@@ -116,7 +116,7 @@
     <div v-if="showAddUserModal" class="modal modal-open">
       <div class="modal-box max-w-xl">
         <div class="flex items-center justify-between mb-5">
-          <h3 class="font-bold text-lg text-slate-800 dark:text-slate-100">
+          <h3 class="font-bold text-lg text-slate-800 dark:text-[#f1f3f9]">
             {{ isEditMode ? 'Kullanıcıyı Düzenle' : 'Yeni Kullanıcı Ekle' }}
           </h3>
           <button @click="closeModal" class="btn btn-ghost btn-sm btn-circle">
@@ -174,11 +174,11 @@
             </div>
           </div>
 
-          <div class="flex items-start gap-3 p-3 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
-            <svg class="w-4 h-4 text-blue-500 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div class="flex items-start gap-3 p-3 rounded-xl bg-brand-50 dark:bg-brand-500/[0.08] border border-brand-200 dark:border-brand-700">
+            <svg class="w-4 h-4 text-brand-500 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
-            <p class="text-xs text-blue-700 dark:text-blue-300">Kullanıcı oluşturulduktan sonra belirtilen e-posta adresine şifre belirleme bağlantısı gönderilecektir.</p>
+            <p class="text-xs text-brand-700 dark:text-brand-300">Kullanıcı oluşturulduktan sonra belirtilen e-posta adresine şifre belirleme bağlantısı gönderilecektir.</p>
           </div>
 
           <div class="flex gap-2 justify-end pt-2">
