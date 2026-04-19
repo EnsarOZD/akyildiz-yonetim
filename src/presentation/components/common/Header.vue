@@ -1,13 +1,13 @@
-﻿<template>
+<template>
   <header data-testid="sidebar"
-    class="sticky top-0 z-50 bg-white/95 dark:bg-[#0f1322]/95 backdrop-blur-md border-b border-slate-200/50 dark:border-white/[0.06] shadow-sm">
+    class="sticky top-0 z-50 bg-white dark:bg-[#080b14] border-b border-slate-200/50 dark:border-white/[0.04] transition-colors duration-300">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex items-center justify-between h-[60px]">
 
         <!-- Logo -->
-        <router-link to="/" class="flex items-center gap-2.5 flex-shrink-0">
-          <div class="w-2 h-2 rounded-full bg-brand-500 dark:bg-brand-400 flex-shrink-0"></div>
-          <span class="text-[13.5px] font-bold tracking-[1.2px] uppercase text-slate-800 dark:text-[#f1f3f9] hidden md:block">
+        <router-link to="/" class="flex items-center gap-2.5 flex-shrink-0 group">
+          <div class="w-2.5 h-2.5 rounded-full bg-brand-500 group-hover:scale-125 transition-transform duration-300 shadow-[0_0_10px_rgba(107,138,255,0.5)]"></div>
+          <span class="text-[14px] font-extrabold tracking-[1.5px] uppercase text-slate-800 dark:text-white hidden md:block">
             {{ appName }}
           </span>
         </router-link>
@@ -20,8 +20,8 @@
             :to="tab.route"
             class="px-3.5 py-2 rounded-lg text-[13px] font-medium transition-all duration-150"
             :class="isActiveTab(tab.route)
-              ? 'bg-brand-500 text-white dark:bg-brand-500 dark:text-white shadow-sm'
-              : 'text-slate-600 dark:text-[#9aa0b4] hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-[#f1f3f9]'"
+              ? 'bg-brand-500 text-white shadow-lg shadow-brand-500/20'
+              : 'text-slate-600 dark:text-[#9aa0b4] hover:text-slate-900 dark:hover:text-[#f1f3f9]'"
             :aria-current="isActiveTab(tab.route) ? 'page' : undefined"
           >
             {{ tab.label }}

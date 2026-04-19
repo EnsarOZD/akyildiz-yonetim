@@ -31,14 +31,14 @@
       
       <!-- Normal sayfalar için layout -->
       <template v-else>
-        <div class="min-h-screen bg-base-200">
+        <div class="min-h-screen bg-white dark:bg-[#080b14] text-slate-900 dark:text-[#f1f3f9] transition-colors duration-300">
           <!-- Header -->
           <Header />
 
           <!-- Bildirim İzni Banner -->
           <NotificationPermissionBanner />
 
-          <div class="w-full max-w-7xl mx-auto mb-20 md:mb-0">
+          <div class="w-full max-w-7xl mx-auto mb-20 md:mb-0 px-4 sm:px-6 lg:px-8">
             <!-- İçerik -->
             <router-view key="private-view" />
           </div>

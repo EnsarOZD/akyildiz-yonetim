@@ -47,6 +47,17 @@ a {
 .dark body,
 [data-theme="dark"] body {
   background-color: #080b14;
+  color: #f1f3f9;
+}
+
+/* Base theme colors from JSX design */
+:root.dark, [data-theme="dark"] {
+  --bg-deep: #080b14;
+  --surface: #0f1322;
+  --surface-alt: #151a2e;
+  --elevated: #1c2238;
+  --border-dim: rgba(255, 255, 255, 0.06);
+  --border-strong: rgba(255, 255, 255, 0.12);
 }
 
 /* Force DaisyUI bg-base-* to use Royal Blue palette in dark mode */
@@ -175,23 +186,25 @@ button:active:not([disabled]) {
   border-radius: 0.75rem;
   box-shadow: 0 1px 4px 0 rgb(0 0 0 / 0.06), 0 1px 2px -1px rgb(0 0 0 / 0.04);
   padding: 1rem;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
-.dark .app-card {
+.dark .app-card, [data-theme="dark"] .app-card {
   background-color: #0f1322;
-  border-color: rgba(255, 255, 255, 0.07);
-  box-shadow: 0 1px 4px 0 rgb(0 0 0 / 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 0 4px 20px -4px rgba(0, 0, 0, 0.5);
 }
 .app-card.hoverable {
-  transition: border-color 0.15s, box-shadow 0.15s;
   cursor: pointer;
 }
 .app-card.hoverable:hover {
   border-color: #a3aeff;
-  box-shadow: 0 2px 8px 0 rgb(107 138 255 / 0.12);
+  box-shadow: 0 4px 12px 0 rgb(107 138 255 / 0.12);
+  transform: translateY(-2px);
 }
-.dark .app-card.hoverable:hover {
+.dark .app-card.hoverable:hover, [data-theme="dark"] .app-card.hoverable:hover {
   border-color: rgba(107, 138, 255, 0.35);
-  box-shadow: 0 2px 12px 0 rgb(107 138 255 / 0.1);
+  background-color: #151a2e;
+  box-shadow: 0 8px 30px -4px rgba(0, 0, 0, 0.6);
 }
 
 /* ============================================================
