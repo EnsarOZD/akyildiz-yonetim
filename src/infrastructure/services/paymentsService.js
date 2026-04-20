@@ -1,5 +1,8 @@
 import apiService from './api.js'
 
+const _cache = new Map()
+const CACHE_TTL = 3 * 60 * 1000 // 3 dakika
+
 class PaymentsService {
   // Tüm ödemeleri getir
   async getPayments(filters = {}) {
@@ -15,7 +18,10 @@ class PaymentsService {
     if (filters.debtorType !== undefined && filters.debtorType !== null && filters.debtorType !== '') params.debtorType = filters.debtorType
     if (filters.excludeAdvanceUse !== undefined) params.excludeAdvanceUse = filters.excludeAdvanceUse
 
-    // Tüm kayıtlar çekilir; PaymentsStore 5 dk. cache'ler, dashboard client-side filtreler.
+    const cacheKey = 'payments:' + JSON.stringify(params)
+    const cached = _cache.get(cacheKey)
+    if (cached && Date.now() - cached.ts < CACHE_TTL) return cached.data
+
     params.pageSize = 1000
     let pageNumber = 1
     const allItems = []
@@ -33,7 +39,12 @@ class PaymentsService {
       pageNumber++
     }
 
+    _cache.set(cacheKey, { data: allItems, ts: Date.now() })
     return allItems
+  }
+
+  invalidateCache() {
+    _cache.clear()
   }
 
   // ID'ye göre ödeme getir
@@ -43,27 +54,37 @@ class PaymentsService {
 
   // Yeni ödeme oluştur
   async createPayment(paymentData) {
-    return apiService.post('/payments', paymentData)
+    const result = await apiService.post('/payments', paymentData)
+    this.invalidateCache()
+    return result
   }
 
   // Yeni transactional ödeme oluştur (borç eşleştirme ile)
   async createPaymentWithAllocation(paymentData) {
-    return apiService.post('/payments/with-allocation', paymentData)
+    const result = await apiService.post('/payments/with-allocation', paymentData)
+    this.invalidateCache()
+    return result
   }
 
   // Ödeme güncelle
   async updatePayment(id, paymentData) {
-    return apiService.put(`/payments/${id}`, paymentData)
+    const result = await apiService.put(`/payments/${id}`, paymentData)
+    this.invalidateCache()
+    return result
   }
 
   // Ödeme sil
   async deletePayment(id) {
-    return apiService.delete(`/payments/${id}`)
+    const result = await apiService.delete(`/payments/${id}`)
+    this.invalidateCache()
+    return result
   }
 
   // Toplu ödeme sil
   async bulkDeletePayments(ids) {
-    return apiService.post('/payments/bulk-delete', { ids: ids })
+    const result = await apiService.post('/payments/bulk-delete', { ids: ids })
+    this.invalidateCache()
+    return result
   }
 
   // Avans hesaplarını getir

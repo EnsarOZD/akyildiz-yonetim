@@ -1,5 +1,8 @@
 import apiService from './api.js'
 
+const _cache = new Map()
+const CACHE_TTL = 3 * 60 * 1000 // 3 dakika
+
 class UtilityDebtsService {
   // Tüm utility debt'leri getir
   async getUtilityDebts(filters = {}) {
@@ -22,6 +25,10 @@ class UtilityDebtsService {
     if (filters.endDate) params.endDate = filters.endDate
     if (filters.debtorType !== undefined && filters.debtorType !== null && filters.debtorType !== '') params.debtorType = filters.debtorType
 
+    const cacheKey = 'debts:' + JSON.stringify(params)
+    const cached = _cache.get(cacheKey)
+    if (cached && Date.now() - cached.ts < CACHE_TTL) return cached.data
+
     params.pageSize = 1000
     let pageNumber = 1
     const allItems = []
@@ -34,12 +41,17 @@ class UtilityDebtsService {
 
       if (items.length === 0) break
       allItems.push(...items)
-      
+
       if (items.length < actualPageSize) break // Son sayfa
       pageNumber++
     }
 
+    _cache.set(cacheKey, { data: allItems, ts: Date.now() })
     return allItems
+  }
+
+  invalidateCache() {
+    _cache.clear()
   }
 
   // ID'ye göre utility debt getir
@@ -49,47 +61,60 @@ class UtilityDebtsService {
 
   // Yeni utility debt oluştur
   async createUtilityDebt(utilityDebtData) {
-    return apiService.post('/utilitydebts', utilityDebtData)
+    const result = await apiService.post('/utilitydebts', utilityDebtData)
+    this.invalidateCache()
+    return result
   }
 
   // Utility debt güncelle (tam güncelleme - tüm alanlar gönderilmeli)
   async updateUtilityDebt(id, utilityDebtData) {
-    return apiService.put(`/utilitydebts/${id}`, utilityDebtData)
+    const result = await apiService.put(`/utilitydebts/${id}`, utilityDebtData)
+    this.invalidateCache()
+    return result
   }
 
   // Utility debt kısmi güncelle (sadece gönderilen alanlar değişir)
   async patchUtilityDebt(id, fields) {
-    return apiService.patch(`/utilitydebts/${id}`, fields)
+    const result = await apiService.patch(`/utilitydebts/${id}`, fields)
+    this.invalidateCache()
+    return result
   }
 
   // Toplu utility debt oluştur (sıralı veya toplu request)
   async createBulkUtilityDebts(debts) {
-    // Backend'de toplu endpoint yoksa tek tek atar, varsa doğrudan post eder
     try {
-      return await apiService.post('/utilitydebts/bulk', { debts })
+      const result = await apiService.post('/utilitydebts/bulk', { debts })
+      this.invalidateCache()
+      return result
     } catch (e) {
-      // Fallback: Tek tek gönder (backend desteği yoksa)
       const results = []
       for (const debt of debts) {
-        results.push(await this.createUtilityDebt(debt))
+        results.push(await apiService.post('/utilitydebts', debt))
       }
+      this.invalidateCache()
       return results
     }
   }
 
   // Utility debt sil
   async deleteUtilityDebt(id) {
-    return apiService.delete(`/utilitydebts/${id}`)
+    const result = await apiService.delete(`/utilitydebts/${id}`)
+    this.invalidateCache()
+    return result
   }
 
   // Toplu utility debt sil
   async bulkDeleteDebts(ids) {
-    return apiService.post('/utilitydebts/bulk-delete', { ids: ids })
+    const result = await apiService.post('/utilitydebts/bulk-delete', { ids: ids })
+    this.invalidateCache()
+    return result
   }
 
   // Döneme göre utility debt'leri sil
   async deleteUtilityDebtsByPeriod(period) {
-    return apiService.delete(`/utilitydebts/period/${period}`)
+    const result = await apiService.delete(`/utilitydebts/period/${period}`)
+    this.invalidateCache()
+    return result
   }
 
   // Ortak gider paylaştır
