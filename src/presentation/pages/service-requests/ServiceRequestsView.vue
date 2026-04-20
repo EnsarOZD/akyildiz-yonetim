@@ -20,21 +20,23 @@
     </PageHeader>
 
     <!-- Filtreler -->
-    <div class="flex flex-wrap items-center justify-between gap-4 mb-8">
-      <div class="flex p-1.5 bg-slate-50 dark:bg-white/[0.02] rounded-2xl border border-slate-100 dark:border-white/[0.04] shadow-sm">
-        <button v-for="f in filters" :key="f.value"
-          @click="activeFilter = f.value; loadRequests()"
-          :class="[
-            'px-5 py-1.5 text-[11px] font-black uppercase tracking-widest rounded-xl transition-all duration-300',
-            activeFilter === f.value 
-              ? 'bg-white dark:bg-brand-500 text-brand-600 dark:text-white shadow-xl shadow-brand-500/10' 
-              : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'
-          ]">
-          {{ f.label }}
-        </button>
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-8">
+      <div class="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0 pb-1 sm:pb-0">
+        <div class="flex p-1.5 bg-slate-50 dark:bg-white/[0.02] rounded-2xl border border-slate-100 dark:border-white/[0.04] shadow-sm w-max">
+          <button v-for="f in filters" :key="f.value"
+            @click="activeFilter = f.value; loadRequests()"
+            :class="[
+              'px-4 py-1.5 text-[11px] font-black uppercase tracking-widest rounded-xl transition-all duration-300 whitespace-nowrap',
+              activeFilter === f.value
+                ? 'bg-white dark:bg-brand-500 text-brand-600 dark:text-white shadow-xl shadow-brand-500/10'
+                : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'
+            ]">
+            {{ f.label }}
+          </button>
+        </div>
       </div>
-      
-      <div class="flex items-center gap-2">
+
+      <div class="flex items-center gap-2 shrink-0">
         <span class="text-[11px] font-bold text-slate-400 uppercase tracking-widest">{{ requests.length }} talep gösteriliyor</span>
       </div>
     </div>
@@ -69,9 +71,9 @@
           </div>
           
           <div class="flex-1 min-w-0">
-            <div class="flex items-center justify-between gap-3 mb-2">
-              <span class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-[#626885]">{{ categoryLabel(req.category) }}</span>
-              <span :class="statusBadge(req.status)" class="px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest shadow-sm">
+            <div class="flex items-center justify-between gap-2 mb-2">
+              <span class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-[#626885] truncate min-w-0">{{ categoryLabel(req.category) }}</span>
+              <span :class="statusBadge(req.status)" class="px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest shadow-sm shrink-0 whitespace-nowrap">
                 {{ statusLabel(req.status) }}
               </span>
             </div>
