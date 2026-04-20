@@ -151,13 +151,13 @@
             </div>
 
             <!-- Pagination -->
-            <Pagination
-              v-if="ownerTotalPages > 1"
+            <PaginationBar
+              v-if="ownerFiltered.length > PAGE_SIZE"
               :current-page="ownerPage"
-              :total-pages="ownerTotalPages"
-              :total-items="ownerFiltered.length"
+              :total-count="ownerFiltered.length"
               :page-size="PAGE_SIZE"
-              @page-change="ownerPage = $event"
+              :page-size-options="[]"
+              @update:current-page="ownerPage = $event"
             />
           </template>
         </div>
@@ -244,13 +244,13 @@
               </div>
             </div>
 
-            <Pagination
-              v-if="tenantTotalPages > 1"
+            <PaginationBar
+              v-if="tenantFiltered.length > PAGE_SIZE"
               :current-page="tenantPage"
-              :total-pages="tenantTotalPages"
-              :total-items="tenantFiltered.length"
+              :total-count="tenantFiltered.length"
               :page-size="PAGE_SIZE"
-              @page-change="tenantPage = $event"
+              :page-size-options="[]"
+              @update:current-page="tenantPage = $event"
             />
           </template>
         </div>
@@ -318,13 +318,13 @@
               </div>
             </div>
 
-            <Pagination
-              v-if="paymentTotalPages > 1"
+            <PaginationBar
+              v-if="paymentFiltered.length > PAGE_SIZE"
               :current-page="paymentPage"
-              :total-pages="paymentTotalPages"
-              :total-items="paymentFiltered.length"
+              :total-count="paymentFiltered.length"
               :page-size="PAGE_SIZE"
-              @page-change="paymentPage = $event"
+              :page-size-options="[]"
+              @update:current-page="paymentPage = $event"
             />
           </template>
         </div>
@@ -337,7 +337,7 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
 import PageHeader from '@/presentation/components/ui/PageHeader.vue'
-import Pagination from '@/presentation/components/ui/Pagination.vue'
+import PaginationBar from '@/presentation/components/common/PaginationBar.vue'
 import dashboardService from '@/infrastructure/services/dashboardService'
 import { useAuthStore } from '@/application/stores/auth'
 import { formatCurrency } from '@/core/utils/currencyUtils'
