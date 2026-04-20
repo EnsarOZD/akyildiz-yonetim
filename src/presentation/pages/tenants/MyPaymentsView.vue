@@ -73,7 +73,7 @@
 
       <!-- ─── Row 3: Filters ─── -->
       <section class="app-card animate-slide-up p-5">
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <div class="form-control">
             <label class="text-premium-label mb-2">BAŞLANGIÇ</label>
             <input v-model="filters.startDate" type="date" class="bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] rounded-xl px-4 py-2.5 text-sm outline-none focus:border-brand-500 transition-colors" />
@@ -139,11 +139,14 @@
                   <td class="px-6 py-4 text-xs font-black text-slate-500 dark:text-[#9aa0b4]">{{ formatDate(item.date) }}</td>
                   <td class="px-6 py-4 text-center text-xs font-black text-slate-500 dark:text-[#9aa0b4]">{{ formatPeriod(item.periodYear, item.periodMonth) }}</td>
                   <td class="px-6 py-4 text-center">
-                    <span :class="item.isPayment ? 'bg-emerald-500/10 text-emerald-500' : 'bg-amber-500/10 text-amber-500'" class="px-3 py-1 rounded-full text-[10px] font-black uppercase">
-                      {{ item.isPayment ? 'Ödeme' : 'Borç' }}
+                    <span :class="item.isPayment ? 'bg-emerald-500/10 text-emerald-500' : 'bg-amber-500/10 text-amber-500'" class="px-3 py-1 rounded-full text-[10px] font-black uppercase whitespace-nowrap">
+                      {{ item.isPayment ? 'Ödeme' : (item.debtTypeLabel || 'Borç') }}
                     </span>
                   </td>
-                  <td class="px-6 py-4 text-xs font-bold text-slate-800 dark:text-white max-w-xs truncate">{{ item.description }}</td>
+                  <td class="px-6 py-4 text-xs font-bold text-slate-800 dark:text-white max-w-xs">
+                    <p class="truncate">{{ item.description }}</p>
+                    <p v-if="!item.isPayment && item.flatCode" class="text-[10px] font-bold text-brand-500 dark:text-brand-400 mt-0.5">Ünite {{ item.flatCode }}</p>
+                  </td>
                   <td class="px-6 py-4 text-right">
                     <p class="text-sm font-black" :class="item.isPayment ? 'text-emerald-500' : 'text-rose-500'">
                       {{ item.isPayment ? '+' : '-' }} {{ formatCurrency(item.amount) }}
@@ -171,11 +174,21 @@
               <div class="absolute left-0 top-0 bottom-0 w-1.5" :class="item.isPayment ? 'bg-emerald-500 shadow-[2px_0_10px_rgba(16,185,129,0.2)]' : 'bg-amber-500 shadow-[2px_0_10px_rgba(245,158,11,0.2)]'"></div>
               
               <div class="flex justify-between items-start mb-3">
-                 <div>
+                 <div class="min-w-0 flex-1 pr-3">
                     <span class="text-premium-label opacity-70">{{ formatDate(item.date) }}</span>
-                    <h3 class="text-sm font-black text-slate-800 dark:text-white mt-0.5 uppercase tracking-tight">{{ item.description }}</h3>
+                    <h3 class="text-sm font-black text-slate-800 dark:text-white mt-0.5 uppercase tracking-tight truncate">{{ item.description }}</h3>
+                    <div class="flex items-center gap-1.5 flex-wrap mt-1">
+                      <span v-if="!item.isPayment && item.debtTypeLabel"
+                        class="text-[9px] font-black px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 uppercase">
+                        {{ item.debtTypeLabel }}
+                      </span>
+                      <span v-if="!item.isPayment && item.flatCode"
+                        class="text-[9px] font-black px-1.5 py-0.5 rounded bg-brand-100 dark:bg-brand-500/10 text-brand-600 dark:text-brand-400 uppercase">
+                        Ünite {{ item.flatCode }}
+                      </span>
+                    </div>
                  </div>
-                 <div class="text-right">
+                 <div class="text-right shrink-0">
                     <p class="text-sm font-black" :class="item.isPayment ? 'text-emerald-500' : 'text-rose-500'">
                        {{ item.isPayment ? '+' : '-' }}{{ formatCurrency(item.amount) }}
                     </p>
@@ -296,12 +309,14 @@ const reportItems = computed(() => {
         date: d.dueDate || d.createdAt || d.date,
         periodYear: d.periodYear,
         periodMonth: d.periodMonth,
-        description: d.description || `${d.type === 'Electricity' ? 'Elektrik' : d.type === 'Water' ? 'Su' : 'Aidat'} faturası`,
+        description: d.description || `${debtTypeLabel(d.type) || 'Aidat'} faturası`,
         invoiceNumber: d.invoiceNumber ?? d.InvoiceNumber ?? null,
         amount: Number(d.amount ?? 0),
         isPayment: false,
         isPaid,
-        lastPaymentDate: d.dueDate || null
+        lastPaymentDate: d.dueDate || null,
+        flatCode: d.flatCode || d.unit || null,
+        debtTypeLabel: debtTypeLabel(d.type)
       })
     })
   }
@@ -351,6 +366,11 @@ const paginatedReports = computed(() => {
 watch([filters, pageSize], () => { currentPage.value = 1 }, { deep: true })
 
 // Helpers
+const debtTypeLabel = (type) => {
+  const map = { 0: 'Aidat', 1: 'Elektrik', 2: 'Su', Aidat: 'Aidat', Electricity: 'Elektrik', Water: 'Su' }
+  return map[type] ?? null
+}
+
 const formatCurrency = (val) =>
   new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(Number(val ?? 0))
 
