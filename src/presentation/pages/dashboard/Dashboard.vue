@@ -121,7 +121,7 @@
 
             <!-- Combined stats: Kasa / Gelir / Gider -->
             <div class="app-card p-6">
-              <div class="grid grid-cols-3 gap-6">
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-8 sm:gap-6">
 
                 <!-- Kasa Bakiyesi -->
                 <router-link to="/transactions" class="flex flex-col items-start gap-3 group">
@@ -130,30 +130,30 @@
                   </div>
                   <div>
                     <p class="text-[11px] font-black text-slate-400 dark:text-[#626885] uppercase tracking-widest mb-1 shadow-sm">Kasa Bakiyesi</p>
-                    <p class="text-[28px] font-black text-slate-800 dark:text-emerald-500 leading-tight tabular-nums tracking-tighter">{{ formatCurrency(balance) }}</p>
+                    <p class="text-xl sm:text-[28px] font-black text-slate-800 dark:text-emerald-500 leading-tight tabular-nums tracking-tighter">{{ formatCurrency(balance) }}</p>
                   </div>
                 </router-link>
 
                 <!-- Toplam Gelir -->
-                <router-link to="/payments" class="flex flex-col items-start gap-3 group">
+                <router-link to="/payments" class="flex flex-col items-start gap-3 group border-t sm:border-t-0 sm:border-l border-slate-100 dark:border-white/[0.05] pt-6 sm:pt-0 sm:pl-6">
                   <div class="w-10 h-10 rounded-xl bg-brand-500/10 text-brand-500 flex items-center justify-center group-hover:scale-110 transition-all duration-300">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M2.25 18L9 11.25l4.306 4.307a1.125 1.125 0 001.591 0L21.75 9m-9 11.25h9a2.25 2.25 0 002.25-2.25V9m-2.25 11.25l-2.25-2.25"/></svg>
                   </div>
                   <div>
                     <p class="text-[11px] font-black text-slate-400 dark:text-[#626885] uppercase tracking-widest mb-1 shadow-sm">Toplam Gelir</p>
-                    <p class="text-[28px] font-black text-brand-500 leading-tight tabular-nums tracking-tighter">{{ formatCurrency(totalIncome) }}</p>
+                    <p class="text-xl sm:text-[28px] font-black text-brand-500 leading-tight tabular-nums tracking-tighter">{{ formatCurrency(totalIncome) }}</p>
                     <p class="text-[11px] font-bold text-slate-500 dark:text-[#9aa0b4] mt-1">+{{ formatCurrency(thisMonthTenantPayments) }} <span class="font-medium opacity-80 uppercase tracking-tighter">bu ay</span></p>
                   </div>
                 </router-link>
 
                 <!-- Toplam Gider -->
-                <router-link to="/expenses" class="flex flex-col items-start gap-3 group">
+                <router-link to="/expenses" class="flex flex-col items-start gap-3 group border-t sm:border-t-0 sm:border-l border-slate-100 dark:border-white/[0.05] pt-6 sm:pt-0 sm:pl-6">
                   <div class="w-10 h-10 rounded-xl bg-red-500/10 text-red-500 flex items-center justify-center group-hover:scale-110 transition-all duration-300">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M19.5 13.5L12 21m0 0l-7.5-7.5M12 21V3"/></svg>
                   </div>
                   <div>
                     <p class="text-[11px] font-black text-slate-400 dark:text-[#626885] uppercase tracking-widest mb-1 shadow-sm">Toplam Gider</p>
-                    <p class="text-[28px] font-black text-red-500 leading-tight tabular-nums tracking-tighter">{{ formatCurrency(totalExpense) }}</p>
+                    <p class="text-xl sm:text-[28px] font-black text-red-500 leading-tight tabular-nums tracking-tighter">{{ formatCurrency(totalExpense) }}</p>
                     <p class="text-[11px] font-bold text-slate-500 dark:text-[#9aa0b4] mt-1 uppercase tracking-tighter">{{ expenses.length }} kalem</p>
                   </div>
                 </router-link>
@@ -163,7 +163,7 @@
 
             <!-- Overdue card -->
             <router-link to="/overdue"
-              class="app-card p-6 border-l-[3px] hover:shadow-xl transition-all duration-300 flex flex-col justify-between"
+              class="app-card p-6 pl-10 border-l-[6px] hover:shadow-xl transition-all duration-300 flex flex-col justify-between"
               :class="overdueItems.length === 0 ? 'border-l-emerald-500' : 'border-l-red-500'">
               
               <div class="flex items-start justify-between mb-2">

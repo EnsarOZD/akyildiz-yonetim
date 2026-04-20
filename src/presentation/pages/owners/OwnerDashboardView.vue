@@ -3,18 +3,14 @@
     <div class="max-w-6xl mx-auto space-y-8">
 
       <!-- ─── Row 1: Page Header ─── -->
-      <section class="flex flex-col md:flex-row md:items-center justify-between gap-6 animate-slide-up">
-        <div>
-          <h1 class="text-2xl font-black text-high-density text-slate-800 dark:text-white tracking-tighter uppercase italic">
-            Mülk Yönetim Merkezi
-          </h1>
-          <p class="text-[11px] font-black text-brand-500 mt-1 uppercase tracking-[0.2em] flex items-center gap-2">
-            {{ authStore.fullName }}
-            <span class="w-1.5 h-1.5 rounded-full bg-slate-300 dark:bg-white/20"></span>
-            PORTFÖY YÖNETİMİ
-          </p>
-        </div>
-      </section>
+      <PageHeader
+        title="Mülk Yönetim Merkezi"
+        :subtitle="`Merhaba ${authStore.fullName} | Portföy Yönetimi`"
+      >
+        <template #icon>
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+        </template>
+      </PageHeader>
 
       <!-- ─── Row 2: Portfolio Stats ─── -->
       <section v-if="!loading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 animate-slide-up">

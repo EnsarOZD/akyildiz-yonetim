@@ -3,27 +3,24 @@
     <div class="max-w-6xl mx-auto space-y-8">
 
       <!-- ─── Row 1: Page Header ─── -->
-      <section class="flex flex-col md:flex-row md:items-center justify-between gap-6 animate-slide-up">
-        <div>
-          <h1 class="text-2xl font-black text-high-density text-slate-800 dark:text-white tracking-tighter">
-            Yönetim Paneli
-          </h1>
-          <p class="text-sm font-bold text-slate-400 dark:text-[#626885] mt-1 uppercase tracking-widest">
-            Mal sahipleri ve sistem kullanıcılarını buradan yönetin
-          </p>
-        </div>
-
-        <div class="flex items-center gap-2">
+      <PageHeader
+        title="Yönetim Paneli"
+        subtitle="Mal sahipleri ve sistem kullanıcılarını buradan yönetin"
+      >
+        <template #icon>
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M10.343 3.94c.09-.542.56-.94 1.11-.94h1.094c.55 0 1.02.398 1.11.94l.149.894c.07.424.384.764.78.93.398.164.855.142 1.205-.108l.737-.527a1.125 1.125 0 011.45.12l.773.774c.39.389.44 1.002.12 1.45l-.527.737c-.25.35-.272.806-.107 1.204.165.397.505.71.93.78l.894.15c.542.09.94.56.94 1.109v1.094c0 .55-.398 1.02-.94 1.11l-.894.149c-.424.07-.764.383-.929.78-.165.398-.143.854.107 1.204l.527.738a1.125 1.125 0 01-.12 1.45l-.774.773a1.125 1.125 0 01-1.449.12l-.738-.527c-.35-.25-.806-.272-1.203-.107-.397.165-.71.505-.781.929l-.149.894c-.09.542-.56.94-1.11.94h-1.094c-.55 0-1.019-.398-1.11-.94l-.148-.894c-.071-.424-.384-.764-.781-.93-.398-.164-.854-.142-1.204.108l-.738.527a1.125 1.125 0 01-1.45-.12l-.773-.774a1.125 1.125 0 01-.12-1.45l.527-.737c.25-.35.273-.806.108-1.204-.165-.397-.505-.71-.93-.78l-.894-.15a1.125 1.125 0 01-.94-1.11v-1.094c0-.55.398-1.02.94-1.11l.894-.149c.424-.07.765-.383.93-.78.165-.398.143-.854-.108-1.204l-.526-.738a1.125 1.125 0 01.12-1.45l.774-.773a1.125 1.125 0 011.45-.12l.737.527c.35.25.807.272 1.204.107.397-.165.71-.505.78-.929l.15-.894z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        </template>
+        <template #actions>
           <button @click="showAnnouncementModal = true" 
-            class="px-6 py-3 bg-brand-500 hover:bg-brand-600 text-white rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all shadow-lg shadow-brand-500/25 flex items-center gap-2">
+            class="btn btn-sm btn-primary gap-2">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 0 1 -3.417 .592l-2.147-6.15M18 13a3 3 0 1 0 0-6M5.436 13.683A4.001 4.001 0 0 1 7 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 0 1 -1.564 -.317z"/></svg>
-            DUYURU YAYINLA
+            <span>Duyuru</span>
           </button>
-        </div>
-      </section>
+        </template>
+      </PageHeader>
 
       <!-- ─── Row 2: Premium Stats Row ─── -->
-      <section class="grid grid-cols-2 lg:grid-cols-4 gap-4 animate-slide-up">
+      <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 animate-slide-up">
         <div class="app-card border-none bg-slate-50 dark:bg-white/[0.02] p-5 flex items-center gap-4 group">
           <div class="w-12 h-12 rounded-2xl bg-brand-500/10 text-brand-500 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
