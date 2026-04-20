@@ -166,9 +166,9 @@
         <div class="md:hidden space-y-4">
            <div v-if="loading" class="py-10 text-center"><span class="loading loading-spinner text-brand-500"></span></div>
            <div v-else-if="reportItems.length === 0" class="py-10 text-center text-slate-400 font-bold uppercase text-xs">Kayıt Bulunmuyor</div>
-           <div v-for="(item, idx) in paginatedReports" :key="idx" class="app-card relative overflow-hidden group">
+           <div v-for="(item, idx) in paginatedReports" :key="idx" class="app-card relative overflow-hidden group pl-10 transition-all hover:bg-slate-50 dark:hover:bg-white/[0.04]">
               <!-- Indicators -->
-              <div class="absolute left-0 top-0 bottom-0 w-1" :class="item.isPayment ? 'bg-emerald-500' : 'bg-amber-500'"></div>
+              <div class="absolute left-0 top-0 bottom-0 w-1.5" :class="item.isPayment ? 'bg-emerald-500 shadow-[2px_0_10px_rgba(16,185,129,0.2)]' : 'bg-amber-500 shadow-[2px_0_10px_rgba(245,158,11,0.2)]'"></div>
               
               <div class="flex justify-between items-start mb-3">
                  <div>
