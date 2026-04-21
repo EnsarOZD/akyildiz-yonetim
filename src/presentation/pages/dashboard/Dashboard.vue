@@ -504,7 +504,7 @@
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue'
 import { useAuthStore } from '@/application/stores/auth'
-import dashboardService from '@/infrastructure/services/dashboardService'
+import { useDashboardStore } from '@/application/stores/dashboard'
 import ManualDebtModal from '../expenses/ManualDebtModal.vue'
 import OverdueWidget from './components/OverdueWidget.vue'
 import { useNotificationsStore } from '@/application/stores/notificationsStore'
@@ -533,6 +533,7 @@ const openManualDebtModal = (type = 0) => {
 
 // Store
 const authStore = useAuthStore()
+const dashboardStore = useDashboardStore()
 const notificationsStore = useNotificationsStore()
 const userRole = computed(() => authStore.role)
 
@@ -757,8 +758,8 @@ const loadDashboardData = async () => {
     }
 
     const [summary, debtsResult] = await Promise.all([
-      dashboardService.getDashboardSummary(dateFilter.value),
-      userRole.value !== 'tenant' ? dashboardService.getDebtsSummary(year) : Promise.resolve([])
+      dashboardStore.fetchSummary(dateFilter.value),
+      userRole.value !== 'tenant' ? dashboardStore.fetchDebtsSummary(year) : Promise.resolve([])
     ])
 
     payments.value = summary?.payments || []

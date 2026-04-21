@@ -13,6 +13,14 @@ export const useTenantsStore = defineStore('tenants', {
     }),
 
     getters: {
+        tenants: (state) => state.itemsByKey['default'] || [],
+        stats: (state) => state.statsByKey['default'] || {
+            activeCount: 0,
+            occupancyRate: 0,
+            totalDebt: 0,
+            totalFlats: 0,
+            occupiedFlats: 0
+        },
         getTenantById: (state) => (id) => {
             const allItemsList = Object.values(state.itemsByKey).flat()
             return allItemsList.find(t => t.id === id)

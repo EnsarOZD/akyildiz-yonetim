@@ -13,6 +13,11 @@ export const usePaymentsStore = defineStore('payments', {
     pendingPromisesByKey: {}
   }),
 
+  getters: {
+    payments: (state) => state.itemsByKey['default'] || [],
+    advanceAccounts: (state) => state.advanceAccountsByKey['default'] || []
+  },
+
   actions: {
     getCacheKey(filters = {}) {
       const normalizedFilters = { ...filters }

@@ -118,11 +118,12 @@ import { ref, reactive, computed, onMounted, defineComponent, h } from 'vue'
 import PageHeader from '@/presentation/components/ui/PageHeader.vue'
 import Owners from '../owners/Owners.vue'
 import UserManagement from './UserManagement.vue'
-import tenantsService from '@/infrastructure/services/tenantsService'
+import { useTenantsStore } from '@/application/stores/tenants'
 import TargetedNotificationModal from '../notifications/components/TargetedNotificationModal.vue'
 
 const showAnnouncementModal = ref(false)
 const activeTab = ref('owners')
+const tenantsStore = useTenantsStore()
 
 const tabCounts = reactive({
   owners: 0,
@@ -157,7 +158,7 @@ const totalTenants = ref(0)
 
 async function fetchStats() {
   try {
-    const tenantStats = await tenantsService.getTenantStats()
+    const tenantStats = await tenantsStore.fetchStats()
     totalTenants.value = tenantStats?.activeCount ?? tenantStats?.totalCount ?? 0
   } catch (e) {
     console.error('İstatistik hatası:', e)
