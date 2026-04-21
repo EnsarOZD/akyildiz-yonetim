@@ -1,12 +1,11 @@
 import { defineStore } from 'pinia'
-import paymentsService from '@/infrastructure/services/paymentsService'
+import utilityDebtsService from '@/infrastructure/services/utilityDebtsService'
 
 const TTL_MS = 5 * 60 * 1000 // 5 minutes
 
-export const usePaymentsStore = defineStore('payments', {
+export const useUtilityDebtsStore = defineStore('utilityDebts', {
   state: () => ({
     itemsByKey: {},
-    advanceAccountsByKey: {},
     loadingByKey: {},
     errorByKey: {},
     lastFetchedByKey: {},
@@ -42,12 +41,12 @@ export const usePaymentsStore = defineStore('payments', {
 
       const promise = (async () => {
         try {
-          const data = await paymentsService.getPayments(filters)
+          const data = await utilityDebtsService.getUtilityDebts(filters)
           this.itemsByKey[cacheKey] = data || []
           this.lastFetchedByKey[cacheKey] = Date.now()
           return this.itemsByKey[cacheKey]
         } catch (err) {
-          this.errorByKey[cacheKey] = err.message || 'Ödemeler yüklenemedi.'
+          this.errorByKey[cacheKey] = err.message || 'Borçlar yüklenemedi.'
           throw err
         } finally {
           this.loadingByKey[cacheKey] = false
@@ -78,36 +77,6 @@ export const usePaymentsStore = defineStore('payments', {
         this.loadingByKey = {}
         this.errorByKey = {}
       }
-    },
-
-    async fetchAdvanceAccounts() {
-      // Basic advance account fetching - simplistic version for compatibility
-      this.loadingByKey['advance'] = true
-      try {
-        const raw = await paymentsService.getAdvanceAccounts()
-        const list = Array.isArray(raw) ? raw : (raw?.items || [])
-        this.advanceAccountsByKey['default'] = list
-          .map(a => ({ ...a, balance: Number(a.balance ?? 0) }))
-          .filter(a => a.balance > 0)
-        return this.advanceAccountsByKey['default']
-      } catch (err) {
-        this.errorByKey['advance'] = err.message
-        throw err
-      } finally {
-        this.loadingByKey['advance'] = false
-      }
-    },
-
-    async deletePayment(id) {
-      await paymentsService.deletePayment(id)
-      this.invalidateCache() // Refetch necessary keys on UI interactions
-      await this.fetchAdvanceAccounts()
-    },
-
-    async bulkDeletePayments(ids) {
-      await paymentsService.bulkDeletePayments(ids)
-      this.invalidateCache()
-      await this.fetchAdvanceAccounts()
     }
   }
 })

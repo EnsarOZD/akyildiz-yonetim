@@ -1,8 +1,5 @@
 import apiService from './api.js'
 
-const _cache = new Map()
-const CACHE_TTL = 3 * 60 * 1000 // 3 dakika
-
 class UtilityDebtsService {
   // Tüm utility debt'leri getir
   async getUtilityDebts(filters = {}) {
@@ -25,33 +22,14 @@ class UtilityDebtsService {
     if (filters.endDate) params.endDate = filters.endDate
     if (filters.debtorType !== undefined && filters.debtorType !== null && filters.debtorType !== '') params.debtorType = filters.debtorType
 
-    const cacheKey = 'debts:' + JSON.stringify(params)
-    const cached = _cache.get(cacheKey)
-    if (cached && Date.now() - cached.ts < CACHE_TTL) return cached.data
-
-    params.pageSize = 1000
-    let pageNumber = 1
-    const allItems = []
-
-    while (true) {
-      const requestParams = { ...params, pageNumber }
-      const response = await apiService.get('/UtilityDebts', requestParams)
-      const items = Array.isArray(response) ? response : (response?.items ?? [])
-      const actualPageSize = response?.pageSize ?? params.pageSize
-
-      if (items.length === 0) break
-      allItems.push(...items)
-
-      if (items.length < actualPageSize) break // Son sayfa
-      pageNumber++
+    const requestParams = {
+      ...params,
+      pageSize: Math.min(filters.pageSize || 50, 100),
+      pageNumber: filters.pageNumber || 1
     }
 
-    _cache.set(cacheKey, { data: allItems, ts: Date.now() })
-    return allItems
-  }
-
-  invalidateCache() {
-    _cache.clear()
+    const response = await apiService.get('/UtilityDebts', requestParams)
+    return Array.isArray(response) ? response : (response?.items ?? [])
   }
 
   // ID'ye göre utility debt getir

@@ -1,7 +1,6 @@
 import apiService from './api.js'
 
 class ExpensesService {
-  // Tüm giderleri getir
   async getExpenses(filters = {}) {
     const params = {}
     
@@ -11,9 +10,13 @@ class ExpensesService {
     if (filters.endDate) params.endDate = filters.endDate
     if (filters.searchTerm) params.searchTerm = filters.searchTerm
 
-    // Backend now returns PagedResult<T>; fetch max page and unwrap so callers receive a plain array.
-    params.pageSize = 100
-    const response = await apiService.get('/expenses', params)
+    const requestParams = {
+      ...params,
+      pageSize: Math.min(filters.pageSize || 50, 100),
+      pageNumber: filters.pageNumber || 1
+    }
+
+    const response = await apiService.get('/expenses', requestParams)
     return Array.isArray(response) ? response : (response?.items ?? [])
   }
 

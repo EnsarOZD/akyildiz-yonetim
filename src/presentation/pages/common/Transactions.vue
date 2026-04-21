@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="p-4 sm:p-6 min-h-screen dark:bg-base-200">
     <div class="max-w-7xl mx-auto">
       
@@ -152,7 +152,15 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import PageHeader from '@/presentation/components/ui/PageHeader.vue'
-import apiService from '@/infrastructure/services/api'
+import { usePaymentsStore } from '@/application/stores/payments'
+import { useUtilityDebtsStore } from '@/application/stores/utilityDebts'
+import { useExpensesStore } from '@/application/stores/expenses'
+import { useTenantsStore } from '@/application/stores/tenants'
+
+const paymentsStore = usePaymentsStore()
+const utilityDebtsStore = useUtilityDebtsStore()
+const expensesStore = useExpensesStore()
+const tenantsStore = useTenantsStore()
 
 const tenants = ref([])
 const payments = ref([])
@@ -176,8 +184,8 @@ const formatCurrency = (value) => {
 
 const fetchTenants = async () => {
   try {
-    const response = await apiService.get('/tenants')
-    tenants.value = response || []
+    const list = await tenantsStore.fetchTenants()
+    tenants.value = list || []
   } catch (error) {
     console.error('Kiracılar yüklenirken hata:', error)
     tenants.value = []
@@ -186,8 +194,12 @@ const fetchTenants = async () => {
 
 const fetchData = async () => {
   try {
-    // Ödemeleri getir
-    const paymentsResponse = await apiService.get('/payments')
+    const [paymentsResponse, expensesResponse, debtsResponse] = await Promise.all([
+      paymentsStore.fetchIfNeeded({ pageSize: 50 }),
+      expensesStore.fetchIfNeeded({ pageSize: 50 }),
+      utilityDebtsStore.fetchIfNeeded({ pageSize: 50 })
+    ])
+
     payments.value = (paymentsResponse || []).map(payment => {
       // Backend artık isim ve daire bilgisini (TenantName/OwnerName/FlatInfo) kendisi getiriyor
       return {
@@ -198,15 +210,11 @@ const fetchData = async () => {
       }
     })
 
-    // Giderleri getir
-    const expensesResponse = await apiService.get('/expenses')
     expenses.value = (expensesResponse || []).map(expense => ({
       ...expense,
       type: 'expense'
     }))
 
-    // Borçları getir
-    const debtsResponse = await apiService.get('/UtilityDebts')
     debts.value = (debtsResponse || []).map(debt => {
         const tenant = tenants.value.find(t => t.id === debt.tenantId)
         return {

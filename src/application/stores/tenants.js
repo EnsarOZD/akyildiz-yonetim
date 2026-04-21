@@ -4,70 +4,117 @@ import { errorHandler } from '@/core/utils/errorHandler'
 
 export const useTenantsStore = defineStore('tenants', {
     state: () => ({
-        tenants: [],
-        stats: {
-            activeCount: 0,
-            occupancyRate: 0,
-            totalDebt: 0,
-            totalFlats: 0,
-            occupiedFlats: 0
-        },
-        loading: false,
-        lastFetched: null
+        itemsByKey: {},
+        statsByKey: {},
+        loadingByKey: {},
+        errorByKey: {},
+        lastFetchedByKey: {},
+        pendingPromisesByKey: {}
     }),
 
     getters: {
         getTenantById: (state) => (id) => {
-            return state.tenants.find(t => t.id === id)
+            const allItemsList = Object.values(state.itemsByKey).flat()
+            return allItemsList.find(t => t.id === id)
         },
         activeTenants: (state) => {
-            return state.tenants.filter(t => t.isActive)
+            const defaultItems = state.itemsByKey['default'] || []
+            return defaultItems.filter(t => t.isActive)
         }
     },
 
     actions: {
-        async fetchTenants(force = false) {
-            // 5 dakikadan önce tekrar çekme (force değilse)
-            if (!force && this.tenants.length > 0 && this.lastFetched && (Date.now() - this.lastFetched < 300000)) {
-                return this.tenants
+        getCacheKey(filters = {}) {
+            const normalizedFilters = { ...filters }
+            const keys = Object.keys(normalizedFilters).sort()
+            const sortedFilters = {}
+            for (const key of keys) {
+                if (normalizedFilters[key] !== undefined && normalizedFilters[key] !== null && normalizedFilters[key] !== '') {
+                    sortedFilters[key] = normalizedFilters[key]
+                }
+            }
+            return Object.keys(sortedFilters).length ? JSON.stringify(sortedFilters) : 'default'
+        },
+
+        async fetchIfNeeded(filters = {}, force = false) {
+            const cacheKey = this.getCacheKey(filters)
+
+            if (!force && this.itemsByKey[cacheKey] && this.lastFetchedByKey[cacheKey] && (Date.now() - this.lastFetchedByKey[cacheKey] < 300000)) {
+                return this.itemsByKey[cacheKey]
             }
 
-            this.loading = true
-            try {
-                // Paralel olarak hem kiracıları hem istatistikleri çek
-                const [tenantsData, statsData] = await Promise.all([
-                    tenantsService.getTenants(),
-                    tenantsService.getTenantStats()
-                ])
-                this.tenants = tenantsData || []
-                this.stats = statsData || this.stats
-                this.lastFetched = Date.now()
-                return this.tenants
-            } catch (err) {
-                errorHandler.logError(err, { component: 'TenantsStore', action: 'fetchTenants' })
-                throw err
-            } finally {
-                this.loading = false
+            if (this.pendingPromisesByKey[cacheKey]) {
+                return this.pendingPromisesByKey[cacheKey]
+            }
+
+            this.loadingByKey[cacheKey] = true
+            this.errorByKey[cacheKey] = null
+
+            const promise = (async () => {
+                try {
+                    const [tenantsData, statsData] = await Promise.all([
+                        tenantsService.getTenants(filters),
+                        Object.keys(filters).length === 0 ? tenantsService.getTenantStats() : Promise.resolve(null)
+                    ])
+                    this.itemsByKey[cacheKey] = tenantsData || []
+                    if (statsData) {
+                        this.statsByKey[cacheKey] = statsData
+                    }
+                    this.lastFetchedByKey[cacheKey] = Date.now()
+                    return this.itemsByKey[cacheKey]
+                } catch (err) {
+                    this.errorByKey[cacheKey] = err.message || 'Kiracılar yüklenemedi.'
+                    errorHandler.logError(err, { component: 'TenantsStore', action: 'fetchIfNeeded' })
+                    throw err
+                } finally {
+                    this.loadingByKey[cacheKey] = false
+                    this.pendingPromisesByKey[cacheKey] = null
+                }
+            })()
+
+            this.pendingPromisesByKey[cacheKey] = promise
+            return promise
+        },
+
+        async forceRefresh(filters = {}) {
+            return this.fetchIfNeeded(filters, true)
+        },
+
+        invalidateCache(filters = null) {
+            if (filters !== null) {
+                const cacheKey = this.getCacheKey(filters)
+                delete this.itemsByKey[cacheKey]
+                delete this.lastFetchedByKey[cacheKey]
+                delete this.pendingPromisesByKey[cacheKey]
+                delete this.loadingByKey[cacheKey]
+                delete this.errorByKey[cacheKey]
+                delete this.statsByKey[cacheKey]
+            } else {
+                this.itemsByKey = {}
+                this.lastFetchedByKey = {}
+                this.pendingPromisesByKey = {}
+                this.loadingByKey = {}
+                this.errorByKey = {}
+                this.statsByKey = {}
             }
         },
 
         async fetchStats() {
             try {
                 const data = await tenantsService.getTenantStats()
-                this.stats = data || this.stats
-                return this.stats
+                this.statsByKey['default'] = data || this.statsByKey['default']
+                return this.statsByKey['default']
             } catch (err) {
                 console.error('İstatistikler çekilemedi:', err)
-                return this.stats
+                return this.statsByKey['default']
             }
         },
 
         async createTenant(tenantData) {
             try {
                 const newTenant = await tenantsService.createTenant(tenantData)
-                // Listeyi güncellemek için cache'i temizle veya ekle
-                // Şimdilik listeyi tekrar çekmek en güvenlisi (ilişkili veriler vb. için)
-                await this.fetchTenants(true)
+                this.invalidateCache()
+                await this.fetchIfNeeded({}, true)
                 return newTenant
             } catch (err) {
                 throw err
@@ -77,7 +124,8 @@ export const useTenantsStore = defineStore('tenants', {
         async updateTenant(id, tenantData) {
             try {
                 await tenantsService.updateTenant(id, tenantData)
-                await this.fetchTenants(true)
+                this.invalidateCache()
+                await this.fetchIfNeeded({}, true)
             } catch (err) {
                 throw err
             }
@@ -86,7 +134,8 @@ export const useTenantsStore = defineStore('tenants', {
         async deleteTenant(id) {
             try {
                 await tenantsService.deleteTenant(id)
-                this.tenants = this.tenants.filter(t => t.id !== id)
+                this.invalidateCache()
+                await this.fetchIfNeeded({}, true)
             } catch (err) {
                 throw err
             }

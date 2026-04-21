@@ -52,16 +52,9 @@ export default defineConfig({
             handler: 'NetworkOnly'
           },
           {
-            // Finansal veriler: cache'den hemen sun, arka planda güncelle
+            // Finansal veriler PWA arka plan istek fırtınasını önlemek için yenilendi
             urlPattern: /^https:\/\/api\.akyildizyonetim\.com\/api\/.*/i,
-            handler: 'StaleWhileRevalidate',
-            options: {
-              cacheName: 'api-cache',
-              expiration: {
-                maxEntries: 60,
-                maxAgeSeconds: 60 * 5 // 5 dakika
-              }
-            }
+            handler: 'NetworkOnly',
           }
         ]
       }
