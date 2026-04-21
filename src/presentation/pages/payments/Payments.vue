@@ -747,7 +747,7 @@ const startEdit = (payment) => {
 
 const handleClearFilters = () => {
   clearFilters()
-  paymentsStore.fetchPayments(true)
+  paymentsStore.fetchIfNeeded({}, true)
 }
 
 const handlePaymentSave = async () => {
@@ -767,7 +767,7 @@ const handlePaymentSave = async () => {
   selectedPaymentId.value = null
 
   await Promise.all([
-    paymentsStore.fetchPayments(true), 
+    paymentsStore.fetchIfNeeded({}, true), 
     paymentsStore.fetchAdvanceAccounts()
   ])
 
@@ -779,7 +779,7 @@ const handleAdvanceSuccess = () => {
   showAdvanceManager.value = false
   debtRefreshKey.value++  // trigger PaymentModal to re-fetch debts
   paymentsStore.fetchAdvanceAccounts()
-  paymentsStore.fetchPayments(true)
+  paymentsStore.fetchIfNeeded({}, true)
   notifySuccess('Avans hesabı işlemi başarıyla tamamlandı.')
 }
 
@@ -824,6 +824,6 @@ const paymentTypeStats = computed(() => {
 onMounted(() => {
   tenantsStore.fetchIfNeeded()
   paymentsStore.fetchAdvanceAccounts()
-  paymentsStore.fetchPayments()
+  paymentsStore.fetchIfNeeded()
 })
 </script>
