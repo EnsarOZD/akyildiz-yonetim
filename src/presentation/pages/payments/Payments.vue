@@ -822,7 +822,7 @@ const paymentTypeStats = computed(() => {
 })
 
 onMounted(() => {
-  tenantsStore.fetchTenants()
+  tenantsStore.fetchIfNeeded()
   paymentsStore.fetchAdvanceAccounts()
   paymentsStore.fetchPayments()
 })

@@ -184,7 +184,7 @@ const formatCurrency = (value) => {
 
 const fetchTenants = async () => {
   try {
-    const list = await tenantsStore.fetchTenants()
+    const list = await tenantsStore.fetchIfNeeded()
     tenants.value = list || []
   } catch (error) {
     console.error('Kiracılar yüklenirken hata:', error)

@@ -383,8 +383,7 @@ const formatCurrency = (amount) =>
 // Methods
 const fetchTenants = async () => {
   try {
-    // Pinia store üzerinden çekiyoruz
-    await tenantsStore.fetchTenants()
+    await tenantsStore.fetchIfNeeded()
   } catch (err) {
     console.error('Kiracılar yüklenirken hata:', err)
   }
