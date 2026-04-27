@@ -503,7 +503,9 @@ const fetchDebts = async () => {
   loadingDebts.value = true
   tenantDebts.value = []
   try {
-    const filterType = form.type !== '' ? parseInt(form.type) : undefined
+    // DebtType enum: Aidat=0, Electricity=1, Water=2 — Doğalgaz/Diğer (>=3) eşleşen tipi yok, filtre gönderilmez
+    const fTypeNum = form.type !== '' ? parseInt(form.type) : -1
+    const filterType = fTypeNum >= 0 && fTypeNum <= 2 ? fTypeNum : undefined
     if (paymentType.value === 'tenant' && form.tenantId) {
       tenantDebts.value = await utilityDebtsService.getUtilityDebts({ tenantId: form.tenantId, excludePaid: true, type: filterType }) || []
     } else if (paymentType.value === 'owner' && form.ownerId) {
@@ -583,7 +585,7 @@ const handleSave = async () => {
       // 0->1(Dues), 1&2->2(Utility), o.w->3(Other)
       type: fType === 0 ? 1 : (fType === 1 || fType === 2 ? 2 : 3), 
       targetDebtType: fType < 3 ? fType : null,
-      bank: form.bank,
+      bankName: form.bank,
       description: form.description || ''
     }
 
@@ -604,12 +606,9 @@ const handleSave = async () => {
     resetDirty()
     emit('save', saved)
   } catch (e) {
-    try {
-      handleNetworkError(e, { component: 'PaymentModal', action: 'savePayment' })
-    } catch {
-      errorMessage.value = 'Ödeme kaydedilirken bir hata oluştu.'
-      notifyError('Ödeme kaydedilirken bir hata oluştu.')
-    }
+    const msg = e?.apiError?.message || e?.message || 'Ödeme kaydedilirken bir hata oluştu.'
+    errorMessage.value = msg
+    handleNetworkError(e, { component: 'PaymentModal', action: 'savePayment' })
   } finally {
     isLoading.value = false
   }

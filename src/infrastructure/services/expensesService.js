@@ -41,8 +41,11 @@ class ExpensesService {
   }
 
   // İstatistikler
-  async getExpenseStats() {
-    return apiService.get('/expenses/stats')
+  async getExpenseStats(filters = {}) {
+    const params = {}
+    if (filters.startDate) params.startDate = filters.startDate
+    if (filters.endDate) params.endDate = filters.endDate
+    return apiService.get('/expenses/stats', params)
   }
 }
 

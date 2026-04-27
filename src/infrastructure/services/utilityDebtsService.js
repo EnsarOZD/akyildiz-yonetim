@@ -113,6 +113,8 @@ class UtilityDebtsService {
       body: formData
     })
   }
+
+  invalidateCache() {}
 }
 
 export default new UtilityDebtsService() 

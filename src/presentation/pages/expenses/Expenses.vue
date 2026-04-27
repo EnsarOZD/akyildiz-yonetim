@@ -424,17 +424,12 @@ const fetchExpenses = async () => {
       query.endDate = endDate
     }
 
-    const response = await expensesService.getExpenses(query)
+    const [response, stats] = await Promise.all([
+      expensesService.getExpenses(query),
+      expensesService.getExpenseStats(query)
+    ])
     expenses.value = response || []
-
-    // İstatistik endpoint’i tarih desteklemiyorsa fallback
-    try {
-      const stats = await expensesService.getExpenseStats(query)
-      expenseStats.value = stats || {}
-    } catch {
-      const stats = await expensesService.getExpenseStats()
-      expenseStats.value = stats || {}
-    }
+    expenseStats.value = stats || {}
   } catch (apiError) {
     handleNetworkError(apiError, { component: 'Expenses', action: 'fetchExpenses' })
     error.value = apiError?.message || 'Giderler yüklenemedi.'

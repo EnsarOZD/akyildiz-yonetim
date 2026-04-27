@@ -147,6 +147,8 @@ class PaymentsService {
   async getPaymentStats() {
     return apiService.get('/expenses/stats')
   }
+
+  invalidateCache() {}
 }
 
 export default new PaymentsService() 
