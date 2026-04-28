@@ -111,9 +111,10 @@
             v-model="form.date"
             type="date"
             class="input input-bordered w-full"
-            :class="{ '!border-red-500/50': step1Touched && !form.date }"
+            :class="{ '!border-red-500/50': step1Touched && (!form.date || new Date(form.date) > new Date()) }"
           />
           <p v-if="step1Touched && !form.date" class="text-red-400 text-[10px] font-bold uppercase tracking-wide mt-1.5 ml-1">Tarih zorunludur.</p>
+          <p v-if="step1Touched && form.date && new Date(form.date) > new Date()" class="text-red-400 text-[10px] font-bold uppercase tracking-wide mt-1.5 ml-1">Gelecek bir tarih seçilemez.</p>
         </div>
         <div class="form-control">
           <label class="label"><span class="label-text">Gelen Tutar (₺) *</span></label>
@@ -529,14 +530,15 @@ const selectedPersonName = computed(() => {
 })
 
 // ── Adım 1 validasyonu ────────────────────────────────────────
-const isStep1Valid = computed(() =>
-  !!form.date &&
-  Number(form.amount) > 0 &&
-  form.type !== '' &&
-  !!form.bank &&
-  ((paymentType.value === 'tenant' && !!form.tenantId) ||
-   (paymentType.value === 'owner'  && !!form.ownerId))
-)
+const isStep1Valid = computed(() => {
+  const isDateValid = !!form.date && new Date(form.date) <= new Date()
+  return isDateValid &&
+    Number(form.amount) > 0 &&
+    form.type !== '' &&
+    !!form.bank &&
+    ((paymentType.value === 'tenant' && !!form.tenantId) ||
+     (paymentType.value === 'owner'  && !!form.ownerId))
+})
 
 // ── Navigasyon ────────────────────────────────────────────────
 const nextStep = async () => {

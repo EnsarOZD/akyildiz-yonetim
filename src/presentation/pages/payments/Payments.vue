@@ -428,6 +428,8 @@ import { useErrorHandler } from '@/application/composables/useErrorHandler'
 import { useNotify } from '@/application/composables/useNotify'
 import { usePaymentsStore } from '@/application/stores/payments.js'
 import { useTenantsStore } from '@/application/stores/tenants.js'
+import { useDashboardStore } from '@/application/stores/dashboard'
+import { useUtilityDebtsStore } from '@/application/stores/utilityDebts'
 import { paymentTypes, getPaymentTypeLabel, paymentTypeToValue } from '@/core/constants/enums'
 import { safeFormatDate } from '@/core/utils/dateUtils'
 import { formatCurrency, getAvatarColor, getAvatarInitial } from '@/core/utils/uiHelpers'
@@ -441,6 +443,8 @@ const authStore = useAuthStore()
 
 const paymentsStore = usePaymentsStore()
 const tenantsStore = useTenantsStore()
+const dashboardStore = useDashboardStore()
+const utilityDebtsStore = useUtilityDebtsStore()
 
 const formatDate = (d) => safeFormatDate(d, 'dd MMM yyyy')
 
@@ -706,6 +710,8 @@ const cancelClose = () => {
 const deletePayment = async (id) => {
   try {
     await paymentsStore.deletePayment(id)
+    dashboardStore.invalidateCache()
+    utilityDebtsStore.invalidateCache()
     notifySuccess('Ödeme silindi.')
   } catch (error) {
     notifyError('Ödeme silinemedi.')
@@ -718,6 +724,8 @@ const confirmBulkDelete = async () => {
   isBulkDeleting.value = true
   try {
     await paymentsStore.bulkDeletePayments(selectedIds.value)
+    dashboardStore.invalidateCache()
+    utilityDebtsStore.invalidateCache()
     notifySuccess(`${selectedIds.value.length} ödeme başarıyla silindi.`)
     selectedIds.value = []
     showBulkDeleteConfirm.value = false
@@ -770,6 +778,9 @@ const handlePaymentSave = async () => {
     paymentsStore.fetchIfNeeded({}, true), 
     paymentsStore.fetchAdvanceAccounts()
   ])
+
+  dashboardStore.invalidateCache()
+  utilityDebtsStore.invalidateCache()
 
   if (wasEdit) notifySuccess('Ödeme güncellendi.')
   else notifySuccess('Ödeme kaydedildi.')

@@ -10,12 +10,14 @@ export const usePaymentsStore = defineStore('payments', {
     loadingByKey: {},
     errorByKey: {},
     lastFetchedByKey: {},
-    pendingPromisesByKey: {}
+    pendingPromisesByKey: {},
+    currentCacheKey: 'default',
+    currentAdvanceKey: 'default'
   }),
 
   getters: {
-    payments: (state) => state.itemsByKey['default'] || [],
-    advanceAccounts: (state) => state.advanceAccountsByKey['default'] || []
+    payments: (state) => state.itemsByKey[state.currentCacheKey] || [],
+    advanceAccounts: (state) => state.advanceAccountsByKey[state.currentAdvanceKey] || []
   },
 
   actions: {
@@ -49,6 +51,7 @@ export const usePaymentsStore = defineStore('payments', {
         try {
           const data = await paymentsService.getPayments(filters)
           this.itemsByKey[cacheKey] = data || []
+          this.currentCacheKey = cacheKey
           this.lastFetchedByKey[cacheKey] = Date.now()
           return this.itemsByKey[cacheKey]
         } catch (err) {
@@ -77,11 +80,11 @@ export const usePaymentsStore = defineStore('payments', {
         delete this.loadingByKey[cacheKey]
         delete this.errorByKey[cacheKey]
       } else {
-        this.itemsByKey = {}
-        this.lastFetchedByKey = {}
-        this.pendingPromisesByKey = {}
-        this.loadingByKey = {}
-        this.errorByKey = {}
+        for (const key in this.itemsByKey) delete this.itemsByKey[key]
+        for (const key in this.lastFetchedByKey) delete this.lastFetchedByKey[key]
+        for (const key in this.pendingPromisesByKey) delete this.pendingPromisesByKey[key]
+        for (const key in this.loadingByKey) delete this.loadingByKey[key]
+        for (const key in this.errorByKey) delete this.errorByKey[key]
       }
     },
 

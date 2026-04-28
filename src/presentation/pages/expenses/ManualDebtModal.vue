@@ -67,7 +67,7 @@
           <div class="form-control">
             <label class="label"><span class="label-text">Tutar *</span></label>
             <div class="relative">
-              <input type="number" v-model.number="form.amount" step="0.01" class="input input-bordered w-full !text-lg font-black pr-12 text-green-400" required min="0" />
+              <input type="number" v-model.number="form.amount" step="0.01" class="input input-bordered w-full !text-lg font-black pr-12 text-green-400" required min="0.01" />
               <span class="absolute right-4 top-1/2 -translate-y-1/2 text-[#626885] font-black uppercase tracking-widest text-[10px]">TL</span>
             </div>
           </div>
@@ -207,7 +207,7 @@ const form = ref({
   type: props.type,
   periodYear: new Date().getFullYear(),
   periodMonth: new Date().getMonth() + 1,
-  amount: 0,
+  amount: '',
   dueDate: new Date(new Date().getFullYear(), new Date().getMonth() + 1, 15).toISOString().split('T')[0],
   description: '',
   invoiceNumber: ''

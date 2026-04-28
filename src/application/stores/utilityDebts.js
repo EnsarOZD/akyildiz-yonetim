@@ -71,11 +71,11 @@ export const useUtilityDebtsStore = defineStore('utilityDebts', {
         delete this.loadingByKey[cacheKey]
         delete this.errorByKey[cacheKey]
       } else {
-        this.itemsByKey = {}
-        this.lastFetchedByKey = {}
-        this.pendingPromisesByKey = {}
-        this.loadingByKey = {}
-        this.errorByKey = {}
+        for (const key in this.itemsByKey) delete this.itemsByKey[key]
+        for (const key in this.lastFetchedByKey) delete this.lastFetchedByKey[key]
+        for (const key in this.pendingPromisesByKey) delete this.pendingPromisesByKey[key]
+        for (const key in this.loadingByKey) delete this.loadingByKey[key]
+        for (const key in this.errorByKey) delete this.errorByKey[key]
       }
     }
   }
