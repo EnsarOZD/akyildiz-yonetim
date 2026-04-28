@@ -651,12 +651,16 @@ const maxAmount = computed(() => {
 })
 
 // Main Dashboard Data Fetch
-const loadDashboardData = async () => {
+const loadDashboardData = async (forceRefresh = true) => {
+  // If called from an event handler, forceRefresh will be an Event object, which is truthy.
+  // We want to force refresh on any manual action.
+  const isForce = typeof forceRefresh === 'boolean' ? forceRefresh : true;
+  
   loading.value = true
   error.value = null
 
   try {
-    const summary = await dashboardStore.fetchSummary(dateFilter.value)
+    const summary = await dashboardStore.fetchSummary(dateFilter.value, isForce)
     summaryData.value = summary
     
     // Invalidate debts list to ensure lazy load triggers fresh data if filter changes
@@ -682,7 +686,7 @@ const loadDebtsSummary = async () => {
     if (!isNaN(dateFilter.value)) year = parseInt(dateFilter.value)
     else if (dateFilter.value !== 'all') year = now.getFullYear()
 
-    const result = await dashboardStore.fetchDebtsSummary(year)
+    const result = await dashboardStore.fetchDebtsSummary(year, true)
     debtsSummary.value = result || []
   } catch (err) {
     console.error('Borç özeti yüklenemedi:', err)
