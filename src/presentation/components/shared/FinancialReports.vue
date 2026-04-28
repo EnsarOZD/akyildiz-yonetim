@@ -168,8 +168,8 @@ const today = new Date()
 const startOfYear = new Date(today.getFullYear(), 0, 1)
 
 const filters = ref({
-  startDate: format(startOfYear, 'yyyy-MM-dd'),
-  endDate: format(today, 'yyyy-MM-dd'),
+  startDate: '',
+  endDate: '',
   tenantId: '',
   ownerId: ''
 })
