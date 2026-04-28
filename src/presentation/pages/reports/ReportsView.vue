@@ -309,9 +309,11 @@ const filters = reactive({
 
 // Lifecycle
 onMounted(async () => {
-  // Varsayılan olarak tüm zamanlar (boş bırakıldı)
-  filters.startDate = ''
-  filters.endDate = ''
+  const today = new Date()
+  const startOfYear = new Date(today.getFullYear(), 0, 1)
+  
+  filters.startDate = startOfYear.toISOString().substring(0, 10)
+  filters.endDate = today.toISOString().substring(0, 10)
   
   await Promise.all([
     fetchTenants(),
@@ -348,7 +350,8 @@ const fetchData = async () => {
         startDate: filters.startDate || undefined,
         endDate: filters.endDate || undefined,
         type: filters.utilityType || undefined,
-        debtorType: filters.debtorType === 'All' ? undefined : filters.debtorType
+        debtorType: filters.debtorType === 'All' ? undefined : filters.debtorType,
+        pageSize: 1000 // Rappor için limit artırıldı
       }),
       paymentsService.getPayments({
         tenantId: filters.tenantId || undefined,
@@ -357,7 +360,8 @@ const fetchData = async () => {
         endDate: filters.endDate || undefined,
         utilityType: filters.utilityType || undefined,
         debtorType: filters.debtorType === 'All' ? undefined : filters.debtorType,
-        excludeAdvanceUse: true
+        excludeAdvanceUse: true,
+        pageSize: 1000 // Rapor için limit artırıldı
       })
     ])
     

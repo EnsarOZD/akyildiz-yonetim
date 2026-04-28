@@ -154,7 +154,7 @@
                   <div>
                     <p class="text-[11px] font-black text-slate-400 dark:text-[#626885] uppercase tracking-widest mb-1 shadow-sm">Toplam Gider</p>
                     <p class="text-xl sm:text-[28px] font-black text-red-500 leading-tight tabular-nums tracking-tighter">{{ formatCurrency(totalExpense) }}</p>
-                    <p class="text-[11px] font-bold text-slate-500 dark:text-[#9aa0b4] mt-1 uppercase tracking-tighter">{{ expenses.length }} kalem</p>
+                    <p class="text-[11px] font-bold text-slate-500 dark:text-[#9aa0b4] mt-1 uppercase tracking-tighter">{{ totalExpensesCount }} kalem</p>
                   </div>
                 </router-link>
 
@@ -164,15 +164,15 @@
             <!-- Overdue card -->
             <router-link to="/overdue"
               class="app-card p-6 pl-10 border-l-[6px] hover:shadow-xl transition-all duration-300 flex flex-col justify-between"
-              :class="overdueItems.length === 0 ? 'border-l-emerald-500' : 'border-l-red-500'">
+              :class="overdueCount === 0 ? 'border-l-emerald-500' : 'border-l-red-500'">
               
               <div class="flex items-start justify-between mb-2">
                 <div class="w-10 h-10 rounded-xl bg-red-500/10 text-red-500 flex items-center justify-center">
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"/></svg>
                 </div>
                 <span class="text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-wider"
-                  :class="overdueItems.length > 0 ? 'bg-red-500 text-white' : 'bg-emerald-500 text-white text-xs'">
-                  {{ overdueItems.length }} Ödeme
+                  :class="overdueCount > 0 ? 'bg-red-500 text-white' : 'bg-emerald-500 text-white text-xs'">
+                  {{ overdueCount }} Ödeme
                 </span>
               </div>
 
@@ -181,7 +181,7 @@
                 <p class="text-[36px] font-black text-slate-800 dark:text-red-500 tabular-nums tracking-tighter leading-none mb-2">
                   {{ formatCurrency(overdueTotalAmount) }}
                 </p>
-                <div v-if="overdueItems.length > 0 && oldestOverdueDate" class="flex items-center gap-1.5 mt-2 text-xs text-slate-500 dark:text-[#9aa0b4]">
+                <div v-if="overdueCount > 0 && oldestOverdueDate" class="flex items-center gap-1.5 mt-2 text-xs text-slate-500 dark:text-[#9aa0b4]">
                   <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                   En eski: <span class="font-bold text-red-500">{{ formatDate(oldestOverdueDate) }}</span>
                 </div>
@@ -287,7 +287,7 @@
               <!-- Tahsilat Al -->
               <router-link to="/payments" class="app-card p-5 flex flex-col items-center gap-3 group transition-all hover:-translate-y-1 hover:bg-slate-50 dark:hover:bg-[#151a2e]">
                 <div class="w-11 h-11 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2-2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
                 </div>
                 <span class="text-xs font-bold text-slate-700 dark:text-white text-center leading-tight">Tahsilat Al</span>
               </router-link>
@@ -351,11 +351,11 @@
               <div class="flex justify-between"><span class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-brand-500"></span>Su</span><span>{{ formatCurrency(totalWaterDebt) }}</span></div>
             </div>
           </div>
-          <div class="app-card p-5" :class="overdueItems.length > 0 ? 'border-l-4 border-red-400' : ''">
-            <p class="text-xs font-semibold uppercase tracking-wider mb-1" :class="overdueItems.length > 0 ? 'text-red-500' : 'text-slate-500 dark:text-[#9aa0b4]'">Geciken Borçlar</p>
+          <div class="app-card p-5" :class="overdueCount > 0 ? 'border-l-4 border-red-400' : ''">
+            <p class="text-xs font-semibold uppercase tracking-wider mb-1" :class="overdueCount > 0 ? 'text-red-500' : 'text-slate-500 dark:text-[#9aa0b4]'">Geciken Borçlar</p>
             <p class="text-2xl font-bold text-slate-800 dark:text-[#f1f3f9]">{{ formatCurrency(overdueTotalAmount) }}</p>
             <p class="text-xs text-slate-500 dark:text-[#9aa0b4] mt-1">
-              <span :class="overdueItems.length > 0 ? 'text-red-500 font-bold' : ''">{{ overdueItems.length }}</span> adet kalem
+              <span :class="overdueCount > 0 ? 'text-red-500 font-bold' : ''">{{ overdueCount }}</span> adet kalem
             </p>
           </div>
           <div class="app-card p-5 border-l-4 border-emerald-400">
@@ -372,17 +372,17 @@
               <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"/></svg>
               Geciken Ödemeler
             </h2>
-            <span class="text-[11px] font-bold text-slate-400 dark:text-[#626885] uppercase tracking-wider">{{ overdueItems.length }} ADET</span>
+            <span class="text-[11px] font-bold text-slate-400 dark:text-[#626885] uppercase tracking-wider">{{ overdueCount }} ADET</span>
           </div>
 
           <div v-if="overdueItems.length > 0">
-            <div v-for="item in overdueItems.slice(0, 6)" :key="item.id"
+            <div v-for="item in overdueItems" :key="item.id"
               class="flex items-center gap-4 px-6 py-4 border-b border-slate-50 dark:border-white/[0.03] last:border-0 hover:bg-slate-50 dark:hover:bg-white/[0.02] transition-colors">
               <div class="w-9 h-9 rounded-xl bg-red-500/10 text-red-500 flex items-center justify-center flex-shrink-0">
                 <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"/></svg>
               </div>
               <div class="min-w-0 flex-1">
-                <p class="text-[12.5px] font-bold text-slate-800 dark:text-white truncate uppercase tracking-wide">{{ item.company }}</p>
+                <p class="text-[12.5px] font-bold text-slate-800 dark:text-white truncate uppercase tracking-wide">{{ item.company || item.displayName }}</p>
                 <p class="text-[11px] text-slate-500 dark:text-[#9aa0b4] mt-0.5 opacity-80">— {{ item.typeLabel }}</p>
               </div>
               <div class="text-right flex-shrink-0">
@@ -399,7 +399,7 @@
             <p class="text-[13px] font-semibold text-slate-700 dark:text-[#f1f3f9]">Geciken ödeme bulunmuyor</p>
           </div>
 
-          <div v-if="overdueItems.length > 0" class="px-6 py-3 border-t border-slate-100 dark:border-white/[0.05]">
+          <div v-if="overdueCount > 0" class="px-6 py-3 border-t border-slate-100 dark:border-white/[0.05]">
             <router-link to="/overdue"
               class="inline-flex items-center gap-1.5 text-[12px] font-bold text-brand-500 hover:opacity-80 transition-opacity">
               Tümünü gör
@@ -408,9 +408,9 @@
           </div>
         </section>
 
-        <!-- ─── Borç Özet Tablosu ───────────────────── -->
-        <section v-if="userRole !== 'tenant'">
-          <DebtsTable :debts="debtsSummary" :loading="loading" />
+        <!-- ─── Borç Özet Tablosu (Lazy Load) ──────────── -->
+        <section v-if="userRole !== 'tenant'" ref="debtsTableTrigger">
+          <DebtsTable :debts="debtsSummary" :loading="debtsLoading" />
         </section>
 
         <!-- ─── Row 5: Son İşlemler ────────────────────── -->
@@ -446,7 +446,7 @@
               </div>
               <div class="min-w-0 flex-1">
                 <p class="text-[13px] font-bold text-slate-800 dark:text-white truncate">
-                  {{ activity.type === 'debt' ? (activity.company || 'Borç') : (activity.payer || activity.description || 'İşlem') }}
+                  {{ activity.type === 'debt' ? (activity.company || activity.displayName || 'Borç') : (activity.payer || activity.description || 'İşlem') }}
                 </p>
                 <p class="text-[11px] text-slate-500 dark:text-[#9aa0b4] mt-0.5 opacity-80 uppercase tracking-wide">
                   {{ activity.type === 'debt' ? activity.typeLabel : formatDate(activity.paymentDate || activity.expenseDate || activity.dueDate || activity.date) }}
@@ -502,7 +502,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed, watch } from 'vue'
+import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
 import { useAuthStore } from '@/application/stores/auth'
 import { useDashboardStore } from '@/application/stores/dashboard'
 import ManualDebtModal from '../expenses/ManualDebtModal.vue'
@@ -514,17 +514,22 @@ import PageHeader from '@/presentation/components/ui/PageHeader.vue'
 import { formatCurrency } from '@/core/utils/currencyUtils'
 
 // Reactive data
-const payments = ref([])
-const expenses = ref([])
-const debts = ref([])
 const debtsSummary = ref([])
 const dashboardType = ref('')
 const dateFilter = ref('all')
 const loading = ref(true)
+const debtsLoading = ref(false)
 const error = ref(null)
 const showManualDebtModal = ref(false)
 const showAnnouncementModal = ref(false)
 const selectedDebtType = ref(0) // Default Aidat
+
+// Summary aggregate data from backend
+const summaryData = ref(null)
+
+// Lazy load trigger
+const debtsTableTrigger = ref(null)
+let observer = null
 
 const openManualDebtModal = (type = 0) => {
     selectedDebtType.value = type
@@ -551,8 +556,6 @@ const availableYears = computed(() => {
   for (let i = 0; i < 5; i++) {
     years.push(currentYear - i)
   }
-  // Mevcut yıl zaten "Bu Yıl" olarak var, ama kullanıcıyı şaşırtmamak için listede de olabilir veya "Bu Yıl" yeterli olabilir.
-  // Kullanıcı "2025 i seçtiğimde" dediği için yılları listelemek en iyisi.
   return years
 })
 
@@ -562,117 +565,61 @@ const formatDate = (dateStr) => {
   return new Date(dateStr).toLocaleDateString('tr-TR', options)
 }
 
-
-const totalIncome = computed(() => {
-  if (!Array.isArray(payments.value)) return 0
-  const tenantPayments = payments.value.reduce((sum, p) => sum + Number(p.amount || 0), 0)
-  return tenantPayments
-})
-
-const totalExpense = computed(() => {
-  if (!Array.isArray(expenses.value)) return 0
-  return expenses.value.reduce((sum, e) => sum + Number(e.amount || 0), 0)
-})
-
+// Aggregate Calculations from Backend
+const totalIncome = computed(() => summaryData.value?.totalIncome || 0)
+const totalExpense = computed(() => summaryData.value?.totalExpense || 0)
 const balance = computed(() => totalIncome.value - totalExpense.value)
-
-const tenantPaymentsCount = computed(() => {
-  return Array.isArray(payments.value) ? payments.value.length : 0
-})
-
-const thisMonthTenantPayments = computed(() => {
-  if (!Array.isArray(payments.value)) return 0
-  const today = new Date()
-  const currentMonth = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0')
-  
-  return payments.value
-    .filter(p => {
-      const paymentDate = p.paymentDate || p.date
-      return paymentDate && paymentDate.startsWith(currentMonth)
-    })
-    .reduce((sum, p) => sum + Number(p.amount || 0), 0)
-})
-
+const totalExpensesCount = computed(() => summaryData.value?.totalExpensesCount || 0)
+const thisMonthTenantPayments = computed(() => summaryData.value?.thisMonthIncome || 0)
 
 const totalUtilityDebts = computed(() => {
-  if (!Array.isArray(debts.value)) return 0
-  return debts.value.reduce((sum, debt) => sum + Number(debt.remainingAmount || 0), 0)
+  if (!summaryData.value) return 0
+  return (summaryData.value.totalUnpaidAidat || 0) + 
+         (summaryData.value.totalUnpaidElectricity || 0) + 
+         (summaryData.value.totalUnpaidWater || 0) +
+         (summaryData.value.totalUnpaidOther || 0)
 })
 
+const totalAidatDebt = computed(() => summaryData.value?.totalUnpaidAidat || 0)
+const totalElectricityDebt = computed(() => summaryData.value?.totalUnpaidElectricity || 0)
+const totalWaterDebt = computed(() => summaryData.value?.totalUnpaidWater || 0)
 
-const totalAidatDebt = computed(() => {
-  if (!Array.isArray(debts.value)) return 0
-  return debts.value
-    .filter(d => d.type === 0 || d.type === 'Aidat')
-    .reduce((sum, d) => sum + Number(d.remainingAmount || 0), 0)
-})
-
-const totalElectricityDebt = computed(() => {
-  if (!Array.isArray(debts.value)) return 0
-  return debts.value
-    .filter(d => d.type === 1 || d.type === 'Electricity')
-    .reduce((sum, d) => sum + Number(d.remainingAmount || 0), 0)
-})
-
-const totalWaterDebt = computed(() => {
-  if (!Array.isArray(debts.value)) return 0
-  return debts.value
-    .filter(d => d.type === 2 || d.type === 'Water')
-    .reduce((sum, d) => sum + Number(d.remainingAmount || 0), 0)
-})
-
-
-const overdueTotalAmount = computed(() => {
-  if (!Array.isArray(overdueItems.value)) return 0
-  return overdueItems.value.reduce((sum, item) => sum + Number(item.amount || 0), 0)
-})
-
-const oldestOverdueDate = computed(() => {
-  if (!Array.isArray(overdueItems.value) || overdueItems.value.length === 0) return null
-  // En eski tarihi bul
-  return Array.from(overdueItems.value).sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))[0].dueDate
-})
-
+const overdueTotalAmount = computed(() => summaryData.value?.overdueTotal || 0)
+const overdueCount = computed(() => summaryData.value?.overdueCount || 0)
+const oldestOverdueDate = computed(() => summaryData.value?.oldestOverdueDate)
 
 const overdueItems = computed(() => {
-  if (!Array.isArray(debts.value)) return []
-  const now = new Date()
-
-  return debts.value
-    .filter(debt => {
-      const isOverdue = !debt.dueDate || new Date(debt.dueDate) < now
-      const hasValidEntity = !!debt.tenantId || !!debt.ownerId
-      const hasUnpaidAmount = debt.status !== 'Paid' && Number(debt.remainingAmount || 0) > 0
-      return isOverdue && hasValidEntity && hasUnpaidAmount
-    })
-    .sort((a, b) => new Date(b.dueDate) - new Date(a.dueDate))
-    .map(debt => ({
+  if (!summaryData.value?.recentOverdueDebts) return []
+  return summaryData.value.recentOverdueDebts.map(debt => ({
       ...debt,
-      company: debt.displayName || debt.description || 'Bilinmiyor',
-      floor: debt.unit || '-',
+      company: debt.displayName || 'Bilinmiyor',
       amount: Number(debt.remainingAmount || 0),
-      totalAmount: Number(debt.amount || 0),
-      remainingAmount: Number(debt.remainingAmount || 0),
       typeLabel: debt.type === 0 || debt.type === 'Aidat' ? 'Aidat'
                : debt.type === 1 || debt.type === 'Electricity' ? 'Elektrik'
                : 'Su',
-    }))
+  }))
 })
 
 const recentActivities = computed(() => {
+  if (!summaryData.value) return []
+  
   const isObserver = userRole.value?.toLowerCase() === 'observer'
+  const payments = summaryData.value.payments || []
+  const expenses = summaryData.value.expenses || []
+  const debts = summaryData.value.recentDebts || []
+
   const items = [
-    ...payments.value.map(p => ({
+    ...payments.map(p => ({
       ...p,
       type: 'income',
       payer: p.tenantName || p.ownerName || p.description || 'Tahsilat'
     })),
-    ...(isObserver ? [] : expenses.value.map(e => ({
+    ...(isObserver ? [] : expenses.map(e => ({
       ...e,
       type: 'expense',
       payer: e.description || 'Gider'
     }))),
-    ...debts.value.map(d => ({
+    ...debts.map(d => ({
       ...d,
       type: 'debt',
       company: d.displayName || d.description || 'Bilinmiyor',
@@ -687,7 +634,6 @@ const recentActivities = computed(() => {
     : items
 
   return filtered
-    .filter(item => item.paymentDate || item.expenseDate || item.dueDate || item.date || item.createdAt)
     .sort((a, b) => {
       const dateA = a.paymentDate || a.expenseDate || a.dueDate || a.date || a.createdAt
       const dateB = b.paymentDate || b.expenseDate || b.dueDate || b.date || b.createdAt
@@ -696,82 +642,71 @@ const recentActivities = computed(() => {
     .slice(0, 5)
 })
 
-// Aylık veri hesaplama
-const monthlyData = computed(() => {
-  const months = []
-  const now = new Date()
-  
-  // Son 6 ayı hesapla
-  for (let i = 5; i >= 0; i--) {
-    const date = new Date(now.getFullYear(), now.getMonth() - i, 1)
-    const monthKey = date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0')
-    const monthName = date.toLocaleDateString('tr-TR', { month: 'short' })
-    
-    const monthIncome = payments.value
-      .filter(p => {
-        const paymentDate = p.paymentDate || p.date
-        return paymentDate && paymentDate.startsWith(monthKey)
-      })
-      .reduce((sum, p) => sum + Number(p.amount || 0), 0)
-    
-    const monthExpense = expenses.value
-      .filter(e => {
-        const expenseDate = e.expenseDate || e.date
-        return expenseDate && expenseDate.startsWith(monthKey)
-      })
-      .reduce((sum, e) => sum + Number(e.amount || 0), 0)
-    
-    months.push({
-      month: monthName,
-      income: monthIncome,
-      expense: monthExpense
-    })
-  }
-  
-  return months
-})
+// Monthly chart data from backend
+const monthlyData = computed(() => summaryData.value?.monthlyData || [])
 
 const maxAmount = computed(() => {
   const allAmounts = monthlyData.value.flatMap(month => [month.income, month.expense])
-  return Math.max(...allAmounts, 1) // En az 1 olsun ki sıfıra bölme hatası olmasın
+  return Math.max(...allAmounts, 1)
 })
 
-// Tüm verileri yükle — 2 paralel çağrı (8'den indirildi)
+// Main Dashboard Data Fetch
 const loadDashboardData = async () => {
   loading.value = true
   error.value = null
 
   try {
-    const now = new Date()
-    let year = null
+    const summary = await dashboardStore.fetchSummary(dateFilter.value)
+    summaryData.value = summary
     
-    if (dateFilter.value === 'all') {
-      year = null
-    } else if (dateFilter.value === 'this_year' || dateFilter.value === 'this_month') {
-      year = now.getFullYear()
-    } else if (dateFilter.value === 'last_month') {
-      year = now.getMonth() === 0 ? now.getFullYear() - 1 : now.getFullYear()
-    } else if (!isNaN(dateFilter.value)) {
-      year = parseInt(dateFilter.value)
-    } else {
-      year = now.getFullYear()
-    }
-
-    const [summary, debtsResult] = await Promise.all([
-      dashboardStore.fetchSummary(dateFilter.value),
-      userRole.value !== 'tenant' ? dashboardStore.fetchDebtsSummary(year) : Promise.resolve([])
-    ])
-
-    payments.value = summary?.payments || []
-    expenses.value = summary?.expenses || []
-    debts.value = summary?.debts || []
-    debtsSummary.value = debtsResult || []
+    // Invalidate debts list to ensure lazy load triggers fresh data if filter changes
+    debtsSummary.value = []
+    initDebtsObserver() 
   } catch (err) {
     console.error('Dashboard verileri yüklenirken hata:', err)
     error.value = 'Veriler yüklenirken bir hata oluştu. Lütfen sayfayı yenileyin.'
   } finally {
     loading.value = false
   }
+}
+
+// Lazy Load Debts Table
+const loadDebtsSummary = async () => {
+  if (debtsLoading.value || debtsSummary.value.length > 0) return
+  if (userRole.value === 'tenant') return
+
+  debtsLoading.value = true
+  try {
+    const now = new Date()
+    let year = null
+    if (!isNaN(dateFilter.value)) year = parseInt(dateFilter.value)
+    else if (dateFilter.value !== 'all') year = now.getFullYear()
+
+    const result = await dashboardStore.fetchDebtsSummary(year)
+    debtsSummary.value = result || []
+  } catch (err) {
+    console.error('Borç özeti yüklenemedi:', err)
+  } finally {
+    debtsLoading.value = false
+  }
+}
+
+const initDebtsObserver = () => {
+  if (observer) observer.disconnect()
+  
+  // Wait for next tick to ensure ref is bound if loading state just changed
+  setTimeout(() => {
+    if (!debtsTableTrigger.value) return
+
+    observer = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting) {
+        loadDebtsSummary()
+        observer.disconnect()
+      }
+    }, { rootMargin: '200px' })
+
+    observer.observe(debtsTableTrigger.value)
+  }, 100)
 }
 
 onMounted(() => {
@@ -785,5 +720,9 @@ onMounted(() => {
       }
     })
   }
+})
+
+onUnmounted(() => {
+  if (observer) observer.disconnect()
 })
 </script>

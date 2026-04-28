@@ -35,7 +35,8 @@ const tenantsService = {
       params.append('floor', String(filters.floorNumber))
     }
 
-    params.append('pageSize', '100')
+    if (filters.pageSize) params.append('pageSize', String(filters.pageSize))
+    else params.append('pageSize', '20')
 
     const qs = params.toString()
     const url = qs ? `${base}?${qs}` : base

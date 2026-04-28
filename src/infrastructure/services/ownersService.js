@@ -23,7 +23,8 @@ class OwnersService {
   async getOwners(filters = {}) {
     try {
       if (this.backendAvailable) {
-        const params = { ...filters, pageSize: 100 }
+        const params = { ...filters }
+        if (!params.pageSize) params.pageSize = 20
         const response = await apiService.get('/owners', params)
         return Array.isArray(response) ? response : (response?.items ?? [])
       }
