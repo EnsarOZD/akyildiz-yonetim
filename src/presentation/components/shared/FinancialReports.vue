@@ -165,10 +165,10 @@ const tenants = ref([])
 const report = ref(null)
 
 const today = new Date()
-const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1)
+const startOfYear = new Date(today.getFullYear(), 0, 1)
 
 const filters = ref({
-  startDate: format(startOfMonth, 'yyyy-MM-dd'),
+  startDate: format(startOfYear, 'yyyy-MM-dd'),
   endDate: format(today, 'yyyy-MM-dd'),
   tenantId: '',
   ownerId: ''
@@ -204,14 +204,18 @@ const emptyReport = Object.freeze({
 
 const safeReport = computed(() => {
   const r = report.value || {}
+  const payments = r.payments || {}
+  const debts = r.debts || {}
+  const advances = r.advanceAccounts || {}
+  
   return {
-    totalPayments: Number(r.totalPayments || 0),
-    paymentCount: Number(r.paymentCount || 0),
-    totalDebts: Number(r.totalDebts || 0),
-    debtCount: Number(r.debtCount || 0),
-    advanceBalance: Number(r.advanceBalance || 0),
-    advanceAccountCount: Number(r.advanceAccountCount || 0),
-    netBalance: Number(r.netBalance || (r.totalPayments || 0) - (r.totalDebts || 0)),
+    totalPayments: Number(payments.totalAmount || 0),
+    paymentCount: Number(payments.count || 0),
+    totalDebts: Number(debts.totalAmount || 0),
+    debtCount: Number(debts.count || 0),
+    advanceBalance: Number(advances.totalBalance || 0),
+    advanceAccountCount: Number(advances.count || 0),
+    netBalance: Number((payments.totalAmount || 0) - (debts.totalAmount || 0)),
     details: Array.isArray(r.details)
       ? r.details.map((it, idx) => ({ _idx: idx, ...it }))
       : []
