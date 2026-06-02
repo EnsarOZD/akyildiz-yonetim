@@ -24,6 +24,16 @@ class DashboardService {
     async getTenantFinancialReport(startDate, endDate, tenantId, ownerId) {
         return api.get('/reports/tenant/financial', { startDate, endDate, tenantId, ownerId })
     }
+
+    // Devreden bakiye: beforeDate'ten önceki tüm tahakkuk/tahsilat hareketlerinin neti
+    async getOpeningBalance({ beforeDate, tenantId, ownerId, utilityType, debtorType } = {}) {
+        const params = { beforeDate }
+        if (tenantId) params.tenantId = tenantId
+        if (ownerId) params.ownerId = ownerId
+        if (utilityType) params.utilityType = utilityType
+        if (debtorType && debtorType !== 'All') params.debtorType = debtorType
+        return api.get('/reports/opening-balance', params)
+    }
 }
 
 export default new DashboardService()

@@ -24,7 +24,7 @@ class UtilityDebtsService {
 
     const requestParams = {
       ...params,
-      pageSize: Math.min(filters.pageSize || 50, 1000),
+      pageSize: Math.min(filters.pageSize || 1000, 1000),
       pageNumber: filters.pageNumber || 1
     }
 

@@ -94,7 +94,26 @@
     </div>
 
     <!-- Özet Kartları -->
-    <div v-if="reportItems.length > 0" class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+    <div v-if="reportItems.length > 0" class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6" :class="hasOpeningBalance ? 'lg:grid-cols-4' : 'lg:grid-cols-3'">
+      <!-- Devreden Bakiye (yalnızca başlangıç tarihi filtresi varken) -->
+      <div v-if="hasOpeningBalance" class="app-card group hover:shadow-xl hover:shadow-amber-500/5 transition-all duration-300">
+        <div class="flex items-center gap-4">
+          <div class="w-12 h-12 rounded-2xl bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 transition-transform group-hover:scale-110">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 7h6m-6 4h6m-6 4h4M5 3h14a2 2 0 012 2v14l-3-2-2 2-2-2-2 2-2-2-3 2V5a2 2 0 012-2z"/>
+            </svg>
+          </div>
+          <div class="min-w-0">
+            <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-[#626885]">Devreden Bakiye</p>
+            <p :class="[
+              'text-xl font-black tabular-nums tracking-tight mt-0.5',
+              summary.opening >= 0 ? 'text-slate-800 dark:text-white' : 'text-red-500'
+            ]">{{ formatCurrency(summary.opening) }}</p>
+            <p class="text-[10px] text-slate-400 dark:text-[#626885] mt-0.5">{{ formatDate(filters.startDate) }} öncesi</p>
+          </div>
+        </div>
+      </div>
+
       <div class="app-card group hover:shadow-xl hover:shadow-red-500/5 transition-all duration-300">
         <div class="flex items-center gap-4">
           <div class="w-12 h-12 rounded-2xl bg-red-50 dark:bg-red-500/10 text-red-500 flex items-center justify-center shrink-0 transition-transform group-hover:scale-110">
@@ -132,11 +151,12 @@
             </svg>
           </div>
           <div class="min-w-0">
-            <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-[#626885]">Net Bakiye</p>
+            <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-[#626885]">{{ hasOpeningBalance ? 'Kapanış Bakiyesi' : 'Net Bakiye' }}</p>
             <p :class="[
               'text-xl font-black tabular-nums tracking-tight mt-0.5',
               summary.balance >= 0 ? 'text-brand-600 dark:text-brand-400' : 'text-red-500'
             ]">{{ formatCurrency(summary.balance) }}</p>
+            <p v-if="hasOpeningBalance" class="text-[10px] text-slate-400 dark:text-[#626885] mt-0.5">Devreden dahil</p>
           </div>
         </div>
       </div>
@@ -184,7 +204,30 @@
                 <span class="loading loading-spinner loading-md text-slate-400"></span>
               </td>
             </tr>
-            <tr v-else-if="reportItems.length === 0">
+            <!-- Devreden (devir) satırı: tabloya sabitlenir, başlangıç tarihi öncesi net bakiye -->
+            <tr v-if="!loading && hasOpeningBalance && reportItems.length > 0"
+              class="bg-amber-50/60 dark:bg-amber-500/[0.06] border-b-2 border-amber-200 dark:border-amber-500/20">
+              <td class="px-4 py-3 whitespace-nowrap text-[11px] font-black text-amber-600 dark:text-amber-400 uppercase tracking-tight">{{ formatDate(filters.startDate) }}</td>
+              <td class="px-4 py-3 text-[11px] font-mono font-black text-amber-500/70 tracking-tighter">—</td>
+              <td class="px-4 py-3">
+                <p class="text-[13.5px] font-black text-amber-700 dark:text-amber-300 leading-tight uppercase tracking-tight">DEVİR</p>
+                <p class="text-[10px] font-bold text-amber-500/80 uppercase tracking-widest mt-1">Önceki dönemden</p>
+              </td>
+              <td class="px-4 py-3">
+                <span class="px-2 py-0.5 rounded-lg text-[9.5px] font-black uppercase tracking-widest bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300">Devir</span>
+              </td>
+              <td class="px-4 py-3 text-[11px] font-black text-amber-600/80 dark:text-amber-300/70 uppercase tracking-tight">Önceki dönem bakiyesi</td>
+              <td class="px-4 py-3 text-[11px] font-mono font-black text-amber-400 tracking-tighter">—</td>
+              <td class="px-4 py-3 text-right text-[13px] font-black tabular-nums tracking-tight" :class="summary.opening < 0 ? 'text-red-500' : 'text-slate-300 dark:text-[#3a3f55]'">
+                {{ summary.opening < 0 ? formatCurrency(Math.abs(summary.opening)) : '—' }}
+              </td>
+              <td class="px-4 py-3 text-right text-[13px] font-black tabular-nums tracking-tight" :class="summary.opening >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-300 dark:text-[#3a3f55]'">
+                {{ summary.opening >= 0 ? formatCurrency(summary.opening) : '—' }}
+              </td>
+              <td class="px-4 py-3 text-center text-amber-400 text-xs">—</td>
+              <td class="px-4 py-3 text-center text-amber-400 text-xs">—</td>
+            </tr>
+            <tr v-if="!loading && reportItems.length === 0">
               <td colspan="10" class="py-12">
                 <div class="text-center">
                   <div class="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-[#1c2238] flex items-center justify-center mx-auto mb-3">
@@ -198,8 +241,7 @@
               </td>
             </tr>
             <tr
-              v-else
-              v-for="(item, idx) in paginatedReports"
+              v-for="(item, idx) in (loading ? [] : paginatedReports)"
               :key="idx"
               class="group hover:bg-white/[0.02] transition-colors border-b border-white/[0.02]/50 last:border-0"
             >
@@ -290,6 +332,7 @@ import ownersService from '@/infrastructure/services/ownersService'
 import utilityDebtsService from '@/infrastructure/services/utilityDebtsService'
 import PageHeader from '@/presentation/components/ui/PageHeader.vue'
 import paymentsService from '@/infrastructure/services/paymentsService'
+import dashboardService from '@/infrastructure/services/dashboardService'
 
 // State
 const loading = ref(false)
@@ -297,6 +340,7 @@ const tenants = ref([])
 const owners = ref([])
 const debtsData = ref([])
 const paymentsData = ref([])
+const openingBalance = ref(0) // Devreden bakiye (başlangıç tarihinden önceki net)
 const filters = reactive({
   startDate: '',
   endDate: '',
@@ -367,6 +411,25 @@ const fetchData = async () => {
     
     debtsData.value = debts || []
     paymentsData.value = payments || []
+
+    // Devreden bakiye: yalnızca başlangıç tarihi seçiliyse anlamlı
+    if (filters.startDate) {
+      try {
+        const ob = await dashboardService.getOpeningBalance({
+          beforeDate: filters.startDate,
+          tenantId: filters.tenantId || undefined,
+          ownerId: filters.ownerId || undefined,
+          utilityType: filters.utilityType || undefined,
+          debtorType: filters.debtorType
+        })
+        openingBalance.value = Number(ob?.openingBalance ?? 0)
+      } catch (e) {
+        console.error('Devreden bakiye alınamadı:', e)
+        openingBalance.value = 0
+      }
+    } else {
+      openingBalance.value = 0
+    }
   } catch (e) {
     console.error('Veri çekme hatası:', e)
   } finally {
@@ -437,13 +500,21 @@ const reportItems = computed(() => {
   })
 })
 
+// Devreden bakiye yalnızca başlangıç tarihi filtresi varken gösterilir
+const hasOpeningBalance = computed(() => !!filters.startDate)
+
 const summary = computed(() => {
   const totalDebt = reportItems.value.filter(i => !i.isPayment).reduce((s, i) => s + i.amount, 0)
   const totalPayment = reportItems.value.filter(i => i.isPayment).reduce((s, i) => s + i.amount, 0)
+  const periodBalance = totalPayment - totalDebt
+  const opening = hasOpeningBalance.value ? openingBalance.value : 0
   return {
     totalDebt,
     totalPayment,
-    balance: totalPayment - totalDebt
+    opening,
+    periodBalance,
+    // Kapanış bakiyesi = Devreden + Dönem neti (gerçek kümülatif durum)
+    balance: opening + periodBalance
   }
 })
 
@@ -495,7 +566,26 @@ const formatPeriod = (year, month) => {
 // EXPORT FUNCTIONS
 const exportToExcel = async () => {
   const XLSX = await import('xlsx')
-  const data = reportItems.value.map(i => ({
+  const data = []
+
+  // Devreden (devir) satırı — başlangıç tarihi öncesi net bakiye
+  if (hasOpeningBalance.value) {
+    data.push({
+      'Tarih': formatDate(filters.startDate),
+      'Dönem': '',
+      'Kiracı': 'DEVİR (Önceki dönemden)',
+      'Ünite': '',
+      'Tür': 'Devir',
+      'Açıklama': 'Önceki dönem bakiyesi',
+      'Fatura No': '',
+      'Borç (-)': summary.value.opening < 0 ? Math.abs(summary.value.opening) : 0,
+      'Tahsilat (+)': summary.value.opening >= 0 ? summary.value.opening : 0,
+      'Durum': '',
+      'Vade Tarihi': ''
+    })
+  }
+
+  reportItems.value.forEach(i => data.push({
     'Tarih': formatDate(i.date),
     'Dönem': formatPeriod(i.periodYear, i.periodMonth),
     'Kiracı': i.tenantName,
@@ -508,7 +598,16 @@ const exportToExcel = async () => {
     'Durum': i.isPaid ? 'Ödendi' : 'Bekliyor',
     'Vade Tarihi': i.lastPaymentDate ? formatDate(i.lastPaymentDate) : ''
   }))
-  
+
+  // Özet / kapanış satırları
+  data.push({})
+  if (hasOpeningBalance.value) {
+    data.push({ 'Kiracı': 'Devreden Bakiye', 'Tahsilat (+)': summary.value.opening })
+  }
+  data.push({ 'Kiracı': 'Dönem Tahakkuku', 'Borç (-)': summary.value.totalDebt })
+  data.push({ 'Kiracı': 'Dönem Tahsilatı', 'Tahsilat (+)': summary.value.totalPayment })
+  data.push({ 'Kiracı': hasOpeningBalance.value ? 'Kapanış Bakiyesi (Devreden Dahil)' : 'Net Bakiye', 'Tahsilat (+)': summary.value.balance })
+
   const ws = XLSX.utils.json_to_sheet(data)
   const wb = XLSX.utils.book_new()
   XLSX.utils.book_append_sheet(wb, ws, "Finansal Rapor")
@@ -628,7 +727,8 @@ const exportToPDF = async () => {
   const boxY = 47
   const boxH = 23
   const gap  = 5
-  const boxW = (pageW - margin * 2 - gap * 2) / 3
+  const cardCount = hasOpeningBalance.value ? 4 : 3
+  const boxW = (pageW - margin * 2 - gap * (cardCount - 1)) / cardCount
 
   const drawSummaryCard = (x, label, value, bg, border, textColor) => {
     doc.setFillColor(...bg)
@@ -639,16 +739,25 @@ const exportToPDF = async () => {
     doc.setFontSize(6.5)
     doc.text(label, x + boxW / 2, boxY + 7, { align: 'center' })
     doc.setTextColor(...textColor)
-    doc.setFontSize(12)
+    doc.setFontSize(cardCount === 4 ? 10.5 : 12)
     doc.text(formatCurrency(value), x + boxW / 2, boxY + 18, { align: 'center' })
   }
 
-  drawSummaryCard(margin,                      'TOPLAM TAHAKKUK (BORC)',
+  let cardX = margin
+  const nextCardX = () => { const x = cardX; cardX += boxW + gap; return x }
+
+  if (hasOpeningBalance.value) {
+    const opPos = summary.value.opening >= 0
+    drawSummaryCard(nextCardX(), 'DEVREDEN BAKIYE',
+      summary.value.opening,
+      [255,251,235], [180,130,20], opPos ? [120,90,10] : [160,20,20])
+  }
+  drawSummaryCard(nextCardX(), 'TOPLAM TAHAKKUK (BORC)',
     summary.value.totalDebt,   [254,242,242], RED,   [160,20,20])
-  drawSummaryCard(margin + boxW + gap,         'TOPLAM TAHSILAT',
+  drawSummaryCard(nextCardX(), 'TOPLAM TAHSILAT',
     summary.value.totalPayment,[240,253,244], GREEN, [16,90,40])
   const isPos = summary.value.balance >= 0
-  drawSummaryCard(margin + (boxW + gap) * 2,   'NET BAKIYE',
+  drawSummaryCard(nextCardX(), hasOpeningBalance.value ? 'KAPANIS BAKIYESI' : 'NET BAKIYE',
     summary.value.balance,
     isPos ? [239,246,255] : [254,242,242],
     isPos ? [37,99,235]   : RED,
@@ -679,6 +788,23 @@ const exportToPDF = async () => {
     status:    i.isPayment  ? 'Tahsilat' : (i.isPaid ? 'Odendi' : 'Bekliyor'),
     lastPaid:  i.lastPaymentDate ? formatDate(i.lastPaymentDate) : '-'
   }))
+
+  // Devreden (devir) satırı tablonun en üstüne
+  if (hasOpeningBalance.value) {
+    rows.unshift({
+      date:    formatDate(filters.startDate),
+      period:  '-',
+      tenant:  'DEVIR (Onceki donemden)',
+      unit:    '-',
+      desc:    'Onceki donem bakiyesi',
+      invoice: '-',
+      debt:    summary.value.opening < 0 ? formatCurrency(Math.abs(summary.value.opening)) : '-',
+      payment: summary.value.opening >= 0 ? formatCurrency(summary.value.opening) : '-',
+      status:  'Devir',
+      lastPaid:'-',
+      _isDevir: true
+    })
+  }
 
   let totalPages = 1
 
@@ -728,6 +854,12 @@ const exportToPDF = async () => {
       lastPaid: { halign: 'center', cellWidth: 22, textColor: [16, 100, 45] },
     },
     didParseCell(data) {
+      // Devir (devreden) satırını tüm hücrelerde hafif vurgula
+      if (data.section === 'body' && data.row.raw && data.row.raw._isDevir) {
+        data.cell.styles.fillColor = [255, 248, 230]
+        data.cell.styles.fontStyle = 'normal'
+        if (data.column.dataKey === 'tenant') data.cell.styles.textColor = [120, 90, 10]
+      }
       if (data.section !== 'body' || data.column.dataKey !== 'status') return
       if (data.cell.raw === 'Tahsilat') {
         data.cell.styles.textColor   = [16, 100, 45]
@@ -753,10 +885,11 @@ const exportToPDF = async () => {
   // ── Son sayfada özet kutu ──────────────────────────────────────────────────
   const finalY = doc.lastAutoTable.finalY + 6
 
-  if (finalY < pageH - 38) {
+  const showOpening = hasOpeningBalance.value
+  const tbH = showOpening ? 44 : 32
+  if (finalY < pageH - (tbH + 6)) {
     const tbW = 88
     const tbX = pageW - margin - tbW
-    const tbH = 32
 
     // Arka plan
     doc.setFillColor(...NAVY)
@@ -773,21 +906,30 @@ const exportToPDF = async () => {
     // Satırlar
     doc.setTextColor(...WHITE)
     doc.setFontSize(7.5)
-    doc.text('Toplam Borc:',     tbX + 5,        finalY + 17)
-    doc.text(formatCurrency(summary.value.totalDebt),     tbX + tbW - 5, finalY + 17, { align: 'right' })
-    doc.text('Toplam Tahsilat:', tbX + 5,        finalY + 23)
-    doc.text(formatCurrency(summary.value.totalPayment),  tbX + tbW - 5, finalY + 23, { align: 'right' })
+    let ly = finalY + 17
+    if (showOpening) {
+      doc.text('Devreden Bakiye:', tbX + 5, ly)
+      doc.text(formatCurrency(summary.value.opening), tbX + tbW - 5, ly, { align: 'right' })
+      ly += 6
+    }
+    doc.text('Donem Tahakkuku:', tbX + 5, ly)
+    doc.text(formatCurrency(summary.value.totalDebt), tbX + tbW - 5, ly, { align: 'right' })
+    ly += 6
+    doc.text('Donem Tahsilati:', tbX + 5, ly)
+    doc.text(formatCurrency(summary.value.totalPayment), tbX + tbW - 5, ly, { align: 'right' })
+    ly += 2.5
 
     // Ayraç
     doc.setDrawColor(200, 200, 200)
     doc.setLineWidth(0.3)
-    doc.line(tbX + 5, finalY + 25.5, tbX + tbW - 5, finalY + 25.5)
+    doc.line(tbX + 5, ly, tbX + tbW - 5, ly)
+    ly += 5.5
 
-    // Net bakiye
+    // Kapanış / Net bakiye
     doc.setTextColor(...GOLD)
     doc.setFontSize(8.5)
-    doc.text('NET BAKIYE:', tbX + 5, finalY + 31)
-    doc.text(formatCurrency(summary.value.balance), tbX + tbW - 5, finalY + 31, { align: 'right' })
+    doc.text(showOpening ? 'KAPANIS BAKIYESI:' : 'NET BAKIYE:', tbX + 5, ly)
+    doc.text(formatCurrency(summary.value.balance), tbX + tbW - 5, ly, { align: 'right' })
 
     // Kayıt adedi
     doc.setTextColor(...GRAY)
