@@ -34,6 +34,15 @@ class DashboardService {
         if (debtorType && debtorType !== 'All') params.debtorType = debtorType
         return api.get('/reports/opening-balance', params)
     }
+
+    // Birim bazlı gelir/gider karşılaştırması (Elektrik, Su, Aidat) - bina geneli
+    async getCategoryComparison({ startDate, endDate, debtorType } = {}) {
+        const params = {}
+        if (startDate) params.startDate = startDate
+        if (endDate) params.endDate = endDate
+        if (debtorType && debtorType !== 'All') params.debtorType = debtorType
+        return api.get('/reports/category-comparison', params)
+    }
 }
 
 export default new DashboardService()

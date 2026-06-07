@@ -162,6 +162,56 @@
       </div>
     </div>
 
+    <!-- Birim Bazlı Karşılaştırma (Elektrik / Su / Aidat) -->
+    <div v-if="comparisonRows.length > 0" class="app-card !p-0 mb-6">
+      <div class="flex items-center justify-between px-4 py-3 border-b border-slate-200 dark:border-white/[0.07]">
+        <div class="flex items-center gap-2">
+          <span class="text-sm font-semibold text-slate-700 dark:text-[#f1f3f9]">Birim Bazlı Karşılaştırma</span>
+          <span class="text-xs text-slate-400">Bina geneli · Gelir / Gider</span>
+        </div>
+        <span class="text-[10px] font-bold text-slate-400 dark:text-[#626885] uppercase tracking-widest">Fark = Tahsilat − Gider</span>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="table table-sm w-full">
+          <thead>
+            <tr class="border-b border-white/[0.08]">
+              <th class="py-4 text-[10px] font-black text-slate-400 dark:text-[#626885] uppercase tracking-widest px-4 text-left">Kategori</th>
+              <th class="py-4 text-[10px] font-black text-slate-400 dark:text-[#626885] uppercase tracking-widest px-4 text-right">Tahakkuk</th>
+              <th class="py-4 text-[10px] font-black text-slate-400 dark:text-[#626885] uppercase tracking-widest px-4 text-right">Tahsilat</th>
+              <th class="py-4 text-[10px] font-black text-slate-400 dark:text-[#626885] uppercase tracking-widest px-4 text-right">Gider</th>
+              <th class="py-4 text-[10px] font-black text-slate-400 dark:text-[#626885] uppercase tracking-widest px-4 text-right">Fark</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y-0">
+            <tr
+              v-for="row in comparisonRows"
+              :key="row.category"
+              class="group hover:bg-white/[0.02] transition-colors border-b border-white/[0.02]/50"
+            >
+              <td class="px-4 py-3 text-[13px] font-black text-slate-800 dark:text-white uppercase tracking-tight">{{ row.label }}</td>
+              <td class="px-4 py-3 text-right text-[13px] font-black tabular-nums tracking-tight text-slate-500 dark:text-[#9aa0b4]">{{ formatCurrency(row.accrued) }}</td>
+              <td class="px-4 py-3 text-right text-[13px] font-black tabular-nums tracking-tight text-emerald-600 dark:text-emerald-400">{{ formatCurrency(row.collected) }}</td>
+              <td class="px-4 py-3 text-right text-[13px] font-black tabular-nums tracking-tight text-red-500">{{ formatCurrency(row.expense) }}</td>
+              <td class="px-4 py-3 text-right text-[13px] font-black tabular-nums tracking-tight" :class="row.difference >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500'">
+                {{ formatCurrency(row.difference) }}
+              </td>
+            </tr>
+          </tbody>
+          <tfoot v-if="comparisonTotal">
+            <tr class="border-t-2 border-slate-200 dark:border-white/[0.1] bg-slate-50/60 dark:bg-white/[0.02]">
+              <td class="px-4 py-3 text-[12px] font-black text-slate-700 dark:text-white uppercase tracking-widest">Toplam</td>
+              <td class="px-4 py-3 text-right text-[13px] font-black tabular-nums tracking-tight text-slate-600 dark:text-[#9aa0b4]">{{ formatCurrency(comparisonTotal.accrued) }}</td>
+              <td class="px-4 py-3 text-right text-[13px] font-black tabular-nums tracking-tight text-emerald-600 dark:text-emerald-400">{{ formatCurrency(comparisonTotal.collected) }}</td>
+              <td class="px-4 py-3 text-right text-[13px] font-black tabular-nums tracking-tight text-red-500">{{ formatCurrency(comparisonTotal.expense) }}</td>
+              <td class="px-4 py-3 text-right text-[13px] font-black tabular-nums tracking-tight" :class="comparisonTotal.difference >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500'">
+                {{ formatCurrency(comparisonTotal.difference) }}
+              </td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+
     <!-- Tablo Kartı -->
     <div class="app-card !p-0">
       <!-- Tablo Başlığı -->
@@ -341,6 +391,7 @@ const owners = ref([])
 const debtsData = ref([])
 const paymentsData = ref([])
 const openingBalance = ref(0) // Devreden bakiye (başlangıç tarihinden önceki net)
+const categoryComparison = ref(null) // Birim bazlı gelir/gider karşılaştırması (bina geneli)
 const filters = reactive({
   startDate: '',
   endDate: '',
@@ -412,6 +463,19 @@ const fetchData = async () => {
     debtsData.value = debts || []
     paymentsData.value = payments || []
 
+    // Birim bazlı karşılaştırma: bina geneli, yalnız tarih + borçlu türü filtresi.
+    // Yetkisiz roller (viewer vb.) için sessizce boş geçilir.
+    try {
+      categoryComparison.value = await dashboardService.getCategoryComparison({
+        startDate: filters.startDate || undefined,
+        endDate: filters.endDate || undefined,
+        debtorType: filters.debtorType
+      })
+    } catch (e) {
+      console.error('Birim bazlı karşılaştırma alınamadı:', e)
+      categoryComparison.value = null
+    }
+
     // Devreden bakiye: yalnızca başlangıç tarihi seçiliyse anlamlı
     if (filters.startDate) {
       try {
@@ -447,6 +511,28 @@ const clearFilters = () => {
   filters.endDate = ''
   fetchData()
 }
+
+// Birim bazlı karşılaştırma: backend kategorilerini Türkçe etiketlerle eşle
+const CATEGORY_LABELS = { Electricity: 'Elektrik', Water: 'Su', Aidat: 'Aidat' }
+
+const mapComparisonRow = (row) => ({
+  category: row.category,
+  label: CATEGORY_LABELS[row.category] || row.category,
+  accrued: Number(row.accrued || 0),
+  collected: Number(row.collected || 0),
+  expense: Number(row.expense || 0),
+  difference: Number(row.difference || 0)
+})
+
+const comparisonRows = computed(() => {
+  const rows = categoryComparison.value?.rows
+  return Array.isArray(rows) ? rows.map(mapComparisonRow) : []
+})
+
+const comparisonTotal = computed(() => {
+  const total = categoryComparison.value?.total
+  return total ? mapComparisonRow(total) : null
+})
 
 // Data Processing
 const reportItems = computed(() => {
@@ -611,13 +697,36 @@ const exportToExcel = async () => {
   const ws = XLSX.utils.json_to_sheet(data)
   const wb = XLSX.utils.book_new()
   XLSX.utils.book_append_sheet(wb, ws, "Finansal Rapor")
-  
+
   // Sütun genişlikleri ayarı
   const wscols = [
     {wch: 12}, {wch: 25}, {wch: 10}, {wch: 15}, {wch: 30}, {wch: 12}, {wch: 12}, {wch: 10}, {wch: 14}
   ]
   ws['!cols'] = wscols
-  
+
+  // Birim bazlı karşılaştırma — ayrı sayfa (bina geneli)
+  if (comparisonRows.value.length > 0) {
+    const compData = comparisonRows.value.map(r => ({
+      'Kategori': r.label,
+      'Tahakkuk': r.accrued,
+      'Tahsilat': r.collected,
+      'Gider': r.expense,
+      'Fark (Tahsilat - Gider)': r.difference
+    }))
+    if (comparisonTotal.value) {
+      compData.push({
+        'Kategori': 'TOPLAM',
+        'Tahakkuk': comparisonTotal.value.accrued,
+        'Tahsilat': comparisonTotal.value.collected,
+        'Gider': comparisonTotal.value.expense,
+        'Fark (Tahsilat - Gider)': comparisonTotal.value.difference
+      })
+    }
+    const compWs = XLSX.utils.json_to_sheet(compData)
+    compWs['!cols'] = [{wch: 14}, {wch: 14}, {wch: 14}, {wch: 14}, {wch: 22}]
+    XLSX.utils.book_append_sheet(wb, compWs, "Birim Karsilastirma")
+  }
+
   XLSX.writeFile(wb, `Akyildiz_Finans_Raporu_${new Date().toISOString().split('T')[0]}.xlsx`)
 }
 
@@ -887,7 +996,9 @@ const exportToPDF = async () => {
 
   const showOpening = hasOpeningBalance.value
   const tbH = showOpening ? 44 : 32
+  let summaryBottomY = finalY
   if (finalY < pageH - (tbH + 6)) {
+    summaryBottomY = finalY + tbH
     const tbW = 88
     const tbX = pageW - margin - tbW
 
@@ -938,6 +1049,92 @@ const exportToPDF = async () => {
       `Toplam ${reportItems.value.length} kayit listelenmistir.`,
       margin, finalY + 10
     )
+  }
+
+  // ── Birim bazlı karşılaştırma tablosu (bina geneli) ────────────────────────
+  if (comparisonRows.value.length > 0) {
+    const compRows = comparisonRows.value.map(r => ({
+      category: r.label,
+      accrued:  formatCurrency(r.accrued),
+      collected: formatCurrency(r.collected),
+      expense:  formatCurrency(r.expense),
+      diff:     formatCurrency(r.difference),
+      _diffNeg: r.difference < 0
+    }))
+    if (comparisonTotal.value) {
+      compRows.push({
+        category: 'TOPLAM',
+        accrued:  formatCurrency(comparisonTotal.value.accrued),
+        collected: formatCurrency(comparisonTotal.value.collected),
+        expense:  formatCurrency(comparisonTotal.value.expense),
+        diff:     formatCurrency(comparisonTotal.value.difference),
+        _diffNeg: comparisonTotal.value.difference < 0,
+        _isTotal: true
+      })
+    }
+
+    let compStartY = summaryBottomY + 12
+    // Yeni sayfaya taşıması gerekiyorsa autoTable kendisi halleder; başlık için yer ayır.
+    if (compStartY > pageH - 40) {
+      doc.addPage()
+      drawPageHeader(false)
+      drawPageFooter(doc.internal.getNumberOfPages(), doc.internal.getNumberOfPages())
+      compStartY = 32
+    }
+
+    doc.setTextColor(...NAVY)
+    doc.setFontSize(8)
+    doc.text('BIRIM BAZLI KARSILASTIRMA (BINA GENELI)', margin, compStartY)
+    doc.setDrawColor(...NAVY)
+    doc.setLineWidth(0.4)
+    doc.line(margin, compStartY + 2, pageW - margin, compStartY + 2)
+
+    autoTable(doc, {
+      columns: [
+        { header: 'Kategori',            dataKey: 'category'  },
+        { header: 'Tahakkuk',            dataKey: 'accrued'   },
+        { header: 'Tahsilat',            dataKey: 'collected' },
+        { header: 'Gider',               dataKey: 'expense'   },
+        { header: 'Fark (Tahsilat-Gider)', dataKey: 'diff'    },
+      ],
+      body: compRows,
+      startY: compStartY + 5,
+      margin: { left: margin, right: margin, bottom: 18 },
+      styles: {
+        fontSize: 8, font: 'Arial',
+        cellPadding: { top: 3, right: 4, bottom: 3, left: 4 },
+        textColor: [30, 30, 30], lineColor: [215, 220, 228], lineWidth: 0.1,
+      },
+      headStyles: {
+        fillColor: NAVY, textColor: WHITE, fontSize: 8, fontStyle: 'normal',
+        cellPadding: { top: 4, right: 4, bottom: 4, left: 4 }, halign: 'center',
+      },
+      alternateRowStyles: { fillColor: [248, 250, 252] },
+      columnStyles: {
+        category:  { cellWidth: 50, fontStyle: 'normal' },
+        accrued:   { halign: 'right' },
+        collected: { halign: 'right', textColor: GREEN },
+        expense:   { halign: 'right', textColor: RED },
+        diff:      { halign: 'right' },
+      },
+      didParseCell(data) {
+        if (data.section !== 'body') return
+        const raw = data.row.raw
+        if (raw._isTotal) {
+          data.cell.styles.fontStyle = 'normal'
+          data.cell.styles.fillColor = [240, 242, 248]
+        }
+        if (data.column.dataKey === 'diff') {
+          data.cell.styles.textColor = raw._diffNeg ? RED : GREEN
+        }
+      },
+      willDrawPage(data) {
+        if (data.pageNumber > 1) drawPageHeader(false)
+      },
+      didDrawPage(data) {
+        drawPageFooter(data.pageNumber, doc.internal.getNumberOfPages())
+      }
+    })
   }
 
   doc.save(`Akyildiz_Finansal_Rapor_${dateStr}.pdf`)
