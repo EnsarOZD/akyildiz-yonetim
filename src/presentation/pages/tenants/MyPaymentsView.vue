@@ -16,8 +16,15 @@
         </div>
 
         <div class="flex items-center gap-2 shrink-0">
+          <select v-if="isPrivileged" v-model="selectedTenantId"
+            class="select select-sm select-bordered font-bold text-xs max-w-[220px]">
+            <option value="">Kiracı seçiniz…</option>
+            <option v-for="t in tenants" :key="t.id || t._id" :value="t.id || t._id">
+              {{ t.companyName || t.contactPersonName || 'Bilinmiyor' }}
+            </option>
+          </select>
           <div class="flex bg-white dark:bg-[#0f1322] p-1 rounded-2xl border border-slate-200 dark:border-white/[0.08] shadow-sm">
-            <button @click="exportToExcel" :disabled="loading || reportItems.length === 0" 
+            <button @click="exportToExcel" :disabled="loading || reportItems.length === 0"
               class="flex items-center gap-2 px-4 py-2 text-[11px] font-black uppercase tracking-wider text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-xl transition-all disabled:opacity-30">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
               EXCEL
@@ -37,8 +44,17 @@
         </div>
       </section>
 
+      <!-- Admin/manager: kiracı seçilmeden veri/PDF üretilmez (bina geneli sızmasın) -->
+      <section v-if="isPrivileged && !selectedTenantId"
+        class="app-card border-none bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 p-5 flex items-center gap-3 animate-slide-up">
+        <svg class="w-6 h-6 text-amber-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"/></svg>
+        <p class="text-sm font-bold text-amber-700 dark:text-amber-300">
+          Lütfen yukarıdan bir kiracı seçin. Ekstre yalnızca seçilen kiracının verisini içerir.
+        </p>
+      </section>
+
       <!-- ─── Row 2: Summary Cards ─── -->
-      <section v-if="reportItems.length > 0 || !loading" class="grid grid-cols-1 sm:grid-cols-3 gap-4 animate-slide-up">
+      <section v-if="(reportItems.length > 0 || !loading) && !(isPrivileged && !selectedTenantId)" class="grid grid-cols-1 sm:grid-cols-3 gap-4 animate-slide-up">
         <div class="app-card border-none bg-slate-50 dark:bg-white/[0.02] p-5 flex items-center gap-4">
           <div class="w-12 h-12 rounded-2xl bg-rose-500/10 text-rose-500 flex items-center justify-center shrink-0">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"/></svg>
@@ -240,6 +256,13 @@ const debtsData = ref([])
 const paymentsData = ref([])
 const tenantInfo = ref(null)
 
+// Rol bazlı kapsam: kiracı yalnız kendi verisini görür; admin/manager bir kiracı seçer.
+const role = computed(() => authStore.role?.toLowerCase() || '')
+const isTenantUser = computed(() => role.value === 'tenant')
+const isPrivileged = computed(() => role.value === 'admin' || role.value === 'manager')
+const tenants = ref([])
+const selectedTenantId = ref('')
+
 const filters = reactive({
   startDate: '',
   endDate: '',
@@ -248,19 +271,46 @@ const filters = reactive({
 })
 
 // Lifecycle
+const loadTenants = async () => {
+  try {
+    const res = await tenantsService.getTenants({ pageSize: 1000, isActive: true })
+    tenants.value = Array.isArray(res) ? res : (res?.items || [])
+  } catch (e) {
+    console.error('Kiracılar yüklenemedi:', e)
+    tenants.value = []
+  }
+}
+
 onMounted(async () => {
   if (route.query.type) filters.type = route.query.type
   if (route.query.status) filters.status = route.query.status
   if (route.query.startDate) filters.startDate = route.query.startDate
   if (route.query.endDate) filters.endDate = route.query.endDate
+  if (route.query.tenantId) selectedTenantId.value = String(route.query.tenantId)
+  if (isPrivileged.value) await loadTenants()
   await fetchData()
 })
 
+// Kapsanan kiracıyı çöz: kiracı kullanıcı -> kendisi; admin/manager -> seçilen kiracı.
+const resolveScopeTenantId = () => {
+  if (isTenantUser.value) return authStore.companyId || undefined
+  if (isPrivileged.value) return selectedTenantId.value || undefined
+  return undefined
+}
+
 const fetchData = async () => {
+  const tenantId = resolveScopeTenantId()
+
+  // Admin/manager bir kiracı seçmeden bina geneli veri çekme (PDF'e bina geneli sızmasın).
+  if (isPrivileged.value && !tenantId) {
+    debtsData.value = []
+    paymentsData.value = []
+    tenantInfo.value = null
+    return
+  }
+
   loading.value = true
   try {
-    const tenantId = authStore.role?.toLowerCase() === 'tenant' ? authStore.companyId : undefined
-
     const promises = [
       utilityDebtsService.getUtilityDebts({
         tenantId,
@@ -275,7 +325,7 @@ const fetchData = async () => {
       }).then(p => { paymentsData.value = p || [] })
     ]
 
-    if (tenantId && !tenantInfo.value) {
+    if (tenantId) {
       promises.push(tenantsService.getTenantById(tenantId).then(t => { tenantInfo.value = t }))
     }
 
@@ -364,6 +414,13 @@ const paginatedReports = computed(() => {
 })
 
 watch([filters, pageSize], () => { currentPage.value = 1 }, { deep: true })
+
+// Admin/manager kiracı seçimini değiştirince kapsamı yenile.
+watch(selectedTenantId, () => {
+  tenantInfo.value = null
+  currentPage.value = 1
+  fetchData()
+})
 
 // Helpers
 const debtTypeLabel = (type) => {
