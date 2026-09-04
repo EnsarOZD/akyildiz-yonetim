@@ -75,16 +75,28 @@
                 </div>
               </div>
 
-              <!-- Mal Sahibi -->
-              <div class="md:col-span-2">
+              <!-- Mal Sahibi & Kiracı -->
+              <div class="md:col-span-2 space-y-4">
                 <div class="form-control">
-                  <label class="label"><span class="label-text">Mal Sahibi</span></label>
+                  <label class="label"><span class="label-text">Mal Sahibi (Ev/Mülk Sahibi)</span></label>
                   <select
                     v-model="local.ownerId"
                     class="select select-bordered w-full font-bold">
                     <option :value="null">— Mal Sahibi Atanmadı —</option>
                     <option v-for="o in owners" :key="o.id" :value="o.id">
                       {{ ownerLabel(o) }}
+                    </option>
+                  </select>
+                </div>
+
+                <div class="form-control">
+                  <label class="label"><span class="label-text">Atanmış Kiracı (İş Yeri)</span></label>
+                  <select
+                    v-model="local.tenantId"
+                    class="select select-bordered w-full font-bold">
+                    <option :value="null">— Kiracı Atanmadı (Boş Ünite) —</option>
+                    <option v-for="t in tenants" :key="t.id" :value="t.id">
+                      {{ tenantLabel(t) }}
                     </option>
                   </select>
                 </div>
@@ -144,12 +156,14 @@
 import { ref, watch, onMounted } from 'vue'
 import BaseModal from '@/presentation/components/common/BaseModal.vue'
 import ownersService from '@/infrastructure/services/ownersService'
+import tenantsService from '@/infrastructure/services/tenantsService'
 
 const props = defineProps({ flat: Object, visible: Boolean })
 const emit = defineEmits(['save', 'close'])
 
 const local = ref(null)
 const owners = ref([])
+const tenants = ref([])
 
 const fetchOwners = async () => {
   try {
@@ -160,16 +174,47 @@ const fetchOwners = async () => {
   }
 }
 
+const fetchTenants = async () => {
+  try {
+    const list = await tenantsService.getTenants({ isActive: true })
+    tenants.value = Array.isArray(list) ? list : []
+  } catch (e) {
+    console.warn('Kiracılar yüklenemedi:', e)
+  }
+}
+
 const ownerLabel = (o) => {
   const name = o.fullName || [o.firstName, o.lastName].filter(Boolean).join(' ') || 'Mal Sahibi'
   const info = o.phone || o.email || ''
   return info ? `${name} (${info})` : name
 }
 
-watch(() => props.flat, (f) => { if (f) local.value = { ...f } }, { immediate: true })
-watch(() => props.visible, (v) => { if (v) fetchOwners() })
+const tenantLabel = (t) => {
+  const name = t.companyName || t.contactPersonName || 'Kiracı'
+  const info = t.identityNumber ? ` (VKN/TC: ${t.identityNumber})` : ''
+  return `${name}${info}`
+}
 
-onMounted(fetchOwners)
+watch(() => props.flat, (f) => {
+  if (f) {
+    local.value = {
+      tenantId: f.tenantId || f.tenant?.id || null,
+      ...f
+    }
+  }
+}, { immediate: true })
+
+watch(() => props.visible, (v) => {
+  if (v) {
+    fetchOwners()
+    fetchTenants()
+  }
+})
+
+onMounted(() => {
+  fetchOwners()
+  fetchTenants()
+})
 
 watch(() => local.value?.type, (t) => {
   if (!local.value) return

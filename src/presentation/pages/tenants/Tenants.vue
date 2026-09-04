@@ -432,7 +432,15 @@ const handleCreateTenant = async (data) => {
 const handleUpdateTenant = async (data) => {
   try {
     await tenantsStore.updateTenant(editingTenant.value.id, data)
-    errorHandler.logSuccess('success', 'Kiracı başarıyla güncellendi', { component: 'Tenants', action: 'update' })
+    if (data.flatIds && Array.isArray(data.flatIds)) {
+      try {
+        await tenantsService.assignFlats(editingTenant.value.id, { flatIds: data.flatIds })
+      } catch (assignErr) {
+        console.warn('Ünite ataması sunucu uyarısı:', assignErr)
+      }
+    }
+    await tenantsStore.forceRefresh()
+    errorHandler.logSuccess('success', 'Kiracı ve ünite bilgileri başarıyla güncellendi', { component: 'Tenants', action: 'update' })
     closeEditModal()
   } catch (err) {
     console.error('Kiracı güncellenirken hata:', err)

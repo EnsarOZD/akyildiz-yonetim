@@ -192,6 +192,7 @@ import { useAuthStore } from '@/application/stores/auth'
 import FlatEditModal from './components/FlatEditModal.vue'
 import FlatCreateModal from './components/FlatCreateModal.vue'
 import flatsService from '@/infrastructure/services/flatsService'
+import tenantsService from '@/infrastructure/services/tenantsService'
 import { errorHandler } from '@/core/utils/errorHandler'
 import ConfirmModal from '@/presentation/components/common/ConfirmModal.vue'
 import PaginationBar from '@/presentation/components/common/PaginationBar.vue'
@@ -336,6 +337,13 @@ const handleCreateFlat = async (flatData) => {
 const handleUpdateFlat = async (flatData) => {
   try {
     await flatsService.updateFlat(editingFlat.value.id, normalizeFlatPayload({ ...flatData, id: editingFlat.value.id }))
+    if (flatData.tenantId) {
+      try {
+        await tenantsService.assignFlats(flatData.tenantId, { flatIds: [editingFlat.value.id] })
+      } catch (assignErr) {
+        console.warn('Kiracı atama uyarısı:', assignErr)
+      }
+    }
     errorHandler.logSuccess('success', 'Ünite başarıyla güncellendi.', {
       component:'UnitsPage', action:'update'
     })

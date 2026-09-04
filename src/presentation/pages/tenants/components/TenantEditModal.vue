@@ -84,7 +84,49 @@
           </div>
         </div>
 
-        <!-- 3. Finansal Detaylar -->
+        <!-- 3. Ünite ve Kat Ataması -->
+        <div class="space-y-4">
+          <div class="flex items-center justify-between px-1">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-lg bg-brand-500/10 flex items-center justify-center text-brand-400 font-bold text-xs">📍</div>
+              <h4 class="text-[11px] font-black uppercase tracking-widest text-[#f1f3f9]">Ünite ve Kat Ataması</h4>
+            </div>
+            <button type="button" class="text-[10px] font-black text-brand-400 uppercase tracking-widest hover:text-brand-300 transition-colors" @click="resetFloorFilter">Filtreleri Temizle</button>
+          </div>
+
+          <div class="bg-white/[0.02] border border-white/[0.08] rounded-2xl p-6">
+            <div class="grid grid-cols-1 gap-6">
+              <div class="form-control">
+                <label class="label"><span class="label-text">Kat Filtresi (Opsiyonel)</span></label>
+                <select v-model="form.floorNumber" class="select select-bordered w-full font-bold">
+                  <option :value="null">Tüm Katlar</option>
+                  <option v-for="floor in availableFloors" :key="floor" :value="floor">{{ floor }}. Kat</option>
+                </select>
+              </div>
+
+              <div class="form-control">
+                <label class="label">
+                  <span class="label-text">Bağlı ve Seçilebilir Üniteler (Çoklu Seçilebilir)</span>
+                  <span class="label-text-alt text-[10px] font-bold text-brand-400/80 uppercase tracking-tighter">Ctrl / Cmd + Tık</span>
+                </label>
+                <select
+                  multiple
+                  v-model="form.selectedFlatIds"
+                  class="select select-bordered w-full h-48 !bg-white/[0.01] border-white/[0.1] font-bold scrollbar-thin scrollbar-thumb-white/[0.1]"
+                >
+                  <option v-for="flat in selectableFlats" :key="flat.id" :value="flat.id" class="py-2.5 px-4 hover:bg-brand-500/10 border-b border-white/[0.03] transition-colors">
+                    {{ flatOptionLabel(flat) }}
+                  </option>
+                </select>
+                <p class="mt-3 text-[10px] text-[#626885] font-bold uppercase italic tracking-tight leading-relaxed">
+                  💡 Seçimden çıkardığınız üniteler bu kiracıdan alınacak, seçtiğiniz yeni üniteler bu kiracıya atanacaktır.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. Finansal Detaylar -->
         <div class="space-y-4">
           <div class="flex items-center gap-3 px-1">
             <div class="w-8 h-8 rounded-lg bg-brand-500/10 flex items-center justify-center text-brand-400 font-bold text-xs">💰</div>
@@ -135,9 +177,10 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch, computed } from 'vue'
 import BaseModal from '@/presentation/components/common/BaseModal.vue'
 import { useDirtyGuard } from '@/application/composables/useDirtyGuard'
+import tenantsService from '@/infrastructure/services/tenantsService'
 
 const props = defineProps({
   tenant: Object,
@@ -146,10 +189,58 @@ const props = defineProps({
 const emit = defineEmits(['save', 'close'])
 
 const form = ref(null)
+const availableFlats = ref([])
 const { isDirty, resetDirty } = useDirtyGuard(() => form.value)
+
+const UNIT_TYPE = { 0: 'Kat', 1: 'Giriş', 2: 'Otopark' }
+const typeLabel = (t) => UNIT_TYPE[t] ?? 'Bilinmiyor'
+
+const fetchAvailableFlats = async () => {
+  try {
+    const list = await tenantsService.getAvailableFlats()
+    availableFlats.value = Array.isArray(list) ? list : []
+  } catch (err) {
+    console.warn('Boş üniteler yüklenemedi:', err)
+  }
+}
+
+const allFlatsList = computed(() => {
+  const currentFlats = props.tenant?.flats || []
+  const map = new Map()
+  currentFlats.forEach(f => map.set(f.id, { ...f, isCurrent: true }))
+  availableFlats.value.forEach(f => {
+    if (!map.has(f.id)) map.set(f.id, { ...f, isCurrent: false })
+  })
+  return Array.from(map.values())
+})
+
+const availableFloors = computed(() => {
+  const set = new Set(allFlatsList.value.map(f => f.floorNumber).filter(f => f !== null && f !== undefined))
+  return Array.from(set).sort((a, b) => a - b)
+})
+
+const selectableFlats = computed(() => {
+  const floor = form.value?.floorNumber
+  if (floor === null || floor === undefined || floor === '') return allFlatsList.value
+  return allFlatsList.value.filter(f => f.floorNumber === floor)
+})
+
+const flatOptionLabel = (f) => {
+  const currentTag = f.isCurrent ? ' (Mevcut Kiralanan)' : ' (Boş)'
+  const base = `${f.code} — ${Number(f.unitArea || 0)}m²`
+  const info = (f.floorNumber !== null && f.floorNumber !== undefined) 
+    ? `${base} (${f.floorNumber}. Kat)` 
+    : `${base} (${typeLabel(f.type)})`
+  return `${info}${currentTag}`
+}
+
+const resetFloorFilter = () => {
+  if (form.value) form.value.floorNumber = null
+}
 
 watch(() => props.tenant, (t) => {
   if (!t) { form.value = null; return }
+  const initialFlatIds = (t.flats || []).map(f => f.id)
   form.value = {
     id: t.id,
     companyName: t.companyName || '',
@@ -158,13 +249,18 @@ watch(() => props.tenant, (t) => {
     contactPersonName: t.contactPersonName || '',
     contactPersonPhone: t.contactPersonPhone || '',
     contactPersonEmail: t.contactPersonEmail || '',
+    floorNumber: null,
+    selectedFlatIds: [...initialFlatIds],
     monthlyAidat: Number(t.monthlyAidat ?? 0),
     isActive: Boolean(t.isActive)
   }
 }, { immediate: true })
 
 watch(() => props.visible, (v) => {
-  if (v) resetDirty()
+  if (v) {
+    fetchAvailableFlats()
+    resetDirty()
+  }
 })
 
 const handleClose = () => {
@@ -187,6 +283,7 @@ const save = () => {
     contactPersonName: f.contactPersonName.trim(),
     contactPersonPhone: f.contactPersonPhone.trim(),
     contactPersonEmail: f.contactPersonEmail.trim(),
+    flatIds: f.selectedFlatIds || []
   }
 
   resetDirty()
