@@ -1,5 +1,5 @@
 ﻿<template>
-  <div class="p-4 sm:p-6 min-h-screen dark:bg-base-200">
+  <div class="p-4 sm:p-6 min-h-screen">
     <div class="max-w-7xl mx-auto">
       
       <!-- Başlık -->
@@ -12,12 +12,12 @@
         <template #actions>
           <div class="flex items-center gap-3">
             <div class="flex flex-col items-end">
-              <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Toplam Borç</span>
-              <span class="text-sm font-bold text-slate-700 dark:text-[#f1f3f9]">{{ formatCurrency(totalDues) }}</span>
+              <span class="text-[10px] font-bold uppercase tracking-wider text-[#8298ab]">Toplam Borç</span>
+              <span class="text-sm font-bold text-slate-700">{{ formatCurrency(totalDues) }}</span>
             </div>
-            <div class="w-px h-8 bg-slate-200 dark:bg-[#1c2238] mx-1"></div>
+            <div class="w-px h-8 bg-slate-200 mx-1"></div>
             <div class="flex flex-col items-end">
-              <span class="text-[10px] font-bold uppercase tracking-wider text-red-400">Geciken</span>
+              <span class="text-[10px] font-bold uppercase tracking-wider text-red-600">Geciken</span>
               <span class="text-sm font-bold text-red-500">{{ formatCurrency(overdueDues) }}</span>
             </div>
           </div>
@@ -25,7 +25,7 @@
       </PageHeader>
 
       <!-- Filtreler -->
-      <div class="bg-white dark:bg-[#0f1322] p-6 rounded-xl shadow-md border border-gray-200 dark:border-white/[0.07] mb-6">
+      <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200 mb-6">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div>
             <label class="label">Arama</label>
@@ -63,10 +63,10 @@
       </div>
 
       <!-- Tablo -->
-      <div class="bg-white dark:bg-[#0f1322] rounded-xl shadow-md border border-gray-200 dark:border-white/[0.07] overflow-hidden">
+      <div class="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden">
         <div class="overflow-x-auto">
           <table class="table w-full">
-            <thead class="bg-slate-50 dark:bg-[#1c2238]">
+            <thead class="bg-slate-50">
               <tr>
                 <th scope="col" class="text-left p-4">Mal Sahibi</th>
                 <th scope="col" class="text-left p-4">Kat</th>
@@ -78,25 +78,25 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="due in filteredDues" :key="due.id" class="border-b border-gray-200 dark:border-white/[0.07] hover:bg-gray-50 dark:hover:bg-gray-700/50">
+              <tr v-for="due in filteredDues" :key="due.id" class="border-b border-gray-200 hover:bg-gray-50">
                 <td class="p-4">
                   <div>
-                    <p class="font-medium text-gray-800 dark:text-[#f1f3f9]">{{ due.ownerName }}</p>
-                    <p class="text-sm text-gray-500 dark:text-[#9aa0b4]">{{ due.ownerEmail }}</p>
+                    <p class="font-medium text-gray-800">{{ due.ownerName }}</p>
+                    <p class="text-sm text-gray-500">{{ due.ownerEmail }}</p>
                   </div>
                 </td>
-                <td class="p-4 text-gray-800 dark:text-[#f1f3f9]">{{ due.unit }}</td>
-                <td class="p-4 text-gray-800 dark:text-[#f1f3f9]">{{ due.period }}</td>
+                <td class="p-4 text-gray-800">{{ due.unit }}</td>
+                <td class="p-4 text-gray-800">{{ due.period }}</td>
                 <td class="p-4">
-                  <span class="font-semibold text-gray-800 dark:text-[#f1f3f9]">{{ formatCurrency(due.amount) }}</span>
+                  <span class="font-semibold text-gray-800">{{ formatCurrency(due.amount) }}</span>
                 </td>
-                <td class="p-4 text-gray-800 dark:text-[#f1f3f9]">{{ formatDate(due.dueDate) }}</td>
+                <td class="p-4 text-gray-800">{{ formatDate(due.dueDate) }}</td>
                 <td class="p-4">
                   <span 
                     :class="{
-                      'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-400': due.status === 'paid',
-                      'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-400': due.status !== 'paid' && !due.isOverdue,
-                      'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-400': due.isOverdue
+                      'bg-green-100 text-green-800': due.status === 'paid',
+                      'bg-yellow-100 text-yellow-800': due.status !== 'paid' && !due.isOverdue,
+                      'bg-red-100 text-red-800': due.isOverdue
                     }"
                     class="px-2 py-1 rounded-full text-xs font-medium"
                   >
@@ -127,12 +127,12 @@
 
         <!-- Boş durum -->
         <div v-if="filteredDues.length === 0" class="text-center py-12">
-          <div class="bg-gray-100 dark:bg-[#1c2238] text-gray-500 dark:text-[#9aa0b4] rounded-full p-3 w-fit mx-auto mb-3">
+          <div class="bg-gray-100 text-gray-500 rounded-full p-3 w-fit mx-auto mb-3">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
             </svg>
           </div>
-          <p class="text-gray-500 dark:text-[#9aa0b4]">Arama kriterlerinize uygun aidat kaydı bulunamadı.</p>
+          <p class="text-gray-500">Arama kriterlerinize uygun aidat kaydı bulunamadı.</p>
         </div>
       </div>
     </div>

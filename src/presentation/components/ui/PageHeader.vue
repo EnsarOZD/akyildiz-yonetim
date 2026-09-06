@@ -1,13 +1,13 @@
 <template>
   <header class="page-header relative overflow-hidden mb-8 animate-in fade-in slide-in-from-top-4 duration-500
-    bg-white dark:bg-[#0f1322] border border-slate-200/60 dark:border-white/[0.06] rounded-xl shadow-sm">
+    bg-white border border-slate-200/60 rounded-xl shadow-sm">
     <!-- Accent Line -->
-    <div class="absolute left-0 top-0 bottom-0 w-1 bg-brand-500 dark:bg-brand-400 rounded-r-full"></div>
+    <div class="absolute left-0 top-0 bottom-0 w-1 bg-brand-500 rounded-r-full"></div>
 
     <div class="relative px-6 py-3 sm:py-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
       <div class="flex items-center gap-4">
         <!-- Optional Icon Slot -->
-        <div v-if="$slots.icon" class="w-9 h-9 sm:w-11 sm:h-11 rounded-lg sm:rounded-xl bg-brand-500/10 dark:bg-brand-500/[0.12] shadow-sm flex items-center justify-center text-brand-600 dark:text-brand-400 shrink-0">
+        <div v-if="$slots.icon" class="w-9 h-9 sm:w-11 sm:h-11 rounded-lg sm:rounded-xl bg-brand-500/10 shadow-sm flex items-center justify-center text-brand-600 shrink-0">
           <slot name="icon"></slot>
         </div>
 

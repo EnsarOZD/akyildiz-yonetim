@@ -13,15 +13,15 @@
         <!-- 1. Kişisel Bilgiler -->
         <div class="space-y-4">
           <div class="flex items-center gap-3 px-1">
-            <div class="w-8 h-8 rounded-lg bg-brand-500/10 flex items-center justify-center text-brand-400">
+            <div class="w-8 h-8 rounded-lg bg-brand-500/10 flex items-center justify-center text-brand-600">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
               </svg>
             </div>
-            <h4 class="text-[11px] font-black uppercase tracking-widest text-[#f1f3f9]">Kayıt Detayları</h4>
+            <h4 class="text-[11px] font-black uppercase tracking-widest text-[#16283a]">Kayıt Detayları</h4>
           </div>
 
-          <div class="bg-white/[0.02] border border-white/[0.08] rounded-2xl p-6 space-y-6">
+          <div class="bg-[#f6fafd] border border-[#d9e7f2] rounded-2xl p-6 space-y-6">
             <div class="form-control">
               <label class="label"><span class="label-text">Ad Soyad *</span></label>
               <input 
@@ -57,21 +57,21 @@
         <!-- 2. Ünite Atamaları -->
         <div class="space-y-4">
           <div class="flex items-center gap-3 px-1">
-            <div class="w-8 h-8 rounded-lg bg-brand-500/10 flex items-center justify-center text-brand-400 font-bold text-xs">📍</div>
-            <h4 class="text-[11px] font-black uppercase tracking-widest text-[#f1f3f9]">Mülkiyetindeki Üniteler</h4>
+            <div class="w-8 h-8 rounded-lg bg-brand-500/10 flex items-center justify-center text-brand-600 font-bold text-xs">📍</div>
+            <h4 class="text-[11px] font-black uppercase tracking-widest text-[#16283a]">Mülkiyetindeki Üniteler</h4>
           </div>
 
-          <div class="bg-white/[0.02] border border-white/[0.08] rounded-2xl p-6">
+          <div class="bg-[#f6fafd] border border-[#d9e7f2] rounded-2xl p-6">
             <div class="max-h-56 overflow-y-auto custom-scrollbar pr-2">
               <div v-if="allUnitOptions && allUnitOptions.length > 0" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                 <label 
                   v-for="unit in allUnitOptions" 
                   :key="unit" 
-                  class="relative flex items-center gap-3 p-3 rounded-xl border border-white/[0.05] transition-all cursor-pointer group"
+                  class="relative flex items-center gap-3 p-3 rounded-xl border border-[#ecf3f9] transition-all cursor-pointer group"
                   :class="[
                     isUnitAvailable(unit) 
-                      ? 'bg-white/[0.01] hover:bg-brand-500/10 hover:border-brand-500/30' 
-                      : 'bg-white/[0.01] opacity-40 cursor-not-allowed'
+                      ? 'bg-[#f6fafd] hover:bg-brand-500/10 hover:border-brand-600/30' 
+                      : 'bg-[#f6fafd] opacity-40 cursor-not-allowed'
                   ]"
                 >
                   <input
@@ -81,12 +81,12 @@
                     class="checkbox checkbox-primary checkbox-sm"
                     :disabled="!isUnitAvailable(unit)"
                   />
-                  <span class="text-xs font-black text-[#9aa0b4] group-hover:text-brand-400 uppercase tracking-tighter">{{ unit }}</span>
+                  <span class="text-xs font-black text-[#5a7186] group-hover:text-brand-600 uppercase tracking-tighter">{{ unit }}</span>
                 </label>
               </div>
             </div>
             
-            <p class="mt-6 text-[10px] text-[#626885] font-bold uppercase italic tracking-tight leading-relaxed">
+            <p class="mt-6 text-[10px] text-[#8298ab] font-bold uppercase italic tracking-tight leading-relaxed">
               💡 Pasif seçenekler başka bir mal sahibine atalı olan ünitelerdir. Kendi mülkiyetindeki üniteleri buradan yönetebilirsiniz.
             </p>
           </div>
@@ -99,7 +99,7 @@
       <button 
         type="button" 
         @click="$emit('close')" 
-        class="btn btn-ghost !bg-transparent border border-white/[0.08] text-[#9aa0b4] hover:bg-white/[0.05] flex-1"
+        class="btn btn-ghost !bg-transparent border border-[#d9e7f2] text-[#5a7186] hover:bg-[#ecf3f9] flex-1"
       >
         Vazgeç
       </button>

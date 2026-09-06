@@ -1,5 +1,5 @@
 <template>
-  <div class="p-4 sm:p-6 min-h-screen dark:bg-base-200">
+  <div class="p-4 sm:p-6 min-h-screen">
     <div class="max-w-7xl mx-auto">
       
       <!-- Başlık -->
@@ -11,13 +11,13 @@
         </template>
         <template #actions>
           <div class="flex flex-wrap items-center gap-2">
-            <div class="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 px-3 py-1.5 rounded-lg text-xs font-bold border border-emerald-200 dark:border-emerald-800/50">
+            <div class="bg-emerald-100 text-emerald-600 px-3 py-1.5 rounded-lg text-xs font-bold border border-emerald-200">
               Gelir: {{ formatCurrency(totalIncome) }}
             </div>
-            <div class="bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 px-3 py-1.5 rounded-lg text-xs font-bold border border-red-200 dark:border-red-800/50">
+            <div class="bg-red-100 text-red-600 px-3 py-1.5 rounded-lg text-xs font-bold border border-red-200">
               Gider: {{ formatCurrency(totalExpense) }}
             </div>
-            <div class="bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 px-3 py-1.5 rounded-lg text-xs font-bold border border-amber-200 dark:border-amber-800/50">
+            <div class="bg-amber-100 text-amber-600 px-3 py-1.5 rounded-lg text-xs font-bold border border-amber-200">
               Borç: {{ formatCurrency(totalDebt) }}
             </div>
           </div>
@@ -25,14 +25,14 @@
       </PageHeader>
 
       <!-- Filtreler -->
-      <section class="bg-white dark:bg-[#0f1322] p-6 rounded-xl shadow-md border border-gray-200 dark:border-white/[0.07] mb-8">
-        <h2 class="text-xl font-semibold text-gray-800 dark:text-[#f1f3f9] mb-4">Filtreler</h2>
+      <section class="bg-white p-6 rounded-xl shadow-md border border-gray-200 mb-8">
+        <h2 class="text-xl font-semibold text-gray-800 mb-4">Filtreler</h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div class="form-control">
             <label class="label">
-              <span class="label-text text-gray-700 dark:text-[#f1f3f9]">İşlem Tipi</span>
+              <span class="label-text text-gray-700">İşlem Tipi</span>
             </label>
-            <select v-model="filterType" class="select select-bordered w-full bg-white dark:bg-[#1c2238] border-gray-300 dark:border-white/[0.1] text-gray-700 dark:text-[#f1f3f9]">
+            <select v-model="filterType" class="select select-bordered w-full bg-white border-gray-300 text-gray-700">
               <option value="">Tüm Tipler</option>
               <option value="income">Gelir</option>
               <option value="expense">Gider</option>
@@ -42,32 +42,32 @@
 
           <div class="form-control">
             <label class="label">
-              <span class="label-text text-gray-700 dark:text-[#f1f3f9]">Başlangıç Tarihi</span>
+              <span class="label-text text-gray-700">Başlangıç Tarihi</span>
             </label>
-            <input type="date" v-model="filterStart" class="input input-bordered w-full bg-white dark:bg-[#1c2238] border-gray-300 dark:border-white/[0.1] text-gray-700 dark:text-[#f1f3f9]" />
+            <input type="date" v-model="filterStart" class="input input-bordered w-full bg-white border-gray-300 text-gray-700" />
           </div>
 
           <div class="form-control">
             <label class="label">
-              <span class="label-text text-gray-700 dark:text-[#f1f3f9]">Bitiş Tarihi</span>
+              <span class="label-text text-gray-700">Bitiş Tarihi</span>
             </label>
-            <input type="date" v-model="filterEnd" class="input input-bordered w-full bg-white dark:bg-[#1c2238] border-gray-300 dark:border-white/[0.1] text-gray-700 dark:text-[#f1f3f9]" />
+            <input type="date" v-model="filterEnd" class="input input-bordered w-full bg-white border-gray-300 text-gray-700" />
           </div>
 
           <div class="form-control">
             <label class="label">
-              <span class="label-text text-gray-700 dark:text-[#f1f3f9]">Arama</span>
+              <span class="label-text text-gray-700">Arama</span>
             </label>
-            <input type="text" v-model="searchTerm" placeholder="Açıklama ara..." class="input input-bordered w-full bg-white dark:bg-[#1c2238] border-gray-300 dark:border-white/[0.1] text-gray-700 dark:text-[#f1f3f9]" />
+            <input type="text" v-model="searchTerm" placeholder="Açıklama ara..." class="input input-bordered w-full bg-white border-gray-300 text-gray-700" />
           </div>
         </div>
       </section>
 
       <!-- İşlem Listesi -->
-      <section class="bg-white dark:bg-[#0f1322] p-6 rounded-xl shadow-md border border-gray-200 dark:border-white/[0.07]">
+      <section class="bg-white p-6 rounded-xl shadow-md border border-gray-200">
         <PageHeader title="İşlem Geçmişi" subtitle="Tüm finansal hareketlerin listesi">
           <template #actions>
-            <div class="bg-brand-100 dark:bg-blue-900/50 text-brand-600 dark:text-brand-400 px-3 py-1 rounded-full text-sm font-medium">
+            <div class="bg-brand-100 text-brand-600 px-3 py-1 rounded-full text-sm font-medium">
               {{ filteredTransactions.length }} işlem
             </div>
           </template>
@@ -77,14 +77,14 @@
           <div 
             v-for="(item, index) in filteredTransactions" 
             :key="index"
-            class="flex items-center justify-between p-4 rounded-lg border border-gray-200 dark:border-white/[0.07] hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-200"
+            class="flex items-center justify-between p-4 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors duration-200"
           >
             <div class="flex items-center gap-4">
               <div 
                 :class="{
-                  'bg-green-100 dark:bg-green-900/50 text-green-600 dark:text-green-400': item.type === 'income',
-                  'bg-red-100 dark:bg-red-900/50 text-red-600 dark:text-red-400': item.type === 'expense',
-                  'bg-orange-100 dark:bg-orange-900/50 text-orange-600 dark:text-orange-400': item.type === 'debt'
+                  'bg-green-100 text-green-600': item.type === 'income',
+                  'bg-red-100 text-red-600': item.type === 'expense',
+                  'bg-orange-100 text-orange-600': item.type === 'debt'
                 }"
                 class="rounded-full p-3"
               >
@@ -99,23 +99,23 @@
                 </svg>
               </div>
               <div>
-                <p class="font-semibold text-gray-800 dark:text-[#f1f3f9]">
+                <p class="font-semibold text-gray-800">
                   {{ item.type === 'debt' ? (item.company || 'Borç') : (item.payer || item.description || 'İşlem') }}
-                  <span v-if="item.type === 'debt'" class="text-xs font-normal text-gray-400 ml-1">
+                  <span v-if="item.type === 'debt'" class="text-xs font-normal text-[#8298ab] ml-1">
                     ({{ item.typeLabel }})
                   </span>
                 </p>
-                <p class="text-sm text-gray-500 dark:text-[#9aa0b4]">{{ formatDate(item.date) }}</p>
-                <p v-if="item.bank" class="text-xs text-gray-400 dark:text-[#626885]">{{ item.bank }}</p>
-                <p v-if="item.unit && item.unit !== '-'" class="text-xs text-gray-400 dark:text-[#626885]">{{ item.unit }}</p>
+                <p class="text-sm text-gray-500">{{ formatDate(item.date) }}</p>
+                <p v-if="item.bank" class="text-xs text-[#8298ab]">{{ item.bank }}</p>
+                <p v-if="item.unit && item.unit !== '-'" class="text-xs text-[#8298ab]">{{ item.unit }}</p>
               </div>
             </div>
             <div class="text-right">
               <p 
                 :class="{
-                  'text-green-600 dark:text-green-400': item.type === 'income',
-                  'text-red-600 dark:text-red-400': item.type === 'expense',
-                  'text-orange-600 dark:text-orange-400': item.type === 'debt'
+                  'text-green-600': item.type === 'income',
+                  'text-red-600': item.type === 'expense',
+                  'text-orange-600': item.type === 'debt'
                 }"
                 class="font-bold text-lg"
               >
@@ -123,8 +123,8 @@
               </p>
               <p 
                 :class="{
-                  'text-green-500 dark:text-green-400': item.type === 'income',
-                  'text-red-500 dark:text-red-400': item.type === 'expense'
+                  'text-green-500': item.type === 'income',
+                  'text-red-500': item.type === 'expense'
                 }"
                 class="text-sm font-medium"
               >
@@ -135,13 +135,13 @@
         </div>
 
         <div v-else class="text-center py-12">
-          <div class="bg-gray-100 dark:bg-[#1c2238] text-gray-500 dark:text-[#9aa0b4] rounded-full p-4 w-fit mx-auto mb-4">
+          <div class="bg-gray-100 text-gray-500 rounded-full p-4 w-fit mx-auto mb-4">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
             </svg>
           </div>
-          <h3 class="text-lg font-semibold text-gray-800 dark:text-[#f1f3f9] mb-2">İşlem Bulunamadı</h3>
-          <p class="text-gray-500 dark:text-[#9aa0b4]">Seçilen kriterlere uygun işlem bulunmuyor.</p>
+          <h3 class="text-lg font-semibold text-gray-800 mb-2">İşlem Bulunamadı</h3>
+          <p class="text-gray-500">Seçilen kriterlere uygun işlem bulunmuyor.</p>
         </div>
       </section>
 

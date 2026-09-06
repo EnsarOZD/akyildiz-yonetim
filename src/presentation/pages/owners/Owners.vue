@@ -25,36 +25,36 @@
     <!-- İstatistik Kartları -->
     <div class="grid grid-cols-3 gap-3 sm:gap-4 mb-5">
       <div class="app-card flex items-center gap-3">
-        <div class="w-9 h-9 rounded-xl bg-brand-50 dark:bg-brand-500/[0.08] text-brand-500 flex items-center justify-center shrink-0">
+        <div class="w-9 h-9 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center shrink-0">
           <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
           </svg>
         </div>
         <div class="min-w-0">
-          <p class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-[#626885] truncate">Mal Sahibi</p>
-          <p class="text-xl font-bold text-slate-800 dark:text-white tabular-nums">{{ totalOwnersCount }}</p>
+          <p class="text-[10px] font-semibold uppercase tracking-wider text-[#8298ab] truncate">Mal Sahibi</p>
+          <p class="text-xl font-bold text-slate-800 tabular-nums">{{ totalOwnersCount }}</p>
         </div>
       </div>
       <div class="app-card flex items-center gap-3">
-        <div class="w-9 h-9 rounded-xl bg-green-50 dark:bg-green-900/20 text-green-500 flex items-center justify-center shrink-0">
+        <div class="w-9 h-9 rounded-xl bg-green-50 text-green-500 flex items-center justify-center shrink-0">
           <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
           </svg>
         </div>
         <div class="min-w-0">
-          <p class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-[#626885] truncate">Sahip Ünite</p>
-          <p class="text-xl font-bold text-slate-800 dark:text-white tabular-nums">{{ totalOwnedUnitsCount }}</p>
+          <p class="text-[10px] font-semibold uppercase tracking-wider text-[#8298ab] truncate">Sahip Ünite</p>
+          <p class="text-xl font-bold text-slate-800 tabular-nums">{{ totalOwnedUnitsCount }}</p>
         </div>
       </div>
       <div class="app-card flex items-center gap-3">
-        <div class="w-9 h-9 rounded-xl bg-orange-50 dark:bg-orange-900/20 text-orange-500 flex items-center justify-center shrink-0">
+        <div class="w-9 h-9 rounded-xl bg-orange-50 text-orange-500 flex items-center justify-center shrink-0">
           <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
           </svg>
         </div>
         <div class="min-w-0">
-          <p class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-[#626885] truncate">Boş Ünite</p>
-          <p class="text-xl font-bold text-slate-800 dark:text-white tabular-nums">{{ vacantUnitsCount }}</p>
+          <p class="text-[10px] font-semibold uppercase tracking-wider text-[#8298ab] truncate">Boş Ünite</p>
+          <p class="text-xl font-bold text-slate-800 tabular-nums">{{ vacantUnitsCount }}</p>
         </div>
       </div>
     </div>
@@ -62,7 +62,7 @@
     <!-- Arama + Liste -->
     <div class="app-card !p-0">
       <!-- Arama -->
-      <div class="px-4 py-3 border-b border-slate-100 dark:border-slate-700/60">
+      <div class="px-4 py-3 border-b border-slate-100">
         <FilterBar
           :search="search"
           @update:search="val => search = val"
@@ -72,17 +72,17 @@
       </div>
 
       <!-- Tablo Başlıkları -->
-      <div v-if="filteredOwnersWithUnits.length > 0" class="hidden sm:grid grid-cols-12 gap-4 px-4 py-2.5 bg-slate-50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-700/60">
-        <div class="col-span-5 text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-[#626885]">Mal Sahibi</div>
-        <div class="col-span-4 text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-[#626885]">Üniteler</div>
-        <div v-if="authStore.role === ROLES.ADMIN || authStore.role === ROLES.MANAGER" class="col-span-3 text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-[#626885] text-right">İşlemler</div>
+      <div v-if="filteredOwnersWithUnits.length > 0" class="hidden sm:grid grid-cols-12 gap-4 px-4 py-2.5 bg-slate-50 border-b border-slate-100">
+        <div class="col-span-5 text-[10px] font-semibold uppercase tracking-wider text-[#8298ab]">Mal Sahibi</div>
+        <div class="col-span-4 text-[10px] font-semibold uppercase tracking-wider text-[#8298ab]">Üniteler</div>
+        <div v-if="authStore.role === ROLES.ADMIN || authStore.role === ROLES.MANAGER" class="col-span-3 text-[10px] font-semibold uppercase tracking-wider text-[#8298ab] text-right">İşlemler</div>
       </div>
 
       <!-- Boş Durum -->
       <EmptyState v-if="filteredOwnersWithUnits.length === 0" title="Mal sahibi bulunamadı" />
 
       <!-- Liste -->
-      <div v-else class="divide-y divide-slate-100 dark:divide-white/[0.06]/60">
+      <div v-else class="divide-y divide-[#ecf3f9]">
         <div
           v-for="owner in filteredOwnersWithUnits"
           :key="owner.id"
@@ -94,8 +94,8 @@
               {{ getAvatarInitial(owner.name) }}
             </div>
             <div class="min-w-0">
-              <p class="text-sm font-semibold text-slate-800 dark:text-[#f1f3f9] truncate">{{ owner.name }}</p>
-              <p class="text-xs text-slate-400 dark:text-[#626885] truncate">{{ owner.email }}</p>
+              <p class="text-sm font-semibold text-slate-800 truncate">{{ owner.name }}</p>
+              <p class="text-xs text-[#8298ab] truncate">{{ owner.email }}</p>
             </div>
           </div>
 
@@ -108,25 +108,25 @@
                 :class="[
                   'px-1.5 py-0.5 rounded text-[10px] font-semibold',
                   owner.vacantUnits.includes(unit)
-                    ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300'
-                    : 'bg-slate-100 text-slate-600 dark:bg-slate-700/60 dark:text-[#9aa0b4]'
+                    ? 'bg-green-100 text-green-700'
+                    : 'bg-slate-100 text-slate-600'
                 ]"
               >
                 {{ unit }}
               </span>
             </div>
-            <span v-else class="text-xs text-slate-400 dark:text-[#626885]">—</span>
+            <span v-else class="text-xs text-[#8298ab]">—</span>
           </div>
 
           <!-- İşlemler -->
           <div v-if="authStore.role === ROLES.ADMIN || authStore.role === ROLES.MANAGER" class="col-span-12 sm:col-span-3 flex justify-end">
             <div class="dropdown dropdown-end">
-              <button tabindex="0" class="btn btn-ghost btn-xs btn-square text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+              <button tabindex="0" class="btn btn-ghost btn-xs btn-square text-[#8298ab] hover:text-slate-600">
                 <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                   <circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/><circle cx="5" cy="12" r="1.5"/>
                 </svg>
               </button>
-              <ul tabindex="0" class="dropdown-content menu p-1.5 shadow-card bg-base-100 border border-slate-200 dark:border-white/[0.07] rounded-xl w-36 z-10 text-xs">
+              <ul tabindex="0" class="dropdown-content menu p-1.5 shadow-card bg-base-100 border border-slate-200 rounded-xl w-36 z-10 text-xs">
                 <li><a @click="startEdit(owner)" class="rounded-lg">Düzenle</a></li>
                 <li><a @click="askDelete(owner)" class="rounded-lg text-error">Sil</a></li>
               </ul>

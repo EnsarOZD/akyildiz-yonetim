@@ -25,12 +25,12 @@
       <template #actions>
         <div class="flex items-center gap-4">
           <div class="text-right hidden sm:block">
-            <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Bakiye</div>
+            <div class="text-[10px] font-bold uppercase tracking-wider text-[#8298ab]">Bakiye</div>
             <div class="text-lg font-black" :class="tenant.totalBalance > 0 ? 'text-red-500' : 'text-emerald-500'">
               {{ formatCurrency(tenant.totalBalance) }}
             </div>
           </div>
-          <div class="w-px h-8 bg-slate-200 dark:bg-[#1c2238] mx-1 hidden sm:block"></div>
+          <div class="w-px h-8 bg-slate-200 mx-1 hidden sm:block"></div>
           <div class="flex items-center gap-2">
             <span :class="['badge badge-sm font-bold px-3 py-2', tenant.isActive ? 'badge-success' : 'badge-ghost']">
               {{ tenant.isActive ? 'Aktif' : 'Pasif' }}
@@ -38,7 +38,7 @@
             <button 
               v-if="authStore.role === 'admin' || authStore.role === 'manager'"
               @click="showEditModal = true"
-              class="btn btn-sm btn-outline border-slate-300 dark:border-white/[0.1]"
+              class="btn btn-sm btn-outline border-slate-300"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -65,28 +65,28 @@
         <div v-if="activeTab === 'timeline'" class="space-y-6">
           <!-- Özet Kartlar -->
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div class="bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-900/30 rounded-2xl p-4">
-              <p class="text-xs font-bold uppercase tracking-widest text-red-400 mb-1">Toplam Tahakkuk</p>
-              <p class="text-xl font-black text-red-600 dark:text-red-400">{{ formatCurrency(timelineSummary.totalDebt) }}</p>
-              <p class="text-xs text-red-400 mt-1">{{ timelineSummary.debtCount }} kalem</p>
+            <div class="bg-red-50 border border-red-100 rounded-2xl p-4">
+              <p class="text-xs font-bold uppercase tracking-widest text-red-600 mb-1">Toplam Tahakkuk</p>
+              <p class="text-xl font-black text-red-600">{{ formatCurrency(timelineSummary.totalDebt) }}</p>
+              <p class="text-xs text-red-600 mt-1">{{ timelineSummary.debtCount }} kalem</p>
             </div>
-            <div class="bg-green-50 dark:bg-green-900/20 border border-green-100 dark:border-green-900/30 rounded-2xl p-4">
-              <p class="text-xs font-bold uppercase tracking-widest text-green-400 mb-1">Toplam Tahsilat</p>
-              <p class="text-xl font-black text-green-600 dark:text-green-400">{{ formatCurrency(timelineSummary.totalPayment) }}</p>
-              <p class="text-xs text-green-400 mt-1">{{ timelineSummary.paymentCount }} işlem</p>
+            <div class="bg-green-50 border border-green-100 rounded-2xl p-4">
+              <p class="text-xs font-bold uppercase tracking-widest text-emerald-600 mb-1">Toplam Tahsilat</p>
+              <p class="text-xl font-black text-green-600">{{ formatCurrency(timelineSummary.totalPayment) }}</p>
+              <p class="text-xs text-emerald-600 mt-1">{{ timelineSummary.paymentCount }} işlem</p>
             </div>
             <div class="rounded-2xl p-4 border"
               :class="timelineSummary.balance > 0
-                ? 'bg-orange-50 dark:bg-orange-900/20 border-orange-100 dark:border-orange-900/30'
-                : 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-100 dark:border-emerald-900/30'">
+                ? 'bg-orange-50 border-orange-100'
+                : 'bg-emerald-50 border-emerald-100'">
               <p class="text-xs font-bold uppercase tracking-widest mb-1"
-                :class="timelineSummary.balance > 0 ? 'text-orange-400' : 'text-emerald-400'">Güncel Bakiye</p>
+                :class="timelineSummary.balance > 0 ? 'text-orange-600' : 'text-emerald-600'">Güncel Bakiye</p>
               <p class="text-xl font-black"
-                :class="timelineSummary.balance > 0 ? 'text-orange-600 dark:text-orange-400' : 'text-emerald-600 dark:text-emerald-400'">
+                :class="timelineSummary.balance > 0 ? 'text-orange-600' : 'text-emerald-600'">
                 {{ formatCurrency(Math.abs(timelineSummary.balance)) }}
               </p>
               <p class="text-xs mt-1"
-                :class="timelineSummary.balance > 0 ? 'text-orange-400' : 'text-emerald-400'">
+                :class="timelineSummary.balance > 0 ? 'text-orange-600' : 'text-emerald-600'">
                 {{ timelineSummary.balance > 0 ? 'Kalan borç' : 'Fazla ödeme' }}
               </p>
             </div>
@@ -100,17 +100,17 @@
               @click="timelineFilter = f.val"
               class="px-4 py-1.5 rounded-full text-sm font-semibold border transition-all"
               :class="timelineFilter === f.val
-                ? 'bg-gray-800 dark:bg-white text-white dark:text-gray-900 border-transparent'
-                : 'border-gray-200 dark:border-white/[0.07] text-gray-500 hover:border-gray-400'">
+                ? 'bg-[#0284c7] text-white border-transparent shadow-[0_4px_12px_rgba(2,132,199,0.25)]'
+                : 'border-gray-200 text-gray-500 hover:border-gray-400'">
               {{ f.label }}
             </button>
           </div>
 
           <!-- Tablo -->
-          <div class="overflow-x-auto rounded-2xl border border-gray-100 dark:border-white/[0.07]">
+          <div class="overflow-x-auto rounded-2xl border border-gray-100">
             <table class="w-full text-sm">
               <thead>
-                <tr class="bg-gray-50 dark:bg-[#151a2e]/80 text-xs uppercase tracking-widest text-gray-500 dark:text-[#9aa0b4]">
+                <tr class="bg-gray-50 text-xs uppercase tracking-widest text-gray-500">
                   <th class="px-4 py-3 text-left font-bold rounded-tl-2xl">Tarih</th>
                   <th class="px-4 py-3 text-left font-bold">Tür</th>
                   <th class="px-4 py-3 text-left font-bold">Açıklama</th>
@@ -120,39 +120,39 @@
               </thead>
               <tbody>
                 <tr v-for="(item, idx) in filteredTimelineItems" :key="idx"
-                  class="border-t border-gray-100 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors">
+                  class="border-t border-gray-100 hover:bg-gray-50 transition-colors">
                   <td class="px-4 py-3 text-gray-500 whitespace-nowrap">{{ formatDate(item.date) }}</td>
                   <td class="px-4 py-3">
                     <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold"
                       :class="item.isPayment
-                        ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
-                        : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'">
+                        ? 'bg-green-100 text-green-700'
+                        : 'bg-red-100 text-red-700'">
                       <span>{{ item.isPayment ? '↑' : '↓' }}</span>
                       {{ item.isPayment ? 'Tahsilat' : 'Tahakkuk' }}
                     </span>
                   </td>
                   <td class="px-4 py-3">
-                    <div class="font-semibold text-gray-800 dark:text-[#f1f3f9]">{{ item.description }}</div>
-                    <div class="text-xs text-gray-400 mt-0.5">{{ item.typeLabel }}</div>
+                    <div class="font-semibold text-gray-800">{{ item.description }}</div>
+                    <div class="text-xs text-[#8298ab] mt-0.5">{{ item.typeLabel }}</div>
                   </td>
                   <td class="px-4 py-3 text-right font-bold whitespace-nowrap"
-                    :class="item.isPayment ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">
+                    :class="item.isPayment ? 'text-green-600' : 'text-red-600'">
                     {{ item.isPayment ? '+' : '-' }}{{ formatCurrency(item.amount) }}
                   </td>
                   <td class="px-4 py-3 text-center">
-                    <span v-if="item.isPayment" class="inline-block px-2 py-0.5 rounded-full text-xs font-bold bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400">
+                    <span v-if="item.isPayment" class="inline-block px-2 py-0.5 rounded-full text-xs font-bold bg-green-100 text-green-700">
                       Alındı
                     </span>
                     <span v-else class="inline-block px-2 py-0.5 rounded-full text-xs font-bold"
                       :class="item.isPaid
-                        ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
-                        : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'">
+                        ? 'bg-green-100 text-green-700'
+                        : 'bg-red-100 text-red-700'">
                       {{ item.isPaid ? 'Ödendi' : 'Bekliyor' }}
                     </span>
                   </td>
                 </tr>
                 <tr v-if="filteredTimelineItems.length === 0">
-                  <td colspan="5" class="px-4 py-12 text-center text-gray-400 italic">
+                  <td colspan="5" class="px-4 py-12 text-center text-[#8298ab] italic">
                     Henüz finansal işlem kaydı bulunmuyor.
                   </td>
                 </tr>
@@ -271,7 +271,7 @@
 
           <!-- İş Yeri Bilgileri -->
           <div class="card bg-base-200 p-4">
-            <h4 class="text-lg font-semibold mb-4 text-gray-700 dark:text-[#f1f3f9]">🏢 İş Yeri Bilgileri</h4>
+            <h4 class="text-lg font-semibold mb-4 text-gray-700">🏢 İş Yeri Bilgileri</h4>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
               <div><strong>Şirket Adı:</strong> {{ tenant.companyName }}</div>
               <div><strong>İş Türü:</strong> {{ tenant.businessType }}</div>
@@ -281,7 +281,7 @@
 
           <!-- İletişim -->
           <div class="card bg-base-200 p-4">
-            <h4 class="text-lg font-semibold mb-4 text-gray-700 dark:text-[#f1f3f9]">👤 İletişim Kişisi</h4>
+            <h4 class="text-lg font-semibold mb-4 text-gray-700">👤 İletişim Kişisi</h4>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
               <div><strong>İletişim Kişisi:</strong> {{ tenant.contactPersonName }}</div>
               <div><strong>Telefon:</strong> <a :href="`tel:${tenant.contactPersonPhone}`" class="link link-primary">{{ tenant.contactPersonPhone }}</a></div>
@@ -291,7 +291,7 @@
 
           <!-- Ünite Bilgileri -->
           <div class="card bg-base-200 p-4">
-            <h4 class="text-lg font-semibold mb-4 text-gray-700 dark:text-[#f1f3f9]">📍 Ünite Bilgileri</h4>
+            <h4 class="text-lg font-semibold mb-4 text-gray-700">📍 Ünite Bilgileri</h4>
             <div v-if="tenant.flats && tenant.flats.length > 0">
               <div
                 v-for="flat in tenant.flats"
@@ -308,7 +308,7 @@
 
           <!-- Aidat -->
           <div class="card bg-base-200 p-4">
-            <h4 class="text-lg font-semibold mb-4 text-gray-700 dark:text-[#f1f3f9]">💰 Aidat Bilgileri</h4>
+            <h4 class="text-lg font-semibold mb-4 text-gray-700">💰 Aidat Bilgileri</h4>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
               <div><strong>Aylık Aidat:</strong> {{ formatCurrency(tenant.monthlyAidat) }}</div>
             </div>

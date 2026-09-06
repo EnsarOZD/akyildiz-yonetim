@@ -1,4 +1,6 @@
 import './assets/tailwind.css'
+// Tema katmanı (app-card, badge-*, active-nav-item, buton stilleri) — Tailwind'den sonra yüklenir
+import './style.css'
 import { createApp } from 'vue'
 import App from './App.vue'
 import router from './presentation/router'

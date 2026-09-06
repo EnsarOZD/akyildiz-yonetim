@@ -16,19 +16,19 @@
         </div>
         
         <div class="space-y-2">
-          <p class="text-[13.5px] font-black text-[#f1f3f9] uppercase tracking-tight leading-relaxed">
-            <span class="text-red-400">{{ record.flatNumber || record.unit || 'Daire' }}</span> kaydı siliniyor
+          <p class="text-[13.5px] font-black text-[#16283a] uppercase tracking-tight leading-relaxed">
+            <span class="text-red-600">{{ record.flatNumber || record.unit || 'Daire' }}</span> kaydı siliniyor
           </p>
-          <p class="text-xs text-[#626885] font-medium px-4">
+          <p class="text-xs text-[#8298ab] font-medium px-4">
             <strong>{{ record.periodYear }}/{{ String(record.periodMonth).padStart(2,'0') }}</strong> dönemine ait bu kayıt kalıcı olarak silinecektir.
           </p>
         </div>
       </div>
 
       <!-- Bilgi Kartı -->
-      <div class="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-4 flex justify-between items-center">
-        <span class="text-[10px] font-black text-[#626885] uppercase tracking-widest">Silinecek Tutar</span>
-        <span class="text-lg font-black text-red-400 tabular-nums">
+      <div class="bg-[#f6fafd] border border-[#d9e7f2] rounded-2xl p-4 flex justify-between items-center">
+        <span class="text-[10px] font-black text-[#8298ab] uppercase tracking-widest">Silinecek Tutar</span>
+        <span class="text-lg font-black text-red-600 tabular-nums">
           {{ Number(record.amount ?? record.toplamTutar ?? 0).toLocaleString('tr-TR') }} ₺
         </span>
       </div>
@@ -38,7 +38,7 @@
     <template #footer>
       <button 
         type="button"
-        class="btn btn-ghost !bg-transparent border border-white/[0.08] text-[#9aa0b4] hover:bg-white/[0.05] flex-1" 
+        class="btn btn-ghost !bg-transparent border border-[#d9e7f2] text-[#5a7186] hover:bg-[#ecf3f9] flex-1" 
         @click="$emit('close')"
       >
         Vazgeç

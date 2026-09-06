@@ -23,7 +23,7 @@
                 ? 'bg-green-500 text-white'
                 : currentStep === i + 1
                 ? 'bg-brand-500 text-white shadow-lg shadow-brand-500/20'
-                : 'bg-white/[0.05] text-[#626885]'
+                : 'bg-[#ecf3f9] text-[#8298ab]'
             "
           >
             <svg v-if="currentStep > i + 1" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -32,13 +32,13 @@
             <span v-else>{{ i + 1 }}</span>
           </div>
           <span class="text-[10px] font-black uppercase tracking-wider text-center leading-tight"
-            :class="currentStep === i + 1 ? 'text-brand-400' : 'text-[#626885]'">
+            :class="currentStep === i + 1 ? 'text-brand-600' : 'text-[#8298ab]'">
             {{ stepLabel }}
           </span>
         </div>
         <div v-if="i < stepLabels.length - 1"
           class="flex-1 h-px mx-4 mb-4 transition-all duration-300"
-          :class="currentStep > i + 1 ? 'bg-green-500/50' : 'bg-white/[0.08]'"
+          :class="currentStep > i + 1 ? 'bg-green-500/50' : 'bg-[#ecf3f9]'"
         />
       </div>
     </div>
@@ -48,7 +48,7 @@
       <!-- Ödeme Türü -->
       <div class="form-control">
         <label class="label">
-          <span class="label-text font-semibold text-gray-700 dark:text-[#f1f3f9]">Ödeme Türü</span>
+          <span class="label-text font-semibold text-gray-700">Ödeme Türü</span>
         </label>
         <div class="flex gap-3">
           <button
@@ -56,8 +56,8 @@
             @click="paymentType = 'tenant'"
             class="flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl border-2 font-semibold transition-all active:scale-95"
             :class="paymentType === 'tenant'
-              ? 'border-brand-500 bg-brand-500/[0.08] text-brand-400 shadow-lg shadow-brand-500/10'
-              : 'border-white/[0.08] text-[#9aa0b4] hover:border-white/[0.15] hover:bg-white/[0.02]'"
+              ? 'border-brand-600 bg-brand-500/[0.08] text-brand-600 shadow-lg shadow-brand-500/10'
+              : 'border-[#d9e7f2] text-[#5a7186] hover:border-[#7cc9ec] hover:bg-[#f6fafd]'"
           >
             <span>👤</span> Kiracı
           </button>
@@ -66,8 +66,8 @@
             @click="paymentType = 'owner'"
             class="flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl border-2 font-semibold transition-all active:scale-95"
             :class="paymentType === 'owner'
-              ? 'border-brand-500 bg-brand-500/[0.08] text-brand-400 shadow-lg shadow-brand-500/10'
-              : 'border-white/[0.08] text-[#9aa0b4] hover:border-white/[0.15] hover:bg-white/[0.02]'"
+              ? 'border-brand-600 bg-brand-500/[0.08] text-brand-600 shadow-lg shadow-brand-500/10'
+              : 'border-[#d9e7f2] text-[#5a7186] hover:border-[#7cc9ec] hover:bg-[#f6fafd]'"
           >
             <span>🏠</span> Mal Sahibi
           </button>
@@ -77,14 +77,14 @@
       <!-- Kişi Seçimi -->
       <div class="form-control">
         <label class="label">
-          <span class="label-text font-semibold text-gray-700 dark:text-[#f1f3f9]">
+          <span class="label-text font-semibold text-gray-700">
             {{ paymentType === 'tenant' ? 'Kiracı' : 'Mal Sahibi' }}
           </span>
         </label>
         <select
           v-if="paymentType === 'tenant'"
           v-model="form.tenantId"
-          class="select select-bordered w-full bg-white dark:bg-[#1c2238] border-gray-300 dark:border-white/[0.1]"
+          class="select select-bordered w-full bg-white border-gray-300"
           :class="{ 'border-red-400': step1Touched && !form.tenantId }"
         >
           <option disabled value="">Kiracı seçin</option>
@@ -93,7 +93,7 @@
         <select
           v-else
           v-model="form.ownerId"
-          class="select select-bordered w-full bg-white dark:bg-[#1c2238] border-gray-300 dark:border-white/[0.1]"
+          class="select select-bordered w-full bg-white border-gray-300"
           :class="{ 'border-red-400': step1Touched && !form.ownerId }"
         >
           <option disabled value="">Mal sahibi seçin</option>
@@ -113,8 +113,8 @@
             class="input input-bordered w-full"
             :class="{ '!border-red-500/50': step1Touched && (!form.date || new Date(form.date) > new Date()) }"
           />
-          <p v-if="step1Touched && !form.date" class="text-red-400 text-[10px] font-bold uppercase tracking-wide mt-1.5 ml-1">Tarih zorunludur.</p>
-          <p v-if="step1Touched && form.date && new Date(form.date) > new Date()" class="text-red-400 text-[10px] font-bold uppercase tracking-wide mt-1.5 ml-1">Gelecek bir tarih seçilemez.</p>
+          <p v-if="step1Touched && !form.date" class="text-red-600 text-[10px] font-bold uppercase tracking-wide mt-1.5 ml-1">Tarih zorunludur.</p>
+          <p v-if="step1Touched && form.date && new Date(form.date) > new Date()" class="text-red-600 text-[10px] font-bold uppercase tracking-wide mt-1.5 ml-1">Gelecek bir tarih seçilemez.</p>
         </div>
         <div class="form-control">
           <label class="label"><span class="label-text">Gelen Tutar (₺) *</span></label>
@@ -129,7 +129,7 @@
             class="input input-bordered w-full font-bold !text-lg"
             :class="{ '!border-red-500/50': step1Touched && !(Number(form.amount) > 0) }"
           />
-          <p v-if="step1Touched && !(Number(form.amount) > 0)" class="text-red-400 text-[10px] font-bold uppercase tracking-wide mt-1.5 ml-1">Geçerli bir tutar girin.</p>
+          <p v-if="step1Touched && !(Number(form.amount) > 0)" class="text-red-600 text-[10px] font-bold uppercase tracking-wide mt-1.5 ml-1">Geçerli bir tutar girin.</p>
         </div>
         <div class="form-control">
           <label class="label"><span class="label-text">Ödeme Tipi *</span></label>
@@ -145,7 +145,7 @@
             <option value="3">Doğalgaz</option>
             <option value="4">Diğer</option>
           </select>
-          <p v-if="step1Touched && form.type === ''" class="text-red-400 text-[10px] font-bold uppercase tracking-wide mt-1.5 ml-1">Ödeme tipi seçin.</p>
+          <p v-if="step1Touched && form.type === ''" class="text-red-600 text-[10px] font-bold uppercase tracking-wide mt-1.5 ml-1">Ödeme tipi seçin.</p>
         </div>
         <div class="form-control">
           <label class="label"><span class="label-text">Banka *</span></label>
@@ -157,7 +157,7 @@
             <option disabled value="">Seçin</option>
             <option v-for="b in banksSafe" :key="b" :value="b">{{ b }}</option>
           </select>
-          <p v-if="step1Touched && !form.bank" class="text-red-400 text-[10px] font-bold uppercase tracking-wide mt-1.5 ml-1">Banka seçin.</p>
+          <p v-if="step1Touched && !form.bank" class="text-red-600 text-[10px] font-bold uppercase tracking-wide mt-1.5 ml-1">Banka seçin.</p>
         </div>
       </div>
     </div>
@@ -166,18 +166,18 @@
     <div v-if="currentStep === 2" class="space-y-4">
       <!-- Yükleniyor -->
       <div v-if="loadingDebts" class="flex items-center justify-center py-10 gap-3 text-gray-500">
-        <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-brand-500"></div>
+        <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-brand-600"></div>
         <span>Borçlar yükleniyor...</span>
       </div>
 
       <!-- Borç yok -->
-      <div v-else-if="tenantDebts.length === 0" class="bg-green-50 dark:bg-green-900/20 rounded-xl p-5 border border-green-200 dark:border-green-800 flex items-start gap-3">
+      <div v-else-if="tenantDebts.length === 0" class="bg-green-50 rounded-xl p-5 border border-green-200 flex items-start gap-3">
         <svg class="w-6 h-6 text-green-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
         </svg>
         <div>
-          <p class="font-semibold text-green-700 dark:text-green-300">Ödenmemiş borç bulunamadı</p>
-          <p class="text-sm text-green-600 dark:text-green-400 mt-1">
+          <p class="font-semibold text-green-700">Ödenmemiş borç bulunamadı</p>
+          <p class="text-sm text-green-600 mt-1">
             <strong>{{ formatCurrency(form.amount) }}</strong> tutarın tamamı avans hesabına aktarılacak.
           </p>
         </div>
@@ -191,7 +191,7 @@
             type="button"
             @click="setAutoAllocation(true)"
             class="flex-1 py-2 px-3 rounded-lg border-2 text-sm font-semibold transition-all active:scale-95"
-            :class="autoAllocate ? 'border-brand-500 bg-brand-50 dark:bg-brand-500/[0.08] text-brand-700 dark:text-brand-300' : 'border-gray-200 dark:border-white/[0.07] text-gray-500'"
+            :class="autoAllocate ? 'border-brand-600 bg-brand-50 text-brand-700' : 'border-gray-200 text-gray-500'"
           >
             ⚡ Otomatik Eşleştir
           </button>
@@ -199,13 +199,13 @@
             type="button"
             @click="setAutoAllocation(false)"
             class="flex-1 py-2 px-3 rounded-lg border-2 text-sm font-semibold transition-all active:scale-95"
-            :class="!autoAllocate ? 'border-brand-500 bg-brand-50 dark:bg-brand-500/[0.08] text-brand-700 dark:text-brand-300' : 'border-gray-200 dark:border-white/[0.07] text-gray-500'"
+            :class="!autoAllocate ? 'border-brand-600 bg-brand-50 text-brand-700' : 'border-gray-200 text-gray-500'"
           >
             ✏️ Manuel Seç
           </button>
         </div>
 
-        <div v-if="autoAllocate" class="text-sm text-brand-600 dark:text-brand-400 bg-brand-50 dark:bg-brand-500/[0.08] rounded-lg p-3 border border-brand-200 dark:border-brand-700">
+        <div v-if="autoAllocate" class="text-sm text-brand-600 bg-brand-50 rounded-lg p-3 border border-brand-200">
           Backend borçları en eskiden başlayarak kapatacak, fazla tutar avans hesabına aktarılacak.
         </div>
 
@@ -215,10 +215,10 @@
             v-for="debt in tenantDebts"
             :key="debt.id"
             @click="toggleDebt(debt.id)"
-            class="flex items-start gap-4 p-4 bg-white/[0.02] rounded-2xl border border-white/[0.06] cursor-pointer transition-all active:scale-[0.99] group/item"
+            class="flex items-start gap-4 p-4 bg-[#f6fafd] rounded-2xl border border-[#d9e7f2] cursor-pointer transition-all active:scale-[0.99] group/item"
             :class="selectedDebts.includes(debt.id)
-              ? 'border-brand-500/50 bg-brand-500/[0.05]'
-              : 'hover:border-white/[0.12] hover:bg-white/[0.04]'"
+              ? 'border-brand-600/50 bg-brand-500/[0.05]'
+              : 'hover:border-[#7cc9ec] hover:bg-[#ecf3f9]'"
           >
             <input
               type="checkbox"
@@ -230,14 +230,14 @@
             <div class="flex-1 min-w-0">
               <div class="flex items-start justify-between gap-2">
                 <div>
-                  <p class="font-semibold text-gray-800 dark:text-[#f1f3f9] text-sm">{{ getDebtTypeLabel(debt.type) }}</p>
-                  <p class="text-xs text-gray-500 dark:text-[#9aa0b4]">{{ debt.period || debt.dueDateFormatted }}
-                    <span v-if="debt.unit && debt.unit !== '-'" class="text-brand-500 ml-1">({{ debt.unit }})</span>
+                  <p class="font-semibold text-gray-800 text-sm">{{ getDebtTypeLabel(debt.type) }}</p>
+                  <p class="text-xs text-gray-500">{{ debt.period || debt.dueDateFormatted }}
+                    <span v-if="debt.unit && debt.unit !== '-'" class="text-brand-600 ml-1">({{ debt.unit }})</span>
                   </p>
                 </div>
                 <div class="text-right flex-shrink-0">
-                  <p class="font-bold text-red-600 dark:text-red-400 text-sm">{{ formatCurrency(debt.remainingAmount || debt.amount) }}</p>
-                  <p class="text-xs text-gray-400">{{ getDaysOverdue(debt.dueDate) }} gün</p>
+                  <p class="font-bold text-red-600 text-sm">{{ formatCurrency(debt.remainingAmount || debt.amount) }}</p>
+                  <p class="text-xs text-[#8298ab]">{{ getDaysOverdue(debt.dueDate) }} gün</p>
                 </div>
               </div>
               <div v-if="selectedDebts.includes(debt.id)" class="mt-2 flex items-center gap-2" @click.stop>
@@ -258,18 +258,18 @@
         </div>
 
         <!-- Özet -->
-        <div class="bg-white/[0.02] rounded-2xl p-5 border border-white/[0.08] space-y-3">
-          <div class="flex justify-between text-[11px] font-black uppercase tracking-wider text-[#626885]">
+        <div class="bg-[#f6fafd] rounded-2xl p-5 border border-[#d9e7f2] space-y-3">
+          <div class="flex justify-between text-[11px] font-black uppercase tracking-wider text-[#8298ab]">
             <span>Toplam Tutar</span>
-            <span class="text-[#f1f3f9]">{{ formatCurrency(form.amount) }}</span>
+            <span class="text-[#16283a]">{{ formatCurrency(form.amount) }}</span>
           </div>
-          <div class="flex justify-between text-[11px] font-black uppercase tracking-wider text-[#626885]">
+          <div class="flex justify-between text-[11px] font-black uppercase tracking-wider text-[#8298ab]">
             <span>Eşleştirilecek</span>
-            <span class="text-green-400">{{ formatCurrency(autoAllocate ? form.amount : totalAllocated) }}</span>
+            <span class="text-emerald-600">{{ formatCurrency(autoAllocate ? form.amount : totalAllocated) }}</span>
           </div>
-          <div class="flex justify-between text-[11px] font-black uppercase tracking-wider text-[#626885] border-t border-white/[0.06] pt-3">
+          <div class="flex justify-between text-[11px] font-black uppercase tracking-wider text-[#8298ab] border-t border-[#d9e7f2] pt-3">
             <span>Avans Hesabına</span>
-            <span class="text-brand-400">{{ formatCurrency(autoAllocate ? 0 : (form.amount - totalAllocated)) }}</span>
+            <span class="text-brand-600">{{ formatCurrency(autoAllocate ? 0 : (form.amount - totalAllocated)) }}</span>
           </div>
         </div>
       </template>
@@ -277,38 +277,38 @@
 
     <!-- ADIM 3: Özet ve Onay -->
     <div v-if="currentStep === 3" class="space-y-4">
-      <div class="bg-white dark:bg-[#0f1322] rounded-xl border border-gray-200 dark:border-white/[0.07] divide-y dark:divide-white/[0.06]">
+      <div class="bg-white rounded-xl border border-gray-200 divide-y">
         <div class="px-4 py-3 flex justify-between items-center">
           <span class="text-sm text-gray-500">Ödeme Türü</span>
-          <span class="font-semibold text-gray-800 dark:text-[#f1f3f9]">{{ paymentType === 'tenant' ? '👤 Kiracı' : '🏠 Mal Sahibi' }}</span>
+          <span class="font-semibold text-gray-800">{{ paymentType === 'tenant' ? '👤 Kiracı' : '🏠 Mal Sahibi' }}</span>
         </div>
         <div class="px-4 py-3 flex justify-between items-center">
           <span class="text-sm text-gray-500">{{ paymentType === 'tenant' ? 'Kiracı' : 'Mal Sahibi' }}</span>
-          <span class="font-semibold text-gray-800 dark:text-[#f1f3f9]">{{ selectedPersonName }}</span>
+          <span class="font-semibold text-gray-800">{{ selectedPersonName }}</span>
         </div>
         <div class="px-4 py-3 flex justify-between items-center">
           <span class="text-sm text-gray-500">Tarih</span>
-          <span class="font-semibold text-gray-800 dark:text-[#f1f3f9]">{{ form.date }}</span>
+          <span class="font-semibold text-gray-800">{{ form.date }}</span>
         </div>
         <div class="px-4 py-3 flex justify-between items-center">
           <span class="text-sm text-gray-500">Tutar</span>
-          <span class="text-xl font-bold text-green-600 dark:text-green-400">{{ formatCurrency(form.amount) }}</span>
+          <span class="text-xl font-bold text-green-600">{{ formatCurrency(form.amount) }}</span>
         </div>
         <div class="px-4 py-3 flex justify-between items-center">
           <span class="text-sm text-gray-500">Banka</span>
-          <span class="font-semibold text-gray-800 dark:text-[#f1f3f9]">{{ form.bank }}</span>
+          <span class="font-semibold text-gray-800">{{ form.bank }}</span>
         </div>
         <div class="px-4 py-3 flex justify-between items-center">
           <span class="text-sm text-gray-500">Borç Eşleştirme</span>
-          <span class="font-semibold text-gray-800 dark:text-[#f1f3f9]">{{ autoAllocate ? '⚡ Otomatik' : `✏️ Manuel (${selectedDebts.length} borç)` }}</span>
+          <span class="font-semibold text-gray-800">{{ autoAllocate ? '⚡ Otomatik' : `✏️ Manuel (${selectedDebts.length} borç)` }}</span>
         </div>
       </div>
 
-      <div v-if="errorMessage" class="bg-red-50 dark:bg-red-900/20 rounded-xl p-4 border border-red-200 dark:border-red-800 flex items-center gap-3">
+      <div v-if="errorMessage" class="bg-red-50 rounded-xl p-4 border border-red-200 flex items-center gap-3">
         <svg class="w-5 h-5 text-red-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"/>
         </svg>
-        <span class="text-red-700 dark:text-red-300 text-sm font-semibold">{{ errorMessage }}</span>
+        <span class="text-red-700 text-sm font-semibold">{{ errorMessage }}</span>
       </div>
     </div>
 
@@ -319,7 +319,7 @@
         type="button"
         @click="prevStep"
         :disabled="isLoading"
-        class="btn btn-outline border-gray-300 dark:border-white/[0.1] text-gray-700 dark:text-[#f1f3f9] active:scale-95"
+        class="btn btn-outline border-gray-300 text-gray-700 active:scale-95"
       >
         ← Geri
       </button>

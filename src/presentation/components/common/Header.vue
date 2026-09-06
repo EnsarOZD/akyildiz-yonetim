@@ -1,6 +1,6 @@
 <template>
   <header data-testid="sidebar"
-    class="sticky top-0 z-50 bg-white dark:bg-[#080b14] border-b border-slate-200/50 dark:border-white/[0.04] transition-colors duration-300">
+    class="sticky top-0 z-50 bg-white border-b border-[#d9e7f2] transition-colors duration-300">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex items-center justify-between h-[60px]">
 
@@ -8,8 +8,8 @@
         <div class="flex items-center gap-4">
           <!-- Desktop Logo -->
           <router-link to="/" class="hidden md:flex items-center gap-2.5 flex-shrink-0 group">
-            <div class="w-3 h-3 rounded-full bg-brand-500 group-hover:scale-125 transition-transform duration-300 shadow-[0_0_10px_rgba(107,138,255,0.5)]"></div>
-            <span class="text-[15px] font-black tracking-tighter text-slate-800 dark:text-white">
+            <div class="w-3 h-3 rounded-full bg-brand-600 group-hover:scale-125 transition-transform duration-300 shadow-[0_0_10px_rgba(2,132,199,0.45)]"></div>
+            <span class="text-[15px] font-black tracking-tighter text-slate-800">
               {{ appName }}
             </span>
           </router-link>
@@ -17,7 +17,7 @@
           <!-- Mobile Greeting -->
           <div class="flex md:hidden flex-col">
             <span class="text-premium-label opacity-70">Hoş Geldiniz</span>
-            <span class="text-sm font-black text-slate-800 dark:text-white tracking-tight">
+            <span class="text-sm font-black text-slate-800 tracking-tight">
               Merhaba, {{ userInfo?.firstName || 'Kullanıcı' }}
             </span>
           </div>
@@ -31,8 +31,8 @@
             :to="tab.route"
             class="px-5 py-2.5 rounded-xl text-[13px] font-black transition-all duration-300 tracking-tight"
             :class="isActiveTab(tab.route)
-              ? 'text-brand-500 active-nav-item'
-              : 'text-[#626885] hover:text-[#f1f3f9]'"
+              ? 'active-nav-item'
+              : 'text-[#5a7186] hover:text-[#16283a] hover:bg-[#ecf3f9]'"
           >
             {{ tab.label }}
           </router-link>
@@ -45,7 +45,7 @@
           <div v-if="userInfo" class="relative" ref="notificationsRef">
             <button
               @click="toggleNotifications"
-              class="relative p-2 rounded-lg text-slate-500 dark:text-[#9aa0b4] hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-700 dark:hover:text-[#f1f3f9] transition-all duration-150"
+              class="relative p-2 rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-700 transition-all duration-150"
               aria-label="Bildirimleri göster"
               :aria-expanded="showNotificationsDropdown"
             >
@@ -73,14 +73,14 @@
               leave-to-class="opacity-0 translate-y-1 scale-95"
             >
               <div v-if="showNotificationsDropdown"
-                class="absolute right-0 mt-2 w-80 rounded-xl shadow-card-lg border border-slate-200 dark:border-white/[0.08]
-                  bg-white dark:bg-[#0f1322] overflow-hidden origin-top-right">
+                class="absolute right-0 mt-2 w-80 rounded-xl shadow-card-lg border border-[#d9e7f2]
+                  bg-white overflow-hidden origin-top-right">
 
                 <!-- Header -->
-                <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100 dark:border-white/[0.06]">
-                  <span class="text-sm font-semibold text-slate-800 dark:text-[#f1f3f9]">Bildirimler</span>
+                <div class="flex items-center justify-between px-4 py-3 border-b border-[#ecf3f9]">
+                  <span class="text-sm font-semibold text-slate-800">Bildirimler</span>
                   <button @click="notificationsStore.markAllAsRead"
-                    class="text-xs text-brand-600 dark:text-brand-400 hover:text-brand-700 font-medium transition-colors">
+                    class="text-xs text-brand-600 hover:text-brand-700 font-medium transition-colors">
                     Tümünü oku
                   </button>
                 </div>
@@ -92,7 +92,7 @@
                     <span class="loading loading-spinner loading-sm text-brand-600"></span>
                   </div>
                   <div v-else-if="notificationsStore.items.length === 0"
-                    class="py-10 text-center text-sm text-slate-500 dark:text-[#9aa0b4]">
+                    class="py-10 text-center text-sm text-slate-500">
                     Henüz bildirim yok
                   </div>
                   <div v-else>
@@ -100,9 +100,9 @@
                       v-for="item in notificationsStore.items.slice(0, 6)"
                       :key="item.id"
                       @click="handleNotificationClick(item)"
-                      class="relative flex gap-3 px-4 py-3 border-b border-slate-50 dark:border-white/[0.04]
-                        hover:bg-slate-50 dark:hover:bg-white/[0.04] cursor-pointer transition-colors"
-                      :class="!item.isRead ? 'bg-brand-50/40 dark:bg-brand-500/[0.06]' : ''"
+                      class="relative flex gap-3 px-4 py-3 border-b border-[#ecf3f9]
+                        hover:bg-slate-50 cursor-pointer transition-colors"
+                      :class="!item.isRead ? 'bg-brand-50/40' : ''"
                     >
                       <!-- Unread dot -->
                       <span v-if="!item.isRead"
@@ -116,9 +116,9 @@
                       </div>
                       <!-- Content -->
                       <div class="min-w-0 flex-1">
-                        <p class="text-sm font-medium text-slate-800 dark:text-[#f1f3f9] line-clamp-1">{{ item.title }}</p>
-                        <p class="text-xs text-slate-500 dark:text-[#9aa0b4] line-clamp-2 mt-0.5 leading-relaxed">{{ item.message }}</p>
-                        <p class="text-[10px] text-slate-400 dark:text-[#626885] mt-1">{{ formatDate(item.createdAt) }}</p>
+                        <p class="text-sm font-medium text-slate-800 line-clamp-1">{{ item.title }}</p>
+                        <p class="text-xs text-slate-500 line-clamp-2 mt-0.5 leading-relaxed">{{ item.message }}</p>
+                        <p class="text-[10px] text-[#8298ab] mt-1">{{ formatDate(item.createdAt) }}</p>
                       </div>
                     </div>
                   </div>
@@ -126,8 +126,8 @@
 
                 <!-- Footer -->
                 <router-link to="/notifications" @click="showNotificationsDropdown = false"
-                  class="flex items-center justify-center gap-1.5 py-2.5 text-xs font-semibold text-brand-600 dark:text-brand-400
-                    hover:bg-slate-50 dark:hover:bg-white/[0.04] transition-colors border-t border-slate-100 dark:border-white/[0.06]">
+                  class="flex items-center justify-center gap-1.5 py-2.5 text-xs font-semibold text-brand-600
+                    hover:bg-slate-50 transition-colors border-t border-[#ecf3f9]">
                   Tüm bildirimleri gör
                   <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
@@ -142,17 +142,17 @@
           <div v-if="userInfo" class="relative" ref="userMenuRef">
             <button
               @click="toggleUserDropdown"
-              class="flex items-center gap-2 pl-1 pr-2.5 py-1 rounded-full hover:bg-slate-100 dark:hover:bg-white/[0.06] transition-all duration-150"
+              class="flex items-center gap-2 pl-1 pr-2.5 py-1 rounded-full hover:bg-slate-100 transition-all duration-150"
               :aria-expanded="showUserDropdown"
             >
               <!-- Avatar initials -->
-              <div class="w-[28px] h-[28px] rounded-full bg-gradient-to-br from-brand-500 to-brand-400 flex items-center justify-center text-white text-[11px] font-bold flex-shrink-0">
+              <div class="w-[28px] h-[28px] rounded-full bg-gradient-to-br from-brand-600 to-brand-400 flex items-center justify-center text-white text-[11px] font-bold flex-shrink-0">
                 {{ userInitials }}
               </div>
-              <span class="hidden sm:block text-[12.5px] font-semibold text-slate-700 dark:text-[#f1f3f9] max-w-[100px] truncate">
+              <span class="hidden sm:block text-[12.5px] font-semibold text-slate-700 max-w-[100px] truncate">
                 {{ userInfo.firstName }}
               </span>
-              <svg class="w-3.5 h-3.5 text-slate-400 flex-shrink-0 transition-transform duration-150"
+              <svg class="w-3.5 h-3.5 text-[#8298ab] flex-shrink-0 transition-transform duration-150"
                 :class="showUserDropdown ? 'rotate-180' : ''"
                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
@@ -168,24 +168,24 @@
               leave-to-class="opacity-0 translate-y-1 scale-95"
             >
               <div v-if="showUserDropdown"
-                class="absolute right-0 mt-2 w-52 rounded-xl shadow-card-lg border border-slate-200 dark:border-white/[0.08]
-                  bg-white dark:bg-[#0f1322] py-1.5 origin-top-right overflow-hidden">
+                class="absolute right-0 mt-2 w-52 rounded-xl shadow-card-lg border border-[#d9e7f2]
+                  bg-white py-1.5 origin-top-right overflow-hidden">
 
                 <!-- User info -->
-                <div class="px-3.5 py-2.5 border-b border-slate-100 dark:border-white/[0.06] mb-1">
-                  <p class="text-sm font-semibold text-slate-800 dark:text-[#f1f3f9] truncate">
+                <div class="px-3.5 py-2.5 border-b border-[#ecf3f9] mb-1">
+                  <p class="text-sm font-semibold text-slate-800 truncate">
                     {{ userInfo.firstName }} {{ userInfo.lastName }}
                   </p>
-                  <p class="text-xs text-slate-500 dark:text-[#9aa0b4] mt-0.5">{{ roleLabel }}</p>
+                  <p class="text-xs text-slate-500 mt-0.5">{{ roleLabel }}</p>
                 </div>
 
                 <router-link
                   v-if="userInfo.role.toLowerCase() === ROLES.ADMIN"
                   to="/admin"
                   @click="showUserDropdown = false"
-                  class="flex items-center gap-2.5 px-3.5 py-2 text-sm text-slate-700 dark:text-[#f1f3f9] hover:bg-slate-50 dark:hover:bg-white/[0.04] transition-colors"
+                  class="flex items-center gap-2.5 px-3.5 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
                 >
-                  <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg class="w-4 h-4 text-[#8298ab]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M10.343 3.94c.09-.542.56-.94 1.11-.94h1.094c.55 0 1.02.398 1.11.94l.149.894c.07.424.384.764.78.93.398.164.855.142 1.205-.108l.737-.527a1.125 1.125 0 011.45.12l.773.774c.39.389.44 1.002.12 1.45l-.527.737c-.25.35-.272.806-.107 1.204.165.397.505.71.93.78l.894.15c.542.09.94.56.94 1.109v1.094c0 .55-.398 1.02-.94 1.11l-.894.149c-.424.07-.764.383-.929.78-.165.398-.143.854.107 1.204l.527.738a1.125 1.125 0 01-.12 1.45l-.774.773a1.125 1.125 0 01-1.449.12l-.738-.527c-.35-.25-.806-.272-1.203-.107-.397.165-.71.505-.781.929l-.149.894c-.09.542-.56.94-1.11.94h-1.094c-.55 0-1.019-.398-1.11-.94l-.148-.894c-.071-.424-.384-.764-.781-.93-.398-.164-.854-.142-1.204.108l-.738.527a1.125 1.125 0 01-1.45-.12l-.773-.774a1.125 1.125 0 01-.12-1.45l.527-.737c.25-.35.273-.806.108-1.204-.165-.397-.505-.71-.93-.78l-.894-.15a1.125 1.125 0 01-.94-1.11v-1.094c0-.55.398-1.02.94-1.11l.894-.149c.424-.07.765-.383.93-.78.165-.398.143-.854-.108-1.204l-.526-.738a1.125 1.125 0 01.12-1.45l.774-.773a1.125 1.125 0 011.45-.12l.737.527c.35.25.807.272 1.204.107.397-.165.71-.505.78-.929l.15-.894z" />
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
@@ -195,9 +195,9 @@
                 <router-link
                   to="/profile"
                   @click="showUserDropdown = false"
-                  class="flex items-center gap-2.5 px-3.5 py-2 text-sm text-slate-700 dark:text-[#f1f3f9] hover:bg-slate-50 dark:hover:bg-white/[0.04] transition-colors"
+                  class="flex items-center gap-2.5 px-3.5 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
                 >
-                  <svg class="w-4 h-4 text-slate-400 dark:text-[#626885]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg class="w-4 h-4 text-[#8298ab]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
                   </svg>
                   Profilim
@@ -205,18 +205,18 @@
 
                 <button
                   @click="changePassword"
-                  class="w-full flex items-center gap-2.5 px-3.5 py-2 text-sm text-slate-700 dark:text-[#f1f3f9] hover:bg-slate-50 dark:hover:bg-white/[0.04] transition-colors"
+                  class="w-full flex items-center gap-2.5 px-3.5 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
                 >
-                  <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg class="w-4 h-4 text-[#8298ab]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
                   </svg>
                   Şifre Değiştir
                 </button>
 
-                <div class="border-t border-slate-100 dark:border-white/[0.06] mt-1 pt-1">
+                <div class="border-t border-[#ecf3f9] mt-1 pt-1">
                   <button
                     @click="logout"
-                    class="w-full flex items-center gap-2.5 px-3.5 py-2 text-sm text-red-600 dark:text-[#fb7185] hover:bg-red-50 dark:hover:bg-[#fb7185]/[0.08] transition-colors"
+                    class="w-full flex items-center gap-2.5 px-3.5 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
                   >
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
@@ -291,10 +291,10 @@ const isActiveTab = (tabRoute) => {
 
 // Notification icon helpers
 const notifTypes = {
-  Debt:            { bg: 'bg-red-100 dark:bg-red-900/30',    color: 'text-red-600 dark:text-red-400',    path: 'M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z' },
-  Payment:         { bg: 'bg-emerald-100 dark:bg-emerald-900/30', color: 'text-emerald-600 dark:text-emerald-400', path: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z' },
-  PaymentCreated:  { bg: 'bg-brand-100 dark:bg-brand-500/[0.12]',   color: 'text-brand-600 dark:text-brand-400',  path: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1' },
-  Announcement:    { bg: 'bg-amber-100 dark:bg-amber-900/30', color: 'text-amber-600 dark:text-amber-400', path: 'M11 5.882V19.24a1.76 1.76 0 0 1 -3.417 .592l-2.147-6.15M18 13a3 3 0 1 0 0-6M5.436 13.683A4.001 4.001 0 0 1 7 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 0 1 -1.564 -.317z' },
+  Debt:            { bg: 'bg-red-100',    color: 'text-red-600',    path: 'M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z' },
+  Payment:         { bg: 'bg-emerald-100', color: 'text-emerald-600', path: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z' },
+  PaymentCreated:  { bg: 'bg-brand-100',   color: 'text-brand-600',  path: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1' },
+  Announcement:    { bg: 'bg-amber-100', color: 'text-amber-600', path: 'M11 5.882V19.24a1.76 1.76 0 0 1 -3.417 .592l-2.147-6.15M18 13a3 3 0 1 0 0-6M5.436 13.683A4.001 4.001 0 0 1 7 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 0 1 -1.564 -.317z' },
 }
 const notifIconBg    = (type) => (notifTypes[type] || notifTypes.Announcement).bg
 const notifIconColor = (type) => (notifTypes[type] || notifTypes.Announcement).color

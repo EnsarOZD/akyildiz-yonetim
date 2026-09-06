@@ -16,10 +16,10 @@
         </div>
         
         <div class="space-y-2">
-          <p class="text-[13.5px] font-black text-[#f1f3f9] uppercase tracking-tight leading-relaxed">
-            <span class="text-red-400">{{ displayName }}</span> kaydı siliniyor
+          <p class="text-[13.5px] font-black text-[#16283a] uppercase tracking-tight leading-relaxed">
+            <span class="text-red-600">{{ displayName }}</span> kaydı siliniyor
           </p>
-          <p class="text-xs text-[#626885] font-medium px-4">
+          <p class="text-xs text-[#8298ab] font-medium px-4">
             {{ message || 'Bu kaydı silmek istediğinize emin misiniz? Bu işlem geri alınamaz.' }}
           </p>
         </div>
@@ -27,7 +27,7 @@
 
       <!-- Bilgi Notu -->
       <div class="bg-red-500/5 border border-red-500/10 rounded-2xl p-4">
-        <p class="text-[10px] font-bold text-red-300 uppercase tracking-widest text-center italic">
+        <p class="text-[10px] font-bold text-red-600 uppercase tracking-widest text-center italic">
           ⚠️ Kritik Veri: Yetkilerinize göre ilişkili borç ve ödeme kayıtları bu işlemden etkilenebilir.
         </p>
       </div>
@@ -37,7 +37,7 @@
     <template #footer>
       <button 
         type="button"
-        class="btn btn-ghost !bg-transparent border border-white/[0.08] text-[#9aa0b4] hover:bg-white/[0.05] flex-1" 
+        class="btn btn-ghost !bg-transparent border border-[#d9e7f2] text-[#5a7186] hover:bg-[#ecf3f9] flex-1" 
         @click="onCancel"
         :disabled="loading"
       >

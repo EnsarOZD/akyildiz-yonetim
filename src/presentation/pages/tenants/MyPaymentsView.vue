@@ -5,13 +5,13 @@
       <!-- ─── Row 1: Page Header ─── -->
       <section class="flex flex-col md:flex-row md:items-center justify-between gap-6 animate-slide-up">
         <div>
-          <h1 class="text-2xl font-black text-high-density text-slate-800 dark:text-white tracking-tighter">
+          <h1 class="text-2xl font-black text-high-density text-slate-800 tracking-tighter">
             Ödemelerim ve Borçlarım
           </h1>
-          <p class="text-sm font-bold text-slate-400 dark:text-[#626885] mt-1 uppercase tracking-widest flex items-center gap-2">
+          <p class="text-sm font-bold text-[#8298ab] mt-1 uppercase tracking-widest flex items-center gap-2">
             {{ tenantInfo?.companyName || authStore.companyName }}
-            <span v-if="tenantInfo?.flats?.length" class="w-1 h-1 rounded-full bg-slate-300 dark:bg-white/20"></span>
-            <span v-if="tenantInfo?.flats?.length" class="text-brand-500 font-black">UNITE: {{ tenantInfo.flats.map(f => f.code).join(', ') }}</span>
+            <span v-if="tenantInfo?.flats?.length" class="w-1 h-1 rounded-full bg-slate-300"></span>
+            <span v-if="tenantInfo?.flats?.length" class="text-brand-600 font-black">UNITE: {{ tenantInfo.flats.map(f => f.code).join(', ') }}</span>
           </p>
         </div>
 
@@ -23,14 +23,14 @@
               {{ t.companyName || t.contactPersonName || 'Bilinmiyor' }}
             </option>
           </select>
-          <div class="flex bg-white dark:bg-[#0f1322] p-1 rounded-2xl border border-slate-200 dark:border-white/[0.08] shadow-sm">
+          <div class="flex bg-white p-1 rounded-2xl border border-slate-200 shadow-sm">
             <button @click="exportToExcel" :disabled="loading || reportItems.length === 0"
-              class="flex items-center gap-2 px-4 py-2 text-[11px] font-black uppercase tracking-wider text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-xl transition-all disabled:opacity-30">
+              class="flex items-center gap-2 px-4 py-2 text-[11px] font-black uppercase tracking-wider text-emerald-600 hover:bg-emerald-50 rounded-xl transition-all disabled:opacity-30">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
               EXCEL
             </button>
             <button @click="exportToPDF" :disabled="loading || reportItems.length === 0" 
-              class="flex items-center gap-2 px-4 py-2 text-[11px] font-black uppercase tracking-wider text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-xl transition-all disabled:opacity-30">
+              class="flex items-center gap-2 px-4 py-2 text-[11px] font-black uppercase tracking-wider text-rose-500 hover:bg-rose-50 rounded-xl transition-all disabled:opacity-30">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
               PDF
             </button>
@@ -46,32 +46,32 @@
 
       <!-- Admin/manager: kiracı seçilmeden veri/PDF üretilmez (bina geneli sızmasın) -->
       <section v-if="isPrivileged && !selectedTenantId"
-        class="app-card border-none bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 p-5 flex items-center gap-3 animate-slide-up">
+        class="app-card border-none bg-amber-50 border border-amber-200 p-5 flex items-center gap-3 animate-slide-up">
         <svg class="w-6 h-6 text-amber-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"/></svg>
-        <p class="text-sm font-bold text-amber-700 dark:text-amber-300">
+        <p class="text-sm font-bold text-amber-700">
           Lütfen yukarıdan bir kiracı seçin. Ekstre yalnızca seçilen kiracının verisini içerir.
         </p>
       </section>
 
       <!-- ─── Row 2: Summary Cards ─── -->
       <section v-if="(reportItems.length > 0 || !loading) && !(isPrivileged && !selectedTenantId)" class="grid grid-cols-1 sm:grid-cols-3 gap-4 animate-slide-up">
-        <div class="app-card border-none bg-slate-50 dark:bg-white/[0.02] p-5 flex items-center gap-4">
+        <div class="app-card border-none bg-slate-50 p-5 flex items-center gap-4">
           <div class="w-12 h-12 rounded-2xl bg-rose-500/10 text-rose-500 flex items-center justify-center shrink-0">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"/></svg>
           </div>
           <div>
             <p class="text-premium-label mb-1">Toplam Tahakkuk</p>
-            <p class="text-xl font-black text-slate-800 dark:text-white">{{ formatCurrency(rawSummary.totalDebt) }}</p>
+            <p class="text-xl font-black text-slate-800">{{ formatCurrency(rawSummary.totalDebt) }}</p>
           </div>
         </div>
 
-        <div class="app-card border-none bg-slate-50 dark:bg-white/[0.02] p-5 flex items-center gap-4">
+        <div class="app-card border-none bg-slate-50 p-5 flex items-center gap-4">
           <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
           </div>
           <div>
             <p class="text-premium-label mb-1">Toplam Ödenen</p>
-            <p class="text-xl font-black text-slate-800 dark:text-white">{{ formatCurrency(rawSummary.totalPayment) }}</p>
+            <p class="text-xl font-black text-slate-800">{{ formatCurrency(rawSummary.totalPayment) }}</p>
           </div>
         </div>
 
@@ -92,15 +92,15 @@
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <div class="form-control">
             <label class="text-premium-label mb-2">BAŞLANGIÇ</label>
-            <input v-model="filters.startDate" type="date" class="bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] rounded-xl px-4 py-2.5 text-sm outline-none focus:border-brand-500 transition-colors" />
+            <input v-model="filters.startDate" type="date" class="bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-brand-600 transition-colors" />
           </div>
           <div class="form-control">
             <label class="text-premium-label mb-2">BİTİŞ</label>
-            <input v-model="filters.endDate" type="date" class="bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] rounded-xl px-4 py-2.5 text-sm outline-none focus:border-brand-500 transition-colors" />
+            <input v-model="filters.endDate" type="date" class="bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-brand-600 transition-colors" />
           </div>
           <div class="form-control">
             <label class="text-premium-label mb-2">İŞLEM TİPİ</label>
-            <select v-model="filters.type" class="bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] rounded-xl px-4 py-2.5 text-sm outline-none focus:border-brand-500 transition-colors appearance-none">
+            <select v-model="filters.type" class="bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-brand-600 transition-colors appearance-none">
               <option value="all">Tümü (Borç & Ödeme)</option>
               <option value="debt">Sadece Borçlar</option>
               <option value="payment">Sadece Ödemeler</option>
@@ -108,15 +108,15 @@
           </div>
           <div class="form-control">
             <label class="text-premium-label mb-2">DURUM</label>
-            <select v-model="filters.status" :disabled="filters.type === 'payment'" class="bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] rounded-xl px-4 py-2.5 text-sm outline-none focus:border-brand-500 transition-colors appearance-none disabled:opacity-30">
+            <select v-model="filters.status" :disabled="filters.type === 'payment'" class="bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-brand-600 transition-colors appearance-none disabled:opacity-30">
               <option value="all">Tümü</option>
               <option value="unpaid">Bekleyenler</option>
               <option value="paid">Ödenenler</option>
             </select>
           </div>
         </div>
-        <div class="flex justify-end mt-4 pt-4 border-t border-slate-100 dark:border-white/[0.05]">
-          <button @click="clearFilters" class="text-[10px] font-black text-slate-400 hover:text-brand-500 uppercase tracking-widest transition-colors">Filtreleri Temizle</button>
+        <div class="flex justify-end mt-4 pt-4 border-t border-slate-100">
+          <button @click="clearFilters" class="text-[10px] font-black text-[#8298ab] hover:text-brand-600 uppercase tracking-widest transition-colors">Filtreleri Temizle</button>
         </div>
       </section>
 
@@ -125,8 +125,8 @@
         <div class="flex items-center justify-between px-1">
           <h2 class="text-premium-label">İşlem Listesi</h2>
           <div class="flex items-center gap-4">
-             <span class="text-[10px] font-bold text-slate-400 uppercase">{{ reportItems.length }} Kayıt</span>
-             <select v-model="pageSize" class="bg-transparent text-[10px] font-bold text-brand-500 uppercase outline-none">
+             <span class="text-[10px] font-bold text-[#8298ab] uppercase">{{ reportItems.length }} Kayıt</span>
+             <select v-model="pageSize" class="bg-transparent text-[10px] font-bold text-brand-600 uppercase outline-none">
                 <option :value="10">10 Satır</option>
                 <option :value="25">25 Satır</option>
                 <option :value="50">50 Satır</option>
@@ -139,7 +139,7 @@
           <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse">
               <thead>
-                <tr class="bg-slate-50 dark:bg-white/[0.02]">
+                <tr class="bg-slate-50">
                   <th class="px-6 py-4 text-premium-label">Tarih</th>
                   <th class="px-6 py-4 text-premium-label text-center">Dönem</th>
                   <th class="px-6 py-4 text-premium-label text-center">Tür</th>
@@ -148,20 +148,20 @@
                   <th class="px-6 py-4 text-premium-label text-center">Durum</th>
                 </tr>
               </thead>
-              <tbody class="divide-y divide-slate-100 dark:divide-white/[0.05]">
-                <tr v-if="loading"><td colspan="6" class="py-20 text-center"><span class="loading loading-spinner text-brand-500"></span></td></tr>
-                <tr v-else-if="reportItems.length === 0"><td colspan="6" class="py-20 text-center text-slate-400 font-bold uppercase text-xs">Kayıt Bulunamadı</td></tr>
-                <tr v-else v-for="(item, idx) in paginatedReports" :key="idx" class="hover:bg-slate-50 dark:hover:bg-white/[0.02] transition-colors group">
-                  <td class="px-6 py-4 text-xs font-black text-slate-500 dark:text-[#9aa0b4]">{{ formatDate(item.date) }}</td>
-                  <td class="px-6 py-4 text-center text-xs font-black text-slate-500 dark:text-[#9aa0b4]">{{ formatPeriod(item.periodYear, item.periodMonth) }}</td>
+              <tbody class="divide-y divide-[#ecf3f9]">
+                <tr v-if="loading"><td colspan="6" class="py-20 text-center"><span class="loading loading-spinner text-brand-600"></span></td></tr>
+                <tr v-else-if="reportItems.length === 0"><td colspan="6" class="py-20 text-center text-[#8298ab] font-bold uppercase text-xs">Kayıt Bulunamadı</td></tr>
+                <tr v-else v-for="(item, idx) in paginatedReports" :key="idx" class="hover:bg-slate-50 transition-colors group">
+                  <td class="px-6 py-4 text-xs font-black text-slate-500">{{ formatDate(item.date) }}</td>
+                  <td class="px-6 py-4 text-center text-xs font-black text-slate-500">{{ formatPeriod(item.periodYear, item.periodMonth) }}</td>
                   <td class="px-6 py-4 text-center">
                     <span :class="item.isPayment ? 'bg-emerald-500/10 text-emerald-500' : 'bg-amber-500/10 text-amber-500'" class="px-3 py-1 rounded-full text-[10px] font-black uppercase whitespace-nowrap">
                       {{ item.isPayment ? 'Ödeme' : (item.debtTypeLabel || 'Borç') }}
                     </span>
                   </td>
-                  <td class="px-6 py-4 text-xs font-bold text-slate-800 dark:text-white max-w-xs">
+                  <td class="px-6 py-4 text-xs font-bold text-slate-800 max-w-xs">
                     <p class="truncate">{{ item.description }}</p>
-                    <p v-if="!item.isPayment && item.flatCode" class="text-[10px] font-bold text-brand-500 dark:text-brand-400 mt-0.5">Ünite {{ item.flatCode }}</p>
+                    <p v-if="!item.isPayment && item.flatCode" class="text-[10px] font-bold text-brand-600 mt-0.5">Ünite {{ item.flatCode }}</p>
                   </td>
                   <td class="px-6 py-4 text-right">
                     <p class="text-sm font-black" :class="item.isPayment ? 'text-emerald-500' : 'text-rose-500'">
@@ -170,10 +170,10 @@
                   </td>
                   <td class="px-6 py-4 text-center">
                     <span v-if="!item.isPayment" class="px-3 py-1 rounded-full text-[10px] font-black uppercase" 
-                      :class="item.isPaid ? 'bg-brand-500/10 text-brand-500' : 'bg-rose-500/10 text-rose-500'">
+                      :class="item.isPaid ? 'bg-brand-500/10 text-brand-600' : 'bg-rose-500/10 text-rose-500'">
                       {{ item.isPaid ? 'Ödendi' : 'Bekliyor' }}
                     </span>
-                    <span v-else class="text-slate-300 dark:text-white/20">—</span>
+                    <span v-else class="text-[#8298ab]">—</span>
                   </td>
                 </tr>
               </tbody>
@@ -183,23 +183,23 @@
 
         <!-- Mobile Card View -->
         <div class="md:hidden space-y-4">
-           <div v-if="loading" class="py-10 text-center"><span class="loading loading-spinner text-brand-500"></span></div>
-           <div v-else-if="reportItems.length === 0" class="py-10 text-center text-slate-400 font-bold uppercase text-xs">Kayıt Bulunmuyor</div>
-           <div v-for="(item, idx) in paginatedReports" :key="idx" class="app-card relative overflow-hidden group pl-10 transition-all hover:bg-slate-50 dark:hover:bg-white/[0.04]">
+           <div v-if="loading" class="py-10 text-center"><span class="loading loading-spinner text-brand-600"></span></div>
+           <div v-else-if="reportItems.length === 0" class="py-10 text-center text-[#8298ab] font-bold uppercase text-xs">Kayıt Bulunmuyor</div>
+           <div v-for="(item, idx) in paginatedReports" :key="idx" class="app-card relative overflow-hidden group pl-10 transition-all hover:bg-slate-50">
               <!-- Indicators -->
               <div class="absolute left-0 top-0 bottom-0 w-1.5" :class="item.isPayment ? 'bg-emerald-500 shadow-[2px_0_10px_rgba(16,185,129,0.2)]' : 'bg-amber-500 shadow-[2px_0_10px_rgba(245,158,11,0.2)]'"></div>
               
               <div class="flex justify-between items-start mb-3">
                  <div class="min-w-0 flex-1 pr-3">
                     <span class="text-premium-label opacity-70">{{ formatDate(item.date) }}</span>
-                    <h3 class="text-sm font-black text-slate-800 dark:text-white mt-0.5 uppercase tracking-tight truncate">{{ item.description }}</h3>
+                    <h3 class="text-sm font-black text-slate-800 mt-0.5 uppercase tracking-tight truncate">{{ item.description }}</h3>
                     <div class="flex items-center gap-1.5 flex-wrap mt-1">
                       <span v-if="!item.isPayment && item.debtTypeLabel"
-                        class="text-[9px] font-black px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 uppercase">
+                        class="text-[9px] font-black px-1.5 py-0.5 rounded bg-amber-100 text-amber-600 uppercase">
                         {{ item.debtTypeLabel }}
                       </span>
                       <span v-if="!item.isPayment && item.flatCode"
-                        class="text-[9px] font-black px-1.5 py-0.5 rounded bg-brand-100 dark:bg-brand-500/10 text-brand-600 dark:text-brand-400 uppercase">
+                        class="text-[9px] font-black px-1.5 py-0.5 rounded bg-brand-100 text-brand-600 uppercase">
                         Ünite {{ item.flatCode }}
                       </span>
                     </div>
@@ -208,16 +208,16 @@
                     <p class="text-sm font-black" :class="item.isPayment ? 'text-emerald-500' : 'text-rose-500'">
                        {{ item.isPayment ? '+' : '-' }}{{ formatCurrency(item.amount) }}
                     </p>
-                    <span class="text-[10px] font-bold text-slate-400">{{ formatPeriod(item.periodYear, item.periodMonth) }}</span>
+                    <span class="text-[10px] font-bold text-[#8298ab]">{{ formatPeriod(item.periodYear, item.periodMonth) }}</span>
                  </div>
               </div>
 
-              <div class="flex items-center justify-between pt-3 border-t border-slate-100 dark:border-white/[0.05]">
+              <div class="flex items-center justify-between pt-3 border-t border-slate-100">
                  <span class="text-[10px] font-black uppercase" :class="item.isPayment ? 'text-emerald-500' : 'text-amber-500'">
                     {{ item.isPayment ? 'TAHSİLAT' : 'TAHAKKUK' }}
                  </span>
                  <div v-if="!item.isPayment" class="flex items-center gap-2">
-                    <span class="text-[10px] font-black uppercase" :class="item.isPaid ? 'text-brand-500' : 'text-rose-500'">
+                    <span class="text-[10px] font-black uppercase" :class="item.isPaid ? 'text-brand-600' : 'text-rose-500'">
                        {{ item.isPaid ? 'ÖDENDİ' : 'BEKLİYOR' }}
                     </span>
                     <span v-if="!item.isPaid && isOverdue(item.lastPaymentDate)" class="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse"></span>
@@ -228,11 +228,11 @@
 
         <!-- Pagination -->
         <div v-if="totalPages > 1" class="flex items-center justify-center gap-2 pt-4">
-          <button @click="currentPage--" :disabled="currentPage === 1" class="w-10 h-10 rounded-xl flex items-center justify-center bg-white dark:bg-white/5 border border-slate-200 dark:border-white/[0.08] disabled:opacity-20">
+          <button @click="currentPage--" :disabled="currentPage === 1" class="w-10 h-10 rounded-xl flex items-center justify-center bg-white border border-slate-200 disabled:opacity-20">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
           </button>
-          <span class="text-xs font-black text-slate-600 dark:text-[#f1f3f9] px-4">SAYFA {{ currentPage }} / {{ totalPages }}</span>
-          <button @click="currentPage++" :disabled="currentPage === totalPages" class="w-10 h-10 rounded-xl flex items-center justify-center bg-white dark:bg-white/5 border border-slate-200 dark:border-white/[0.08] disabled:opacity-20">
+          <span class="text-xs font-black text-slate-600 px-4">SAYFA {{ currentPage }} / {{ totalPages }}</span>
+          <button @click="currentPage++" :disabled="currentPage === totalPages" class="w-10 h-10 rounded-xl flex items-center justify-center bg-white border border-slate-200 disabled:opacity-20">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
           </button>
         </div>

@@ -14,13 +14,13 @@
     >
       <!-- Mobil: kart; Masaüstü: tam genişlik banner -->
       <div class="md:hidden">
-        <div class="app-card !p-0 shadow-xl border-brand-300 dark:border-brand-600 overflow-hidden">
+        <div class="app-card !p-0 shadow-xl border-brand-300 overflow-hidden">
           <!-- Renk çizgisi -->
           <div class="h-1 bg-gradient-to-r from-blue-500 to-violet-500" />
           <div class="p-4">
             <div class="flex items-start gap-3">
               <!-- İkon -->
-              <div class="w-10 h-10 rounded-xl bg-brand-100 dark:bg-blue-900/40 text-brand-600 dark:text-brand-400 flex items-center justify-center shrink-0">
+              <div class="w-10 h-10 rounded-xl bg-brand-100 text-brand-600 flex items-center justify-center shrink-0">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75"
                     d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
@@ -28,17 +28,17 @@
               </div>
               <!-- Metin -->
               <div class="flex-1 min-w-0">
-                <p class="text-sm font-semibold text-slate-800 dark:text-[#f1f3f9]">
+                <p class="text-sm font-semibold text-slate-800">
                   {{ deniedState ? 'Bildirimler Engellendi' : 'Bildirimleri Etkinleştir' }}
                 </p>
-                <p class="text-xs text-slate-500 dark:text-[#9aa0b4] mt-0.5 leading-relaxed">
+                <p class="text-xs text-slate-500 mt-0.5 leading-relaxed">
                   {{ deniedState
                     ? 'Tarayıcı ayarlarından bu site için bildirimlere izin verin.'
                     : 'Borç, tahsilat ve duyurular için anlık bildirim alın.' }}
                 </p>
               </div>
               <!-- Kapat -->
-              <button @click="dismiss" class="p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-white/[0.06] text-slate-400 shrink-0">
+              <button @click="dismiss" class="p-1 rounded-lg hover:bg-slate-100 text-[#8298ab] shrink-0">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
@@ -64,11 +64,11 @@
             </div>
 
             <!-- Denied mesajı -->
-            <div v-else class="mt-3 flex items-start gap-2 p-2.5 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800">
+            <div v-else class="mt-3 flex items-start gap-2 p-2.5 rounded-lg bg-amber-50 border border-amber-200">
               <svg class="w-4 h-4 text-amber-500 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              <p class="text-xs text-amber-700 dark:text-amber-300">
+              <p class="text-xs text-amber-700">
                 Tarayıcı URL çubuğundaki kilit ikonuna tıklayıp <strong>Bildirimler → İzin Ver</strong> seçeneğini kullanın.
               </p>
             </div>

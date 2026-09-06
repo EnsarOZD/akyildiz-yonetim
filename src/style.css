@@ -1,8 +1,67 @@
 /* ============================================================
    Global Styles — Akyıldız Yönetim
+   Tema: "Gök Mavisi Kurumsal" (tek açık tema)
    ============================================================ */
 
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+/* ============================================================
+   Tema tokenları
+   ============================================================ */
+:root {
+  --bg-page:      #f0f7fc;
+  --surface:      #ffffff;
+  --surface-alt:  #f6fafd;
+  --border:       #d9e7f2;
+  --border-soft:  #ecf3f9;
+  --brand:        #0284c7;
+  --brand-bright: #0ea5e9;
+  --text:         #16283a;
+  --text-muted:   #5a7186;
+  --text-faint:   #8298ab;
+}
+
+/* ============================================================
+   DaisyUI tema tokenları
+
+   DaisyUI 5, tailwind.config.js içindeki `daisyui.themes` dizisini
+   (v4 API'si) OKUMAZ — temayı CSS değişkenlerinden alır. Bu blok
+   daisyUI'nin kendi `[data-theme=light]` bloğundan sonra yüklendiği
+   için Gök Mavisi paleti kazanır. Koyu tema da aynı değerlere
+   sabitlendi: hiçbir ekranda koyu zemin kalmamalı.
+   ============================================================ */
+[data-theme="light"],
+[data-theme="dark"],
+:root {
+  color-scheme: light;
+
+  --color-base-100:         #ffffff;
+  --color-base-200:         #f0f7fc;
+  --color-base-300:         #d9e7f2;
+  --color-base-content:     #16283a;
+
+  --color-primary:          #0284c7;
+  --color-primary-content:  #ffffff;
+  --color-secondary:        #0ea5e9;
+  --color-secondary-content:#ffffff;
+  --color-accent:           #059669;
+  --color-accent-content:   #ffffff;
+  --color-neutral:          #5a7186;
+  --color-neutral-content:  #ffffff;
+
+  --color-info:             #0ea5e9;
+  --color-info-content:     #ffffff;
+  --color-success:          #059669;
+  --color-success-content:  #ffffff;
+  --color-warning:          #d97706;
+  --color-warning-content:  #ffffff;
+  --color-error:            #dc2626;
+  --color-error-content:    #ffffff;
+
+  --radius-box:      0.875rem;
+  --radius-field:    0.625rem;
+  --radius-selector: 9999px;
+}
 
 /* Base */
 *, *::before, *::after {
@@ -21,6 +80,8 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+  background-color: var(--bg-page);
+  color: var(--text);
 }
 
 a {
@@ -28,83 +89,17 @@ a {
   color: inherit;
 }
 
-/* ============================================================
-   Light mode background
-   ============================================================ */
-:root:not(.dark) body,
-[data-theme="light"] body {
-  background-color: #f1f5f9;
-}
-
-:root:not(.dark) .bg-gray-50,
-[data-theme="light"] .bg-gray-50 {
-  background-color: #f8fafc !important;
-}
-
-/* ============================================================
-   Dark mode — Royal Blue corporate
-   ============================================================ */
-.dark body,
-[data-theme="dark"] body {
-  background-color: #080b14;
-  color: #f1f3f9;
-}
-
-/* Base theme colors from JSX design */
-:root.dark, [data-theme="dark"] {
-  --bg-deep: #080b14;
-  --surface: #0f1322;
-  --surface-alt: #151a2e;
-  --elevated: #1c2238;
-  --border-dim: rgba(255, 255, 255, 0.06);
-  --border-strong: rgba(255, 255, 255, 0.12);
-}
-
-/* Force DaisyUI bg-base-* to use Royal Blue palette in dark mode */
-.dark .bg-base-200,
-[data-theme="dark"] .bg-base-200 {
-  background-color: #080b14 !important;
-}
-.dark .bg-base-100,
-[data-theme="dark"] .bg-base-100 {
-  background-color: #0f1322 !important;
-}
-.dark .bg-base-300,
-[data-theme="dark"] .bg-base-300 {
-  background-color: #151a2e !important;
-}
-
-/* Normalize common gray page wrappers to use Royal Blue palette in dark mode */
-.dark .bg-gray-50,
-.dark .bg-gray-100,
-[data-theme="dark"] .bg-gray-50,
-[data-theme="dark"] .bg-gray-100 {
-  background-color: #080b14 !important;
-}
-
-/* Slate-900 and gray-900 page backgrounds normalize to Royal Blue */
-.dark .dark\:bg-gray-900,
-.dark .dark\:bg-slate-900 {
-  background-color: #080b14 !important;
-}
-
-/* Surface-level backgrounds */
-.dark .dark\:bg-slate-800,
-.dark .dark\:bg-gray-800 {
-  background-color: #151a2e !important;
-}
-
-/* White card backgrounds */
-.dark .dark\:bg-gray-800\/50,
-.dark .dark\:bg-slate-800\/50 {
-  background-color: rgba(21, 26, 46, 0.5) !important;
+/* Eski gri sayfa sarmalayıcılarını ferah zemine normalize et */
+.bg-gray-50,
+.bg-slate-50 {
+  background-color: var(--surface-alt);
 }
 
 /* ============================================================
    Focus ring — accessible, not intrusive
    ============================================================ */
 :focus-visible {
-  outline: 2px solid #6b8aff;
+  outline: 2px solid var(--brand);
   outline-offset: 2px;
   border-radius: 4px;
 }
@@ -120,17 +115,11 @@ a {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #94a3b8;
+  background: #c8dcea;
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #64748b;
-}
-.dark ::-webkit-scrollbar-thumb {
-  background: #334155;
-}
-.dark ::-webkit-scrollbar-thumb:hover {
-  background: #475569;
+  background: #a9c7dc;
 }
 
 /* ============================================================
@@ -181,30 +170,20 @@ button:active:not([disabled]) {
    Card base utility
    ============================================================ */
 .app-card {
-  background-color: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 0.75rem;
-  box-shadow: 0 1px 4px 0 rgb(0 0 0 / 0.06), 0 1px 2px -1px rgb(0 0 0 / 0.04);
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 0.875rem;
+  box-shadow: 0 1px 3px rgba(22, 40, 58, 0.05);
   padding: 1rem;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
-.dark .app-card, [data-theme="dark"] .app-card {
-  background-color: #0f1322;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  box-shadow: 0 4px 20px -4px rgba(0, 0, 0, 0.5);
 }
 .app-card.hoverable {
   cursor: pointer;
 }
 .app-card.hoverable:hover {
-  border-color: #a3aeff;
-  box-shadow: 0 4px 12px 0 rgb(107 138 255 / 0.12);
+  border-color: #7cc9ec;
+  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.12);
   transform: translateY(-2px);
-}
-.dark .app-card.hoverable:hover, [data-theme="dark"] .app-card.hoverable:hover {
-  border-color: rgba(107, 138, 255, 0.35);
-  background-color: #151a2e;
-  box-shadow: 0 8px 30px -4px rgba(0, 0, 0, 0.6);
 }
 
 /* ============================================================
@@ -212,95 +191,84 @@ button:active:not([disabled]) {
    ============================================================ */
 .page-title {
   font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
-  font-size: 1.125rem;
-  font-weight: 700;
+  font-size: 1.25rem;
+  font-weight: 800;
   line-height: 1.2;
   letter-spacing: -0.3px;
-  color: #0f172a;
-}
-.dark .page-title {
-  color: #f1f3f9;
+  color: var(--text);
 }
 .page-subtitle {
   font-size: 0.8125rem;
-  color: #64748b;
+  color: var(--text-muted);
   margin-top: 0.25rem;
   font-weight: 500;
-}
-.dark .page-subtitle {
-  color: #9aa0b4;
 }
 
 /* ============================================================
    Status badge colors (semantic)
    ============================================================ */
 .badge-active   { background: #dcfce7; color: #15803d; }
-.badge-passive  { background: #f1f5f9; color: #475569; }
-.badge-pending  { background: #fef9c3; color: #a16207; }
+.badge-passive  { background: #ecf3f9; color: #5a7186; }
+.badge-pending  { background: #fef3c7; color: #b45309; }
 .badge-overdue  { background: #fee2e2; color: #b91c1c; }
-.badge-info     { background: #dbeafe; color: #1d4ed8; }
-
-.dark .badge-active   { background: rgba(94, 234, 212, 0.12); color: #5eead4; }
-.dark .badge-passive  { background: rgba(255,255,255,0.06); color: #9aa0b4; }
-.dark .badge-pending  { background: rgba(252, 211, 77, 0.12); color: #fcd34d; }
-.dark .badge-overdue  { background: rgba(251, 113, 133, 0.12); color: #fb7185; }
-.dark .badge-info     { background: rgba(147, 197, 253, 0.12); color: #93c5fd; }
+.badge-info     { background: #e0f0fa; color: #0369a1; }
 
 /* ============================================================
    Table row hover
    ============================================================ */
 .table-row-hover:hover {
-  background-color: #f8fafc;
+  background-color: var(--surface-alt);
   cursor: pointer;
 }
-.dark .table-row-hover:hover {
-  background-color: #151a2e;
-}
 
 /* ============================================================
-   Dark theme input enhancement
+   Form controls
    ============================================================ */
-.dark .input,
-.dark .select,
-.dark .textarea {
-  background-color: #151a2e;
-  border-color: rgba(255,255,255,0.1);
-  color: #f1f3f9;
+/* Yalnızca kenarlık ve odak halkası — arka plan/metin rengini utility
+   sınıflarına bırak, aksi halde `bg-base-200` (disabled) veya
+   `text-emerald-600` gibi bilinçli seçimler eziliyor. */
+.input,
+.select,
+.textarea {
+  border-color: #c8dcea;
 }
-.dark .input::placeholder,
-.dark .textarea::placeholder {
-  color: #626885;
+.input::placeholder,
+.textarea::placeholder {
+  color: var(--text-faint);
 }
-
-/* ============================================================
-   Dark theme: normalize border colors
-   ============================================================ */
-.dark .dark\:border-slate-700,
-.dark .dark\:border-gray-700 {
-  border-color: rgba(255, 255, 255, 0.07) !important;
-}
-.dark .dark\:border-slate-800,
-.dark .dark\:border-gray-800 {
-  border-color: rgba(255, 255, 255, 0.05) !important;
-}
-
-/* ============================================================
-   Scrollbar — dark theme
-   ============================================================ */
-.dark ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
-}
-.dark ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.15);
-}
-
-/* ============================================================
-   Input focus enhancement
-   ============================================================ */
 .input:focus,
 .select:focus,
 .textarea:focus {
-  box-shadow: 0 0 0 3px rgb(59 130 246 / 0.15);
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+  outline: none;
+}
+
+.modal-box .input,
+.modal-box .select,
+.modal-box .textarea {
+  border-radius: 0.75rem;
+  transition: all 0.2s ease;
+}
+.modal-box .label-text {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+.modal-box .btn-primary {
+  background: linear-gradient(135deg, #0284c7 0%, #0ea5e9 100%);
+  border: none;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25);
+}
+.modal-box .btn-ghost {
+  color: var(--text-muted);
+}
+.modal-box .btn-ghost:hover {
+  background-color: var(--border-soft);
+  color: var(--text);
 }
 
 /* ============================================================
@@ -316,53 +284,9 @@ button:active:not([disabled]) {
 .font-cormorantSC {
   font-family: 'Cormorant SC', serif;
 }
-/* ============================================================
-   Premium Modal Inputs & Form Controls
-   ============================================================ */
-.dark .modal-box .input,
-.dark .modal-box .select,
-.dark .modal-box .textarea {
-  background-color: rgba(255, 255, 255, 0.03) !important;
-  border-color: rgba(255, 255, 255, 0.08) !important;
-  color: #f1f3f9 !important;
-  border-radius: 0.75rem;
-  transition: all 0.2s ease;
-}
-
-.dark .modal-box .input:focus,
-.dark .modal-box .select:focus,
-.dark .modal-box .textarea:focus {
-  background-color: rgba(255, 255, 255, 0.05) !important;
-  border-color: rgba(107, 138, 255, 0.5) !important;
-  box-shadow: 0 0 0 4px rgba(107, 138, 255, 0.1);
-  outline: none;
-}
-
-.dark .modal-box .label-text {
-  color: #9aa0b4;
-  font-size: 0.75rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.025em;
-}
-
-.dark .modal-box .btn-primary {
-  background: linear-gradient(135deg, #6b8aff 0%, #4c6ef5 100%);
-  border: none;
-  box-shadow: 0 4px 12px rgba(107, 138, 255, 0.25);
-}
-
-.dark .modal-box .btn-ghost {
-  color: #9aa0b4;
-}
-
-.dark .modal-box .btn-ghost:hover {
-  background-color: rgba(255, 255, 255, 0.05);
-  color: #f1f3f9;
-}
 
 /* ============================================================
-   Royal Blue Premium — New Standard
+   Gök Mavisi Kurumsal — yardımcı sınıflar
    ============================================================ */
 
 /* High-Density Typography */
@@ -377,27 +301,28 @@ button:active:not([disabled]) {
   font-weight: 900;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  color: #626885;
+  color: var(--text-faint);
 }
 
-/* Premium Card & Backgrounds */
+/* Marka gradyanı — öne çıkan stat kartı, progress */
 .bg-brand-gradient {
-  background: linear-gradient(135deg, #6B8AFF 0%, #4F6DFF 100%);
+  background-image: linear-gradient(135deg, #0284c7 0%, #0ea5e9 100%);
 }
 
 .app-card-premium {
-  background: rgba(15, 19, 34, 0.8);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+  /* background-color, not the shorthand — bg-brand-gradient must survive
+     when both classes sit on the same element */
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: 0 4px 16px rgba(22, 40, 58, 0.06);
   border-radius: 1.5rem;
 }
 
-.dark .glass-panel {
-  background: rgba(255, 255, 255, 0.02);
+.glass-panel {
+  background: rgba(255, 255, 255, 0.72);
   backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid var(--border);
 }
 
 /* Transitions & Animations */
@@ -407,23 +332,51 @@ button:active:not([disabled]) {
 
 @keyframes slide-up {
   from { transform: translateY(20px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+  to   { transform: translateY(0); opacity: 1; }
 }
 
+/* Aktif nav — pill stili (alt çizgi ::after efekti kaldırıldı) */
 .active-nav-item {
-  color: #6B8AFF;
-  position: relative;
+  color: var(--brand);
+  background: rgba(2, 132, 199, 0.08);
+  border-radius: 0.75rem;
 }
 
-.active-nav-item::after {
-  content: '';
-  position: absolute;
-  top: -8px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 20px;
-  height: 3px;
-  background: #6B8AFF;
-  border-radius: 99px;
-  box-shadow: 0 0 10px rgba(107, 138, 255, 0.5);
+/* ============================================================
+   Buton stilleri
+   ============================================================ */
+/* Birincil butonun rengi DaisyUI `primary` (#0284c7) tokenından gelir;
+   burada yalnızca markanın gölgesi eklenir — renk/arka planı ezmek,
+   `btn-primary` ile birlikte kullanılan utility sınıflarını bozardı. */
+.btn-primary {
+  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25);
+}
+
+.btn-soft-brand {
+  background-color: rgba(2, 132, 199, 0.08);
+  color: var(--brand);
+  border: 1px solid rgba(2, 132, 199, 0.3);
+  border-radius: 0.625rem;
+}
+.btn-soft-brand:hover {
+  background-color: rgba(2, 132, 199, 0.14);
+}
+
+.btn-danger-soft {
+  background-color: #fee2e2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+  border-radius: 0.625rem;
+}
+.btn-danger-soft:hover {
+  background-color: #fecaca;
+}
+
+/* Tablo içi küçük aksiyon butonları */
+.btn-table-action {
+  padding: 6px 12px;
+  font-size: 11px;
+  font-weight: 800;
+  border-radius: 8px;
+  line-height: 1.2;
 }

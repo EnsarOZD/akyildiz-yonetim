@@ -10,7 +10,7 @@
     <div
       v-for="error in errors"
       :key="error.id"
-      class="group relative bg-[#0f1322]/90 backdrop-blur-xl border border-red-500/20 shadow-2xl shadow-red-500/10 rounded-2xl p-4 overflow-hidden animate-slide-in"
+      class="group relative bg-[#ffffff]/90 backdrop-blur-xl border border-red-500/20 shadow-2xl shadow-red-500/10 rounded-2xl p-4 overflow-hidden animate-slide-in"
     >
       <!-- Background Accent Glow -->
       <div class="absolute -right-4 -top-4 w-12 h-12 bg-red-500/10 blur-2xl rounded-full"></div>
@@ -25,10 +25,10 @@
         </div>
 
         <div class="flex-1 min-w-0 pr-6">
-          <h4 class="text-[13px] font-black text-[#f1f3f9] uppercase tracking-tight truncate">
+          <h4 class="text-[13px] font-black text-[#16283a] uppercase tracking-tight truncate">
             {{ error.title }}
           </h4>
-          <p class="text-[11px] text-[#9aa0b4] font-medium leading-relaxed mt-1 line-clamp-2 italic">
+          <p class="text-[11px] text-[#5a7186] font-medium leading-relaxed mt-1 line-clamp-2 italic">
             {{ error.message }}
           </p>
         </div>
@@ -36,7 +36,7 @@
         <!-- Close Button -->
         <button
           @click="removeError(error.id)"
-          class="absolute top-4 right-4 text-[#626885] hover:text-red-400 transition-colors duration-200"
+          class="absolute top-4 right-4 text-[#8298ab] hover:text-red-600 transition-colors duration-200"
         >
           <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -45,7 +45,7 @@
       </div>
 
       <!-- Actions -->
-      <div v-if="error.action" class="flex items-center gap-3 mt-4 pt-3 border-t border-white/[0.05]">
+      <div v-if="error.action" class="flex items-center gap-3 mt-4 pt-3 border-t border-[#ecf3f9]">
         <button
           @click="handleAction(error)"
           class="text-[10px] font-black uppercase tracking-widest bg-red-500 text-white px-3 py-1.5 rounded-lg hover:bg-red-600 active:scale-95 transition-all outline-none"
@@ -55,7 +55,7 @@
         
         <button
           @click="showDetails(error)"
-          class="text-[10px] font-black uppercase tracking-widest text-[#626885] hover:text-brand-400 transition-colors outline-none"
+          class="text-[10px] font-black uppercase tracking-widest text-[#8298ab] hover:text-brand-600 transition-colors outline-none"
         >
           Teknik Detaylar
         </button>
@@ -82,17 +82,17 @@
   >
     <div class="space-y-6">
       <div class="bg-red-500/5 border border-red-500/10 rounded-2xl p-5 space-y-2">
-        <h4 class="text-xs font-black text-red-400 uppercase tracking-widest">Hata Özeti</h4>
-        <p class="text-sm font-bold text-[#f1f3f9] leading-relaxed">
+        <h4 class="text-xs font-black text-red-600 uppercase tracking-widest">Hata Özeti</h4>
+        <p class="text-sm font-bold text-[#16283a] leading-relaxed">
           {{ selectedError.title }}: {{ selectedError.message }}
         </p>
       </div>
 
       <!-- Technical Code Block -->
       <div v-if="selectedError.technicalDetails" class="space-y-2">
-        <h4 class="text-[10px] font-black text-[#626885] uppercase tracking-widest px-1">Teknik Sistem Yanıtı</h4>
-        <div class="bg-[#080b14] border border-white/[0.08] rounded-2xl p-5 overflow-hidden group">
-          <pre class="text-[10px] font-mono text-brand-400 custom-scrollbar overflow-x-auto leading-relaxed max-h-64 scroll-smooth">
+        <h4 class="text-[10px] font-black text-[#8298ab] uppercase tracking-widest px-1">Teknik Sistem Yanıtı</h4>
+        <div class="bg-[#f0f7fc] border border-[#d9e7f2] rounded-2xl p-5 overflow-hidden group">
+          <pre class="text-[10px] font-mono text-brand-600 custom-scrollbar overflow-x-auto leading-relaxed max-h-64 scroll-smooth">
             {{ JSON.stringify(selectedError.technicalDetails, null, 2) }}
           </pre>
         </div>
@@ -100,13 +100,13 @@
 
       <!-- Meta Info -->
       <div class="grid grid-cols-2 gap-4">
-        <div class="bg-white/[0.02] border border-white/[0.08] rounded-xl p-3">
-          <span class="text-[9px] font-black text-[#626885] uppercase tracking-widest block mb-1">Zaman Damgası</span>
-          <span class="text-[10px] font-bold text-[#9aa0b4]">{{ formatDate(selectedError.timestamp) }}</span>
+        <div class="bg-[#f6fafd] border border-[#d9e7f2] rounded-xl p-3">
+          <span class="text-[9px] font-black text-[#8298ab] uppercase tracking-widest block mb-1">Zaman Damgası</span>
+          <span class="text-[10px] font-bold text-[#5a7186]">{{ formatDate(selectedError.timestamp) }}</span>
         </div>
-        <div v-if="selectedError.context?.component" class="bg-white/[0.02] border border-white/[0.08] rounded-xl p-3">
-          <span class="text-[9px] font-black text-[#626885] uppercase tracking-widest block mb-1">Kaynak Modül</span>
-          <span class="text-[10px] font-bold text-[#9aa0b4]">{{ selectedError.context.component }}</span>
+        <div v-if="selectedError.context?.component" class="bg-[#f6fafd] border border-[#d9e7f2] rounded-xl p-3">
+          <span class="text-[9px] font-black text-[#8298ab] uppercase tracking-widest block mb-1">Kaynak Modül</span>
+          <span class="text-[10px] font-bold text-[#5a7186]">{{ selectedError.context.component }}</span>
         </div>
       </div>
     </div>

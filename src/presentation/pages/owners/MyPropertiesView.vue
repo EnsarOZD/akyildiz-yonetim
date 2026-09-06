@@ -20,54 +20,54 @@
         <!-- ─── Özet Kartları ─── -->
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <div class="app-card p-5" :class="ownerTotalDebt > 0 ? 'border-l-4 border-l-red-500' : 'border-l-4 border-l-emerald-500'">
-            <p class="text-xs font-semibold text-slate-400 dark:text-[#9aa0b4] uppercase tracking-wider mb-1">Kendi Borcum</p>
+            <p class="text-xs font-semibold text-[#8298ab] uppercase tracking-wider mb-1">Kendi Borcum</p>
             <p class="text-2xl font-black" :class="ownerTotalDebt > 0 ? 'text-red-500' : 'text-emerald-500'">
               {{ formatCurrency(ownerTotalDebt) }}
             </p>
             <span class="mt-2 inline-block text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full"
-              :class="ownerTotalDebt > 0 ? 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' : 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400'">
+              :class="ownerTotalDebt > 0 ? 'bg-red-100 text-red-600' : 'bg-emerald-100 text-emerald-600'">
               {{ ownerTotalDebt > 0 ? `${ownerDebts.length} kalem` : 'Borç Yok' }}
             </span>
           </div>
 
           <div class="app-card p-5">
-            <p class="text-xs font-semibold text-slate-400 dark:text-[#9aa0b4] uppercase tracking-wider mb-1">Kiracı Borçları</p>
+            <p class="text-xs font-semibold text-[#8298ab] uppercase tracking-wider mb-1">Kiracı Borçları</p>
             <p class="text-2xl font-black text-amber-500">{{ formatCurrency(tenantTotalDebt) }}</p>
-            <p class="mt-2 text-[10px] font-bold text-slate-400 dark:text-[#626885] uppercase tracking-wider">
+            <p class="mt-2 text-[10px] font-bold text-[#8298ab] uppercase tracking-wider">
               {{ tenantDebts.length }} kalem
             </p>
           </div>
 
           <div class="app-card p-5">
-            <p class="text-xs font-semibold text-slate-400 dark:text-[#9aa0b4] uppercase tracking-wider mb-1">Vadesi Geçen</p>
-            <p class="text-2xl font-black" :class="ownerOverdueDebt > 0 ? 'text-orange-500' : 'text-slate-300 dark:text-[#626885]'">
+            <p class="text-xs font-semibold text-[#8298ab] uppercase tracking-wider mb-1">Vadesi Geçen</p>
+            <p class="text-2xl font-black" :class="ownerOverdueDebt > 0 ? 'text-orange-500' : 'text-[#8298ab]'">
               {{ formatCurrency(ownerOverdueDebt) }}
             </p>
-            <p class="mt-2 text-[10px] text-slate-400 dark:text-[#626885]">
+            <p class="mt-2 text-[10px] text-[#8298ab]">
               {{ ownerOverdueItems.length > 0 ? `${ownerOverdueItems.length} kalem gecikmiş` : 'Gecikmiş kalem yok' }}
             </p>
           </div>
 
           <div class="app-card p-5">
-            <p class="text-xs font-semibold text-slate-400 dark:text-[#9aa0b4] uppercase tracking-wider mb-1">Son Ödeme</p>
-            <p class="text-lg font-bold text-slate-800 dark:text-[#f1f3f9] mt-1 truncate">
+            <p class="text-xs font-semibold text-[#8298ab] uppercase tracking-wider mb-1">Son Ödeme</p>
+            <p class="text-lg font-bold text-slate-800 mt-1 truncate">
               {{ lastPaymentDate || '—' }}
             </p>
-            <p v-if="lastPaymentAmount > 0" class="mt-1 text-xs text-emerald-600 dark:text-emerald-400 font-semibold">
+            <p v-if="lastPaymentAmount > 0" class="mt-1 text-xs text-emerald-600 font-semibold">
               {{ formatCurrency(lastPaymentAmount) }}
             </p>
-            <p v-else class="mt-1 text-xs text-slate-400">Ödeme kaydı yok</p>
+            <p v-else class="mt-1 text-xs text-[#8298ab]">Ödeme kaydı yok</p>
           </div>
         </div>
 
         <!-- ─── Kendi Borçlarım ─── -->
         <div class="app-card overflow-hidden">
           <!-- Header + Arama/Filtre -->
-          <div class="px-5 py-4 border-b border-slate-100 dark:border-white/[0.05] space-y-3">
+          <div class="px-5 py-4 border-b border-slate-100 space-y-3">
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-2">
                 <span class="w-1 h-5 bg-red-500 rounded-full"></span>
-                <h2 class="text-sm font-bold text-slate-800 dark:text-[#f1f3f9]">Kendi Borçlarım</h2>
+                <h2 class="text-sm font-bold text-slate-800">Kendi Borçlarım</h2>
               </div>
               <span v-if="ownerDebts.length > 0" class="badge-overdue text-[10px] font-bold px-2.5 py-1 rounded-full">
                 {{ ownerDebts.length }} kalem
@@ -77,7 +77,7 @@
             <div v-if="ownerDebts.length > 0" class="flex flex-col sm:flex-row gap-2">
               <!-- Arama -->
               <div class="relative flex-1">
-                <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#8298ab]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                 </svg>
                 <input
@@ -85,14 +85,14 @@
                   @input="ownerPage = 1"
                   type="text"
                   placeholder="Ünite, tür veya dönem ara..."
-                  class="w-full pl-8 pr-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-white/[0.08] bg-white dark:bg-[#151a2e] text-slate-700 dark:text-[#f1f3f9] placeholder-slate-400 dark:placeholder-[#626885] focus:outline-none focus:border-brand-500"
+                  class="w-full pl-8 pr-3 py-2 text-xs rounded-lg border border-slate-200 bg-white text-slate-700 placeholder-slate-400 focus:outline-none focus:border-brand-600"
                 />
               </div>
               <!-- Tür filtresi -->
               <select
                 v-model="ownerTypeFilter"
                 @change="ownerPage = 1"
-                class="text-xs rounded-lg border border-slate-200 dark:border-white/[0.08] bg-white dark:bg-[#151a2e] text-slate-700 dark:text-[#f1f3f9] px-3 py-2 focus:outline-none focus:border-brand-500">
+                class="text-xs rounded-lg border border-slate-200 bg-white text-slate-700 px-3 py-2 focus:outline-none focus:border-brand-600">
                 <option value="">Tüm Türler</option>
                 <option value="Aidat">Aidat</option>
                 <option value="Electricity">Elektrik</option>
@@ -102,7 +102,7 @@
               <select
                 v-model="ownerStatusFilter"
                 @change="ownerPage = 1"
-                class="text-xs rounded-lg border border-slate-200 dark:border-white/[0.08] bg-white dark:bg-[#151a2e] text-slate-700 dark:text-[#f1f3f9] px-3 py-2 focus:outline-none focus:border-brand-500">
+                class="text-xs rounded-lg border border-slate-200 bg-white text-slate-700 px-3 py-2 focus:outline-none focus:border-brand-600">
                 <option value="">Tüm Durumlar</option>
                 <option value="overdue">Gecikmiş</option>
                 <option value="upcoming">Vadesi Gelmemiş</option>
@@ -111,31 +111,31 @@
           </div>
 
           <div v-if="ownerDebts.length === 0" class="px-5 py-10 flex flex-col items-center gap-2 text-center">
-            <div class="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+            <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
               </svg>
             </div>
-            <p class="text-sm font-semibold text-slate-700 dark:text-[#f1f3f9]">Tebrikler!</p>
-            <p class="text-xs text-slate-400">Ödenmemiş kişisel borcunuz bulunmamaktadır.</p>
+            <p class="text-sm font-semibold text-slate-700">Tebrikler!</p>
+            <p class="text-xs text-[#8298ab]">Ödenmemiş kişisel borcunuz bulunmamaktadır.</p>
           </div>
 
           <template v-else>
             <!-- Sonuç yok -->
-            <div v-if="ownerFiltered.length === 0" class="px-5 py-8 text-center text-sm text-slate-400">
+            <div v-if="ownerFiltered.length === 0" class="px-5 py-8 text-center text-sm text-[#8298ab]">
               Arama kriterlerine uygun borç bulunamadı.
             </div>
 
-            <div v-else class="divide-y divide-slate-50 dark:divide-white/[0.03]">
+            <div v-else class="divide-y divide-[#ecf3f9]">
               <div v-for="debt in ownerPaged" :key="debt.id"
-                class="px-5 py-4 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-white/[0.02] transition-colors">
+                class="px-5 py-4 flex items-center justify-between hover:bg-slate-50 transition-colors">
                 <div class="flex items-center gap-3">
                   <div class="w-9 h-9 rounded-xl flex items-center justify-center text-base shrink-0" :class="debtTypeClass(debt.type)">
                     {{ debtTypeIcon(debt.type) }}
                   </div>
                   <div>
-                    <p class="text-sm font-semibold text-slate-800 dark:text-[#f1f3f9]">{{ debtTypeLabel(debt.type) }}</p>
-                    <p class="text-xs text-slate-400 dark:text-[#9aa0b4] mt-0.5">
+                    <p class="text-sm font-semibold text-slate-800">{{ debtTypeLabel(debt.type) }}</p>
+                    <p class="text-xs text-[#8298ab] mt-0.5">
                       {{ debt.periodMonth }}/{{ debt.periodYear }}
                       <span v-if="debt.flatCode" class="mx-1">·</span>
                       <span v-if="debt.flatCode">Ünite {{ debt.flatCode }}</span>
@@ -145,7 +145,7 @@
                 <div class="text-right">
                   <p class="text-sm font-bold text-red-500">{{ formatCurrency(debt.remainingAmount) }}</p>
                   <span v-if="isOverdue(debt)" class="text-[10px] font-bold text-orange-500 uppercase">Gecikmiş</span>
-                  <p v-else class="text-[10px] text-slate-400">Vade: {{ formatDate(debt.dueDate) }}</p>
+                  <p v-else class="text-[10px] text-[#8298ab]">Vade: {{ formatDate(debt.dueDate) }}</p>
                 </div>
               </div>
             </div>
@@ -165,11 +165,11 @@
         <!-- ─── Kiracıların Borçları ─── -->
         <div class="app-card overflow-hidden">
           <!-- Header + Arama/Filtre -->
-          <div class="px-5 py-4 border-b border-slate-100 dark:border-white/[0.05] space-y-3">
+          <div class="px-5 py-4 border-b border-slate-100 space-y-3">
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-2">
                 <span class="w-1 h-5 bg-amber-500 rounded-full"></span>
-                <h2 class="text-sm font-bold text-slate-800 dark:text-[#f1f3f9]">Kiracıların Borçları</h2>
+                <h2 class="text-sm font-bold text-slate-800">Kiracıların Borçları</h2>
               </div>
               <span v-if="tenantDebts.length > 0" class="badge-pending text-[10px] font-bold px-2.5 py-1 rounded-full">
                 {{ tenantDebts.length }} kalem
@@ -178,7 +178,7 @@
 
             <div v-if="tenantDebts.length > 0" class="flex flex-col sm:flex-row gap-2">
               <div class="relative flex-1">
-                <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#8298ab]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                 </svg>
                 <input
@@ -186,13 +186,13 @@
                   @input="tenantPage = 1"
                   type="text"
                   placeholder="Kiracı, ünite veya dönem ara..."
-                  class="w-full pl-8 pr-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-white/[0.08] bg-white dark:bg-[#151a2e] text-slate-700 dark:text-[#f1f3f9] placeholder-slate-400 dark:placeholder-[#626885] focus:outline-none focus:border-brand-500"
+                  class="w-full pl-8 pr-3 py-2 text-xs rounded-lg border border-slate-200 bg-white text-slate-700 placeholder-slate-400 focus:outline-none focus:border-brand-600"
                 />
               </div>
               <select
                 v-model="tenantTypeFilter"
                 @change="tenantPage = 1"
-                class="text-xs rounded-lg border border-slate-200 dark:border-white/[0.08] bg-white dark:bg-[#151a2e] text-slate-700 dark:text-[#f1f3f9] px-3 py-2 focus:outline-none focus:border-brand-500">
+                class="text-xs rounded-lg border border-slate-200 bg-white text-slate-700 px-3 py-2 focus:outline-none focus:border-brand-600">
                 <option value="">Tüm Türler</option>
                 <option value="Aidat">Aidat</option>
                 <option value="Electricity">Elektrik</option>
@@ -201,7 +201,7 @@
               <select
                 v-model="tenantStatusFilter"
                 @change="tenantPage = 1"
-                class="text-xs rounded-lg border border-slate-200 dark:border-white/[0.08] bg-white dark:bg-[#151a2e] text-slate-700 dark:text-[#f1f3f9] px-3 py-2 focus:outline-none focus:border-brand-500">
+                class="text-xs rounded-lg border border-slate-200 bg-white text-slate-700 px-3 py-2 focus:outline-none focus:border-brand-600">
                 <option value="">Tüm Durumlar</option>
                 <option value="overdue">Gecikmiş</option>
                 <option value="upcoming">Vadesi Gelmemiş</option>
@@ -210,36 +210,36 @@
           </div>
 
           <div v-if="tenantDebts.length === 0" class="px-5 py-10 text-center">
-            <p class="text-sm text-slate-400">Kiracıya ait açık borç bulunmamaktadır.</p>
+            <p class="text-sm text-[#8298ab]">Kiracıya ait açık borç bulunmamaktadır.</p>
           </div>
 
           <template v-else>
-            <div v-if="tenantFiltered.length === 0" class="px-5 py-8 text-center text-sm text-slate-400">
+            <div v-if="tenantFiltered.length === 0" class="px-5 py-8 text-center text-sm text-[#8298ab]">
               Arama kriterlerine uygun borç bulunamadı.
             </div>
 
-            <div v-else class="divide-y divide-slate-50 dark:divide-white/[0.03]">
+            <div v-else class="divide-y divide-[#ecf3f9]">
               <div v-for="debt in tenantPaged" :key="debt.id"
-                class="px-5 py-4 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-white/[0.02] transition-colors">
+                class="px-5 py-4 flex items-center justify-between hover:bg-slate-50 transition-colors">
                 <div class="flex items-center gap-3">
                   <div class="w-9 h-9 rounded-xl flex items-center justify-center text-base shrink-0" :class="debtTypeClass(debt.type)">
                     {{ debtTypeIcon(debt.type) }}
                   </div>
                   <div>
-                    <p class="text-sm font-semibold text-slate-800 dark:text-[#f1f3f9]">{{ debtTypeLabel(debt.type) }}</p>
-                    <p class="text-xs text-slate-400 dark:text-[#9aa0b4] mt-0.5">
+                    <p class="text-sm font-semibold text-slate-800">{{ debtTypeLabel(debt.type) }}</p>
+                    <p class="text-xs text-[#8298ab] mt-0.5">
                       {{ debt.periodMonth }}/{{ debt.periodYear }}
                       <span v-if="debt.flatCode" class="mx-1">·</span>
                       <span v-if="debt.flatCode">Ünite {{ debt.flatCode }}</span>
                       <span v-if="debt.tenantName" class="mx-1">·</span>
-                      <span v-if="debt.tenantName" class="text-amber-600 dark:text-amber-400">{{ debt.tenantName }}</span>
+                      <span v-if="debt.tenantName" class="text-amber-600">{{ debt.tenantName }}</span>
                     </p>
                   </div>
                 </div>
                 <div class="text-right">
-                  <p class="text-sm font-bold text-amber-600 dark:text-amber-400">{{ formatCurrency(debt.remainingAmount) }}</p>
+                  <p class="text-sm font-bold text-amber-600">{{ formatCurrency(debt.remainingAmount) }}</p>
                   <span v-if="isOverdue(debt)" class="text-[10px] font-bold text-orange-500 uppercase">Gecikmiş</span>
-                  <p v-else class="text-[10px] text-slate-400">Vade: {{ formatDate(debt.dueDate) }}</p>
+                  <p v-else class="text-[10px] text-[#8298ab]">Vade: {{ formatDate(debt.dueDate) }}</p>
                 </div>
               </div>
             </div>
@@ -257,17 +257,17 @@
 
         <!-- ─── Ödemeler ─── -->
         <div class="app-card overflow-hidden">
-          <div class="px-5 py-4 border-b border-slate-100 dark:border-white/[0.05] space-y-3">
+          <div class="px-5 py-4 border-b border-slate-100 space-y-3">
             <div class="flex items-center justify-between">
-              <h2 class="text-sm font-bold text-slate-800 dark:text-[#f1f3f9]">Ödemeler</h2>
-              <span class="text-[10px] font-bold text-slate-400 dark:text-[#626885] uppercase tracking-wider">
+              <h2 class="text-sm font-bold text-slate-800">Ödemeler</h2>
+              <span class="text-[10px] font-bold text-[#8298ab] uppercase tracking-wider">
                 {{ payments.length }} kayıt
               </span>
             </div>
 
             <div v-if="payments.length > 0" class="flex flex-col sm:flex-row gap-2">
               <div class="relative flex-1">
-                <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#8298ab]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                 </svg>
                 <input
@@ -275,46 +275,46 @@
                   @input="paymentPage = 1"
                   type="text"
                   placeholder="Açıklama veya tür ara..."
-                  class="w-full pl-8 pr-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-white/[0.08] bg-white dark:bg-[#151a2e] text-slate-700 dark:text-[#f1f3f9] placeholder-slate-400 dark:placeholder-[#626885] focus:outline-none focus:border-brand-500"
+                  class="w-full pl-8 pr-3 py-2 text-xs rounded-lg border border-slate-200 bg-white text-slate-700 placeholder-slate-400 focus:outline-none focus:border-brand-600"
                 />
               </div>
               <!-- Yıl filtresi -->
               <select
                 v-model="paymentYearFilter"
                 @change="paymentPage = 1"
-                class="text-xs rounded-lg border border-slate-200 dark:border-white/[0.08] bg-white dark:bg-[#151a2e] text-slate-700 dark:text-[#f1f3f9] px-3 py-2 focus:outline-none focus:border-brand-500">
+                class="text-xs rounded-lg border border-slate-200 bg-white text-slate-700 px-3 py-2 focus:outline-none focus:border-brand-600">
                 <option value="">Tüm Yıllar</option>
                 <option v-for="y in paymentYears" :key="y" :value="y">{{ y }}</option>
               </select>
             </div>
           </div>
 
-          <div v-if="payments.length === 0" class="px-5 py-10 text-center text-sm text-slate-400">
+          <div v-if="payments.length === 0" class="px-5 py-10 text-center text-sm text-[#8298ab]">
             Henüz ödeme kaydı bulunmuyor.
           </div>
 
           <template v-else>
-            <div v-if="paymentFiltered.length === 0" class="px-5 py-8 text-center text-sm text-slate-400">
+            <div v-if="paymentFiltered.length === 0" class="px-5 py-8 text-center text-sm text-[#8298ab]">
               Arama kriterlerine uygun ödeme bulunamadı.
             </div>
 
-            <div v-else class="divide-y divide-slate-50 dark:divide-white/[0.03]">
+            <div v-else class="divide-y divide-[#ecf3f9]">
               <div v-for="payment in paymentPaged" :key="payment.id"
-                class="px-5 py-3.5 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-white/[0.02] transition-colors">
+                class="px-5 py-3.5 flex items-center justify-between hover:bg-slate-50 transition-colors">
                 <div class="flex items-center gap-3">
-                  <div class="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center flex-shrink-0">
+                  <div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center flex-shrink-0">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
                   </div>
                   <div>
-                    <p class="text-sm font-semibold text-slate-800 dark:text-[#f1f3f9]">
+                    <p class="text-sm font-semibold text-slate-800">
                       {{ payment.description || payment.type || 'Ödeme' }}
                     </p>
-                    <p class="text-xs text-slate-400 dark:text-[#9aa0b4]">{{ formatDate(payment.paymentDate || payment.date) }}</p>
+                    <p class="text-xs text-[#8298ab]">{{ formatDate(payment.paymentDate || payment.date) }}</p>
                   </div>
                 </div>
-                <span class="text-sm font-bold text-emerald-600 dark:text-emerald-400">+{{ formatCurrency(payment.amount) }}</span>
+                <span class="text-sm font-bold text-emerald-600">+{{ formatCurrency(payment.amount) }}</span>
               </div>
             </div>
 
@@ -491,14 +491,14 @@ const debtTypeIcon = (type) => {
 
 const debtTypeClass = (type) => {
   const map = {
-    0: 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600',
-    1: 'bg-amber-50 dark:bg-amber-900/20 text-amber-600',
-    2: 'bg-brand-50 dark:bg-brand-500/[0.08] text-brand-600',
-    Aidat: 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600',
-    Electricity: 'bg-amber-50 dark:bg-amber-900/20 text-amber-600',
-    Water: 'bg-brand-50 dark:bg-brand-500/[0.08] text-brand-600',
+    0: 'bg-emerald-50 text-emerald-600',
+    1: 'bg-amber-50 text-amber-600',
+    2: 'bg-brand-50 text-brand-600',
+    Aidat: 'bg-emerald-50 text-emerald-600',
+    Electricity: 'bg-amber-50 text-amber-600',
+    Water: 'bg-brand-50 text-brand-600',
   }
-  return map[type] ?? 'bg-slate-50 dark:bg-[#1c2238] text-gray-500'
+  return map[type] ?? 'bg-slate-50 text-gray-500'
 }
 
 // ─── Data ────────────────────────────────────────────────────────────────────

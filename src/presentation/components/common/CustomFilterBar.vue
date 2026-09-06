@@ -19,15 +19,15 @@
           </span>
           <span v-else>Tip Seç</span>
         </ListboxButton>
-        <ListboxOptions class="absolute z-10 mt-1 w-full bg-white dark:bg-[#151a2e] border border-gray-200 dark:border-white/[0.07] rounded-md shadow-lg max-h-60 overflow-auto focus:outline-none">
+        <ListboxOptions class="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-auto focus:outline-none">
           <ListboxOption
             v-for="opt in selectTypeOptions"
             :key="opt.value"
             :value="opt.value"
-            class="cursor-pointer select-none relative py-2 pl-8 pr-4 hover:bg-brand-100 dark:hover:bg-blue-900/30"
+            class="cursor-pointer select-none relative py-2 pl-8 pr-4 hover:bg-brand-100"
           >
             <span class="absolute left-2">{{ opt.icon }}</span>
-            <span :class="[selectedType === opt.value ? 'font-semibold text-brand-700 dark:text-brand-300' : 'text-gray-900 dark:text-[#f1f3f9]']">
+            <span :class="[selectedType === opt.value ? 'font-semibold text-brand-700' : 'text-gray-900']">
               {{ opt.label }}
             </span>
           </ListboxOption>

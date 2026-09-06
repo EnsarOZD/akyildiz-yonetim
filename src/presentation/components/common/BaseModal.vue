@@ -2,20 +2,20 @@
   <dialog v-if="modelValue" class="modal" open @keydown.esc="handleClose">
     <div
       ref="modalBoxRef"
-      class="modal-box flex flex-col p-0 w-full max-w-[95vw] sm:max-w-lg md:max-w-2xl lg:max-w-4xl bg-[#0f1322] border border-white/[0.08] shadow-2xl"
+      class="modal-box flex flex-col p-0 w-full max-w-[95vw] sm:max-w-lg md:max-w-2xl lg:max-w-4xl bg-[#ffffff] border border-[#d9e7f2] shadow-2xl"
       :class="sizeClass"
       :style="{ maxHeight: 'min(90dvh, 800px)' }"
     >
       <!-- Sticky Header -->
-      <div class="flex-shrink-0 flex items-center justify-between px-6 py-5 border-b border-white/[0.08] bg-white/[0.02] rounded-t-2xl">
-        <h3 class="text-[13px] font-black text-[#f1f3f9] flex items-center gap-3 uppercase tracking-widest">
+      <div class="flex-shrink-0 flex items-center justify-between px-6 py-5 border-b border-[#d9e7f2] bg-[#f6fafd] rounded-t-2xl">
+        <h3 class="text-[13px] font-black text-[#16283a] flex items-center gap-3 uppercase tracking-widest">
           <span v-if="icon" class="text-xl">{{ icon }}</span>
           {{ title }}
         </h3>
         <button
           @click="handleClose"
           type="button"
-          class="btn btn-sm btn-ghost btn-circle text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 active:scale-95"
+          class="btn btn-sm btn-ghost btn-circle text-[#8298ab] hover:text-gray-700 active:scale-95"
           aria-label="Kapat"
         >
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -25,20 +25,20 @@
       </div>
 
       <!-- Scrollable Content -->
-      <div class="flex-grow overflow-y-auto overscroll-contain px-6 py-6 scrollbar-thin scrollbar-thumb-white/[0.05]">
+      <div class="flex-grow overflow-y-auto overscroll-contain px-6 py-6 scrollbar-thin scrollbar-thumb-[#c8dcea]">
         <slot />
       </div>
 
       <!-- Sticky Footer -->
       <div
         v-if="$slots.footer"
-        class="flex-shrink-0 flex items-center justify-end gap-3 px-6 py-5 border-t border-white/[0.08] bg-white/[0.01] rounded-b-2xl"
+        class="flex-shrink-0 flex items-center justify-end gap-3 px-6 py-5 border-t border-[#d9e7f2] bg-[#f6fafd] rounded-b-2xl"
       >
         <slot name="footer" />
       </div>
     </div>
     <!-- Backdrop -->
-    <div class="modal-backdrop bg-[#030509]/80 backdrop-blur-sm transition-all duration-300" @click="handleClose" />
+    <div class="modal-backdrop bg-[#16283a]/35 backdrop-blur-sm transition-all duration-300" @click="handleClose" />
   </dialog>
 
   <!-- Kaydedilmemiş değişiklik uyarısı -->

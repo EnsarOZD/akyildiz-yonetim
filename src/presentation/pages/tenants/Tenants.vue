@@ -38,40 +38,40 @@
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
       <div class="app-card group hover:shadow-xl hover:shadow-blue-500/5 transition-all duration-300">
         <div class="flex items-center gap-4">
-          <div class="w-12 h-12 rounded-2xl bg-brand-50 dark:bg-brand-500/10 text-brand-600 dark:text-brand-400 flex items-center justify-center shrink-0 transition-transform group-hover:scale-110">
+          <div class="w-12 h-12 rounded-2xl bg-brand-50 text-brand-600 flex items-center justify-center shrink-0 transition-transform group-hover:scale-110">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
             </svg>
           </div>
           <div class="min-w-0">
-            <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-[#626885]">Aktif Kiracı</p>
-            <p class="text-2xl font-black text-slate-800 dark:text-white tabular-nums tracking-tight mt-0.5">{{ stats.activeCount }}</p>
+            <p class="text-[10px] font-bold uppercase tracking-widest text-[#8298ab]">Aktif Kiracı</p>
+            <p class="text-2xl font-black text-slate-800 tabular-nums tracking-tight mt-0.5">{{ stats.activeCount }}</p>
           </div>
         </div>
       </div>
       <div class="app-card group hover:shadow-xl hover:shadow-emerald-500/5 transition-all duration-300">
         <div class="flex items-center gap-4">
-          <div class="w-12 h-12 rounded-2xl bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 transition-transform group-hover:scale-110">
+          <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 transition-transform group-hover:scale-110">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
             </svg>
           </div>
           <div class="min-w-0">
-            <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-[#626885]">Doluluk</p>
-            <p class="text-2xl font-black text-slate-800 dark:text-white tabular-nums tracking-tight mt-0.5">%{{ stats.occupancyRate }}</p>
+            <p class="text-[10px] font-bold uppercase tracking-widest text-[#8298ab]">Doluluk</p>
+            <p class="text-2xl font-black text-slate-800 tabular-nums tracking-tight mt-0.5">%{{ stats.occupancyRate }}</p>
           </div>
         </div>
       </div>
       <div class="app-card group hover:shadow-xl hover:shadow-red-500/5 transition-all duration-300">
         <div class="flex items-center gap-4">
-          <div class="w-12 h-12 rounded-2xl bg-red-50 dark:bg-red-500/10 text-red-500 flex items-center justify-center shrink-0 transition-transform group-hover:scale-110">
+          <div class="w-12 h-12 rounded-2xl bg-red-50 text-red-500 flex items-center justify-center shrink-0 transition-transform group-hover:scale-110">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
           </div>
           <div class="min-w-0">
-            <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-[#626885]">Toplam Bakiye</p>
-            <p class="text-2xl font-black text-slate-800 dark:text-white tabular-nums tracking-tight mt-0.5">{{ formatCurrency(stats.totalDebt) }}</p>
+            <p class="text-[10px] font-bold uppercase tracking-widest text-[#8298ab]">Toplam Bakiye</p>
+            <p class="text-2xl font-black text-slate-800 tabular-nums tracking-tight mt-0.5">{{ formatCurrency(stats.totalDebt) }}</p>
           </div>
         </div>
       </div>
@@ -81,7 +81,7 @@
     <div class="app-card mb-5">
       <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <div class="col-span-2 lg:col-span-1">
-          <label class="text-xs font-semibold text-slate-500 dark:text-[#9aa0b4] mb-1 block">Arama</label>
+          <label class="text-xs font-semibold text-slate-500 mb-1 block">Arama</label>
           <input
             v-model="filters.searchTerm"
             @input="handleSearch"
@@ -90,7 +90,7 @@
           />
         </div>
         <div>
-          <label class="text-xs font-semibold text-slate-500 dark:text-[#9aa0b4] mb-1 block">Durum</label>
+          <label class="text-xs font-semibold text-slate-500 mb-1 block">Durum</label>
           <select v-model="filters.isActive" @change="handleSearch" class="select select-bordered select-sm w-full">
             <option value="">Tümü</option>
             <option value="true">Aktif</option>
@@ -98,14 +98,14 @@
           </select>
         </div>
         <div>
-          <label class="text-xs font-semibold text-slate-500 dark:text-[#9aa0b4] mb-1 block">Kat</label>
+          <label class="text-xs font-semibold text-slate-500 mb-1 block">Kat</label>
           <select v-model="filters.floorNumber" @change="handleSearch" class="select select-bordered select-sm w-full">
             <option value="">Tüm Katlar</option>
             <option v-for="floor in availableFloors" :key="floor" :value="floor">{{ floor }}. Kat</option>
           </select>
         </div>
         <div>
-          <label class="text-xs font-semibold text-slate-500 dark:text-[#9aa0b4] mb-1 block">İş Türü</label>
+          <label class="text-xs font-semibold text-slate-500 mb-1 block">İş Türü</label>
           <select v-model="filters.businessType" @change="handleSearch" class="select select-bordered select-sm w-full">
             <option value="">Tümü</option>
             <option value="Ticaret">Ticaret</option>
@@ -117,14 +117,14 @@
           </select>
         </div>
       </div>
-      <div class="flex items-center justify-between mt-3 pt-3 border-t border-slate-100 dark:border-slate-700/60">
+      <div class="flex items-center justify-between mt-3 pt-3 border-t border-slate-100">
         <button @click="clearFilters" class="btn btn-ghost btn-xs text-slate-500 gap-1">
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
           </svg>
           Temizle
         </button>
-        <span class="text-xs text-slate-400 dark:text-[#626885]">{{ filteredTenants.length }} kiracı</span>
+        <span class="text-xs text-[#8298ab]">{{ filteredTenants.length }} kiracı</span>
       </div>
     </div>
 
@@ -138,12 +138,12 @@
         <!-- Menü -->
         <div v-if="authStore.role === ROLES.ADMIN || authStore.role === ROLES.MANAGER" class="absolute top-3 right-3 z-10">
           <div class="dropdown dropdown-end">
-            <button tabindex="0" class="btn btn-ghost btn-circle btn-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+            <button tabindex="0" class="btn btn-ghost btn-circle btn-xs text-[#8298ab] hover:text-slate-600">
               <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                 <circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/><circle cx="5" cy="12" r="1.5"/>
               </svg>
             </button>
-            <ul tabindex="0" class="dropdown-content menu p-1.5 shadow-xl bg-white dark:bg-[#0f1322] border border-slate-200 dark:border-white/[0.07] rounded-xl w-44 z-20 text-xs">
+            <ul tabindex="0" class="dropdown-content menu p-1.5 shadow-xl bg-white border border-slate-200 rounded-xl w-44 z-20 text-xs">
               <li><button @click="viewTenant(tenant)" class="rounded-lg py-2">Detayları Gör</button></li>
               <li><button @click="editTenant(tenant)" class="rounded-lg py-2">Düzenle</button></li>
               <li v-if="authStore.role === ROLES.ADMIN"><button @click="openDeleteModal(tenant)" class="rounded-lg py-2 text-error">Sil</button></li>
@@ -157,16 +157,16 @@
             {{ getAvatarInitial(tenant.companyName) }}
           </div>
           <div class="min-w-0">
-            <h3 class="text-[13px] font-black text-slate-800 dark:text-white leading-tight uppercase tracking-tight truncate group-hover:text-brand-500 transition-colors">
+            <h3 class="text-[13px] font-black text-slate-800 leading-tight uppercase tracking-tight truncate group-hover:text-brand-600 transition-colors">
               {{ tenant.companyName }}
             </h3>
             <div class="flex items-center gap-1.5 mt-2 flex-wrap">
               <span :class="['px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider', 
-                tenant.isActive ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400' 
-                : 'bg-slate-100 text-slate-500 dark:bg-slate-700/50 dark:text-slate-400']">
+                tenant.isActive ? 'bg-emerald-50 text-emerald-600' 
+                : 'bg-slate-100 text-slate-500']">
                 {{ tenant.isActive ? 'Aktif' : 'Pasif' }}
               </span>
-              <span v-if="tenant.flats?.length" class="bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider">
+              <span v-if="tenant.flats?.length" class="bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider">
                 Ünite {{ tenant.flats[0].code }}
               </span>
             </div>
@@ -174,8 +174,8 @@
         </div>
 
         <!-- Bakiye -->
-        <div class="mt-4 flex items-center justify-between py-2 border-t border-slate-100 dark:border-white/[0.04]">
-          <span class="text-[10px] font-bold text-slate-400 dark:text-[#626885] uppercase tracking-widest">Bakiye</span>
+        <div class="mt-4 flex items-center justify-between py-2 border-t border-slate-100">
+          <span class="text-[10px] font-bold text-[#8298ab] uppercase tracking-widest">Bakiye</span>
           <span :class="['text-lg font-black tabular-nums tracking-tight', tenant.totalBalance > 0 ? 'text-red-500' : 'text-emerald-500']">
             {{ formatCurrency(tenant.totalBalance) }}
           </span>
@@ -183,7 +183,7 @@
 
         <!-- Aksiyonlar -->
         <div class="flex gap-2 mt-2">
-          <button @click="viewTenant(tenant)" class="btn btn-sm btn-ghost bg-slate-50 dark:bg-white/[0.04] hover:bg-brand-500 hover:text-white flex-1 font-bold text-xs">
+          <button @click="viewTenant(tenant)" class="btn btn-sm btn-ghost bg-slate-50 hover:bg-brand-500 hover:text-white flex-1 font-bold text-xs">
             Detayları Gör
           </button>
           
@@ -191,7 +191,7 @@
             <a
               :href="`https://wa.me/${tenant.contactPersonPhone?.replace(/\D/g,'')}`"
               target="_blank"
-              class="w-8 h-8 rounded-xl flex items-center justify-center bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400 hover:bg-emerald-500 hover:text-white transition-all shadow-sm"
+              class="w-8 h-8 rounded-xl flex items-center justify-center bg-emerald-50 text-emerald-600 hover:bg-emerald-500 hover:text-white transition-all shadow-sm"
               title="WhatsApp"
             >
               <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
@@ -202,7 +202,7 @@
             <button
               v-if="authStore.role === ROLES.ADMIN || authStore.role === ROLES.MANAGER"
               @click="router.push(`/payments?tenantId=${tenant.id}`)"
-              class="w-8 h-8 rounded-xl flex items-center justify-center bg-brand-50 text-brand-600 dark:bg-brand-500/10 dark:text-brand-400 hover:bg-brand-500 hover:text-white transition-all shadow-sm"
+              class="w-8 h-8 rounded-xl flex items-center justify-center bg-brand-50 text-brand-600 hover:bg-brand-500 hover:text-white transition-all shadow-sm"
               title="Ödemeler"
             >
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

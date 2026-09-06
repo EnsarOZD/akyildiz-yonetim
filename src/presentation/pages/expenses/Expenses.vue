@@ -10,7 +10,7 @@
       </template>
       <template #actions>
         <div class="flex items-center gap-3">
-          <select v-model="dateFilter" @change="fetchExpenses" class="select select-sm select-bordered h-10 border-slate-200 dark:border-white/[0.07] bg-white/50 dark:bg-slate-800/50">
+          <select v-model="dateFilter" @change="fetchExpenses" class="select select-sm select-bordered h-10 border-slate-200 bg-white/50">
             <option value="all">Tüm Zamanlar</option>
             <option value="this_month">Bu Ay</option>
             <option value="last_month">Geçen Ay</option>
@@ -35,16 +35,16 @@
     </div>
 
     <!-- Hata -->
-    <div v-else-if="error" class="app-card border-red-300 dark:border-red-800 bg-red-50 dark:bg-red-900/10 mb-5">
+    <div v-else-if="error" class="app-card border-red-300 bg-red-50 mb-5">
       <div class="flex items-center gap-3">
-        <div class="w-9 h-9 rounded-xl bg-red-100 dark:bg-red-900/30 text-red-500 flex items-center justify-center shrink-0">
+        <div class="w-9 h-9 rounded-xl bg-red-100 text-red-500 flex items-center justify-center shrink-0">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"/>
           </svg>
         </div>
         <div>
-          <p class="text-sm font-semibold text-red-800 dark:text-red-200">Veri yüklenemedi</p>
-          <p class="text-xs text-red-600 dark:text-red-300">{{ error }}</p>
+          <p class="text-sm font-semibold text-red-800">Veri yüklenemedi</p>
+          <p class="text-xs text-red-600">{{ error }}</p>
         </div>
         <button @click="fetchExpenses" class="btn btn-error btn-xs ml-auto">Tekrar Dene</button>
       </div>
@@ -55,40 +55,40 @@
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
         <div class="app-card group hover:shadow-xl hover:shadow-red-500/5 transition-all duration-300">
           <div class="flex items-center gap-4">
-            <div class="w-12 h-12 rounded-2xl bg-red-50 dark:bg-red-500/10 text-red-500 flex items-center justify-center shrink-0 transition-transform group-hover:scale-110">
+            <div class="w-12 h-12 rounded-2xl bg-red-50 text-red-500 flex items-center justify-center shrink-0 transition-transform group-hover:scale-110">
               <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M17 13l-5 5m0 0l-5-5m5 5V6"/>
               </svg>
             </div>
             <div class="min-w-0">
-              <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-[#626885]">Bu Ay</p>
-              <p class="text-xl font-black text-slate-800 dark:text-white tabular-nums tracking-tight mt-0.5">{{ formatCurrency(thisMonthExpense) }}</p>
+              <p class="text-[10px] font-bold uppercase tracking-widest text-[#8298ab]">Bu Ay</p>
+              <p class="text-xl font-black text-slate-800 tabular-nums tracking-tight mt-0.5">{{ formatCurrency(thisMonthExpense) }}</p>
             </div>
           </div>
         </div>
         <div class="app-card group hover:shadow-xl hover:shadow-blue-500/5 transition-all duration-300">
           <div class="flex items-center gap-4">
-            <div class="w-12 h-12 rounded-2xl bg-brand-50 dark:bg-brand-500/10 text-brand-500 flex items-center justify-center shrink-0 transition-transform group-hover:scale-110">
+            <div class="w-12 h-12 rounded-2xl bg-brand-50 text-brand-600 flex items-center justify-center shrink-0 transition-transform group-hover:scale-110">
               <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 7h6m0 0v6m0-6L9 13"/>
               </svg>
             </div>
             <div class="min-w-0">
-              <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-[#626885]">Toplam</p>
-              <p class="text-xl font-black text-slate-800 dark:text-white tabular-nums tracking-tight mt-0.5">{{ formatCurrency(totalExpense) }}</p>
+              <p class="text-[10px] font-bold uppercase tracking-widest text-[#8298ab]">Toplam</p>
+              <p class="text-xl font-black text-slate-800 tabular-nums tracking-tight mt-0.5">{{ formatCurrency(totalExpense) }}</p>
             </div>
           </div>
         </div>
         <div class="app-card group hover:shadow-xl hover:shadow-amber-500/5 transition-all duration-300">
           <div class="flex items-center gap-4">
-            <div class="w-12 h-12 rounded-2xl bg-amber-50 dark:bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0 transition-transform group-hover:scale-110">
+            <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-500 flex items-center justify-center shrink-0 transition-transform group-hover:scale-110">
               <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
               </svg>
             </div>
             <div class="min-w-0">
-              <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-[#626885]">Bu Ay İşlem</p>
-              <p class="text-2xl font-black text-slate-800 dark:text-white tabular-nums tracking-tight mt-0.5">{{ thisMonthCount }}</p>
+              <p class="text-[10px] font-bold uppercase tracking-widest text-[#8298ab]">Bu Ay İşlem</p>
+              <p class="text-2xl font-black text-slate-800 tabular-nums tracking-tight mt-0.5">{{ thisMonthCount }}</p>
             </div>
           </div>
         </div>
@@ -97,39 +97,39 @@
       <!-- Grafik + Tip Dağılımı -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-5">
         <div class="app-card">
-          <h2 class="text-xs font-bold text-slate-400 dark:text-[#626885] uppercase tracking-widest mb-6 px-1">Aylık Gider Grafiği</h2>
+          <h2 class="text-xs font-bold text-[#8298ab] uppercase tracking-widest mb-6 px-1">Aylık Gider Grafiği</h2>
           <div class="h-40 flex items-end gap-3 px-2">
             <div v-for="(month, index) in monthlyData" :key="index" class="flex-1 group/bar relative flex flex-col items-center gap-3">
               <div
                 class="w-full bg-gradient-to-t from-red-500/80 to-red-500 rounded-t-lg transition-all duration-500 group-hover/bar:from-red-600 group-hover/bar:to-red-400"
                 :style="{ height: `${Math.max((month.expense / maxAmount) * 130, month.expense > 0 ? 4 : 2)}px` }"
               >
-                <div class="opacity-0 group-hover/bar:opacity-100 absolute -top-10 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[10px] px-2 py-1 rounded shadow-xl whitespace-nowrap transition-opacity pointer-events-none font-bold">
+                <div class="opacity-0 group-hover/bar:opacity-100 absolute -top-10 left-1/2 -translate-x-1/2 bg-[#16283a] text-white text-[10px] px-2 py-1 rounded shadow-xl whitespace-nowrap transition-opacity pointer-events-none font-bold">
                   {{ formatCurrency(month.expense) }}
                 </div>
               </div>
-              <span class="text-[10px] text-slate-400 dark:text-[#626885] font-bold uppercase tracking-tighter">{{ month.month }}</span>
+              <span class="text-[10px] text-[#8298ab] font-bold uppercase tracking-tighter">{{ month.month }}</span>
             </div>
           </div>
         </div>
         <div class="app-card">
-          <h2 class="text-xs font-bold text-slate-400 dark:text-[#626885] uppercase tracking-widest mb-6 px-1">Tip Dağılımı</h2>
+          <h2 class="text-xs font-bold text-[#8298ab] uppercase tracking-widest mb-6 px-1">Tip Dağılımı</h2>
           <div class="space-y-1">
-            <div v-for="type in expenseTypeStats" :key="type.name" class="flex items-center justify-between p-2 rounded-xl transition-colors hover:bg-slate-50 dark:hover:bg-white/[0.04]">
+            <div v-for="type in expenseTypeStats" :key="type.name" class="flex items-center justify-between p-2 rounded-xl transition-colors hover:bg-slate-50">
               <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-xl bg-red-50 dark:bg-red-500/10 text-red-500 flex items-center justify-center shrink-0">
+                <div class="w-8 h-8 rounded-xl bg-red-50 text-red-500 flex items-center justify-center shrink-0">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M17 13l-5 5m0 0l-5-5m5 5V6"/>
                   </svg>
                 </div>
                 <div>
-                  <p class="text-[13px] font-bold text-slate-700 dark:text-[#f1f3f9]">{{ type.label }}</p>
-                  <p class="text-[10px] font-bold text-slate-400 dark:text-[#626885] uppercase tracking-tighter">{{ type.count }} gider</p>
+                  <p class="text-[13px] font-bold text-slate-700">{{ type.label }}</p>
+                  <p class="text-[10px] font-bold text-[#8298ab] uppercase tracking-tighter">{{ type.count }} gider</p>
                 </div>
               </div>
-              <p class="text-[13px] font-black text-red-500 dark:text-red-400 tabular-nums tracking-tight">{{ formatCurrency(type.total) }}</p>
+              <p class="text-[13px] font-black text-red-500 tabular-nums tracking-tight">{{ formatCurrency(type.total) }}</p>
             </div>
-            <div v-if="expenseTypeStats.length === 0" class="text-xs text-slate-400 dark:text-[#626885] text-center py-4">Veri yok</div>
+            <div v-if="expenseTypeStats.length === 0" class="text-xs text-[#8298ab] text-center py-4">Veri yok</div>
           </div>
         </div>
       </div>
@@ -137,10 +137,10 @@
       <!-- Filtreler + Liste -->
       <div class="app-card !p-0">
         <!-- Liste Başlığı -->
-        <div class="flex items-center justify-between px-5 py-4 border-b border-white/[0.04]">
+        <div class="flex items-center justify-between px-5 py-4 border-b border-[#ecf3f9]">
           <div class="flex items-center gap-3">
-            <h3 class="text-[13.5px] font-black text-slate-800 dark:text-[#f1f3f9] uppercase tracking-tight">Gider Listesi</h3>
-            <span class="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-white/[0.04] text-[10px] font-black text-slate-400 uppercase tracking-widest">{{ filteredExpenses.length }} Kayıt</span>
+            <h3 class="text-[13.5px] font-black text-slate-800 uppercase tracking-tight">Gider Listesi</h3>
+            <span class="px-2 py-0.5 rounded-md bg-slate-100 text-[10px] font-black text-[#8298ab] uppercase tracking-widest">{{ filteredExpenses.length }} Kayıt</span>
           </div>
         </div>
 
@@ -148,35 +148,35 @@
         <div class="overflow-x-auto">
           <table class="table table-sm w-full border-collapse">
             <thead>
-              <tr class="border-b border-white/[0.08]">
-                <th class="py-4 text-[10px] font-black text-slate-400 dark:text-[#626885] uppercase tracking-widest text-left px-4">Tarih</th>
-                <th class="py-4 text-[10px] font-black text-slate-400 dark:text-[#626885] uppercase tracking-widest text-left px-4">Kategori</th>
-                <th class="py-4 text-[10px] font-black text-slate-400 dark:text-[#626885] uppercase tracking-widest text-left px-4">Açıklama</th>
-                <th class="py-4 text-[10px] font-black text-slate-400 dark:text-[#626885] uppercase tracking-widest text-right px-4">Tutar (Borç)</th>
-                <th class="py-4 text-[10px] font-black text-slate-400 dark:text-[#626885] uppercase tracking-widest text-center px-4">Aksiyon</th>
+              <tr class="border-b border-[#d9e7f2]">
+                <th class="py-4 text-[10px] font-black text-[#8298ab] uppercase tracking-widest text-left px-4">Tarih</th>
+                <th class="py-4 text-[10px] font-black text-[#8298ab] uppercase tracking-widest text-left px-4">Kategori</th>
+                <th class="py-4 text-[10px] font-black text-[#8298ab] uppercase tracking-widest text-left px-4">Açıklama</th>
+                <th class="py-4 text-[10px] font-black text-[#8298ab] uppercase tracking-widest text-right px-4">Tutar (Borç)</th>
+                <th class="py-4 text-[10px] font-black text-[#8298ab] uppercase tracking-widest text-center px-4">Aksiyon</th>
               </tr>
             </thead>
             <tbody class="divide-y-0">
               <tr 
                 v-for="e in paginatedExpenses" 
                 :key="e.id"
-                class="group hover:bg-white/[0.02] transition-colors border-b border-white/[0.02]/50 last:border-0"
+                class="group hover:bg-[#f6fafd] transition-colors border-b border-[#ecf3f9] last:border-0"
               >
                 <!-- Tarih -->
-                <td class="px-4 py-3 whitespace-nowrap text-[11px] font-black text-slate-400 dark:text-[#626885] uppercase tracking-tight">
+                <td class="px-4 py-3 whitespace-nowrap text-[11px] font-black text-[#8298ab] uppercase tracking-tight">
                   {{ formatDate(e.expenseDate) || 'Tarih yok' }}
                 </td>
 
                 <!-- Kat/İkon -->
                 <td class="px-4 py-3">
-                  <span class="bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 px-2 py-0.5 rounded-lg text-[9.5px] font-black uppercase tracking-widest">
+                  <span class="bg-red-50 text-red-600 px-2 py-0.5 rounded-lg text-[9.5px] font-black uppercase tracking-widest">
                     {{ getExpenseTypeName(e.type) || 'Tip Yok' }}
                   </span>
                 </td>
 
                 <!-- Bilgi -->
                 <td class="px-4 py-3">
-                  <p class="text-[13.5px] font-black text-slate-800 dark:text-white uppercase tracking-tight truncate group-hover:text-red-500 transition-colors">{{ e.title || 'Açıklama Yok' }}</p>
+                  <p class="text-[13.5px] font-black text-slate-800 uppercase tracking-tight truncate group-hover:text-red-500 transition-colors">{{ e.title || 'Açıklama Yok' }}</p>
                 </td>
 
                 <!-- Tutar -->
@@ -189,12 +189,12 @@
                 <!-- İşlem Menüsü -->
                 <td class="px-4 py-3 text-center">
                   <div class="dropdown dropdown-end">
-                    <button tabindex="0" class="btn btn-ghost btn-xs btn-square text-slate-400 hover:text-red-500">
+                    <button tabindex="0" class="btn btn-ghost btn-xs btn-square text-[#8298ab] hover:text-red-500">
                       <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                         <circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/><circle cx="5" cy="12" r="1.5"/>
                       </svg>
                     </button>
-                    <ul tabindex="0" class="dropdown-content menu p-1.5 shadow-card bg-base-100 border border-slate-200 dark:border-white/[0.07] rounded-xl w-32 z-10 text-xs">
+                    <ul tabindex="0" class="dropdown-content menu p-1.5 shadow-card bg-base-100 border border-slate-200 rounded-xl w-32 z-10 text-xs">
                       <li><a @click="startEdit(e)" class="rounded-lg">Düzenle</a></li>
                       <li><a @click="deleteExpense(e)" class="rounded-lg text-error">Sil</a></li>
                     </ul>
@@ -206,7 +206,7 @@
         </div>
 
         <!-- Sayfalama -->
-        <div v-if="filteredExpenses.length > 0" class="px-4 py-3 border-t border-slate-100 dark:border-slate-700/60">
+        <div v-if="filteredExpenses.length > 0" class="px-4 py-3 border-t border-slate-100">
           <PaginationBar v-model:currentPage="currentPage" v-model:pageSize="pageSize" :total-count="filteredExpenses.length" />
         </div>
       </div>

@@ -1,5 +1,5 @@
 <template>
-  <div data-theme="dark" class="min-h-screen">
+  <div data-theme="light" class="min-h-screen">
     <!-- Hata Durumu (Rendering Crash) -->
     <div v-if="renderError" class="min-h-screen flex flex-col items-center justify-center p-6 bg-base-200 text-center">
       <div class="max-w-md w-full p-8 bg-base-100 rounded-2xl shadow-2xl border-t-4 border-error">
@@ -31,7 +31,7 @@
       
       <!-- Normal sayfalar için layout -->
       <template v-else>
-        <div class="min-h-screen bg-white dark:bg-[#080b14] text-slate-900 dark:text-[#f1f3f9] transition-colors duration-300">
+        <div class="min-h-screen bg-[#f0f7fc] text-[#16283a] transition-colors duration-300">
           <!-- Header -->
           <Header />
 
@@ -99,8 +99,7 @@ watch(() => route.path, () => {
   renderError.value = null
 })
 
-// Tema her zaman koyu
-watch(() => authStore.theme, () => {
-  document.documentElement.classList.add('dark')
-}, { immediate: true })
+// Tema her zaman açık — "Gök Mavisi Kurumsal"
+document.documentElement.classList.remove('dark')
+document.documentElement.setAttribute('data-theme', 'light')
 </script>

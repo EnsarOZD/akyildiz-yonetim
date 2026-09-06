@@ -10,19 +10,19 @@
       </template>
       <template #actions>
         <div v-if="authStore.role === ROLES.ADMIN || authStore.role === ROLES.MANAGER" class="flex flex-wrap gap-2 shrink-0">
-          <button @click="openManualDebt(0)" class="btn btn-sm btn-ghost bg-white dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] hover:bg-slate-50 dark:hover:bg-white/[0.08] font-bold text-xs">
+          <button @click="openManualDebt(0)" class="btn btn-sm btn-ghost bg-white border border-slate-200 hover:bg-slate-50 font-bold text-xs">
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
             </svg>
             AİDAT
           </button>
-          <button @click="openManualDebt(1)" class="btn btn-sm btn-ghost bg-white dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] hover:bg-slate-50 dark:hover:bg-white/[0.08] font-bold text-xs">
+          <button @click="openManualDebt(1)" class="btn btn-sm btn-ghost bg-white border border-slate-200 hover:bg-slate-50 font-bold text-xs">
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
             </svg>
             ELEKTRİK
           </button>
-          <button @click="openManualDebt(2)" class="btn btn-sm btn-ghost bg-white dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] hover:bg-slate-50 dark:hover:bg-white/[0.08] font-bold text-xs">
+          <button @click="openManualDebt(2)" class="btn btn-sm btn-ghost bg-white border border-slate-200 hover:bg-slate-50 font-bold text-xs">
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m8-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z"/>
             </svg>
@@ -41,22 +41,22 @@
     <!-- Yükleniyor -->
     <div v-if="dataStatus.loading" class="space-y-3">
       <div v-for="i in 6" :key="i" class="app-card animate-pulse">
-        <div class="h-4 bg-slate-200 dark:bg-[#1c2238] rounded w-3/4 mb-2"></div>
-        <div class="h-3 bg-slate-200 dark:bg-[#1c2238] rounded w-1/2"></div>
+        <div class="h-4 bg-slate-200 rounded w-3/4 mb-2"></div>
+        <div class="h-3 bg-slate-200 rounded w-1/2"></div>
       </div>
     </div>
 
     <!-- Hata -->
-    <div v-else-if="dataStatus.error" class="app-card border-red-300 dark:border-red-800 bg-red-50 dark:bg-red-900/10 mb-5">
+    <div v-else-if="dataStatus.error" class="app-card border-red-300 bg-red-50 mb-5">
       <div class="flex items-center gap-3">
-        <div class="w-9 h-9 rounded-xl bg-red-100 dark:bg-red-900/30 text-red-500 flex items-center justify-center shrink-0">
+        <div class="w-9 h-9 rounded-xl bg-red-100 text-red-500 flex items-center justify-center shrink-0">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"/>
           </svg>
         </div>
         <div>
-          <p class="text-sm font-semibold text-red-800 dark:text-red-200">Veri yüklenemedi</p>
-          <p class="text-xs text-red-600 dark:text-red-300">{{ dataStatus.error }}</p>
+          <p class="text-sm font-semibold text-red-800">Veri yüklenemedi</p>
+          <p class="text-xs text-red-600">{{ dataStatus.error }}</p>
         </div>
       </div>
     </div>
@@ -67,56 +67,56 @@
         <!-- Toplam Kayıt -->
         <div class="app-card group hover:shadow-xl hover:shadow-slate-500/5 transition-all duration-300">
           <div class="flex items-center gap-4">
-            <div class="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-white/[0.05] text-slate-500 dark:text-[#9aa0b4] flex items-center justify-center shrink-0 transition-transform group-hover:scale-110">
+            <div class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-500 flex items-center justify-center shrink-0 transition-transform group-hover:scale-110">
               <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
               </svg>
             </div>
             <div class="min-w-0">
-              <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-[#626885]">Toplam Kayıt</p>
-              <p class="text-2xl font-black text-slate-800 dark:text-white tabular-nums tracking-tight mt-0.5">{{ dues.length }}</p>
+              <p class="text-[10px] font-bold uppercase tracking-widest text-[#8298ab]">Toplam Kayıt</p>
+              <p class="text-2xl font-black text-slate-800 tabular-nums tracking-tight mt-0.5">{{ dues.length }}</p>
             </div>
           </div>
         </div>
         <!-- Aidat -->
         <div class="app-card group hover:shadow-xl hover:shadow-brand-500/5 transition-all duration-300">
           <div class="flex items-center gap-4">
-            <div class="w-12 h-12 rounded-2xl bg-brand-50 dark:bg-brand-500/10 text-brand-600 dark:text-brand-400 flex items-center justify-center shrink-0 transition-transform group-hover:scale-110">
+            <div class="w-12 h-12 rounded-2xl bg-brand-50 text-brand-600 flex items-center justify-center shrink-0 transition-transform group-hover:scale-110">
               <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z"/>
               </svg>
             </div>
             <div class="min-w-0">
-              <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-[#626885]">Aidat</p>
-              <p class="text-2xl font-black text-slate-800 dark:text-white tabular-nums tracking-tight mt-0.5">{{ dues.filter(d => d.type === 0).length }}</p>
+              <p class="text-[10px] font-bold uppercase tracking-widest text-[#8298ab]">Aidat</p>
+              <p class="text-2xl font-black text-slate-800 tabular-nums tracking-tight mt-0.5">{{ dues.filter(d => d.type === 0).length }}</p>
             </div>
           </div>
         </div>
         <!-- Elektrik -->
         <div class="app-card group hover:shadow-xl hover:shadow-amber-500/5 transition-all duration-300">
           <div class="flex items-center gap-4">
-            <div class="w-12 h-12 rounded-2xl bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 transition-transform group-hover:scale-110">
+            <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0 transition-transform group-hover:scale-110">
               <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M13 10V3L4 14h7v7l9-11h-7z"/>
               </svg>
             </div>
             <div class="min-w-0">
-              <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-[#626885]">Elektrik</p>
-              <p class="text-2xl font-black text-slate-800 dark:text-white tabular-nums tracking-tight mt-0.5">{{ dues.filter(d => d.type === 1).length }}</p>
+              <p class="text-[10px] font-bold uppercase tracking-widest text-[#8298ab]">Elektrik</p>
+              <p class="text-2xl font-black text-slate-800 tabular-nums tracking-tight mt-0.5">{{ dues.filter(d => d.type === 1).length }}</p>
             </div>
           </div>
         </div>
         <!-- Su -->
         <div class="app-card group hover:shadow-xl hover:shadow-cyan-500/5 transition-all duration-300">
           <div class="flex items-center gap-4">
-            <div class="w-12 h-12 rounded-2xl bg-cyan-50 dark:bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 flex items-center justify-center shrink-0 transition-transform group-hover:scale-110">
+            <div class="w-12 h-12 rounded-2xl bg-cyan-50 text-cyan-600 flex items-center justify-center shrink-0 transition-transform group-hover:scale-110">
               <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 3v1m0 16v1m8-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z"/>
               </svg>
             </div>
             <div class="min-w-0">
-              <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-[#626885]">Su</p>
-              <p class="text-2xl font-black text-slate-800 dark:text-white tabular-nums tracking-tight mt-0.5">{{ dues.filter(d => d.type === 2).length }}</p>
+              <p class="text-[10px] font-bold uppercase tracking-widest text-[#8298ab]">Su</p>
+              <p class="text-2xl font-black text-slate-800 tabular-nums tracking-tight mt-0.5">{{ dues.filter(d => d.type === 2).length }}</p>
             </div>
           </div>
         </div>
@@ -125,7 +125,7 @@
       <!-- Filtre + Liste Kartı -->
       <div class="app-card !p-0">
         <!-- Filtre Bar -->
-        <div class="px-4 pt-4 pb-3 border-b border-slate-200 dark:border-white/[0.07]">
+        <div class="px-4 pt-4 pb-3 border-b border-slate-200">
           <FilterBar
             v-model:search="searchTerm"
             v-model:period="selectedPeriod"
@@ -136,10 +136,10 @@
         </div>
 
         <!-- Liste Başlığı -->
-        <div class="flex items-center justify-between px-5 py-4 border-b border-white/[0.08]">
+        <div class="flex items-center justify-between px-5 py-4 border-b border-[#d9e7f2]">
           <div class="flex items-center gap-3">
-            <h3 class="text-[13.5px] font-black text-slate-800 dark:text-[#f1f3f9] uppercase tracking-tight">Borç Listesi</h3>
-            <span class="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-white/[0.04] text-[10px] font-black text-slate-400 uppercase tracking-widest">{{ filteredDues.length }} Kayıt</span>
+            <h3 class="text-[13.5px] font-black text-slate-800 uppercase tracking-tight">Borç Listesi</h3>
+            <span class="px-2 py-0.5 rounded-md bg-slate-100 text-[10px] font-black text-[#8298ab] uppercase tracking-widest">{{ filteredDues.length }} Kayıt</span>
           </div>
           <Transition
             enter-active-class="transition duration-200 ease-out"
@@ -150,14 +150,14 @@
             leave-to-class="opacity-0 translate-x-2"
           >
             <div v-if="selectedIds.length > 0" class="flex items-center gap-2">
-              <span class="text-xs font-medium text-slate-500 dark:text-[#9aa0b4]">{{ selectedIds.length }} seçildi</span>
+              <span class="text-xs font-medium text-slate-500">{{ selectedIds.length }} seçildi</span>
               <button @click="showBulkDeleteConfirm = true" class="btn btn-error btn-xs">Sil</button>
             </div>
           </Transition>
         </div>
 
         <!-- Seçim Satırı -->
-        <div v-if="filteredDues.length > 0 && (authStore.role === ROLES.ADMIN || authStore.role === ROLES.MANAGER)" class="flex items-center gap-3 px-4 py-2 bg-slate-50 dark:bg-slate-800/10 border-b border-white/[0.05]">
+        <div v-if="filteredDues.length > 0 && (authStore.role === ROLES.ADMIN || authStore.role === ROLES.MANAGER)" class="flex items-center gap-3 px-4 py-2 bg-slate-50 border-b border-[#ecf3f9]">
           <input
             type="checkbox"
             class="checkbox checkbox-xs checkbox-primary"
@@ -165,26 +165,26 @@
             :indeterminate="isPartiallySelected"
             @change="toggleSelectAll"
           />
-          <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Tümünü Seç</span>
+          <span class="text-[10px] font-bold text-[#8298ab] uppercase tracking-widest">Tümünü Seç</span>
         </div>
 
         <!-- Tablo -->
         <div class="overflow-x-auto">
           <table class="table table-sm w-full border-collapse">
             <thead>
-              <tr class="border-b border-white/[0.08]">
+              <tr class="border-b border-[#d9e7f2]">
                 <th class="w-10 px-4 py-4 text-center"></th>
-                <th class="py-4 text-[10px] font-black text-slate-400 dark:text-[#626885] uppercase tracking-widest text-left px-4">Kiracı / Ünite</th>
-                <th class="py-4 text-[10px] font-black text-slate-400 dark:text-[#626885] uppercase tracking-widest text-left px-4">Dönem</th>
-                <th class="py-4 text-[10px] font-black text-slate-400 dark:text-[#626885] uppercase tracking-widest text-left px-4">Vade</th>
-                <th class="py-4 text-[10px] font-black text-slate-400 dark:text-[#626885] uppercase tracking-widest text-right px-4">Tutar (Borç)</th>
-                <th class="py-4 text-[10px] font-black text-slate-400 dark:text-[#626885] uppercase tracking-widest text-center px-4">Durum</th>
-                <th class="py-4 text-[10px] font-black text-slate-400 dark:text-[#626885] uppercase tracking-widest text-center px-4">Aksiyon</th>
+                <th class="py-4 text-[10px] font-black text-[#8298ab] uppercase tracking-widest text-left px-4">Kiracı / Ünite</th>
+                <th class="py-4 text-[10px] font-black text-[#8298ab] uppercase tracking-widest text-left px-4">Dönem</th>
+                <th class="py-4 text-[10px] font-black text-[#8298ab] uppercase tracking-widest text-left px-4">Vade</th>
+                <th class="py-4 text-[10px] font-black text-[#8298ab] uppercase tracking-widest text-right px-4">Tutar (Borç)</th>
+                <th class="py-4 text-[10px] font-black text-[#8298ab] uppercase tracking-widest text-center px-4">Durum</th>
+                <th class="py-4 text-[10px] font-black text-[#8298ab] uppercase tracking-widest text-center px-4">Aksiyon</th>
               </tr>
             </thead>
             <tbody class="divide-y-0">
               <tr v-if="dataStatus.loading">
-                <td colspan="7" class="py-12 text-center text-slate-400">Yükleniyor...</td>
+                <td colspan="7" class="py-12 text-center text-[#8298ab]">Yükleniyor...</td>
               </tr>
               <tr v-else-if="filteredDues.length === 0">
                 <td colspan="7" class="py-20 text-center">
@@ -195,7 +195,7 @@
                 v-else 
                 v-for="d in duesPaged" 
                 :key="d.id || (d.flatId + '-' + d.periodYear + '-' + d.periodMonth)"
-                class="group hover:bg-white/[0.02] transition-colors border-b border-white/[0.02]/50 last:border-0"
+                class="group hover:bg-[#f6fafd] transition-colors border-b border-[#ecf3f9] last:border-0"
                 :class="selectedIds.includes(d.id) ? 'bg-brand-500/5' : ''"
               >
                 <td class="px-4 py-3 text-center">
@@ -208,15 +208,15 @@
                   />
                 </td>
                 <td class="px-4 py-3">
-                  <p class="text-[13.5px] font-black text-slate-800 dark:text-white uppercase tracking-tight truncate group-hover:text-brand-500 transition-colors">
+                  <p class="text-[13.5px] font-black text-slate-800 uppercase tracking-tight truncate group-hover:text-brand-600 transition-colors">
                     {{ d.tenantCompany || d.flatNumber || '-' }}
                   </p>
-                  <p v-if="d.invoiceNumber" class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">FAT: {{ d.invoiceNumber }}</p>
+                  <p v-if="d.invoiceNumber" class="text-[9px] font-bold text-[#8298ab] uppercase tracking-widest mt-0.5">FAT: {{ d.invoiceNumber }}</p>
                 </td>
-                <td class="px-4 py-3 text-[11px] font-black text-slate-500 dark:text-[#9aa0b4] tabular-nums tracking-tighter">
+                <td class="px-4 py-3 text-[11px] font-black text-slate-500 tabular-nums tracking-tighter">
                   {{ d.periodYear }}/{{ String(d.periodMonth).padStart(2,'0') }}
                 </td>
-                <td class="px-4 py-3 text-[11px] font-black text-slate-400 dark:text-[#626885] uppercase tracking-tight">
+                <td class="px-4 py-3 text-[11px] font-black text-[#8298ab] uppercase tracking-tight">
                   {{ formatDate(d.dueDate) }}
                 </td>
                 <td class="px-4 py-3 text-right">
@@ -230,22 +230,22 @@
                   <span :class="[
                     'px-2 py-0.5 rounded-lg text-[9.5px] font-black uppercase tracking-widest shadow-sm border border-transparent',
                     d.status === 'paid'
-                      ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400'
+                      ? 'bg-emerald-50 text-emerald-600'
                       : d.status === 'partial'
-                        ? 'bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400'
-                        : 'bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400'
+                        ? 'bg-amber-50 text-amber-600'
+                        : 'bg-red-50 text-red-600'
                   ]">
                     {{ d.status === 'paid' ? 'Ödendi' : d.status === 'partial' ? 'Kısmi' : 'Bekliyor' }}
                   </span>
                 </td>
                 <td class="px-4 py-3 text-center">
                   <div class="dropdown dropdown-end">
-                    <button tabindex="0" class="btn btn-ghost btn-xs btn-square text-slate-400 hover:text-brand-500">
+                    <button tabindex="0" class="btn btn-ghost btn-xs btn-square text-[#8298ab] hover:text-brand-600">
                       <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                         <circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/><circle cx="5" cy="12" r="1.5"/>
                       </svg>
                     </button>
-                    <ul tabindex="0" class="dropdown-content menu p-1.5 shadow-card bg-base-100 border border-slate-200 dark:border-white/[0.07] rounded-xl w-32 z-10 text-xs text-left">
+                    <ul tabindex="0" class="dropdown-content menu p-1.5 shadow-card bg-base-100 border border-slate-200 rounded-xl w-32 z-10 text-xs text-left">
                       <li v-if="d.status !== 'paid' && d.remainingAmount > 0 && d.remainingAmount < 1">
                         <a @click="openCloseDebt(d)" class="rounded-lg text-amber-600">Borcu Kapat</a>
                       </li>
@@ -262,7 +262,7 @@
         </div>
 
         <!-- Sayfalama -->
-        <div class="border-t border-slate-200 dark:border-white/[0.07]">
+        <div class="border-t border-slate-200">
           <PaginationBar
             v-model:currentPage="duesPage"
             v-model:pageSize="pageSize"
@@ -304,17 +304,17 @@
             </svg>
           </div>
           <div class="space-y-2 px-2">
-            <p class="text-sm font-black text-[#f1f3f9] uppercase tracking-tight leading-relaxed">
-              Kritik İşlem: <span class="text-red-400 font-bold">{{ selectedIds.length }}</span> Kayıt Siliniyor
+            <p class="text-sm font-black text-[#16283a] uppercase tracking-tight leading-relaxed">
+              Kritik İşlem: <span class="text-red-600 font-bold">{{ selectedIds.length }}</span> Kayıt Siliniyor
             </p>
-            <p class="text-[11px] text-[#626885] font-medium leading-relaxed italic px-4">
+            <p class="text-[11px] text-[#8298ab] font-medium leading-relaxed italic px-4">
               Seçili tüm borç ve aidat kayıtları kalıcı olarak silinecektir. Bu işlem geri alınamaz.
             </p>
           </div>
         </div>
       </div>
       <template #footer>
-        <button class="btn btn-ghost !bg-transparent border border-white/[0.08] text-[#9aa0b4] flex-1" @click="showBulkDeleteConfirm = false" :disabled="isBulkDeleting">Vazgeç</button>
+        <button class="btn btn-ghost !bg-transparent border border-[#d9e7f2] text-[#5a7186] flex-1" @click="showBulkDeleteConfirm = false" :disabled="isBulkDeleting">Vazgeç</button>
         <button class="btn btn-error flex-1 font-black uppercase tracking-widest" @click="confirmBulkDelete" :disabled="isBulkDeleting">
           <span v-if="isBulkDeleting" class="loading loading-spinner loading-xs mr-2"></span>
           Kayıtları Sil
@@ -339,21 +339,21 @@
             </svg>
           </div>
           <div class="space-y-2 px-2">
-            <p class="text-[11px] font-black text-[#f1f3f9] uppercase tracking-widest leading-relaxed">
+            <p class="text-[11px] font-black text-[#16283a] uppercase tracking-widest leading-relaxed">
               {{ selectedDue.tenantCompany || selectedDue.flatNumber }}
             </p>
-            <p class="text-xs font-black text-amber-400 tabular-nums uppercase">
+            <p class="text-xs font-black text-amber-600 tabular-nums uppercase">
               Kalan: {{ formatNumber(selectedDue.remainingAmount) }} ₺
             </p>
-            <p class="text-[11px] text-[#626885] font-medium leading-relaxed italic px-4">
+            <p class="text-[11px] text-[#8298ab] font-medium leading-relaxed italic px-4">
               Kuruş farkı sıfırlanarak borç tamamen kapatılacaktır. Onaylıyor musunuz?
             </p>
           </div>
         </div>
       </div>
       <template #footer>
-        <button class="btn btn-ghost !bg-transparent border border-white/[0.08] text-[#9aa0b4] flex-1" @click="showCloseDebtConfirm = false; selectedDue = null" :disabled="isClosingDebt">Vazgeç</button>
-        <button class="btn btn-warning flex-1 font-black uppercase tracking-widest text-[#0f1322]" @click="confirmCloseDebt" :disabled="isClosingDebt">
+        <button class="btn btn-ghost !bg-transparent border border-[#d9e7f2] text-[#5a7186] flex-1" @click="showCloseDebtConfirm = false; selectedDue = null" :disabled="isClosingDebt">Vazgeç</button>
+        <button class="btn btn-warning flex-1 font-black uppercase tracking-widest text-[#16283a]" @click="confirmCloseDebt" :disabled="isClosingDebt">
           <span v-if="isClosingDebt" class="loading loading-spinner loading-xs mr-2"></span>
           Borcu Kapat
         </button>

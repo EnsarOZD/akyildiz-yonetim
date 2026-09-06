@@ -13,15 +13,15 @@
         <!-- Temel Bilgiler Grubu -->
         <div class="space-y-4">
           <div class="flex items-center gap-3 px-1">
-            <div class="w-8 h-8 rounded-lg bg-brand-500/10 flex items-center justify-center text-brand-400">
+            <div class="w-8 h-8 rounded-lg bg-brand-500/10 flex items-center justify-center text-brand-600">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <h4 class="text-[11px] font-black uppercase tracking-widest text-[#f1f3f9]">Temel Ünite Bilgileri</h4>
+            <h4 class="text-[11px] font-black uppercase tracking-widest text-[#16283a]">Temel Ünite Bilgileri</h4>
           </div>
 
-          <div class="bg-white/[0.02] border border-white/[0.08] rounded-2xl p-6">
+          <div class="bg-[#f6fafd] border border-[#d9e7f2] rounded-2xl p-6">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <!-- Code -->
               <div class="form-control">
@@ -35,12 +35,12 @@
                   placeholder="Örn: A-201, GA, OTOPARK"
                   required
                 />
-                <div v-if="codeError" class="mt-2 flex items-center gap-2 text-red-400 text-[10px] font-bold uppercase tracking-tight">
+                <div v-if="codeError" class="mt-2 flex items-center gap-2 text-red-600 text-[10px] font-bold uppercase tracking-tight">
                   <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-width="3"/></svg>
                   {{ codeError }}
                 </div>
-                <div v-else class="mt-2 text-[10px] text-[#626885] font-medium leading-relaxed italic">
-                  İpucu: <code class="text-brand-400 font-black">A-201</code> yazarsanız kat otomatik 2 alınır.
+                <div v-else class="mt-2 text-[10px] text-[#8298ab] font-medium leading-relaxed italic">
+                  İpucu: <code class="text-brand-600 font-black">A-201</code> yazarsanız kat otomatik 2 alınır.
                 </div>
               </div>
 
@@ -65,7 +65,7 @@
                   placeholder="0"
                   required
                 />
-                <p v-if="flat.type === 1" class="mt-2 text-[10px] text-[#626885] font-bold uppercase italic tracking-tighter">İpucu: Giriş için kat varsayılan 0'dır.</p>
+                <p v-if="flat.type === 1" class="mt-2 text-[10px] text-[#8298ab] font-bold uppercase italic tracking-tighter">İpucu: Giriş için kat varsayılan 0'dır.</p>
               </div>
 
               <!-- Alan -->
@@ -73,7 +73,7 @@
                 <label class="label"><span class="label-text">Alan (m²) *</span></label>
                 <div class="relative">
                   <input type="number" v-model.number="flat.unitArea" min="1" step="0.01" class="input input-bordered w-full font-black !text-lg pr-12" required />
-                  <span class="absolute right-4 top-1/2 -translate-y-1/2 text-[#626885] font-black uppercase text-[10px] tracking-widest">m²</span>
+                  <span class="absolute right-4 top-1/2 -translate-y-1/2 text-[#8298ab] font-black uppercase text-[10px] tracking-widest">m²</span>
                 </div>
               </div>
 
@@ -97,7 +97,7 @@
                 <label class="label"><span class="label-text">Aylık Kira Bedeli</span></label>
                 <div class="relative">
                   <input type="number" v-model.number="flat.monthlyRent" min="0" step="0.01" class="input input-bordered w-full font-black pr-12" />
-                  <span class="absolute right-4 top-1/2 -translate-y-1/2 text-[#626885] font-black uppercase text-[10px] tracking-widest">TL</span>
+                  <span class="absolute right-4 top-1/2 -translate-y-1/2 text-[#8298ab] font-black uppercase text-[10px] tracking-widest">TL</span>
                 </div>
               </div>
 
@@ -105,7 +105,7 @@
               <div class="form-control justify-center">
                 <label class="label cursor-pointer flex justify-start gap-4 p-0">
                   <input type="checkbox" v-model="flat.isActive" class="toggle toggle-success" />
-                  <span class="label-text font-black uppercase tracking-widest text-[11px] text-[#9aa0b4]">Aktif Ünite</span>
+                  <span class="label-text font-black uppercase tracking-widest text-[11px] text-[#5a7186]">Aktif Ünite</span>
                 </label>
               </div>
             </div>
@@ -114,14 +114,14 @@
 
         <!-- Açıklama -->
         <div class="space-y-4">
-           <div class="flex items-center gap-3 px-1 text-[#f1f3f9]">
+           <div class="flex items-center gap-3 px-1 text-[#16283a]">
             <h4 class="text-[11px] font-black uppercase tracking-widest">Açıklama ve Notlar</h4>
           </div>
           <div class="form-control">
             <textarea 
               v-model.trim="flat.description" 
               rows="3" 
-              class="textarea textarea-bordered w-full !bg-white/[0.02] border-white/[0.08]" 
+              class="textarea textarea-bordered w-full !bg-white border-[#d9e7f2]" 
               placeholder="Ünite hakkında ek notlar girin..."></textarea>
           </div>
         </div>
@@ -133,7 +133,7 @@
       <button 
         type="button" 
         @click="$emit('close')" 
-        class="btn btn-ghost !bg-transparent border border-white/[0.08] text-[#9aa0b4] hover:bg-white/[0.05] flex-1"
+        class="btn btn-ghost !bg-transparent border border-[#d9e7f2] text-[#5a7186] hover:bg-[#ecf3f9] flex-1"
       >
         Vazgeç
       </button>

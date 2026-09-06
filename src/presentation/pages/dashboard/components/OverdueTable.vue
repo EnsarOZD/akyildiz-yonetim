@@ -28,7 +28,7 @@
             </tr>
           </tbody>
         </table>
-        <p v-if="!items.length" class="text-gray-400 italic text-sm mt-2">Geciken ödeme bulunmuyor.</p>
+        <p v-if="!items.length" class="text-[#8298ab] italic text-sm mt-2">Geciken ödeme bulunmuyor.</p>
       </div>
     </div>
   </div>

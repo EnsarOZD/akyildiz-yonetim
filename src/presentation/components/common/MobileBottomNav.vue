@@ -10,7 +10,7 @@
       leave-to-class="opacity-0"
     >
       <div v-if="showMoreMenu"
-        class="md:hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-[55]"
+        class="md:hidden fixed inset-0 bg-[#16283a]/35 backdrop-blur-sm z-[55]"
         @click="showMoreMenu = false" />
     </transition>
 
@@ -24,12 +24,12 @@
       leave-to-class="translate-y-full"
     >
       <div v-if="showMoreMenu"
-        class="md:hidden fixed inset-x-0 bottom-0 z-[60] bg-white dark:bg-[#0f1322] rounded-t-3xl shadow-[0_-8px_32px_rgba(0,0,0,0.2)] border-t border-slate-200/60 dark:border-white/[0.06]">
+        class="md:hidden fixed inset-x-0 bottom-0 z-[60] bg-white rounded-t-3xl shadow-[0_-8px_32px_rgba(0,0,0,0.2)] border-t border-slate-200/60">
         <div class="px-5 pt-4 pb-safe-offset">
           <!-- Handle -->
-          <div class="w-10 h-1 bg-slate-200 dark:bg-[#1c2238] rounded-full mx-auto mb-5" @click="showMoreMenu = false" />
+          <div class="w-10 h-1 bg-slate-200 rounded-full mx-auto mb-5" @click="showMoreMenu = false" />
 
-          <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3 px-1">Diğer</p>
+          <p class="text-xs font-semibold text-[#8298ab] uppercase tracking-wider mb-3 px-1">Diğer</p>
 
           <div class="grid grid-cols-3 gap-3">
             <template v-for="item in moreItems" :key="item.path || item.name">
@@ -38,17 +38,17 @@
                 @click="item.action"
                 class="flex flex-col items-center gap-2 p-3 rounded-2xl transition-colors"
                 :class="item.danger
-                  ? 'hover:bg-red-50 dark:hover:bg-red-950/30'
-                  : 'hover:bg-slate-50 dark:hover:bg-white/[0.04]'"
+                  ? 'hover:bg-red-50'
+                  : 'hover:bg-slate-50'"
               >
                 <div class="w-11 h-11 rounded-2xl flex items-center justify-center"
                   :class="item.danger
-                    ? 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'
-                    : 'bg-slate-100 dark:bg-[#151a2e] text-slate-600 dark:text-[#f1f3f9]'">
+                    ? 'bg-red-100 text-red-600'
+                    : 'bg-slate-100 text-slate-600'">
                   <component :is="item.icon" class="w-5 h-5" />
                 </div>
                 <span class="text-[11px] font-medium leading-tight text-center"
-                  :class="item.danger ? 'text-red-600 dark:text-red-400' : 'text-slate-600 dark:text-[#9aa0b4]'">
+                  :class="item.danger ? 'text-red-600' : 'text-slate-600'">
                   {{ item.name }}
                 </span>
               </button>
@@ -57,18 +57,18 @@
                 v-else
                 :to="item.path"
                 @click="showMoreMenu = false"
-                class="flex flex-col items-center gap-2 p-3 rounded-2xl hover:bg-slate-50 dark:hover:bg-white/[0.04] transition-colors"
+                class="flex flex-col items-center gap-2 p-3 rounded-2xl hover:bg-slate-50 transition-colors"
               >
-                <div class="w-11 h-11 rounded-2xl bg-slate-100 dark:bg-[#151a2e] text-slate-600 dark:text-[#f1f3f9] flex items-center justify-center">
+                <div class="w-11 h-11 rounded-2xl bg-slate-100 text-slate-600 flex items-center justify-center">
                   <component :is="item.icon" class="w-5 h-5" />
                 </div>
-                <span class="text-[11px] font-medium text-slate-600 dark:text-[#9aa0b4] leading-tight text-center">{{ item.name }}</span>
+                <span class="text-[11px] font-medium text-slate-600 leading-tight text-center">{{ item.name }}</span>
               </router-link>
             </template>
           </div>
 
           <button @click="showMoreMenu = false"
-            class="w-full mt-4 py-3 rounded-xl bg-slate-100 dark:bg-[#151a2e] text-sm font-semibold text-slate-600 dark:text-[#9aa0b4] hover:bg-slate-200 dark:hover:bg-white/[0.06] transition-colors">
+            class="w-full mt-4 py-3 rounded-xl bg-slate-100 text-sm font-semibold text-slate-600 hover:bg-slate-200 transition-colors">
             Kapat
           </button>
         </div>
@@ -77,8 +77,8 @@
 
     <!-- Bottom nav bar -->
     <nav class="md:hidden fixed bottom-0 left-0 right-0 z-[50]
-      bg-[#0f1322]/80 backdrop-blur-xl
-      border-t border-white/[0.08]
+      bg-[#ffffff]/80 backdrop-blur-xl
+      border-t border-[#d9e7f2]
       shadow-[0_-8px_32px_rgba(0,0,0,0.4)]
       pb-safe">
       <div class="flex items-center justify-around h-16 px-2">
@@ -93,19 +93,19 @@
           >
             <!-- Active indicator pill (Top) -->
             <transition enter-active-class="transition-all duration-300" enter-from-class="scale-x-0 opacity-0" enter-to-class="scale-x-100 opacity-100">
-              <span v-if="isActive" class="absolute top-0 w-10 h-1 rounded-full bg-brand-500 shadow-[0_0_12px_rgba(107,138,255,0.6)]" />
+              <span v-if="isActive" class="absolute top-0 w-10 h-1 rounded-full bg-brand-600 shadow-[0_0_12px_rgba(2,132,199,0.5)]" />
             </transition>
 
             <div class="flex items-center justify-center w-6 h-6 transition-all duration-200"
-              :class="isActive ? 'text-brand-500 scale-110' : 'text-[#626885]'">
+              :class="isActive ? 'text-brand-600 scale-110' : 'text-[#8298ab]'">
               <component :is="item.icon" class="w-6 h-6" :stroke-width="isActive ? '2.25' : '1.75'" />
               
               <!-- Badge -->
-              <span v-if="item.badge" class="absolute top-2 right-1/4 w-2 h-2 bg-red-500 rounded-full border-2 border-[#0f1322]" />
+              <span v-if="item.badge" class="absolute top-2 right-1/4 w-2 h-2 bg-red-500 rounded-full border-2 border-[#d9e7f2]" />
             </div>
             
             <span class="text-[10px] font-black tracking-tight leading-none truncate max-w-full px-1 transition-colors duration-150 uppercase"
-              :class="isActive ? 'text-brand-500' : 'text-[#626885]'">
+              :class="isActive ? 'text-brand-600' : 'text-[#8298ab]'">
               {{ item.name }}
             </span>
           </router-link>
@@ -117,11 +117,11 @@
             class="flex flex-col items-center justify-center gap-1 flex-1 min-w-0 h-full relative"
           >
             <div class="flex items-center justify-center w-6 h-6 transition-all duration-200"
-              :class="showMoreMenu ? 'text-white scale-110' : 'text-[#626885]'">
+              :class="showMoreMenu ? 'text-brand-600 scale-110' : 'text-[#8298ab]'">
               <component :is="item.icon" class="w-6 h-6" />
             </div>
             <span class="text-[10px] font-black tracking-tight leading-none truncate max-w-full px-1 transition-colors duration-150 uppercase"
-              :class="showMoreMenu ? 'text-white' : 'text-[#626885]'">
+              :class="showMoreMenu ? 'text-brand-600' : 'text-[#8298ab]'">
               {{ item.name }}
             </span>
           </button>

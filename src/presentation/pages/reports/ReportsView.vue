@@ -15,8 +15,8 @@
           </svg>
           Excel Aktar
         </button>
-        <button @click="exportToPDF" class="btn btn-sm btn-ghost border border-slate-300 dark:border-white/[0.1]">
-          <svg class="w-4 h-4 text-rose-500 dark:text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <button @click="exportToPDF" class="btn btn-sm btn-ghost border border-slate-300">
+          <svg class="w-4 h-4 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
           </svg>
           PDF
@@ -38,12 +38,12 @@
           { label: 'Başlangıç', model: 'startDate', type: 'date' },
           { label: 'Bitiş', model: 'endDate', type: 'date' }
         ]" :key="field.label">
-          <label class="text-[10px] font-bold text-slate-400 dark:text-[#626885] uppercase tracking-widest mb-1.5 block px-1">{{ field.label }}</label>
+          <label class="text-[10px] font-bold text-[#8298ab] uppercase tracking-widest mb-1.5 block px-1">{{ field.label }}</label>
           <input v-model="filters[field.model]" :type="field.type" class="input input-sm input-bordered w-full font-bold text-xs" />
         </div>
         
         <div>
-          <label class="text-[10px] font-bold text-slate-400 dark:text-[#626885] uppercase tracking-widest mb-1.5 block px-1">Kiracı</label>
+          <label class="text-[10px] font-bold text-[#8298ab] uppercase tracking-widest mb-1.5 block px-1">Kiracı</label>
           <select v-model="filters.tenantId" class="select select-sm select-bordered w-full font-bold text-xs">
             <option value="">Tüm Kiracılar</option>
             <option v-for="t in tenants" :key="t.id" :value="t.id">{{ t.companyName }}</option>
@@ -51,7 +51,7 @@
         </div>
 
         <div>
-          <label class="text-[10px] font-bold text-slate-400 dark:text-[#626885] uppercase tracking-widest mb-1.5 block px-1">Mal Sahibi</label>
+          <label class="text-[10px] font-bold text-[#8298ab] uppercase tracking-widest mb-1.5 block px-1">Mal Sahibi</label>
           <select v-model="filters.ownerId" class="select select-sm select-bordered w-full font-bold text-xs">
             <option value="">Tüm Mal Sahipleri</option>
             <option v-for="o in owners" :key="o.id" :value="o.id">{{ o.firstName }} {{ o.lastName }}</option>
@@ -59,7 +59,7 @@
         </div>
 
         <div>
-          <label class="text-[10px] font-bold text-slate-400 dark:text-[#626885] uppercase tracking-widest mb-1.5 block px-1">İşlem Tipi</label>
+          <label class="text-[10px] font-bold text-[#8298ab] uppercase tracking-widest mb-1.5 block px-1">İşlem Tipi</label>
           <select v-model="filters.type" class="select select-sm select-bordered w-full font-bold text-xs">
             <option value="all">Tümü</option>
             <option value="debt">Sadece Borçlar</option>
@@ -68,7 +68,7 @@
         </div>
 
         <div>
-          <label class="text-[10px] font-bold text-slate-400 dark:text-[#626885] uppercase tracking-widest mb-1.5 block px-1">Kategori</label>
+          <label class="text-[10px] font-bold text-[#8298ab] uppercase tracking-widest mb-1.5 block px-1">Kategori</label>
           <select v-model="filters.utilityType" class="select select-sm select-bordered w-full font-bold text-xs">
             <option value="">Tümü</option>
             <option value="Aidat">Aidat</option>
@@ -78,7 +78,7 @@
         </div>
 
         <div>
-          <label class="text-[10px] font-bold text-slate-400 dark:text-[#626885] uppercase tracking-widest mb-1.5 block px-1">Borçlu Türü</label>
+          <label class="text-[10px] font-bold text-[#8298ab] uppercase tracking-widest mb-1.5 block px-1">Borçlu Türü</label>
           <select v-model="filters.debtorType" class="select select-sm select-bordered w-full font-bold text-xs">
             <option value="All">Tümü</option>
             <option value="OnlyTenants">Yalnızca Kiracılar</option>
@@ -86,8 +86,8 @@
           </select>
         </div>
       </div>
-      <div class="flex justify-end mt-4 pt-4 border-t border-slate-100 dark:border-white/[0.04]">
-        <button @click="clearFilters" class="btn btn-ghost btn-xs text-slate-400 font-bold uppercase tracking-wider">
+      <div class="flex justify-end mt-4 pt-4 border-t border-slate-100">
+        <button @click="clearFilters" class="btn btn-ghost btn-xs text-[#8298ab] font-bold uppercase tracking-wider">
           Filtreleri Temizle
         </button>
       </div>
@@ -98,45 +98,45 @@
       <!-- Devreden Bakiye (yalnızca başlangıç tarihi filtresi varken) -->
       <div v-if="hasOpeningBalance" class="app-card group hover:shadow-xl hover:shadow-amber-500/5 transition-all duration-300">
         <div class="flex items-center gap-4">
-          <div class="w-12 h-12 rounded-2xl bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 transition-transform group-hover:scale-110">
+          <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0 transition-transform group-hover:scale-110">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 7h6m-6 4h6m-6 4h4M5 3h14a2 2 0 012 2v14l-3-2-2 2-2-2-2 2-2-2-3 2V5a2 2 0 012-2z"/>
             </svg>
           </div>
           <div class="min-w-0">
-            <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-[#626885]">Devreden Bakiye</p>
+            <p class="text-[10px] font-bold uppercase tracking-widest text-[#8298ab]">Devreden Bakiye</p>
             <p :class="[
               'text-xl font-black tabular-nums tracking-tight mt-0.5',
-              summary.opening >= 0 ? 'text-slate-800 dark:text-white' : 'text-red-500'
+              summary.opening >= 0 ? 'text-slate-800' : 'text-red-500'
             ]">{{ formatCurrency(summary.opening) }}</p>
-            <p class="text-[10px] text-slate-400 dark:text-[#626885] mt-0.5">{{ formatDate(filters.startDate) }} öncesi</p>
+            <p class="text-[10px] text-[#8298ab] mt-0.5">{{ formatDate(filters.startDate) }} öncesi</p>
           </div>
         </div>
       </div>
 
       <div class="app-card group hover:shadow-xl hover:shadow-red-500/5 transition-all duration-300">
         <div class="flex items-center gap-4">
-          <div class="w-12 h-12 rounded-2xl bg-red-50 dark:bg-red-500/10 text-red-500 flex items-center justify-center shrink-0 transition-transform group-hover:scale-110">
+          <div class="w-12 h-12 rounded-2xl bg-red-50 text-red-500 flex items-center justify-center shrink-0 transition-transform group-hover:scale-110">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"/>
             </svg>
           </div>
           <div class="min-w-0">
-            <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-[#626885]">Toplam Tahakkuk</p>
-            <p class="text-xl font-black text-slate-800 dark:text-white tabular-nums tracking-tight mt-0.5">{{ formatCurrency(summary.totalDebt) }}</p>
+            <p class="text-[10px] font-bold uppercase tracking-widest text-[#8298ab]">Toplam Tahakkuk</p>
+            <p class="text-xl font-black text-slate-800 tabular-nums tracking-tight mt-0.5">{{ formatCurrency(summary.totalDebt) }}</p>
           </div>
         </div>
       </div>
       <div class="app-card group hover:shadow-xl hover:shadow-emerald-500/5 transition-all duration-300">
         <div class="flex items-center gap-4">
-          <div class="w-12 h-12 rounded-2xl bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 transition-transform group-hover:scale-110">
+          <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 transition-transform group-hover:scale-110">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
             </svg>
           </div>
           <div class="min-w-0">
-            <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-[#626885]">Toplam Tahsilat</p>
-            <p class="text-xl font-black text-slate-800 dark:text-white tabular-nums tracking-tight mt-0.5">{{ formatCurrency(summary.totalPayment) }}</p>
+            <p class="text-[10px] font-bold uppercase tracking-widest text-[#8298ab]">Toplam Tahsilat</p>
+            <p class="text-xl font-black text-slate-800 tabular-nums tracking-tight mt-0.5">{{ formatCurrency(summary.totalPayment) }}</p>
           </div>
         </div>
       </div>
@@ -144,19 +144,19 @@
         <div class="flex items-center gap-4">
           <div :class="[
             'w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 transition-transform group-hover:scale-110',
-            summary.balance >= 0 ? 'bg-brand-50 dark:bg-brand-500/10 text-brand-600 dark:text-brand-400' : 'bg-red-50 dark:bg-red-500/10 text-red-500'
+            summary.balance >= 0 ? 'bg-brand-50 text-brand-600' : 'bg-red-50 text-red-500'
           ]">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"/>
             </svg>
           </div>
           <div class="min-w-0">
-            <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-[#626885]">{{ hasOpeningBalance ? 'Kapanış Bakiyesi' : 'Net Bakiye' }}</p>
+            <p class="text-[10px] font-bold uppercase tracking-widest text-[#8298ab]">{{ hasOpeningBalance ? 'Kapanış Bakiyesi' : 'Net Bakiye' }}</p>
             <p :class="[
               'text-xl font-black tabular-nums tracking-tight mt-0.5',
-              summary.balance >= 0 ? 'text-brand-600 dark:text-brand-400' : 'text-red-500'
+              summary.balance >= 0 ? 'text-brand-600' : 'text-red-500'
             ]">{{ formatCurrency(summary.balance) }}</p>
-            <p v-if="hasOpeningBalance" class="text-[10px] text-slate-400 dark:text-[#626885] mt-0.5">Devreden dahil</p>
+            <p v-if="hasOpeningBalance" class="text-[10px] text-[#8298ab] mt-0.5">Devreden dahil</p>
           </div>
         </div>
       </div>
@@ -164,46 +164,46 @@
 
     <!-- Birim Bazlı Karşılaştırma (Elektrik / Su / Aidat) -->
     <div v-if="comparisonRows.length > 0" class="app-card !p-0 mb-6">
-      <div class="flex items-center justify-between px-4 py-3 border-b border-slate-200 dark:border-white/[0.07]">
+      <div class="flex items-center justify-between px-4 py-3 border-b border-slate-200">
         <div class="flex items-center gap-2">
-          <span class="text-sm font-semibold text-slate-700 dark:text-[#f1f3f9]">Birim Bazlı Karşılaştırma</span>
-          <span class="text-xs text-slate-400">Bina geneli · Gelir / Gider</span>
+          <span class="text-sm font-semibold text-slate-700">Birim Bazlı Karşılaştırma</span>
+          <span class="text-xs text-[#8298ab]">Bina geneli · Gelir / Gider</span>
         </div>
-        <span class="text-[10px] font-bold text-slate-400 dark:text-[#626885] uppercase tracking-widest">Fark = Tahsilat − Gider</span>
+        <span class="text-[10px] font-bold text-[#8298ab] uppercase tracking-widest">Fark = Tahsilat − Gider</span>
       </div>
       <div class="overflow-x-auto">
         <table class="table table-sm w-full">
           <thead>
-            <tr class="border-b border-white/[0.08]">
-              <th class="py-4 text-[10px] font-black text-slate-400 dark:text-[#626885] uppercase tracking-widest px-4 text-left">Kategori</th>
-              <th class="py-4 text-[10px] font-black text-slate-400 dark:text-[#626885] uppercase tracking-widest px-4 text-right">Tahakkuk</th>
-              <th class="py-4 text-[10px] font-black text-slate-400 dark:text-[#626885] uppercase tracking-widest px-4 text-right">Tahsilat</th>
-              <th class="py-4 text-[10px] font-black text-slate-400 dark:text-[#626885] uppercase tracking-widest px-4 text-right">Gider</th>
-              <th class="py-4 text-[10px] font-black text-slate-400 dark:text-[#626885] uppercase tracking-widest px-4 text-right">Fark</th>
+            <tr class="border-b border-[#d9e7f2]">
+              <th class="py-4 text-[10px] font-black text-[#8298ab] uppercase tracking-widest px-4 text-left">Kategori</th>
+              <th class="py-4 text-[10px] font-black text-[#8298ab] uppercase tracking-widest px-4 text-right">Tahakkuk</th>
+              <th class="py-4 text-[10px] font-black text-[#8298ab] uppercase tracking-widest px-4 text-right">Tahsilat</th>
+              <th class="py-4 text-[10px] font-black text-[#8298ab] uppercase tracking-widest px-4 text-right">Gider</th>
+              <th class="py-4 text-[10px] font-black text-[#8298ab] uppercase tracking-widest px-4 text-right">Fark</th>
             </tr>
           </thead>
           <tbody class="divide-y-0">
             <tr
               v-for="row in comparisonRows"
               :key="row.category"
-              class="group hover:bg-white/[0.02] transition-colors border-b border-white/[0.02]/50"
+              class="group hover:bg-[#f6fafd] transition-colors border-b border-[#ecf3f9]"
             >
-              <td class="px-4 py-3 text-[13px] font-black text-slate-800 dark:text-white uppercase tracking-tight">{{ row.label }}</td>
-              <td class="px-4 py-3 text-right text-[13px] font-black tabular-nums tracking-tight text-slate-500 dark:text-[#9aa0b4]">{{ formatCurrency(row.accrued) }}</td>
-              <td class="px-4 py-3 text-right text-[13px] font-black tabular-nums tracking-tight text-emerald-600 dark:text-emerald-400">{{ formatCurrency(row.collected) }}</td>
+              <td class="px-4 py-3 text-[13px] font-black text-slate-800 uppercase tracking-tight">{{ row.label }}</td>
+              <td class="px-4 py-3 text-right text-[13px] font-black tabular-nums tracking-tight text-slate-500">{{ formatCurrency(row.accrued) }}</td>
+              <td class="px-4 py-3 text-right text-[13px] font-black tabular-nums tracking-tight text-emerald-600">{{ formatCurrency(row.collected) }}</td>
               <td class="px-4 py-3 text-right text-[13px] font-black tabular-nums tracking-tight text-red-500">{{ formatCurrency(row.expense) }}</td>
-              <td class="px-4 py-3 text-right text-[13px] font-black tabular-nums tracking-tight" :class="row.difference >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500'">
+              <td class="px-4 py-3 text-right text-[13px] font-black tabular-nums tracking-tight" :class="row.difference >= 0 ? 'text-emerald-600' : 'text-red-500'">
                 {{ formatCurrency(row.difference) }}
               </td>
             </tr>
           </tbody>
           <tfoot v-if="comparisonTotal">
-            <tr class="border-t-2 border-slate-200 dark:border-white/[0.1] bg-slate-50/60 dark:bg-white/[0.02]">
-              <td class="px-4 py-3 text-[12px] font-black text-slate-700 dark:text-white uppercase tracking-widest">Toplam</td>
-              <td class="px-4 py-3 text-right text-[13px] font-black tabular-nums tracking-tight text-slate-600 dark:text-[#9aa0b4]">{{ formatCurrency(comparisonTotal.accrued) }}</td>
-              <td class="px-4 py-3 text-right text-[13px] font-black tabular-nums tracking-tight text-emerald-600 dark:text-emerald-400">{{ formatCurrency(comparisonTotal.collected) }}</td>
+            <tr class="border-t-2 border-slate-200 bg-slate-50/60">
+              <td class="px-4 py-3 text-[12px] font-black text-slate-700 uppercase tracking-widest">Toplam</td>
+              <td class="px-4 py-3 text-right text-[13px] font-black tabular-nums tracking-tight text-slate-600">{{ formatCurrency(comparisonTotal.accrued) }}</td>
+              <td class="px-4 py-3 text-right text-[13px] font-black tabular-nums tracking-tight text-emerald-600">{{ formatCurrency(comparisonTotal.collected) }}</td>
               <td class="px-4 py-3 text-right text-[13px] font-black tabular-nums tracking-tight text-red-500">{{ formatCurrency(comparisonTotal.expense) }}</td>
-              <td class="px-4 py-3 text-right text-[13px] font-black tabular-nums tracking-tight" :class="comparisonTotal.difference >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500'">
+              <td class="px-4 py-3 text-right text-[13px] font-black tabular-nums tracking-tight" :class="comparisonTotal.difference >= 0 ? 'text-emerald-600' : 'text-red-500'">
                 {{ formatCurrency(comparisonTotal.difference) }}
               </td>
             </tr>
@@ -215,13 +215,13 @@
     <!-- Tablo Kartı -->
     <div class="app-card !p-0">
       <!-- Tablo Başlığı -->
-      <div class="flex items-center justify-between px-4 py-3 border-b border-slate-200 dark:border-white/[0.07]">
+      <div class="flex items-center justify-between px-4 py-3 border-b border-slate-200">
         <div class="flex items-center gap-2">
-          <span class="text-sm font-semibold text-slate-700 dark:text-[#f1f3f9]">İşlem Listesi</span>
-          <span class="text-xs text-slate-400">{{ reportItems.length }} kayıt</span>
+          <span class="text-sm font-semibold text-slate-700">İşlem Listesi</span>
+          <span class="text-xs text-[#8298ab]">{{ reportItems.length }} kayıt</span>
         </div>
         <div class="flex items-center gap-2">
-          <span class="text-xs text-slate-400 hidden sm:block">Sayfa başına</span>
+          <span class="text-xs text-[#8298ab] hidden sm:block">Sayfa başına</span>
           <select v-model="pageSize" class="select select-xs select-bordered">
             <option :value="10">10</option>
             <option :value="25">25</option>
@@ -235,102 +235,102 @@
       <div class="overflow-x-auto">
         <table class="table table-sm w-full" id="report-table">
           <thead>
-            <tr class="border-b border-white/[0.08]">
-              <th class="py-4 text-[10px] font-black text-slate-400 dark:text-[#626885] uppercase tracking-widest whitespace-nowrap px-4 text-left">Tarih</th>
-              <th class="py-4 text-[10px] font-black text-slate-400 dark:text-[#626885] uppercase tracking-widest whitespace-nowrap px-4 text-left">Dönem</th>
-              <th class="py-4 text-[10px] font-black text-slate-400 dark:text-[#626885] uppercase tracking-widest whitespace-nowrap px-4 text-left">Kiracı / Ünite</th>
-              <th class="py-4 text-[10px] font-black text-slate-400 dark:text-[#626885] uppercase tracking-widest whitespace-nowrap px-4 text-left">İşlem</th>
-              <th class="py-4 text-[10px] font-black text-slate-400 dark:text-[#626885] uppercase tracking-widest whitespace-nowrap px-4 text-left">Açıklama</th>
-              <th class="py-4 text-[10px] font-black text-slate-400 dark:text-[#626885] uppercase tracking-widest whitespace-nowrap px-4 text-left">Fatura No</th>
-              <th class="py-4 text-[10px] font-black text-slate-400 dark:text-[#626885] uppercase tracking-widest text-right whitespace-nowrap px-4">Borç (−)</th>
-              <th class="py-4 text-[10px] font-black text-slate-400 dark:text-[#626885] uppercase tracking-widest text-right whitespace-nowrap px-4">Alacak (+)</th>
-              <th class="py-4 text-[10px] font-black text-slate-400 dark:text-[#626885] uppercase tracking-widest text-center whitespace-nowrap px-4">Durum</th>
-              <th class="py-4 text-[10px] font-black text-slate-400 dark:text-[#626885] uppercase tracking-widest text-center whitespace-nowrap px-4">Vade</th>
+            <tr class="border-b border-[#d9e7f2]">
+              <th class="py-4 text-[10px] font-black text-[#8298ab] uppercase tracking-widest whitespace-nowrap px-4 text-left">Tarih</th>
+              <th class="py-4 text-[10px] font-black text-[#8298ab] uppercase tracking-widest whitespace-nowrap px-4 text-left">Dönem</th>
+              <th class="py-4 text-[10px] font-black text-[#8298ab] uppercase tracking-widest whitespace-nowrap px-4 text-left">Kiracı / Ünite</th>
+              <th class="py-4 text-[10px] font-black text-[#8298ab] uppercase tracking-widest whitespace-nowrap px-4 text-left">İşlem</th>
+              <th class="py-4 text-[10px] font-black text-[#8298ab] uppercase tracking-widest whitespace-nowrap px-4 text-left">Açıklama</th>
+              <th class="py-4 text-[10px] font-black text-[#8298ab] uppercase tracking-widest whitespace-nowrap px-4 text-left">Fatura No</th>
+              <th class="py-4 text-[10px] font-black text-[#8298ab] uppercase tracking-widest text-right whitespace-nowrap px-4">Borç (−)</th>
+              <th class="py-4 text-[10px] font-black text-[#8298ab] uppercase tracking-widest text-right whitespace-nowrap px-4">Alacak (+)</th>
+              <th class="py-4 text-[10px] font-black text-[#8298ab] uppercase tracking-widest text-center whitespace-nowrap px-4">Durum</th>
+              <th class="py-4 text-[10px] font-black text-[#8298ab] uppercase tracking-widest text-center whitespace-nowrap px-4">Vade</th>
             </tr>
           </thead>
           <tbody class="divide-y-0">
             <tr v-if="loading">
               <td colspan="10" class="text-center py-10">
-                <span class="loading loading-spinner loading-md text-slate-400"></span>
+                <span class="loading loading-spinner loading-md text-[#8298ab]"></span>
               </td>
             </tr>
             <!-- Devreden (devir) satırı: tabloya sabitlenir, başlangıç tarihi öncesi net bakiye -->
             <tr v-if="!loading && hasOpeningBalance && reportItems.length > 0"
-              class="bg-amber-50/60 dark:bg-amber-500/[0.06] border-b-2 border-amber-200 dark:border-amber-500/20">
-              <td class="px-4 py-3 whitespace-nowrap text-[11px] font-black text-amber-600 dark:text-amber-400 uppercase tracking-tight">{{ formatDate(filters.startDate) }}</td>
+              class="bg-amber-50/60 border-b-2 border-amber-200">
+              <td class="px-4 py-3 whitespace-nowrap text-[11px] font-black text-amber-600 uppercase tracking-tight">{{ formatDate(filters.startDate) }}</td>
               <td class="px-4 py-3 text-[11px] font-mono font-black text-amber-500/70 tracking-tighter">—</td>
               <td class="px-4 py-3">
-                <p class="text-[13.5px] font-black text-amber-700 dark:text-amber-300 leading-tight uppercase tracking-tight">DEVİR</p>
+                <p class="text-[13.5px] font-black text-amber-700 leading-tight uppercase tracking-tight">DEVİR</p>
                 <p class="text-[10px] font-bold text-amber-500/80 uppercase tracking-widest mt-1">Önceki dönemden</p>
               </td>
               <td class="px-4 py-3">
-                <span class="px-2 py-0.5 rounded-lg text-[9.5px] font-black uppercase tracking-widest bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300">Devir</span>
+                <span class="px-2 py-0.5 rounded-lg text-[9.5px] font-black uppercase tracking-widest bg-amber-100 text-amber-700">Devir</span>
               </td>
-              <td class="px-4 py-3 text-[11px] font-black text-amber-600/80 dark:text-amber-300/70 uppercase tracking-tight">Önceki dönem bakiyesi</td>
-              <td class="px-4 py-3 text-[11px] font-mono font-black text-amber-400 tracking-tighter">—</td>
-              <td class="px-4 py-3 text-right text-[13px] font-black tabular-nums tracking-tight" :class="summary.opening < 0 ? 'text-red-500' : 'text-slate-300 dark:text-[#3a3f55]'">
+              <td class="px-4 py-3 text-[11px] font-black text-amber-600/80 uppercase tracking-tight">Önceki dönem bakiyesi</td>
+              <td class="px-4 py-3 text-[11px] font-mono font-black text-amber-600 tracking-tighter">—</td>
+              <td class="px-4 py-3 text-right text-[13px] font-black tabular-nums tracking-tight" :class="summary.opening < 0 ? 'text-red-500' : 'text-[#8298ab]'">
                 {{ summary.opening < 0 ? formatCurrency(Math.abs(summary.opening)) : '—' }}
               </td>
-              <td class="px-4 py-3 text-right text-[13px] font-black tabular-nums tracking-tight" :class="summary.opening >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-300 dark:text-[#3a3f55]'">
+              <td class="px-4 py-3 text-right text-[13px] font-black tabular-nums tracking-tight" :class="summary.opening >= 0 ? 'text-emerald-600' : 'text-[#8298ab]'">
                 {{ summary.opening >= 0 ? formatCurrency(summary.opening) : '—' }}
               </td>
-              <td class="px-4 py-3 text-center text-amber-400 text-xs">—</td>
-              <td class="px-4 py-3 text-center text-amber-400 text-xs">—</td>
+              <td class="px-4 py-3 text-center text-amber-600 text-xs">—</td>
+              <td class="px-4 py-3 text-center text-amber-600 text-xs">—</td>
             </tr>
             <tr v-if="!loading && reportItems.length === 0">
               <td colspan="10" class="py-12">
                 <div class="text-center">
-                  <div class="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-[#1c2238] flex items-center justify-center mx-auto mb-3">
-                    <svg class="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div class="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-3">
+                    <svg class="w-6 h-6 text-[#8298ab]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                     </svg>
                   </div>
-                  <p class="text-sm font-medium text-slate-500 dark:text-[#9aa0b4]">Kayıt bulunamadı</p>
-                  <p class="text-xs text-slate-400 mt-1">Farklı filtre kriterleri deneyin</p>
+                  <p class="text-sm font-medium text-slate-500">Kayıt bulunamadı</p>
+                  <p class="text-xs text-[#8298ab] mt-1">Farklı filtre kriterleri deneyin</p>
                 </div>
               </td>
             </tr>
             <tr
               v-for="(item, idx) in (loading ? [] : paginatedReports)"
               :key="idx"
-              class="group hover:bg-white/[0.02] transition-colors border-b border-white/[0.02]/50 last:border-0"
+              class="group hover:bg-[#f6fafd] transition-colors border-b border-[#ecf3f9] last:border-0"
             >
-              <td class="px-4 py-3 whitespace-nowrap text-[11px] font-black text-slate-400 dark:text-[#626885] uppercase tracking-tight">{{ formatDate(item.date) }}</td>
-              <td class="px-4 py-3 whitespace-nowrap text-[11px] font-mono font-black text-slate-600 dark:text-[#9aa0b4] tracking-tighter">{{ formatPeriod(item.periodYear, item.periodMonth) }}</td>
+              <td class="px-4 py-3 whitespace-nowrap text-[11px] font-black text-[#8298ab] uppercase tracking-tight">{{ formatDate(item.date) }}</td>
+              <td class="px-4 py-3 whitespace-nowrap text-[11px] font-mono font-black text-slate-600 tracking-tighter">{{ formatPeriod(item.periodYear, item.periodMonth) }}</td>
               <td class="px-4 py-3">
-                <p class="text-[13.5px] font-black text-slate-800 dark:text-white leading-tight uppercase tracking-tight truncate group-hover:text-brand-500 transition-colors">{{ item.tenantName }}</p>
-                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">{{ item.unitCode }}</p>
+                <p class="text-[13.5px] font-black text-slate-800 leading-tight uppercase tracking-tight truncate group-hover:text-brand-600 transition-colors">{{ item.tenantName }}</p>
+                <p class="text-[10px] font-bold text-[#8298ab] uppercase tracking-widest mt-1">{{ item.unitCode }}</p>
               </td>
               <td class="px-4 py-3">
                 <span :class="[
                   'px-2 py-0.5 rounded-lg text-[9.5px] font-black uppercase tracking-widest',
-                  item.isPayment ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400' 
-                  : 'bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400'
+                  item.isPayment ? 'bg-emerald-50 text-emerald-600' 
+                  : 'bg-red-50 text-red-600'
                 ]">
                   {{ item.isPayment ? 'Tahsilat' : 'Borç' }}
                 </span>
               </td>
-              <td class="px-4 py-3 max-w-[180px] truncate text-[11px] font-black text-slate-500 dark:text-white/70 uppercase tracking-tight">{{ item.description }}</td>
-              <td class="px-4 py-3 text-[11px] font-mono font-black text-slate-400 uppercase tracking-tighter">{{ item.invoiceNumber || '—' }}</td>
-              <td class="px-4 py-3 text-right text-[13px] font-black tabular-nums tracking-tight" :class="!item.isPayment ? 'text-red-500' : 'text-slate-300 dark:text-[#3a3f55]'">
+              <td class="px-4 py-3 max-w-[180px] truncate text-[11px] font-black text-slate-500 uppercase tracking-tight">{{ item.description }}</td>
+              <td class="px-4 py-3 text-[11px] font-mono font-black text-[#8298ab] uppercase tracking-tighter">{{ item.invoiceNumber || '—' }}</td>
+              <td class="px-4 py-3 text-right text-[13px] font-black tabular-nums tracking-tight" :class="!item.isPayment ? 'text-red-500' : 'text-[#8298ab]'">
                 {{ !item.isPayment ? formatCurrency(item.amount) : '—' }}
               </td>
-              <td class="px-4 py-3 text-right text-[13px] font-black tabular-nums tracking-tight" :class="item.isPayment ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-300 dark:text-[#3a3f55]'">
+              <td class="px-4 py-3 text-right text-[13px] font-black tabular-nums tracking-tight" :class="item.isPayment ? 'text-emerald-600' : 'text-[#8298ab]'">
                 {{ item.isPayment ? formatCurrency(item.amount) : '—' }}
               </td>
               <td class="px-4 py-3 text-center">
                 <span v-if="!item.isPayment" :class="[
                   'px-2 py-0.5 rounded-lg text-[9.5px] font-black uppercase tracking-widest',
-                  item.isPaid ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400' : 'bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400'
+                  item.isPaid ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'
                 ]">
                   {{ item.isPaid ? 'Ödendi' : 'Bekliyor' }}
                 </span>
-                <span v-else class="text-slate-300 dark:text-[#3a3f55] text-xs">—</span>
+                <span v-else class="text-[#8298ab] text-xs">—</span>
               </td>
               <td class="px-4 py-3 whitespace-nowrap text-[11px] font-black text-center uppercase tracking-tight" :class="
-                !item.lastPaymentDate ? 'text-slate-300 dark:text-[#3a3f55]' :
+                !item.lastPaymentDate ? 'text-[#8298ab]' :
                 (!item.isPaid && new Date(item.lastPaymentDate) < new Date()) ? 'text-red-500' :
-                'text-slate-400 dark:text-[#626885]'
+                'text-[#8298ab]'
               ">
                 {{ item.lastPaymentDate ? formatDate(item.lastPaymentDate) : '—' }}
               </td>
@@ -340,8 +340,8 @@
       </div>
 
       <!-- Pagination -->
-      <div v-if="totalPages > 1" class="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-3 border-t border-slate-200 dark:border-white/[0.07]">
-        <p class="text-xs text-slate-400">
+      <div v-if="totalPages > 1" class="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-3 border-t border-slate-200">
+        <p class="text-xs text-[#8298ab]">
           {{ reportItems.length }} kayıttan
           {{ (currentPage - 1) * pageSize + 1 }}–{{ Math.min(currentPage * pageSize, reportItems.length) }} arası
         </p>
@@ -358,7 +358,7 @@
             @click="currentPage = page"
             :class="[
               'btn btn-xs',
-              currentPage === page ? 'btn-primary' : 'btn-ghost text-slate-500 dark:text-[#9aa0b4]'
+              currentPage === page ? 'btn-primary' : 'btn-ghost text-slate-500'
             ]"
           >
             {{ page }}

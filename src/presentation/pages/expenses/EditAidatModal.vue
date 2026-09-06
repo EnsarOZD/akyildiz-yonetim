@@ -8,15 +8,15 @@
   >
     <div class="space-y-6">
       <!-- Bilgi Alanları -->
-      <div class="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-5 space-y-4">
-        <h4 class="text-[11px] font-black uppercase tracking-widest text-[#626885] mb-2">Kayıt Bilgileri</h4>
+      <div class="bg-[#f6fafd] border border-[#d9e7f2] rounded-2xl p-5 space-y-4">
+        <h4 class="text-[11px] font-black uppercase tracking-widest text-[#8298ab] mb-2">Kayıt Bilgileri</h4>
 
         <div class="grid grid-cols-2 gap-4">
           <div class="form-control">
             <label class="label">
               <span class="label-text">Kat/Daire</span>
             </label>
-            <div class="px-4 py-2.5 bg-white/[0.04] border border-white/[0.08] rounded-xl text-sm text-[#9aa0b4] font-medium">
+            <div class="px-4 py-2.5 bg-[#ecf3f9] border border-[#d9e7f2] rounded-xl text-sm text-[#5a7186] font-medium">
               {{ record.unit || record.flatNumber || '-' }}
             </div>
           </div>
@@ -25,7 +25,7 @@
             <label class="label">
               <span class="label-text">Şirket/Kişi</span>
             </label>
-            <div class="px-4 py-2.5 bg-white/[0.04] border border-white/[0.08] rounded-xl text-sm text-[#9aa0b4] font-medium truncate">
+            <div class="px-4 py-2.5 bg-[#ecf3f9] border border-[#d9e7f2] rounded-xl text-sm text-[#5a7186] font-medium truncate">
                {{ record.tenantCompany || record.tenantName || record.ownerName || '-' }}
             </div>
           </div>
@@ -47,8 +47,8 @@
       </div>
 
       <!-- Düzenlenebilir Alanlar -->
-      <div class="bg-brand-500/[0.05] border border-brand-500/20 rounded-2xl p-5 space-y-5">
-        <h4 class="text-[11px] font-black uppercase tracking-widest text-brand-400 mb-2">Tutar ve Detaylar</h4>
+      <div class="bg-brand-500/[0.05] border border-brand-600/20 rounded-2xl p-5 space-y-5">
+        <h4 class="text-[11px] font-black uppercase tracking-widest text-brand-600 mb-2">Tutar ve Detaylar</h4>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div class="form-control">
@@ -66,9 +66,9 @@
                 placeholder="0,00"
                 required
               />
-              <span class="absolute right-4 top-1/2 -translate-y-1/2 text-[#626885] font-black uppercase tracking-widest text-[10px]">TL</span>
+              <span class="absolute right-4 top-1/2 -translate-y-1/2 text-[#8298ab] font-black uppercase tracking-widest text-[10px]">TL</span>
             </div>
-            <p v-if="amountError" class="text-red-400 text-[10px] font-bold uppercase tracking-wide mt-1.5 ml-1">{{ amountError }}</p>
+            <p v-if="amountError" class="text-red-600 text-[10px] font-bold uppercase tracking-wide mt-1.5 ml-1">{{ amountError }}</p>
           </div>
 
           <div class="form-control">
@@ -116,7 +116,7 @@
     </div>
 
     <template #footer>
-      <button class="btn btn-outline border-white/[0.08] text-[#9aa0b4] hover:bg-white/[0.04]" @click="$emit('close')">
+      <button class="btn btn-outline border-[#d9e7f2] text-[#5a7186] hover:bg-[#ecf3f9]" @click="$emit('close')">
         Vazgeç
       </button>
       <button class="btn btn-primary" @click="save" :disabled="local.toplamTutar <= 0">

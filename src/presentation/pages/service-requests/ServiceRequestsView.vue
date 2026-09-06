@@ -22,14 +22,14 @@
     <!-- Filtreler -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-8">
       <div class="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0 pb-1 sm:pb-0">
-        <div class="flex p-1.5 bg-slate-50 dark:bg-white/[0.02] rounded-2xl border border-slate-100 dark:border-white/[0.04] shadow-sm w-max">
+        <div class="flex p-1.5 bg-slate-50 rounded-2xl border border-slate-100 shadow-sm w-max">
           <button v-for="f in filters" :key="f.value"
             @click="activeFilter = f.value; loadRequests()"
             :class="[
               'px-4 py-1.5 text-[11px] font-black uppercase tracking-widest rounded-xl transition-all duration-300 whitespace-nowrap',
               activeFilter === f.value
-                ? 'bg-white dark:bg-brand-500 text-brand-600 dark:text-white shadow-xl shadow-brand-500/10'
-                : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'
+                ? 'bg-white text-brand-600 shadow-xl shadow-brand-500/10'
+                : 'text-[#8298ab] hover:text-slate-600'
             ]">
             {{ f.label }}
           </button>
@@ -37,7 +37,7 @@
       </div>
 
       <div class="flex items-center gap-2 shrink-0">
-        <span class="text-[11px] font-bold text-slate-400 uppercase tracking-widest">{{ requests.length }} talep gösteriliyor</span>
+        <span class="text-[11px] font-bold text-[#8298ab] uppercase tracking-widest">{{ requests.length }} talep gösteriliyor</span>
       </div>
     </div>
 
@@ -48,14 +48,14 @@
 
     <!-- Boş Durum -->
     <div v-else-if="requests.length === 0" class="app-card p-16 text-center border-dashed border-2">
-      <div class="w-16 h-16 rounded-2xl bg-slate-100 dark:bg-[#151a2e] text-slate-300 flex items-center justify-center mx-auto mb-4">
+      <div class="w-16 h-16 rounded-2xl bg-slate-100 text-[#8298ab] flex items-center justify-center mx-auto mb-4">
         <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
         </svg>
       </div>
-      <h3 class="text-base font-bold text-slate-800 dark:text-[#f1f3f9]">Henüz talep yok</h3>
+      <h3 class="text-base font-bold text-slate-800">Henüz talep yok</h3>
       <p class="text-sm text-slate-500 mt-1 max-w-xs mx-auto">Herhangi bir arıza, temizlik veya güvenlik talebiniz olduğunda buradan kolayca iletebilirsiniz.</p>
-      <button @click="showCreate = true" class="btn btn-sm btn-ghost text-brand-500 mt-4">Yeni Talep Oluştur</button>
+      <button @click="showCreate = true" class="btn btn-sm btn-ghost text-brand-600 mt-4">Yeni Talep Oluştur</button>
     </div>
 
     <!-- Hizmet Talebi Listesi -->
@@ -72,45 +72,45 @@
           
           <div class="flex-1 min-w-0">
             <div class="flex items-center justify-between gap-2 mb-2">
-              <span class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-[#626885] truncate min-w-0">{{ categoryLabel(req.category) }}</span>
+              <span class="text-[10px] font-black uppercase tracking-[0.2em] text-[#8298ab] truncate min-w-0">{{ categoryLabel(req.category) }}</span>
               <span :class="statusBadge(req.status)" class="px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest shadow-sm shrink-0 whitespace-nowrap">
                 {{ statusLabel(req.status) }}
               </span>
             </div>
             
-            <h3 class="text-[15px] font-black text-slate-800 dark:text-white leading-tight uppercase tracking-tight truncate mb-2 group-hover:text-brand-500 transition-colors">{{ req.title }}</h3>
-            <p class="text-xs font-bold text-slate-500 dark:text-[#9aa0b4] line-clamp-2 mb-4 leading-relaxed uppercase">{{ req.description }}</p>
+            <h3 class="text-[15px] font-black text-slate-800 leading-tight uppercase tracking-tight truncate mb-2 group-hover:text-brand-600 transition-colors">{{ req.title }}</h3>
+            <p class="text-xs font-bold text-slate-500 line-clamp-2 mb-4 leading-relaxed uppercase">{{ req.description }}</p>
             
-            <div class="flex flex-wrap items-center gap-y-3 gap-x-5 pt-4 border-t border-slate-100 dark:border-white/[0.04]">
+            <div class="flex flex-wrap items-center gap-y-3 gap-x-5 pt-4 border-t border-slate-100">
               <div class="flex items-center gap-2 min-w-0">
-                <div class="w-6 h-6 rounded-xl bg-slate-100 dark:bg-white/[0.04] flex items-center justify-center text-[10px] font-black text-slate-500 overflow-hidden ring-2 ring-white dark:ring-[#1c2238] shadow-sm">
+                <div class="w-6 h-6 rounded-xl bg-slate-100 flex items-center justify-center text-[10px] font-black text-slate-500 overflow-hidden ring-2 ring-white shadow-sm">
                   <span v-if="!(req.tenantName || req.ownerName || req.firstName)">?</span>
                   <img v-else-if="req.userPhoto" :src="req.userPhoto" class="w-full h-full object-cover">
                   <span v-else>{{ (req.tenantName || req.ownerName || req.firstName || '?').charAt(0) }}</span>
                 </div>
-                <span class="text-[11px] font-black text-slate-700 dark:text-[#f1f3f9] uppercase tracking-tight truncate">{{ req.tenantName || req.ownerName || 'Bilinmiyor' }}</span>
+                <span class="text-[11px] font-black text-slate-700 uppercase tracking-tight truncate">{{ req.tenantName || req.ownerName || 'Bilinmiyor' }}</span>
               </div>
               
               <div class="flex items-center gap-1.5">
-                <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-3.5 h-3.5 text-[#8298ab]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
-                <span class="text-[11px] font-bold text-slate-400 dark:text-[#626885] tabular-nums uppercase">{{ formatDate(req.createdAt) }}</span>
+                <span class="text-[11px] font-bold text-[#8298ab] tabular-nums uppercase">{{ formatDate(req.createdAt) }}</span>
               </div>
 
               <!-- Atanan Personel -->
-              <div v-if="req.assignedPersonnelName" class="flex items-center gap-2 px-2 py-0.5 bg-brand-50 dark:bg-brand-500/10 rounded-lg">
+              <div v-if="req.assignedPersonnelName" class="flex items-center gap-2 px-2 py-0.5 bg-brand-50 rounded-lg">
                 <div class="w-4 h-4 rounded-lg bg-brand-500 text-white flex items-center justify-center shadow-lg shadow-brand-500/20">
                   <svg class="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
                 </div>
-                <span class="text-[10px] font-black text-brand-600 dark:text-brand-400 uppercase tracking-tighter">{{ req.assignedPersonnelName }}</span>
+                <span class="text-[10px] font-black text-brand-600 uppercase tracking-tighter">{{ req.assignedPersonnelName }}</span>
               </div>
             </div>
           </div>
         </div>
 
         <!-- İşlemler -->
-        <div v-if="canManage" class="mt-5 flex items-center justify-end gap-3 pt-4 border-t border-slate-100 dark:border-white/[0.04]">
+        <div v-if="canManage" class="mt-5 flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
           <button v-if="!req.assignedPersonnelId && req.status !== 'Closed'" 
             @click="openAssign(req)" 
             class="btn btn-xs h-8 bg-brand-50 hover:bg-brand-100 text-brand-600 border-none rounded-xl px-4 text-[10px] font-black uppercase tracking-widest">
@@ -119,13 +119,13 @@
           </button>
           
           <div class="dropdown dropdown-end">
-            <button tabindex="0" class="btn btn-xs btn-ghost hover:bg-slate-100 dark:hover:bg-white/[0.06] rounded-lg">
-              <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <button tabindex="0" class="btn btn-xs btn-ghost hover:bg-slate-100 rounded-lg">
+              <svg class="w-4 h-4 text-[#8298ab]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
               </svg>
             </button>
-            <ul tabindex="0" class="dropdown-content z-[1] menu p-1.5 shadow-xl bg-white dark:bg-[#0f1322] rounded-xl w-44 border border-slate-200 dark:border-white/[0.07] text-xs">
-              <li v-if="req.status === 'Open'"><a @click="updateStatus(req.id, 'InProgress')" class="rounded-lg py-2"><svg class="w-3.5 h-3.5 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/></svg> İşleme Al</a></li>
+            <ul tabindex="0" class="dropdown-content z-[1] menu p-1.5 shadow-xl bg-white rounded-xl w-44 border border-slate-200 text-xs">
+              <li v-if="req.status === 'Open'"><a @click="updateStatus(req.id, 'InProgress')" class="rounded-lg py-2"><svg class="w-3.5 h-3.5 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/></svg> İşleme Al</a></li>
               <li v-if="req.status === 'InProgress'"><a @click="openResolve(req)" class="rounded-lg py-2"><svg class="w-3.5 h-3.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> Tamamlandı Olarak İşaretle</a></li>
               <li v-if="req.status !== 'Closed'"><div class="divider my-0"></div></li>
               <li v-if="req.status !== 'Closed'"><a @click="openClose(req)" class="rounded-lg py-2 text-error"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> Talebi Kapat</a></li>
@@ -138,19 +138,19 @@
 
     <!-- Yeni Talep Modal -->
     <div v-if="showCreate" class="modal modal-open">
-      <div class="modal-box max-w-md bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border border-white/20 dark:border-slate-700/30">
-        <h3 class="font-bold text-xl mb-1 text-slate-800 dark:text-white">Yeni Talep</h3>
+      <div class="modal-box max-w-md bg-white/90 backdrop-blur-xl border border-white/20">
+        <h3 class="font-bold text-xl mb-1 text-slate-800">Yeni Talep</h3>
         <p class="text-xs text-slate-500 mb-6">Arıza veya hizmet talebinizi aşağıdan iletebilirsiniz.</p>
         
         <div class="space-y-4">
           <div class="form-control">
             <label class="label py-1"><span class="label-text text-xs font-bold text-slate-500 uppercase">Talep Başlığı</span></label>
-            <input v-model="form.title" type="text" placeholder="Kısa ve öz bir başlık..." class="input input-bordered bg-slate-50 dark:bg-slate-800/50 w-full focus:ring-2 focus:ring-brand-500/20" />
+            <input v-model="form.title" type="text" placeholder="Kısa ve öz bir başlık..." class="input input-bordered bg-slate-50 w-full focus:ring-2 focus:ring-brand-500/20" />
           </div>
           
           <div class="form-control">
             <label class="label py-1"><span class="label-text text-xs font-bold text-slate-500 uppercase">Kategori</span></label>
-            <select v-model="form.category" class="select select-bordered bg-slate-50 dark:bg-slate-800/50 w-full">
+            <select v-model="form.category" class="select select-bordered bg-slate-50 w-full">
               <option value="Maintenance">Bakım / Tamir</option>
               <option value="Cleaning">Temizlik</option>
               <option value="Noise">Gürültü / Şikayet</option>
@@ -161,7 +161,7 @@
           
           <div class="form-control">
             <label class="label py-1"><span class="label-text text-xs font-bold text-slate-500 uppercase">Açıklama</span></label>
-            <textarea v-model="form.description" class="textarea textarea-bordered bg-slate-50 dark:bg-slate-800/50 w-full h-24" placeholder="Lütfen detayları belirtin..."></textarea>
+            <textarea v-model="form.description" class="textarea textarea-bordered bg-slate-50 w-full h-24" placeholder="Lütfen detayları belirtin..."></textarea>
           </div>
         </div>
         
@@ -173,21 +173,21 @@
           </button>
         </div>
       </div>
-      <div class="modal-backdrop bg-slate-900/40 backdrop-blur-sm" @click="showCreate = false"></div>
+      <div class="modal-backdrop bg-[#16283a]/35 backdrop-blur-sm" @click="showCreate = false"></div>
     </div>
 
     <!-- Personel Ata Modal -->
     <div v-if="assignTarget" class="modal modal-open">
-      <div class="modal-box max-w-sm bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl">
-        <h3 class="font-bold text-lg mb-4 text-slate-800 dark:text-white">Personel Atama</h3>
+      <div class="modal-box max-w-sm bg-white/90 backdrop-blur-xl">
+        <h3 class="font-bold text-lg mb-4 text-slate-800">Personel Atama</h3>
         <p class="text-xs text-slate-500 mb-4 font-medium italic">"{{ assignTarget.title }}"</p>
         
         <div class="form-control mb-6">
           <label class="label py-1"><span class="label-text text-xs font-bold text-slate-500 uppercase">Görevlendirilecek Personel</span></label>
           <div v-if="personnelLoading" class="flex justify-center py-4">
-            <span class="loading loading-spinner loading-sm text-brand-500"></span>
+            <span class="loading loading-spinner loading-sm text-brand-600"></span>
           </div>
-          <select v-else v-model="selectedPersonnelId" class="select select-bordered w-full bg-slate-50 dark:bg-slate-800/50">
+          <select v-else v-model="selectedPersonnelId" class="select select-bordered w-full bg-slate-50">
             <option value="">Lütfen seçim yapın...</option>
             <option v-for="p in personnel" :key="p.id" :value="p.id">{{ p.firstName }} {{ p.lastName }}</option>
           </select>
@@ -206,13 +206,13 @@
 
     <!-- Tamamlandı Modal (Çözüm Notu) -->
     <div v-if="resolveTarget" class="modal modal-open">
-      <div class="modal-box max-w-md bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl">
+      <div class="modal-box max-w-md bg-white/90 backdrop-blur-xl">
         <h3 class="font-bold text-lg mb-2 text-emerald-600">Talep Tamamlandı</h3>
         <p class="text-xs text-slate-500 mb-6">Hizmetin nasıl tamamlandığına dair kısa bir not ekleyebilirsiniz.</p>
         
         <div class="form-control">
           <label class="label py-1"><span class="label-text text-xs font-bold text-slate-500 uppercase">Çözüm Notu</span></label>
-          <textarea v-model="resolutionNote" class="textarea textarea-bordered bg-slate-50 dark:bg-slate-800/50 w-full h-24" placeholder="Yapılan işlemi açıklayın..."></textarea>
+          <textarea v-model="resolutionNote" class="textarea textarea-bordered bg-slate-50 w-full h-24" placeholder="Yapılan işlemi açıklayın..."></textarea>
         </div>
         
         <div class="modal-action mt-6">
@@ -228,13 +228,13 @@
 
     <!-- Kapat Modal -->
     <div v-if="closeTarget" class="modal modal-open">
-      <div class="modal-box max-w-sm bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl">
+      <div class="modal-box max-w-sm bg-white/90 backdrop-blur-xl">
         <h3 class="font-bold text-base mb-1 text-red-500">Talebi Kapat</h3>
         <p class="text-xs text-slate-500 mb-4 italic">Talep kalıcı olarak arşive alınacaktır.</p>
         
         <div class="form-control">
           <label class="label py-1"><span class="label-text text-xs font-bold text-slate-500 uppercase">Kapatma Nedeni</span></label>
-          <textarea v-model="closeNote" class="textarea textarea-bordered bg-slate-50 dark:bg-slate-800/50 w-full h-20" placeholder="İsteğe bağlı not..."></textarea>
+          <textarea v-model="closeNote" class="textarea textarea-bordered bg-slate-50 w-full h-20" placeholder="İsteğe bağlı not..."></textarea>
         </div>
         
         <div class="modal-action mt-6">
@@ -250,11 +250,11 @@
 
     <!-- Silme Modal -->
     <div v-if="deleteTarget" class="modal modal-open">
-      <div class="modal-box max-w-sm bg-white dark:bg-[#0f1322] border-2 border-error/20">
+      <div class="modal-box max-w-sm bg-white border-2 border-error/20">
         <div class="w-12 h-12 rounded-full bg-error/10 text-error flex items-center justify-center mx-auto mb-4">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
         </div>
-        <h3 class="font-bold text-lg text-center text-slate-800 dark:text-white">Talebi Sil?</h3>
+        <h3 class="font-bold text-lg text-center text-slate-800">Talebi Sil?</h3>
         <p class="text-xs text-center text-slate-500 mt-2 mb-6">Bu işlem geri alınamaz. Talebe ait tüm veriler ve fotoğraflar listeden kaldırılacaktır.</p>
         
         <div class="flex gap-2">
@@ -265,7 +265,7 @@
           </button>
         </div>
       </div>
-      <div class="modal-backdrop bg-slate-900/60" @click="deleteTarget = null"></div>
+      <div class="modal-backdrop bg-[#16283a]/45" @click="deleteTarget = null"></div>
     </div>
 
   </div>
@@ -441,17 +441,17 @@ const formatDate = (d) => {
 
 const statusLabel = (s) => ({ Open: 'Yeni', InProgress: 'İşlemde', Resolved: 'Çözüldü', Closed: 'Kapalı' }[s] ?? s)
 const statusBadge = (s) => ({
-  Open: 'bg-brand-100 text-brand-600 dark:bg-brand-500/[0.12] dark:text-brand-400',
-  InProgress: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400',
-  Resolved: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400',
-  Closed: 'bg-slate-100 text-slate-500 dark:bg-[#151a2e] dark:text-[#9aa0b4]',
-}[s] ?? 'bg-slate-100 text-slate-400')
+  Open: 'bg-brand-100 text-brand-600',
+  InProgress: 'bg-amber-100 text-amber-600',
+  Resolved: 'bg-emerald-100 text-emerald-600',
+  Closed: 'bg-slate-100 text-slate-500',
+}[s] ?? 'bg-slate-100 text-[#8298ab]')
 
 const statusBorder = (s) => ({
   Open: 'border-l-brand-500',
   InProgress: 'border-l-amber-500',
   Resolved: 'border-l-emerald-500',
-  Closed: 'border-l-slate-300 dark:border-l-[#151a2e]',
+  Closed: 'border-l-slate-300',
 }[s] ?? 'border-l-transparent')
 
 const categoryLabel = (c) => ({
@@ -475,11 +475,11 @@ const categoryIcon = (c) => {
 }
 
 const categoryClass = (c) => ({
-  Maintenance: 'bg-amber-100 text-amber-600 dark:bg-amber-900/40 dark:text-amber-400',
-  Cleaning: 'bg-brand-100 text-brand-600 dark:bg-blue-900/40 dark:text-brand-400',
-  Noise: 'bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-400',
-  Security: 'bg-violet-100 text-violet-600 dark:bg-violet-900/40 dark:text-violet-400',
-  Other: 'bg-slate-100 text-slate-500 dark:bg-[#1c2238] dark:text-[#9aa0b4]',
+  Maintenance: 'bg-amber-100 text-amber-600',
+  Cleaning: 'bg-brand-100 text-brand-600',
+  Noise: 'bg-red-100 text-red-600',
+  Security: 'bg-violet-100 text-violet-600',
+  Other: 'bg-slate-100 text-slate-500',
 }[c] ?? 'bg-slate-100 text-slate-500')
 
 onMounted(loadRequests)

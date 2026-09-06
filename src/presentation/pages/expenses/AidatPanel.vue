@@ -2,8 +2,8 @@
   <div class="space-y-6">
     <!-- Başlık -->
     <div class="text-center">
-      <h2 class="text-2xl font-bold text-gray-800 dark:text-[#f1f3f9]">Yıllık Aidat Yönetimi</h2>
-      <p class="text-gray-500 dark:text-[#9aa0b4] mt-2">Kiracılar için yıllık aidat tutarlarını tanımlayın ve yönetin</p>
+      <h2 class="text-2xl font-bold text-gray-800">Yıllık Aidat Yönetimi</h2>
+      <p class="text-gray-500 mt-2">Kiracılar için yıllık aidat tutarlarını tanımlayın ve yönetin</p>
     </div>
 
     <!-- Aidat Tanımlama Formu -->

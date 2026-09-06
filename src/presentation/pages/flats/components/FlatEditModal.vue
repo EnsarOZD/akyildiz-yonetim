@@ -13,15 +13,15 @@
         <!-- Temel Bilgiler Grubu -->
         <div class="space-y-4">
           <div class="flex items-center gap-3 px-1">
-            <div class="w-8 h-8 rounded-lg bg-brand-500/10 flex items-center justify-center text-brand-400">
+            <div class="w-8 h-8 rounded-lg bg-brand-500/10 flex items-center justify-center text-brand-600">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
               </svg>
             </div>
-            <h4 class="text-[11px] font-black uppercase tracking-widest text-[#f1f3f9]">Kayıt Detayları</h4>
+            <h4 class="text-[11px] font-black uppercase tracking-widest text-[#16283a]">Kayıt Detayları</h4>
           </div>
 
-          <div class="bg-white/[0.02] border border-white/[0.08] rounded-2xl p-6">
+          <div class="bg-[#f6fafd] border border-[#d9e7f2] rounded-2xl p-6">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <!-- Code -->
               <div class="form-control">
@@ -62,7 +62,7 @@
                 <label class="label"><span class="label-text">Alan (m²) *</span></label>
                 <div class="relative">
                   <input type="number" v-model.number="local.unitArea" min="1" step="0.01" class="input input-bordered w-full font-black !text-lg pr-12" required />
-                  <span class="absolute right-4 top-1/2 -translate-y-1/2 text-[#626885] font-black uppercase text-[10px] tracking-widest">m²</span>
+                  <span class="absolute right-4 top-1/2 -translate-y-1/2 text-[#8298ab] font-black uppercase text-[10px] tracking-widest">m²</span>
                 </div>
               </div>
 
@@ -71,7 +71,7 @@
                 <label class="label"><span class="label-text">Aylık Kira Bedeli</span></label>
                 <div class="relative">
                   <input type="number" v-model.number="local.monthlyRent" min="0" step="0.01" class="input input-bordered w-full font-black pr-12" />
-                  <span class="absolute right-4 top-1/2 -translate-y-1/2 text-[#626885] font-black uppercase text-[10px] tracking-widest">TL</span>
+                  <span class="absolute right-4 top-1/2 -translate-y-1/2 text-[#8298ab] font-black uppercase text-[10px] tracking-widest">TL</span>
                 </div>
               </div>
 
@@ -106,7 +106,7 @@
               <div class="form-control justify-center">
                 <label class="label cursor-pointer flex justify-start gap-4 p-0">
                   <input type="checkbox" v-model="local.isActive" class="toggle toggle-success" />
-                  <span class="label-text font-black uppercase tracking-widest text-[11px] text-[#9aa0b4]">Aktif Ünite</span>
+                  <span class="label-text font-black uppercase tracking-widest text-[11px] text-[#5a7186]">Aktif Ünite</span>
                 </label>
               </div>
             </div>
@@ -115,14 +115,14 @@
 
         <!-- Açıklama -->
         <div class="space-y-4">
-           <div class="flex items-center gap-3 px-1 text-[#f1f3f9]">
+           <div class="flex items-center gap-3 px-1 text-[#16283a]">
             <h4 class="text-[11px] font-black uppercase tracking-widest">Açıklama ve Notlar</h4>
           </div>
           <div class="form-control">
             <textarea 
               v-model.trim="local.description" 
               rows="3" 
-              class="textarea textarea-bordered w-full !bg-white/[0.02] border-white/[0.08]" 
+              class="textarea textarea-bordered w-full !bg-white border-[#d9e7f2]" 
               placeholder="Ünite hakkında ek notlar girin..."></textarea>
           </div>
         </div>
@@ -134,7 +134,7 @@
       <button 
         type="button" 
         @click="$emit('close')" 
-        class="btn btn-ghost !bg-transparent border border-white/[0.08] text-[#9aa0b4] hover:bg-white/[0.05] flex-1"
+        class="btn btn-ghost !bg-transparent border border-[#d9e7f2] text-[#5a7186] hover:bg-[#ecf3f9] flex-1"
       >
         Vazgeç
       </button>

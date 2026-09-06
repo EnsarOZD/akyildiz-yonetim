@@ -17,8 +17,8 @@ export default defineConfig({
         name: 'Akyıldız Yönetim',
         short_name: 'Akyıldız',
         description: 'Profesyonel apartman ve site yönetim sistemi',
-        theme_color: '#0b1220',
-        background_color: '#0b1220',
+        theme_color: '#0284c7',
+        background_color: '#f0f7fc',
         display: 'standalone',
         orientation: 'portrait',
         icons: [

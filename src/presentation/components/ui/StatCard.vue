@@ -14,16 +14,16 @@
 
     <!-- Content -->
     <div class="min-w-0 flex-1">
-      <p class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-[#9aa0b4] truncate">{{ label }}</p>
-      <p class="mt-0.5 text-2xl font-bold text-slate-800 dark:text-[#f1f3f9] leading-none">{{ value }}</p>
-      <p v-if="sub" class="mt-1 text-xs text-slate-500 dark:text-[#9aa0b4] truncate">{{ sub }}</p>
+      <p class="text-xs font-semibold uppercase tracking-wider text-slate-500 truncate">{{ label }}</p>
+      <p class="mt-0.5 text-2xl font-bold text-slate-800 leading-none">{{ value }}</p>
+      <p v-if="sub" class="mt-1 text-xs text-slate-500 truncate">{{ sub }}</p>
     </div>
 
     <!-- Trend badge (optional) -->
     <div v-if="trend !== undefined" class="flex-shrink-0">
       <span
         class="inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full"
-        :class="trend >= 0 ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400' : 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400'"
+        :class="trend >= 0 ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'"
       >
         <svg v-if="trend >= 0" class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 15l7-7 7 7" />
@@ -49,12 +49,12 @@ const props = defineProps({
 })
 
 const palettes = {
-  blue:   { bg: 'bg-brand-100 dark:bg-brand-500/[0.12]',   icon: 'text-brand-600 dark:text-brand-400' },
-  green:  { bg: 'bg-emerald-100 dark:bg-emerald-900/30', icon: 'text-emerald-600 dark:text-emerald-400' },
-  red:    { bg: 'bg-red-100 dark:bg-red-900/30',     icon: 'text-red-600 dark:text-red-400' },
-  amber:  { bg: 'bg-amber-100 dark:bg-amber-900/30', icon: 'text-amber-600 dark:text-amber-400' },
-  purple: { bg: 'bg-violet-100 dark:bg-violet-900/30', icon: 'text-violet-600 dark:text-violet-400' },
-  slate:  { bg: 'bg-slate-100 dark:bg-[#1c2238]',    icon: 'text-slate-500 dark:text-[#9aa0b4]' },
+  blue:   { bg: 'bg-brand-100',   icon: 'text-brand-600' },
+  green:  { bg: 'bg-emerald-100', icon: 'text-emerald-600' },
+  red:    { bg: 'bg-red-100',     icon: 'text-red-600' },
+  amber:  { bg: 'bg-amber-100', icon: 'text-amber-600' },
+  purple: { bg: 'bg-violet-100', icon: 'text-violet-600' },
+  slate:  { bg: 'bg-slate-100',    icon: 'text-slate-500' },
 }
 
 const iconBg    = computed(() => (palettes[props.color] || palettes.blue).bg)

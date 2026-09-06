@@ -35,10 +35,10 @@
             </svg>
           </div>
           <div>
-            <h4 class="font-semibold text-gray-900 dark:text-[#f1f3f9] text-sm">
+            <h4 class="font-semibold text-gray-900 text-sm">
               {{ notification.title }}
             </h4>
-            <p class="text-gray-600 dark:text-[#9aa0b4] text-sm mt-1">
+            <p class="text-gray-600 text-sm mt-1">
               {{ notification.message }}
             </p>
           </div>
@@ -47,7 +47,7 @@
         <!-- Close Button -->
         <button
           @click="removeNotification(notification.id)"
-          class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors duration-200"
+          class="text-[#8298ab] hover:text-gray-600 transition-colors duration-200"
         >
           <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -56,7 +56,7 @@
       </div>
 
       <!-- Progress Bar -->
-      <div class="mt-3 h-1 bg-gray-200 dark:bg-[#1c2238] rounded-full overflow-hidden">
+      <div class="mt-3 h-1 bg-gray-200 rounded-full overflow-hidden">
         <div
           :class="getProgressClasses(notification.type)"
           class="h-full transition-all duration-300 ease-linear"
@@ -119,12 +119,12 @@ const removeNotification = (notificationId) => {
 
 // Bildirim sınıfları
 const getNotificationClasses = (type) => {
-  const baseClasses = 'bg-white dark:bg-[#151a2e]'
+  const baseClasses = 'bg-white'
   switch (type) {
     case 'success':
       return `${baseClasses} border-l-4 border-green-500`
     case 'info':
-      return `${baseClasses} border-l-4 border-brand-500`
+      return `${baseClasses} border-l-4 border-brand-600`
     case 'warning':
       return `${baseClasses} border-l-4 border-yellow-500`
     default:
@@ -136,13 +136,13 @@ const getNotificationClasses = (type) => {
 const getIconClasses = (type) => {
   switch (type) {
     case 'success':
-      return 'bg-green-100 dark:bg-green-900/50 text-green-600 dark:text-green-400'
+      return 'bg-green-100 text-green-600'
     case 'info':
-      return 'bg-brand-100 dark:bg-blue-900/50 text-brand-600 dark:text-brand-400'
+      return 'bg-brand-100 text-brand-600'
     case 'warning':
-      return 'bg-yellow-100 dark:bg-yellow-900/50 text-yellow-600 dark:text-yellow-400'
+      return 'bg-yellow-100 text-yellow-600'
     default:
-      return 'bg-green-100 dark:bg-green-900/50 text-green-600 dark:text-green-400'
+      return 'bg-green-100 text-green-600'
   }
 }
 

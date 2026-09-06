@@ -1,11 +1,11 @@
 ﻿<template>
-  <div class="min-h-screen flex items-center justify-center dark:bg-base-200 py-12 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-md w-full space-y-8 p-10 bg-white dark:bg-[#0f1322] rounded-xl shadow-2xl">
+  <div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full space-y-8 p-10 bg-white rounded-xl shadow-2xl">
       <div>
-        <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
+        <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
           Şifre Belirleme
         </h2>
-        <p class="mt-2 text-center text-sm text-gray-600 dark:text-[#9aa0b4]">
+        <p class="mt-2 text-center text-sm text-gray-600">
           Lütfen hesabınız için güvenli bir şifre belirleyin
         </p>
       </div>
@@ -24,12 +24,12 @@
         <div class="rounded-md shadow-sm -space-y-px">
           <div class="form-control w-full">
             <label class="label">
-              <span class="label-text font-semibold text-gray-700 dark:text-[#f1f3f9]">E-posta</span>
+              <span class="label-text font-semibold text-gray-700">E-posta</span>
             </label>
             <input 
               v-model="email" 
               type="email" 
-              class="input input-bordered w-full dark:bg-[#1c2238] text-gray-500 dark:text-[#9aa0b4] cursor-not-allowed border-gray-300 dark:border-white/[0.1]" 
+              class="input input-bordered w-full text-gray-500 cursor-not-allowed border-gray-300" 
               readonly 
             />
           </div>

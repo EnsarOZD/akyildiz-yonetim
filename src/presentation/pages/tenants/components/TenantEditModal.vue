@@ -13,15 +13,15 @@
         <!-- 1. İş Yeri Bilgileri -->
         <div class="space-y-4">
           <div class="flex items-center gap-3 px-1">
-            <div class="w-8 h-8 rounded-lg bg-brand-500/10 flex items-center justify-center text-brand-400">
+            <div class="w-8 h-8 rounded-lg bg-brand-500/10 flex items-center justify-center text-brand-600">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
               </svg>
             </div>
-            <h4 class="text-[11px] font-black uppercase tracking-widest text-[#f1f3f9]">Resmi Kayıt Bilgileri</h4>
+            <h4 class="text-[11px] font-black uppercase tracking-widest text-[#16283a]">Resmi Kayıt Bilgileri</h4>
           </div>
 
-          <div class="bg-white/[0.02] border border-white/[0.08] rounded-2xl p-6">
+          <div class="bg-[#f6fafd] border border-[#d9e7f2] rounded-2xl p-6">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div class="form-control md:col-span-2">
                 <label class="label"><span class="label-text">Şirket Resmi Adı *</span></label>
@@ -58,15 +58,15 @@
         <!-- 2. İletişim Kişisi -->
         <div class="space-y-4">
           <div class="flex items-center gap-3 px-1">
-            <div class="w-8 h-8 rounded-lg bg-brand-500/10 flex items-center justify-center text-brand-400">
+            <div class="w-8 h-8 rounded-lg bg-brand-500/10 flex items-center justify-center text-brand-600">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
             </div>
-            <h4 class="text-[11px] font-black uppercase tracking-widest text-[#f1f3f9]">Güncel İletişim Bilgileri</h4>
+            <h4 class="text-[11px] font-black uppercase tracking-widest text-[#16283a]">Güncel İletişim Bilgileri</h4>
           </div>
 
-          <div class="bg-white/[0.02] border border-white/[0.08] rounded-2xl p-6">
+          <div class="bg-[#f6fafd] border border-[#d9e7f2] rounded-2xl p-6">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div class="form-control">
                 <label class="label"><span class="label-text">Yetkili Ad Soyad *</span></label>
@@ -88,13 +88,13 @@
         <div class="space-y-4">
           <div class="flex items-center justify-between px-1">
             <div class="flex items-center gap-3">
-              <div class="w-8 h-8 rounded-lg bg-brand-500/10 flex items-center justify-center text-brand-400 font-bold text-xs">📍</div>
-              <h4 class="text-[11px] font-black uppercase tracking-widest text-[#f1f3f9]">Ünite ve Kat Ataması</h4>
+              <div class="w-8 h-8 rounded-lg bg-brand-500/10 flex items-center justify-center text-brand-600 font-bold text-xs">📍</div>
+              <h4 class="text-[11px] font-black uppercase tracking-widest text-[#16283a]">Ünite ve Kat Ataması</h4>
             </div>
-            <button type="button" class="text-[10px] font-black text-brand-400 uppercase tracking-widest hover:text-brand-300 transition-colors" @click="resetFloorFilter">Filtreleri Temizle</button>
+            <button type="button" class="text-[10px] font-black text-brand-600 uppercase tracking-widest hover:text-brand-600 transition-colors" @click="resetFloorFilter">Filtreleri Temizle</button>
           </div>
 
-          <div class="bg-white/[0.02] border border-white/[0.08] rounded-2xl p-6">
+          <div class="bg-[#f6fafd] border border-[#d9e7f2] rounded-2xl p-6">
             <div class="grid grid-cols-1 gap-6">
               <div class="form-control">
                 <label class="label"><span class="label-text">Kat Filtresi (Opsiyonel)</span></label>
@@ -107,18 +107,18 @@
               <div class="form-control">
                 <label class="label">
                   <span class="label-text">Bağlı ve Seçilebilir Üniteler (Çoklu Seçilebilir)</span>
-                  <span class="label-text-alt text-[10px] font-bold text-brand-400/80 uppercase tracking-tighter">Ctrl / Cmd + Tık</span>
+                  <span class="label-text-alt text-[10px] font-bold text-brand-600/80 uppercase tracking-tighter">Ctrl / Cmd + Tık</span>
                 </label>
                 <select
                   multiple
                   v-model="form.selectedFlatIds"
-                  class="select select-bordered w-full h-48 !bg-white/[0.01] border-white/[0.1] font-bold scrollbar-thin scrollbar-thumb-white/[0.1]"
+                  class="select select-bordered w-full h-48 !bg-white border-[#d9e7f2] font-bold scrollbar-thin scrollbar-thumb-[#c8dcea]"
                 >
-                  <option v-for="flat in selectableFlats" :key="flat.id" :value="flat.id" class="py-2.5 px-4 hover:bg-brand-500/10 border-b border-white/[0.03] transition-colors">
+                  <option v-for="flat in selectableFlats" :key="flat.id" :value="flat.id" class="py-2.5 px-4 hover:bg-brand-500/10 border-b border-[#ecf3f9] transition-colors">
                     {{ flatOptionLabel(flat) }}
                   </option>
                 </select>
-                <p class="mt-3 text-[10px] text-[#626885] font-bold uppercase italic tracking-tight leading-relaxed">
+                <p class="mt-3 text-[10px] text-[#8298ab] font-bold uppercase italic tracking-tight leading-relaxed">
                   💡 Seçimden çıkardığınız üniteler bu kiracıdan alınacak, seçtiğiniz yeni üniteler bu kiracıya atanacaktır.
                 </p>
               </div>
@@ -129,23 +129,23 @@
         <!-- 4. Finansal Detaylar -->
         <div class="space-y-4">
           <div class="flex items-center gap-3 px-1">
-            <div class="w-8 h-8 rounded-lg bg-brand-500/10 flex items-center justify-center text-brand-400 font-bold text-xs">💰</div>
-            <h4 class="text-[11px] font-black uppercase tracking-widest text-[#f1f3f9]">Finansal & Üyelik Durumu</h4>
+            <div class="w-8 h-8 rounded-lg bg-brand-500/10 flex items-center justify-center text-brand-600 font-bold text-xs">💰</div>
+            <h4 class="text-[11px] font-black uppercase tracking-widest text-[#16283a]">Finansal & Üyelik Durumu</h4>
           </div>
 
-          <div class="bg-white/[0.02] border border-white/[0.08] rounded-2xl p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="bg-[#f6fafd] border border-[#d9e7f2] rounded-2xl p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
             <div class="form-control">
               <label class="label"><span class="label-text">Aylık Aidat Bedeli</span></label>
               <div class="relative">
                 <input type="number" v-model.number="form.monthlyAidat" class="input input-bordered w-full font-black text-lg pr-12" min="0" step="0.01" required />
-                <span class="absolute right-4 top-1/2 -translate-y-1/2 text-[#626885] font-black text-[10px] uppercase tracking-widest">TL</span>
+                <span class="absolute right-4 top-1/2 -translate-y-1/2 text-[#8298ab] font-black text-[10px] uppercase tracking-widest">TL</span>
               </div>
             </div>
 
             <div class="form-control justify-center">
               <label class="label cursor-pointer flex justify-start gap-4 p-0">
                 <input type="checkbox" v-model="form.isActive" class="toggle toggle-success" />
-                <span class="label-text font-black uppercase tracking-widest text-[11px] text-[#9aa0b4]">Üyelik Aktif</span>
+                <span class="label-text font-black uppercase tracking-widest text-[11px] text-[#5a7186]">Üyelik Aktif</span>
               </label>
             </div>
           </div>
@@ -158,7 +158,7 @@
       <button 
         type="button" 
         @click="handleClose" 
-        class="btn btn-ghost !bg-transparent border border-white/[0.08] text-[#9aa0b4] hover:bg-white/[0.05] flex-1"
+        class="btn btn-ghost !bg-transparent border border-[#d9e7f2] text-[#5a7186] hover:bg-[#ecf3f9] flex-1"
       >
         Vazgeç
       </button>

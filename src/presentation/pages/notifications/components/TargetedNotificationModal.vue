@@ -9,7 +9,7 @@
     <div class="space-y-8">
       <!-- 1. Bildirim Türü Seçimi -->
       <div class="space-y-4">
-        <div class="flex items-center gap-3 px-1 text-[#f1f3f9]">
+        <div class="flex items-center gap-3 px-1 text-[#16283a]">
           <h4 class="text-[11px] font-black uppercase tracking-widest">1. Bildirim Türünü Seçin</h4>
         </div>
         <div class="grid grid-cols-3 gap-4">
@@ -19,15 +19,15 @@
             class="relative cursor-pointer p-6 rounded-2xl border transition-all duration-300 flex flex-col items-center gap-3 group overflow-hidden"
             :class="[
               form.type === type.id 
-                ? 'border-brand-500 bg-brand-500/[0.08] shadow-lg shadow-brand-500/10' 
-                : 'border-white/[0.08] bg-white/[0.01] hover:border-white/[0.2] hover:bg-white/[0.03]'
+                ? 'border-brand-600 bg-brand-500/[0.08] shadow-lg shadow-brand-500/10' 
+                : 'border-[#d9e7f2] bg-[#f6fafd] hover:border-[#7cc9ec] hover:bg-[#f6fafd]'
             ]"
           >
             <!-- Background Glow -->
             <div v-if="form.type === type.id" class="absolute -right-4 -top-4 w-12 h-12 bg-brand-500/20 blur-2xl rounded-full"></div>
             
             <span class="text-3xl transition-transform group-hover:scale-110 duration-500">{{ type.icon }}</span>
-            <span class="text-xs font-black uppercase tracking-widest text-center" :class="form.type === type.id ? 'text-brand-400' : 'text-[#626885]'">
+            <span class="text-xs font-black uppercase tracking-widest text-center" :class="form.type === type.id ? 'text-brand-600' : 'text-[#8298ab]'">
               {{ type.label }}
             </span>
           </div>
@@ -36,10 +36,10 @@
 
       <!-- 2. Hedef Kitle ve Kapsam -->
       <div class="space-y-4">
-        <div class="flex items-center gap-3 px-1 text-[#f1f3f9]">
+        <div class="flex items-center gap-3 px-1 text-[#16283a]">
           <h4 class="text-[11px] font-black uppercase tracking-widest">2. Hedef Kitle ve Gönderim Kapsamı</h4>
         </div>
-        <div class="bg-white/[0.02] border border-white/[0.08] rounded-2xl p-6">
+        <div class="bg-[#f6fafd] border border-[#d9e7f2] rounded-2xl p-6">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <!-- Kime Gönderilecek -->
             <div class="form-control">
@@ -73,11 +73,11 @@
             <div v-if="form.type === 'debt'" class="p-4 bg-amber-500/[0.05] border border-amber-500/20 rounded-xl animate-shake">
               <div class="flex items-center gap-3 mb-3">
                 <span class="text-lg">⏳</span>
-                <span class="text-xs font-black text-amber-300 uppercase tracking-widest">Gecikme Filtresi Aktif</span>
+                <span class="text-xs font-black text-amber-600 uppercase tracking-widest">Gecikme Filtresi Aktif</span>
               </div>
               <div class="flex items-center gap-3 text-xs text-amber-200/70 font-medium px-1">
                 <span>Ödemesi en az</span>
-                <input v-model="form.delayDays" type="number" class="w-16 bg-white/5 border border-white/10 rounded-lg py-1 px-2 text-center font-black text-amber-400" min="1" />
+                <input v-model="form.delayDays" type="number" class="w-16 bg-white/5 border border-white/10 rounded-lg py-1 px-2 text-center font-black text-amber-600" min="1" />
                 <span>gün gecikenlere gönderilsin.</span>
               </div>
             </div>
@@ -85,7 +85,7 @@
             <!-- E-posta Seçeneği -->
             <label class="flex items-center gap-3 cursor-pointer group p-2">
               <input type="checkbox" v-model="form.sendEmail" class="checkbox checkbox-primary checkbox-sm" />
-              <span class="text-xs font-bold text-[#9aa0b4] group-hover:text-brand-400 transition-colors uppercase tracking-widest">📧 Ayrıca e-posta bildirimi gönder</span>
+              <span class="text-xs font-bold text-[#5a7186] group-hover:text-brand-600 transition-colors uppercase tracking-widest">📧 Ayrıca e-posta bildirimi gönder</span>
             </label>
           </div>
         </div>
@@ -93,10 +93,10 @@
 
       <!-- 3. Bildirim İçeriği -->
       <div class="space-y-4">
-        <div class="flex items-center gap-3 px-1 text-[#f1f3f9]">
+        <div class="flex items-center gap-3 px-1 text-[#16283a]">
           <h4 class="text-[11px] font-black uppercase tracking-widest">3. Bildirim İçeriğini Oluşturun</h4>
         </div>
-        <div class="space-y-4 bg-white/[0.02] border border-white/[0.08] rounded-2xl p-6">
+        <div class="space-y-4 bg-[#f6fafd] border border-[#d9e7f2] rounded-2xl p-6">
           <div class="form-control">
             <label class="label"><span class="label-text">Bildirim Başlığı *</span></label>
             <input 
@@ -114,7 +114,7 @@
               v-model="form.message"
               rows="4"
               placeholder="Mesajınızı buraya detaylıca yazın..."
-              class="textarea textarea-bordered w-full !bg-white/[0.01] border-white/[0.08] leading-relaxed"
+              class="textarea textarea-bordered w-full !bg-white border-[#d9e7f2] leading-relaxed"
               required
             ></textarea>
           </div>
@@ -122,16 +122,16 @@
       </div>
 
       <!-- 4. Gönderim Özeti -->
-      <div class="bg-white/[0.03] border border-white/[0.08] rounded-2xl p-6 flex items-center justify-between shadow-inner">
+      <div class="bg-[#f6fafd] border border-[#d9e7f2] rounded-2xl p-6 flex items-center justify-between shadow-inner">
         <div>
-          <h5 class="text-[10px] font-black text-[#626885] uppercase tracking-widest mb-1">Tahmini Alıcı Kapsamı</h5>
-          <p class="text-lg font-black text-[#f1f3f9] underline decoration-brand-500/50 underline-offset-4 decoration-2">
+          <h5 class="text-[10px] font-black text-[#8298ab] uppercase tracking-widest mb-1">Tahmini Alıcı Kapsamı</h5>
+          <p class="text-lg font-black text-[#16283a] underline decoration-brand-500/50 underline-offset-4 decoration-2">
             {{ estimatedRecipients }} Kullanıcı
           </p>
         </div>
         <div class="text-right">
-          <h5 class="text-[10px] font-black text-[#626885] uppercase tracking-widest mb-1">Gönderim Modu</h5>
-          <span class="text-xs px-4 py-1.5 bg-brand-500/10 text-brand-400 border border-brand-500/20 rounded-full font-black uppercase tracking-widest">
+          <h5 class="text-[10px] font-black text-[#8298ab] uppercase tracking-widest mb-1">Gönderim Modu</h5>
+          <span class="text-xs px-4 py-1.5 bg-brand-500/10 text-brand-600 border border-brand-600/20 rounded-full font-black uppercase tracking-widest">
             {{ form.targetType === 'all' ? 'Kitlesel' : 'Hedefli' }}
           </span>
         </div>
@@ -143,7 +143,7 @@
       <button 
         type="button" 
         @click="$emit('close')" 
-        class="btn btn-ghost !bg-transparent border border-white/[0.08] text-[#9aa0b4] hover:bg-white/[0.05] flex-1"
+        class="btn btn-ghost !bg-transparent border border-[#d9e7f2] text-[#5a7186] hover:bg-[#ecf3f9] flex-1"
         :disabled="loading"
       >
         Vazgeç

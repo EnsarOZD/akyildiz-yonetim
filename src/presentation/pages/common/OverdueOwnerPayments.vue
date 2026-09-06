@@ -1,5 +1,5 @@
 ﻿<template>
-  <div class="p-4 sm:p-6 min-h-screen dark:bg-base-200">
+  <div class="p-4 sm:p-6 min-h-screen">
     <div class="max-w-7xl mx-auto">
       
       <!-- Başlık -->
@@ -12,20 +12,20 @@
         <template #actions>
           <div class="flex items-center gap-3">
             <div class="flex flex-col items-end">
-              <span class="text-[10px] font-bold uppercase tracking-wider text-red-400">Toplam Geciken</span>
+              <span class="text-[10px] font-bold uppercase tracking-wider text-red-600">Toplam Geciken</span>
               <span class="text-sm font-bold text-red-500">{{ formatCurrency(totalOverdueAmount) }}</span>
             </div>
-            <div class="w-px h-8 bg-slate-200 dark:bg-[#1c2238] mx-1"></div>
+            <div class="w-px h-8 bg-slate-200 mx-1"></div>
             <div class="flex flex-col items-end">
-              <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Adet</span>
-              <span class="text-sm font-bold text-slate-700 dark:text-[#f1f3f9]">{{ overdueCount }}</span>
+              <span class="text-[10px] font-bold uppercase tracking-wider text-[#8298ab]">Adet</span>
+              <span class="text-sm font-bold text-slate-700">{{ overdueCount }}</span>
             </div>
           </div>
         </template>
       </PageHeader>
 
       <!-- Filtreler -->
-      <div class="bg-white dark:bg-[#0f1322] p-6 rounded-xl shadow-md border border-gray-200 dark:border-white/[0.07] mb-6">
+      <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200 mb-6">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div>
             <label class="label">Arama</label>
@@ -68,10 +68,10 @@
       </div>
 
       <!-- Tablo -->
-      <div class="bg-white dark:bg-[#0f1322] rounded-xl shadow-md border border-gray-200 dark:border-white/[0.07] overflow-hidden">
+      <div class="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden">
         <div class="overflow-x-auto">
           <table class="table w-full">
-            <thead class="bg-slate-50 dark:bg-[#1c2238]">
+            <thead class="bg-slate-50">
               <tr>
                 <th scope="col" class="text-left p-4">Mal Sahibi</th>
                 <th scope="col" class="text-left p-4">Kat</th>
@@ -83,21 +83,21 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="overdue in filteredOverdue" :key="overdue.id" class="border-b border-gray-200 dark:border-white/[0.07] hover:bg-red-50 dark:hover:bg-red-900/20">
+              <tr v-for="overdue in filteredOverdue" :key="overdue.id" class="border-b border-gray-200 hover:bg-red-50">
                 <td class="p-4">
                   <div>
-                    <p class="font-medium text-gray-800 dark:text-[#f1f3f9]">{{ overdue.ownerName }}</p>
-                    <p class="text-sm text-gray-500 dark:text-[#9aa0b4]">{{ overdue.ownerEmail }}</p>
+                    <p class="font-medium text-gray-800">{{ overdue.ownerName }}</p>
+                    <p class="text-sm text-gray-500">{{ overdue.ownerEmail }}</p>
                   </div>
                 </td>
-                <td class="p-4 text-gray-800 dark:text-[#f1f3f9]">{{ overdue.unit }}</td>
+                <td class="p-4 text-gray-800">{{ overdue.unit }}</td>
                 <td class="p-4">
                   <span 
                     :class="{
-                      'bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-400': overdue.type === 'aidat',
-                      'bg-brand-100 text-brand-700 dark:bg-blue-900/50 dark:text-brand-400': overdue.type === 'su',
-                      'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-400': overdue.type === 'elektrik',
-                      'bg-gray-100 text-gray-800 dark:bg-gray-900/50 dark:text-[#9aa0b4]': overdue.type === 'diger'
+                      'bg-purple-100 text-purple-800': overdue.type === 'aidat',
+                      'bg-brand-100 text-brand-700': overdue.type === 'su',
+                      'bg-yellow-100 text-yellow-800': overdue.type === 'elektrik',
+                      'bg-gray-100 text-gray-800': overdue.type === 'diger'
                     }"
                     class="px-2 py-1 rounded-full text-xs font-medium"
                   >
@@ -105,15 +105,15 @@
                   </span>
                 </td>
                 <td class="p-4">
-                  <span class="font-semibold text-red-600 dark:text-red-400">{{ formatCurrency(overdue.amount) }}</span>
+                  <span class="font-semibold text-red-600">{{ formatCurrency(overdue.amount) }}</span>
                 </td>
-                <td class="p-4 text-gray-800 dark:text-[#f1f3f9]">{{ formatDate(overdue.dueDate) }}</td>
+                <td class="p-4 text-gray-800">{{ formatDate(overdue.dueDate) }}</td>
                 <td class="p-4">
                   <span 
                     :class="{
-                      'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-400': overdue.overdueDays > 30,
-                      'bg-orange-100 text-orange-800 dark:bg-orange-900/50 dark:text-orange-400': overdue.overdueDays > 15 && overdue.overdueDays <= 30,
-                      'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-400': overdue.overdueDays <= 15
+                      'bg-red-100 text-red-800': overdue.overdueDays > 30,
+                      'bg-orange-100 text-orange-800': overdue.overdueDays > 15 && overdue.overdueDays <= 30,
+                      'bg-yellow-100 text-yellow-800': overdue.overdueDays <= 15
                     }"
                     class="px-2 py-1 rounded-full text-xs font-medium"
                   >
@@ -149,12 +149,12 @@
 
         <!-- Boş durum -->
         <div v-if="filteredOverdue.length === 0" class="text-center py-12">
-          <div class="bg-green-100 dark:bg-green-900/50 text-green-600 dark:text-green-400 rounded-full p-3 w-fit mx-auto mb-3">
+          <div class="bg-green-100 text-green-600 rounded-full p-3 w-fit mx-auto mb-3">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
-          <p class="text-gray-500 dark:text-[#9aa0b4]">Geciken ödeme bulunmuyor.</p>
+          <p class="text-gray-500">Geciken ödeme bulunmuyor.</p>
         </div>
       </div>
     </div>

@@ -1,17 +1,17 @@
 ﻿<template>
-  <div v-if="show" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-    <div class="bg-white dark:bg-[#0f1322] rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all">
+  <div v-if="show" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#16283a]/35 backdrop-blur-sm">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all">
       <!-- Header -->
-      <div class="px-6 py-4 border-b border-gray-100 dark:border-white/[0.07] flex items-center justify-between bg-brand-50/50 dark:bg-brand-500/[0.08]">
+      <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-brand-50/50">
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 bg-brand-100 dark:bg-blue-900/50 rounded-full flex items-center justify-center text-brand-600">
+          <div class="w-10 h-10 bg-brand-100 rounded-full flex items-center justify-center text-brand-600">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 0 1 -3.417 .592l-2.147-6.15M18 13a3 3 0 1 0 0-6M5.436 13.683A4.001 4.001 0 0 1 7 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 0 1 -1.564 -.317z" />
             </svg>
           </div>
-          <h2 class="text-xl font-bold text-gray-900 dark:text-white">Genel Duyuru Yayınla</h2>
+          <h2 class="text-xl font-bold text-gray-900">Genel Duyuru Yayınla</h2>
         </div>
-        <button @click="$emit('close')" class="p-2 hover:bg-gray-100 dark:hover:bg-white/[0.06] rounded-full transition">
+        <button @click="$emit('close')" class="p-2 hover:bg-gray-100 rounded-full transition">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
           </svg>
@@ -21,38 +21,38 @@
       <!-- Body -->
       <div class="p-6 space-y-4">
         <div class="space-y-1">
-          <label class="text-sm font-semibold text-gray-700 dark:text-[#f1f3f9]">Duyuru Başlığı</label>
+          <label class="text-sm font-semibold text-gray-700">Duyuru Başlığı</label>
           <input 
             v-model="form.title"
             type="text" 
             placeholder="Örn: Su Kesintisi Hakkında"
-            class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-white/[0.07] dark:bg-base-200 focus:ring-2 focus:ring-brand-500 transition outline-none"
+            class="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-brand-500 transition outline-none"
           />
         </div>
 
         <div class="space-y-1">
-          <label class="text-sm font-semibold text-gray-700 dark:text-[#f1f3f9]">Mesaj İçeriği</label>
+          <label class="text-sm font-semibold text-gray-700">Mesaj İçeriği</label>
           <textarea 
             v-model="form.message"
             rows="4"
             placeholder="Tüm kullanıcılara iletilecek mesajı yazın..."
-            class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-white/[0.07] dark:bg-base-200 focus:ring-2 focus:ring-brand-500 transition outline-none resize-none"
+            class="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-brand-500 transition outline-none resize-none"
           ></textarea>
         </div>
 
-        <div class="bg-amber-50 dark:bg-amber-900/20 p-3 rounded-xl border border-amber-100 dark:border-amber-900/30 flex gap-3">
+        <div class="bg-amber-50 p-3 rounded-xl border border-amber-100 flex gap-3">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-amber-600 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
             <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
           </svg>
-          <p class="text-xs text-amber-800 dark:text-amber-200">
+          <p class="text-xs text-amber-800">
             Bu duyuru yayınlandığında sistemdeki <strong>tüm kullanıcılara</strong> anlık bildirim olarak iletilecektir.
           </p>
         </div>
 
         <!-- E-posta seçeneği -->
-        <label class="flex items-center gap-3 cursor-pointer p-3 rounded-xl border border-brand-100 dark:border-brand-800/30 bg-brand-50 dark:bg-brand-500/[0.08]">
+        <label class="flex items-center gap-3 cursor-pointer p-3 rounded-xl border border-brand-100 bg-brand-50">
           <input type="checkbox" v-model="form.sendEmail" class="checkbox checkbox-primary checkbox-sm" />
-          <span class="text-sm font-semibold text-brand-800 dark:text-brand-300">
+          <span class="text-sm font-semibold text-brand-800">
             📧 Ayrıca e-posta ile de gönder
             <span class="text-xs font-normal opacity-70 ml-1">(kayıtlı e-postalara)</span>
           </span>
@@ -60,10 +60,10 @@
       </div>
 
       <!-- Footer -->
-      <div class="px-6 py-4 dark:bg-gray-900/50 border-t border-gray-100 dark:border-white/[0.07] flex justify-end gap-3">
+      <div class="px-6 py-4 border-t border-gray-100 flex justify-end gap-3">
         <button 
           @click="$emit('close')"
-          class="px-5 py-2.5 rounded-xl text-gray-600 dark:text-[#9aa0b4] font-medium hover:bg-gray-100 dark:hover:bg-white/[0.04] transition"
+          class="px-5 py-2.5 rounded-xl text-gray-600 font-medium hover:bg-gray-100 transition"
         >
           Vazgeç
         </button>

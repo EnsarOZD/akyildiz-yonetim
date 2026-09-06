@@ -42,53 +42,53 @@
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
       <div class="app-card group hover:shadow-xl hover:shadow-emerald-500/5 transition-all duration-300">
         <div class="flex items-center gap-4">
-          <div class="w-12 h-12 rounded-2xl bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 transition-transform group-hover:scale-110">
+          <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 transition-transform group-hover:scale-110">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
             </svg>
           </div>
           <div class="min-w-0">
-            <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-[#626885]">Bu Ay</p>
-            <p class="text-xl font-black text-slate-800 dark:text-white tabular-nums tracking-tight mt-0.5">{{ formatCurrency(thisMonthIncome) }}</p>
+            <p class="text-[10px] font-bold uppercase tracking-widest text-[#8298ab]">Bu Ay</p>
+            <p class="text-xl font-black text-slate-800 tabular-nums tracking-tight mt-0.5">{{ formatCurrency(thisMonthIncome) }}</p>
           </div>
         </div>
       </div>
       <div class="app-card group hover:shadow-xl hover:shadow-blue-500/5 transition-all duration-300">
         <div class="flex items-center gap-4">
-          <div class="w-12 h-12 rounded-2xl bg-brand-50 dark:bg-brand-500/10 text-brand-600 dark:text-brand-400 flex items-center justify-center shrink-0 transition-transform group-hover:scale-110">
+          <div class="w-12 h-12 rounded-2xl bg-brand-50 text-brand-600 flex items-center justify-center shrink-0 transition-transform group-hover:scale-110">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
             </svg>
           </div>
           <div class="min-w-0">
-            <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-[#626885]">Toplam</p>
-            <p class="text-xl font-black text-slate-800 dark:text-white tabular-nums tracking-tight mt-0.5">{{ formatCurrency(totalIncome) }}</p>
+            <p class="text-[10px] font-bold uppercase tracking-widest text-[#8298ab]">Toplam</p>
+            <p class="text-xl font-black text-slate-800 tabular-nums tracking-tight mt-0.5">{{ formatCurrency(totalIncome) }}</p>
           </div>
         </div>
       </div>
       <div class="app-card group hover:shadow-xl hover:shadow-amber-500/5 transition-all duration-300">
         <div class="flex items-center gap-4">
-          <div class="w-12 h-12 rounded-2xl bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 transition-transform group-hover:scale-110">
+          <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0 transition-transform group-hover:scale-110">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
           <div class="min-w-0">
-            <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-[#626885]">Bu Ay İşlem</p>
-            <p class="text-2xl font-black text-slate-800 dark:text-white tabular-nums tracking-tight mt-0.5">{{ thisMonthCount }}</p>
+            <p class="text-[10px] font-bold uppercase tracking-widest text-[#8298ab]">Bu Ay İşlem</p>
+            <p class="text-2xl font-black text-slate-800 tabular-nums tracking-tight mt-0.5">{{ thisMonthCount }}</p>
           </div>
         </div>
       </div>
       <div class="app-card group hover:shadow-xl hover:shadow-purple-500/5 transition-all duration-300">
         <div class="flex items-center gap-4">
-          <div class="w-12 h-12 rounded-2xl bg-purple-50 dark:bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0 transition-transform group-hover:scale-110">
+          <div class="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0 transition-transform group-hover:scale-110">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
             </svg>
           </div>
           <div class="min-w-0">
-            <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-[#626885]">Avans</p>
-            <p class="text-xl font-black text-slate-800 dark:text-white tabular-nums tracking-tight mt-0.5">{{ formatCurrency(totalAdvance) }}</p>
+            <p class="text-[10px] font-bold uppercase tracking-widest text-[#8298ab]">Avans</p>
+            <p class="text-xl font-black text-slate-800 tabular-nums tracking-tight mt-0.5">{{ formatCurrency(totalAdvance) }}</p>
           </div>
         </div>
       </div>
@@ -99,48 +99,48 @@
 
       <!-- Aylık Ödeme Grafiği -->
       <div class="app-card">
-        <h2 class="text-xs font-bold text-slate-400 dark:text-[#626885] uppercase tracking-widest mb-6 px-1">Aylık Ödeme Girişi</h2>
+        <h2 class="text-xs font-bold text-[#8298ab] uppercase tracking-widest mb-6 px-1">Aylık Ödeme Girişi</h2>
         <div class="h-40 flex items-end gap-3 px-2">
           <div v-for="(month, index) in monthlyPaymentData" :key="index" class="flex-1 group/bar relative flex flex-col items-center gap-3">
             <div
               class="w-full bg-gradient-to-t from-brand-500/80 to-brand-500 rounded-t-lg transition-all duration-500 group-hover/bar:from-brand-600 group-hover/bar:to-brand-400"
               :style="{ height: `${Math.max((month.total / maxMonthlyPayment) * 130, month.total > 0 ? 4 : 2)}px` }"
             >
-              <div class="opacity-0 group-hover/bar:opacity-100 absolute -top-10 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[10px] px-2 py-1 rounded shadow-xl whitespace-nowrap transition-opacity pointer-events-none font-bold">
+              <div class="opacity-0 group-hover/bar:opacity-100 absolute -top-10 left-1/2 -translate-x-1/2 bg-[#16283a] text-white text-[10px] px-2 py-1 rounded shadow-xl whitespace-nowrap transition-opacity pointer-events-none font-bold">
                 {{ formatCurrency(month.total) }}
               </div>
             </div>
-            <span class="text-[10px] text-slate-400 dark:text-[#626885] font-bold uppercase tracking-tighter">{{ month.month }}</span>
+            <span class="text-[10px] text-[#8298ab] font-bold uppercase tracking-tighter">{{ month.month }}</span>
           </div>
         </div>
       </div>
 
       <!-- Ödeme Tipi Dağılımı -->
       <div class="app-card">
-        <h2 class="text-xs font-bold text-slate-400 dark:text-[#626885] uppercase tracking-widest mb-6 px-1">Tip Dağılımı</h2>
+        <h2 class="text-xs font-bold text-[#8298ab] uppercase tracking-widest mb-6 px-1">Tip Dağılımı</h2>
         <div class="space-y-1">
-          <div v-for="type in paymentTypeStats" :key="type.name" class="flex items-center justify-between p-2 rounded-xl transition-colors hover:bg-slate-50 dark:hover:bg-white/[0.04]">
+          <div v-for="type in paymentTypeStats" :key="type.name" class="flex items-center justify-between p-2 rounded-xl transition-colors hover:bg-slate-50">
             <div class="flex items-center gap-3">
-              <div class="w-8 h-8 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+              <div class="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
                 </svg>
               </div>
               <div>
-                <p class="text-[13px] font-bold text-slate-700 dark:text-[#f1f3f9]">{{ type.label }}</p>
-                <p class="text-[10px] font-bold text-slate-400 dark:text-[#626885] uppercase tracking-tighter">{{ type.count }} ödeme</p>
+                <p class="text-[13px] font-bold text-slate-700">{{ type.label }}</p>
+                <p class="text-[10px] font-bold text-[#8298ab] uppercase tracking-tighter">{{ type.count }} ödeme</p>
               </div>
             </div>
-            <p class="text-[13px] font-black text-emerald-600 dark:text-emerald-400 tabular-nums tracking-tight">{{ formatCurrency(type.total) }}</p>
+            <p class="text-[13px] font-black text-emerald-600 tabular-nums tracking-tight">{{ formatCurrency(type.total) }}</p>
           </div>
-          <div v-if="paymentTypeStats.length === 0" class="text-xs text-slate-400 dark:text-[#626885] text-center py-4">Veri yok</div>
+          <div v-if="paymentTypeStats.length === 0" class="text-xs text-[#8298ab] text-center py-4">Veri yok</div>
         </div>
       </div>
     </div>
 
     <!-- Avans Hesapları -->
     <div v-if="advanceAccounts.length > 0" class="app-card mb-5">
-      <h3 class="text-sm font-semibold text-slate-700 dark:text-[#f1f3f9] mb-3 flex items-center gap-2">
+      <h3 class="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2">
         <svg class="w-4 h-4 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
         </svg>
@@ -150,14 +150,14 @@
         <div
           v-for="advance in advanceAccounts"
           :key="advance.id"
-          class="p-3 rounded-xl bg-purple-50 dark:bg-purple-900/10 border border-purple-100 dark:border-purple-900/30"
+          class="p-3 rounded-xl bg-purple-50 border border-purple-100"
         >
           <div class="flex items-center justify-between mb-1">
-            <span class="text-xs font-semibold text-slate-700 dark:text-[#f1f3f9] truncate">{{ getTenantCompany(advance.tenantId) }}</span>
+            <span class="text-xs font-semibold text-slate-700 truncate">{{ getTenantCompany(advance.tenantId) }}</span>
             <span class="badge badge-xs badge-success">Aktif</span>
           </div>
-          <p class="text-base font-bold text-purple-600 dark:text-purple-400 tabular-nums">{{ formatCurrency(Number(advance.balance ?? advance.amount ?? 0)) }}</p>
-          <p class="text-[10px] text-slate-400 dark:text-[#626885] mt-0.5">{{ formatDate(advance.updatedAt || advance.lastMovementAt || advance.createdAt || advance.paymentDate) }}</p>
+          <p class="text-base font-bold text-purple-600 tabular-nums">{{ formatCurrency(Number(advance.balance ?? advance.amount ?? 0)) }}</p>
+          <p class="text-[10px] text-[#8298ab] mt-0.5">{{ formatDate(advance.updatedAt || advance.lastMovementAt || advance.createdAt || advance.paymentDate) }}</p>
         </div>
       </div>
     </div>
@@ -165,7 +165,7 @@
     <!-- Filtreler ve Liste -->
     <div class="app-card !p-0">
       <!-- Filtreler -->
-      <div class="px-4 py-3 border-b border-white/[0.08] flex flex-col sm:flex-row items-start sm:items-center gap-3">
+      <div class="px-4 py-3 border-b border-[#d9e7f2] flex flex-col sm:flex-row items-start sm:items-center gap-3">
         <CustomFilterBar
           class="flex-1"
           :search="filters.searchTerm"
@@ -187,17 +187,17 @@
           leave-to-class="opacity-0 scale-95"
         >
           <div v-if="selectedIds.length > 0" class="flex items-center gap-2 shrink-0">
-            <span class="text-xs font-semibold text-slate-600 dark:text-[#f1f3f9]">{{ selectedIds.length }} seçildi</span>
+            <span class="text-xs font-semibold text-slate-600">{{ selectedIds.length }} seçildi</span>
             <button @click="showBulkDeleteConfirm = true" class="btn btn-error btn-xs text-white gap-1">Sil</button>
           </div>
         </Transition>
       </div>
 
       <!-- Liste Başlığı -->
-      <div class="flex items-center justify-between px-5 py-4 border-b border-white/[0.04]">
+      <div class="flex items-center justify-between px-5 py-4 border-b border-[#ecf3f9]">
         <div class="flex items-center gap-3">
-          <h3 class="text-[13.5px] font-black text-slate-800 dark:text-[#f1f3f9] uppercase tracking-tight">Ödeme Listesi</h3>
-          <span class="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-white/[0.04] text-[10px] font-black text-slate-400 uppercase tracking-widest">{{ filteredPayments.length }} Kayıt</span>
+          <h3 class="text-[13.5px] font-black text-slate-800 uppercase tracking-tight">Ödeme Listesi</h3>
+          <span class="px-2 py-0.5 rounded-md bg-slate-100 text-[10px] font-black text-[#8298ab] uppercase tracking-widest">{{ filteredPayments.length }} Kayıt</span>
         </div>
       </div>
 
@@ -205,7 +205,7 @@
       <div class="overflow-x-auto">
         <table class="table table-sm w-full border-collapse">
           <thead>
-            <tr class="border-b border-white/[0.08]">
+            <tr class="border-b border-[#d9e7f2]">
               <th class="w-10 px-4 py-4 text-center">
                 <input
                   type="checkbox"
@@ -215,16 +215,16 @@
                   @change="toggleSelectAll"
                 />
               </th>
-              <th class="py-4 text-[10px] font-black text-slate-400 dark:text-[#626885] uppercase tracking-widest text-left px-4">Tarih</th>
-              <th class="py-4 text-[10px] font-black text-slate-400 dark:text-[#626885] uppercase tracking-widest text-left px-4">Kiracı / Ünite</th>
-              <th class="py-4 text-[10px] font-black text-slate-400 dark:text-[#626885] uppercase tracking-widest text-left px-4">Banka / Açıklama</th>
-              <th class="py-4 text-[10px] font-black text-slate-400 dark:text-[#626885] uppercase tracking-widest text-right px-4">Tutar (Alacak)</th>
-              <th class="py-4 text-[10px] font-black text-slate-400 dark:text-[#626885] uppercase tracking-widest text-center px-4">Aksiyon</th>
+              <th class="py-4 text-[10px] font-black text-[#8298ab] uppercase tracking-widest text-left px-4">Tarih</th>
+              <th class="py-4 text-[10px] font-black text-[#8298ab] uppercase tracking-widest text-left px-4">Kiracı / Ünite</th>
+              <th class="py-4 text-[10px] font-black text-[#8298ab] uppercase tracking-widest text-left px-4">Banka / Açıklama</th>
+              <th class="py-4 text-[10px] font-black text-[#8298ab] uppercase tracking-widest text-right px-4">Tutar (Alacak)</th>
+              <th class="py-4 text-[10px] font-black text-[#8298ab] uppercase tracking-widest text-center px-4">Aksiyon</th>
             </tr>
           </thead>
           <tbody class="divide-y-0">
             <tr v-if="loading">
-              <td colspan="6" class="py-12 text-center text-slate-400">Yükleniyor...</td>
+              <td colspan="6" class="py-12 text-center text-[#8298ab]">Yükleniyor...</td>
             </tr>
             <tr v-else-if="filteredPayments.length === 0">
               <td colspan="6" class="py-20 text-center">
@@ -235,7 +235,7 @@
               v-else
               v-for="p in paymentsView" 
               :key="p.id"
-              class="group hover:bg-white/[0.02] transition-colors border-b border-white/[0.02]/50 last:border-0"
+              class="group hover:bg-[#f6fafd] transition-colors border-b border-[#ecf3f9] last:border-0"
               :class="{'bg-brand-500/5': selectedIds.includes(p.id)}"
             >
               <td class="px-4 py-3 text-center">
@@ -246,7 +246,7 @@
                   v-model="selectedIds"
                 />
               </td>
-              <td class="px-4 py-3 whitespace-nowrap text-[11px] font-black text-slate-400 dark:text-[#626885] uppercase tracking-tight">
+              <td class="px-4 py-3 whitespace-nowrap text-[11px] font-black text-[#8298ab] uppercase tracking-tight">
                 {{ formatDate(getPaymentDate(p)) }}
               </td>
               <td class="px-4 py-3">
@@ -254,29 +254,29 @@
                   <div class="w-8 h-8 rounded-xl flex items-center justify-center text-[10px] font-black text-white shadow-lg shrink-0" :class="getAvatarColor(p.company)">
                     {{ getAvatarInitial(p.company) }}
                   </div>
-                  <p class="text-[13.5px] font-black text-slate-800 dark:text-white leading-tight uppercase tracking-tight truncate group-hover:text-brand-500 transition-colors">{{ p.company }}</p>
+                  <p class="text-[13.5px] font-black text-slate-800 leading-tight uppercase tracking-tight truncate group-hover:text-brand-600 transition-colors">{{ p.company }}</p>
                 </div>
               </td>
               <td class="px-4 py-3">
                 <div class="flex items-center gap-2">
-                  <span class="text-[10px] font-bold text-slate-400 dark:text-[#626885] uppercase tracking-widest bg-slate-50 dark:bg-white/[0.04] px-1.5 py-0.5 rounded">{{ p.bank || 'NAKİT' }}</span>
-                  <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest truncate max-w-[150px]">{{ getPaymentDisplayLabel(p) }}</span>
+                  <span class="text-[10px] font-bold text-[#8298ab] uppercase tracking-widest bg-slate-50 px-1.5 py-0.5 rounded">{{ p.bank || 'NAKİT' }}</span>
+                  <span class="text-[10px] font-bold text-[#8298ab] uppercase tracking-widest truncate max-w-[150px]">{{ getPaymentDisplayLabel(p) }}</span>
                 </div>
               </td>
               <td class="px-4 py-3 text-right">
-                <p class="text-[14px] font-black text-emerald-600 dark:text-emerald-400 tabular-nums tracking-tight">
+                <p class="text-[14px] font-black text-emerald-600 tabular-nums tracking-tight">
                   {{ formatCurrency(p.amount) }}
                 </p>
-                <p v-if="p.periodYear" class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">{{ p.periodYear }}-{{ String(p.periodMonth).padStart(2, '0') }}</p>
+                <p v-if="p.periodYear" class="text-[9px] font-bold text-[#8298ab] uppercase tracking-widest mt-0.5">{{ p.periodYear }}-{{ String(p.periodMonth).padStart(2, '0') }}</p>
               </td>
               <td class="px-4 py-3 text-center">
                 <div class="dropdown dropdown-end">
-                  <button tabindex="0" class="btn btn-ghost btn-xs btn-square text-slate-400 hover:text-brand-500">
+                  <button tabindex="0" class="btn btn-ghost btn-xs btn-square text-[#8298ab] hover:text-brand-600">
                     <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                       <circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/><circle cx="5" cy="12" r="1.5"/>
                     </svg>
                   </button>
-                  <ul tabindex="0" class="dropdown-content menu p-1.5 shadow-card bg-base-100 border border-slate-200 dark:border-white/[0.07] rounded-xl w-32 z-10 text-xs">
+                  <ul tabindex="0" class="dropdown-content menu p-1.5 shadow-card bg-base-100 border border-slate-200 rounded-xl w-32 z-10 text-xs">
                     <li><a @click="startEdit(p)" class="rounded-lg">Düzenle</a></li>
                     <li><a @click="deletePayment(p.id)" class="rounded-lg text-error">Sil</a></li>
                   </ul>
@@ -288,7 +288,7 @@
       </div>
 
       <!-- Sayfalama -->
-      <div v-if="filteredPayments.length > 0" class="px-4 py-3 border-t border-slate-100 dark:border-slate-700/60">
+      <div v-if="filteredPayments.length > 0" class="px-4 py-3 border-t border-slate-100">
         <PaginationBar
           v-model:currentPage="currentPage"
           v-model:pageSize="pageSize"
@@ -320,12 +320,12 @@
       @close="cancelClose"
     >
       <div class="space-y-4 text-center">
-        <p class="text-xs text-[#9aa0b4] font-medium leading-relaxed italic">
+        <p class="text-xs text-[#5a7186] font-medium leading-relaxed italic">
           Yaptığınız değişiklikler kaydedilmedi. Çıkmak istediğinizden emin misiniz?
         </p>
       </div>
       <template #footer>
-        <button class="btn btn-ghost !bg-transparent border border-white/[0.08] text-[#9aa0b4] flex-1" @click="cancelClose">Vazgeç</button>
+        <button class="btn btn-ghost !bg-transparent border border-[#d9e7f2] text-[#5a7186] flex-1" @click="cancelClose">Vazgeç</button>
         <button class="btn btn-primary flex-1 font-black uppercase" @click="confirmClose">Devam Et</button>
       </template>
     </BaseModal>
@@ -347,17 +347,17 @@
             </svg>
           </div>
           <div class="space-y-2 px-2">
-            <p class="text-sm font-black text-[#f1f3f9] uppercase tracking-tight">
-              Kritik İşlem: <span class="text-red-400 font-bold">{{ selectedIds.length }}</span> Kayıt
+            <p class="text-sm font-black text-[#16283a] uppercase tracking-tight">
+              Kritik İşlem: <span class="text-red-600 font-bold">{{ selectedIds.length }}</span> Kayıt
             </p>
-            <p class="text-[11px] text-[#626885] font-medium leading-relaxed italic px-4">
+            <p class="text-[11px] text-[#8298ab] font-medium leading-relaxed italic px-4">
               Seçili tüm ödeme kayıtları kalıcı olarak silinecektir. Bu işlem geri alınamaz.
             </p>
           </div>
         </div>
       </div>
       <template #footer>
-        <button class="btn btn-ghost !bg-transparent border border-white/[0.08] text-[#9aa0b4] flex-1" @click="showBulkDeleteConfirm = false" :disabled="isBulkDeleting">Vazgeç</button>
+        <button class="btn btn-ghost !bg-transparent border border-[#d9e7f2] text-[#5a7186] flex-1" @click="showBulkDeleteConfirm = false" :disabled="isBulkDeleting">Vazgeç</button>
         <button class="btn btn-error flex-1 font-black uppercase" @click="confirmBulkDelete" :disabled="isBulkDeleting">
           <span v-if="isBulkDeleting" class="loading loading-spinner loading-xs mr-2"></span>
           Kaydı Sil
@@ -376,7 +376,7 @@
     >
       <AdvanceAccountManager @success="handleAdvanceSuccess" />
       <template #footer>
-        <button class="btn btn-ghost !bg-transparent border border-white/[0.08] text-[#9aa0b4] w-full mt-4" @click="showAdvanceManager = false">Kapat</button>
+        <button class="btn btn-ghost !bg-transparent border border-[#d9e7f2] text-[#5a7186] w-full mt-4" @click="showAdvanceManager = false">Kapat</button>
       </template>
     </BaseModal>
 
@@ -391,7 +391,7 @@
     >
       <FinancialReports />
       <template #footer>
-        <button class="btn btn-ghost !bg-transparent border border-white/[0.08] text-[#9aa0b4] w-full mt-4" @click="showFinancialReports = false">Raporu Kapat</button>
+        <button class="btn btn-ghost !bg-transparent border border-[#d9e7f2] text-[#5a7186] w-full mt-4" @click="showFinancialReports = false">Raporu Kapat</button>
       </template>
     </BaseModal>
 
@@ -406,7 +406,7 @@
     >
       <AuditLogs />
       <template #footer>
-        <button class="btn btn-ghost !bg-transparent border border-white/[0.08] text-[#9aa0b4] w-full mt-4" @click="showAuditLogs = false">Panelden Çık</button>
+        <button class="btn btn-ghost !bg-transparent border border-[#d9e7f2] text-[#5a7186] w-full mt-4" @click="showAuditLogs = false">Panelden Çık</button>
       </template>
     </BaseModal>
   </div>

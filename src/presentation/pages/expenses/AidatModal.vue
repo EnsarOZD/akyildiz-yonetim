@@ -9,22 +9,22 @@
     <div class="space-y-6">
       <!-- Error Info -->
       <div v-if="errorMsg" class="bg-red-500/10 border border-red-500/20 rounded-xl p-4 flex items-center gap-3 mb-4">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
         </svg>
-        <span class="text-sm text-red-400 font-medium">{{ errorMsg }}</span>
+        <span class="text-sm text-red-600 font-medium">{{ errorMsg }}</span>
       </div>
 
       <!-- Bilgilendirme Kutusu -->
-      <div class="bg-brand-500/[0.05] border border-brand-500/20 rounded-2xl p-5">
+      <div class="bg-brand-500/[0.05] border border-brand-600/20 rounded-2xl p-5">
         <div class="flex items-start gap-4">
-          <div class="w-10 h-10 rounded-xl bg-brand-500/10 flex items-center justify-center shrink-0 text-brand-400">
+          <div class="w-10 h-10 rounded-xl bg-brand-500/10 flex items-center justify-center shrink-0 text-brand-600">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
           <div>
-            <h4 class="text-[11px] font-black uppercase tracking-widest text-brand-400 mb-1">Toplu Aidat Oluşturma</h4>
+            <h4 class="text-[11px] font-black uppercase tracking-widest text-brand-600 mb-1">Toplu Aidat Oluşturma</h4>
             <p class="text-xs text-brand-200/70 leading-relaxed font-medium">
               Seçilen dönem için yıllık aidat tanımlarından otomatik aidat kayıtları oluşturulur.
             </p>
@@ -46,7 +46,7 @@
             class="input input-bordered w-full font-bold !text-lg"
             required
           />
-          <p class="text-[10px] font-bold text-[#626885] uppercase tracking-widest mt-2 ml-1">Aidatın geçerli olacağı ay/yıl</p>
+          <p class="text-[10px] font-bold text-[#8298ab] uppercase tracking-widest mt-2 ml-1">Aidatın geçerli olacağı ay/yıl</p>
         </div>
 
         <!-- Son Ödeme Tarihi -->
@@ -61,7 +61,7 @@
             class="input input-bordered w-full"
             required
           />
-          <p class="text-[10px] font-bold text-[#626885] uppercase tracking-widest mt-2 ml-1 italic">Öneri: Dönemi takip eden ayın 10'u</p>
+          <p class="text-[10px] font-bold text-[#8298ab] uppercase tracking-widest mt-2 ml-1 italic">Öneri: Dönemi takip eden ayın 10'u</p>
         </div>
       </form>
     </div>
@@ -70,7 +70,7 @@
     <template #footer>
       <button 
         type="button"
-        class="btn btn-ghost !bg-transparent border border-white/[0.08] text-[#9aa0b4] hover:bg-white/[0.05]" 
+        class="btn btn-ghost !bg-transparent border border-[#d9e7f2] text-[#5a7186] hover:bg-[#ecf3f9]" 
         @click="handleClose" 
         :disabled="loading"
       >

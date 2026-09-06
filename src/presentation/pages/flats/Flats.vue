@@ -26,7 +26,7 @@
     <div class="app-card mb-6">
       <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
         <div>
-          <label class="text-[10px] font-bold text-slate-400 dark:text-[#626885] uppercase tracking-widest mb-1.5 block px-1">Arama</label>
+          <label class="text-[10px] font-bold text-[#8298ab] uppercase tracking-widest mb-1.5 block px-1">Arama</label>
           <input
             v-model="filters.searchTerm"
             @input="handleSearch"
@@ -35,14 +35,14 @@
           />
         </div>
         <div>
-          <label class="text-[10px] font-bold text-slate-400 dark:text-[#626885] uppercase tracking-widest mb-1.5 block px-1">Tip</label>
+          <label class="text-[10px] font-bold text-[#8298ab] uppercase tracking-widest mb-1.5 block px-1">Tip</label>
           <select v-model="filters.type" @change="handleSearch" class="select select-bordered select-sm w-full font-bold text-xs">
             <option value="null">Tümü</option>
             <option v-for="t in UNIT_TYPES" :key="t.value" :value="t.value">{{ t.label }}</option>
           </select>
         </div>
         <div>
-          <label class="text-[10px] font-bold text-slate-400 dark:text-[#626885] uppercase tracking-widest mb-1.5 block px-1">Durum</label>
+          <label class="text-[10px] font-bold text-[#8298ab] uppercase tracking-widest mb-1.5 block px-1">Durum</label>
           <select v-model="filters.isActive" @change="handleSearch" class="select select-bordered select-sm w-full font-bold text-xs">
             <option value="null">Tümü</option>
             <option value="true">Aktif</option>
@@ -50,7 +50,7 @@
           </select>
         </div>
         <div>
-          <label class="text-[10px] font-bold text-slate-400 dark:text-[#626885] uppercase tracking-widest mb-1.5 block px-1">Doluluk</label>
+          <label class="text-[10px] font-bold text-[#8298ab] uppercase tracking-widest mb-1.5 block px-1">Doluluk</label>
           <select v-model="filters.isOccupied" @change="handleSearch" class="select select-bordered select-sm w-full font-bold text-xs">
             <option value="null">Tümü</option>
             <option value="true">Dolu</option>
@@ -58,7 +58,7 @@
           </select>
         </div>
         <div>
-          <label class="text-[10px] font-bold text-slate-400 dark:text-[#626885] uppercase tracking-widest mb-1.5 block px-1">Kat No</label>
+          <label class="text-[10px] font-bold text-[#8298ab] uppercase tracking-widest mb-1.5 block px-1">Kat No</label>
           <input
             v-model.number="filters.floorNumber"
             @input="handleSearch"
@@ -68,14 +68,14 @@
           />
         </div>
       </div>
-      <div class="flex items-center justify-between mt-4 pt-4 border-t border-slate-100 dark:border-white/[0.04]">
-        <button @click="clearFilters" class="btn btn-ghost btn-xs text-slate-400 font-bold uppercase tracking-wider gap-2">
+      <div class="flex items-center justify-between mt-4 pt-4 border-t border-slate-100">
+        <button @click="clearFilters" class="btn btn-ghost btn-xs text-[#8298ab] font-bold uppercase tracking-wider gap-2">
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
           </svg>
           Temizle
         </button>
-        <span class="text-[11px] font-bold text-slate-400 dark:text-[#626885] uppercase tracking-widest">{{ filteredFlats.length }} ünite listeleniyor</span>
+        <span class="text-[11px] font-bold text-[#8298ab] uppercase tracking-widest">{{ filteredFlats.length }} ünite listeleniyor</span>
       </div>
     </div>
 
@@ -95,12 +95,12 @@
             {{ flat.code }}
           </div>
           <div class="min-w-0 flex-1 pt-1">
-            <p class="text-[17px] font-black text-slate-800 dark:text-white leading-tight uppercase tracking-tight group-hover:text-brand-500 transition-colors">
+            <p class="text-[17px] font-black text-slate-800 leading-tight uppercase tracking-tight group-hover:text-brand-600 transition-colors">
               {{ flat.code }}
             </p>
             <div class="flex flex-wrap gap-1.5 mt-2">
-              <span class="bg-slate-100 dark:bg-white/[0.04] text-slate-500 dark:text-[#9aa0b4] px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider tabular-nums">{{ floorLabel(flat) }}</span>
-              <span class="bg-brand-50 dark:bg-brand-500/10 text-brand-600 dark:text-brand-400 px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-wider">{{ typeLabel(flat.type) }}</span>
+              <span class="bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider tabular-nums">{{ floorLabel(flat) }}</span>
+              <span class="bg-brand-50 text-brand-600 px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-wider">{{ typeLabel(flat.type) }}</span>
             </div>
           </div>
         </div>
@@ -109,42 +109,42 @@
         <div class="flex items-center gap-2">
           <span :class="[
             'px-2 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-widest',
-            flat.isActive ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400' 
-            : 'bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400'
+            flat.isActive ? 'bg-emerald-50 text-emerald-600' 
+            : 'bg-red-50 text-red-600'
           ]">
             {{ flat.isActive ? 'Aktif' : 'Pasif' }}
           </span>
           <span :class="[
             'px-2 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-widest',
-            flat.isOccupied ? 'bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400' 
-            : 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400'
+            flat.isOccupied ? 'bg-amber-50 text-amber-600' 
+            : 'bg-emerald-50 text-emerald-600'
           ]">
             {{ flat.isOccupied ? 'Dolu' : 'Boş' }}
           </span>
         </div>
 
         <!-- Detaylar -->
-        <div class="space-y-2 pt-4 border-t border-slate-100 dark:border-white/[0.04]">
+        <div class="space-y-2 pt-4 border-t border-slate-100">
           <div class="flex justify-between items-center">
-            <span class="text-[10px] font-bold text-slate-400 dark:text-[#626885] uppercase tracking-widest">Alan</span>
-            <span class="text-xs font-black text-slate-700 dark:text-white tabular-nums tracking-tight">{{ flat.unitArea }} m²</span>
+            <span class="text-[10px] font-bold text-[#8298ab] uppercase tracking-widest">Alan</span>
+            <span class="text-xs font-black text-slate-700 tabular-nums tracking-tight">{{ flat.unitArea }} m²</span>
           </div>
           <div v-if="flat.monthlyRent && flat.monthlyRent > 0" class="flex justify-between items-center">
-            <span class="text-[10px] font-bold text-slate-400 dark:text-[#626885] uppercase tracking-widest">Aylık Kira</span>
-            <span class="text-xs font-black text-emerald-600 dark:text-emerald-400 tabular-nums tracking-tight">{{ formatCurrency(flat.monthlyRent) }}</span>
+            <span class="text-[10px] font-bold text-[#8298ab] uppercase tracking-widest">Aylık Kira</span>
+            <span class="text-xs font-black text-emerald-600 tabular-nums tracking-tight">{{ formatCurrency(flat.monthlyRent) }}</span>
           </div>
-          <p v-if="flat.description" class="text-[10px] font-medium italic text-slate-400 dark:text-[#626885] pt-1 border-t border-dashed border-slate-100 dark:border-white/[0.04] mt-1">{{ flat.description }}</p>
+          <p v-if="flat.description" class="text-[10px] font-medium italic text-[#8298ab] pt-1 border-t border-dashed border-slate-100 mt-1">{{ flat.description }}</p>
         </div>
 
         <!-- İşlem Menüsü -->
         <div class="absolute top-4 right-4">
           <div class="dropdown dropdown-end">
-            <button tabindex="0" class="w-8 h-8 rounded-xl flex items-center justify-center text-slate-400 hover:bg-slate-50 dark:hover:bg-white/[0.04] transition-colors">
+            <button tabindex="0" class="w-8 h-8 rounded-xl flex items-center justify-center text-[#8298ab] hover:bg-slate-50 transition-colors">
               <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                 <circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/><circle cx="5" cy="12" r="1.5"/>
               </svg>
             </button>
-            <ul tabindex="0" class="dropdown-content menu p-1.5 shadow-xl bg-white dark:bg-[#0f1322] border border-slate-200 dark:border-white/[0.07] rounded-xl w-40 z-10 text-xs">
+            <ul tabindex="0" class="dropdown-content menu p-1.5 shadow-xl bg-white border border-slate-200 rounded-xl w-40 z-10 text-xs">
               <li v-if="authStore.role === ROLES.ADMIN || authStore.role === ROLES.MANAGER">
                 <a @click="editFlat(flat)" class="rounded-lg">Düzenle</a>
               </li>
