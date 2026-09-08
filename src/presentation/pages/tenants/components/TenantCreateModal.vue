@@ -202,6 +202,7 @@ import { useNotify } from '@/application/composables/useNotify'
 import tenantsService from '@/infrastructure/services/tenantsService.js'
 import { useEventBus } from '@/application/composables/useEventBus'
 import { useDirtyGuard } from '@/application/composables/useDirtyGuard'
+import { unitTypeLabel } from '@/core/constants/units'
 
 const props = defineProps({ visible: Boolean })
 const emit = defineEmits(['save', 'close'])
@@ -230,8 +231,7 @@ const tenant = ref(emptyTenant())
 const { isDirty, resetDirty } = useDirtyGuard(() => tenant.value)
 defineExpose({ isDirty, resetDirty })
 
-const UNIT_TYPE = { 0: 'Kat', 1: 'Giriş', 2: 'Otopark' }
-const typeLabel = (t) => UNIT_TYPE[t] ?? 'Bilinmiyor'
+const typeLabel = (t) => unitTypeLabel(t)
 const flatOptionLabel = (f) => {
   const base = `${f.code} — ${Number(f.unitArea || 0)}m²`
   return (f.floorNumber !== null && f.floorNumber !== undefined) 

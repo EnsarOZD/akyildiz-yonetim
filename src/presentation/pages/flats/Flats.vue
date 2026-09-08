@@ -152,7 +152,7 @@
                 <a v-if="canDelete(flat)" @click="deleteFlat(flat)" class="rounded-lg text-error">Sil</a>
                 <a v-else class="rounded-lg opacity-40 pointer-events-none text-error">Sil (Dolu)</a>
               </li>
-              <li v-if="(authStore.role === ROLES.ADMIN || authStore.role === ROLES.MANAGER) && flat.type === 2">
+              <li v-if="(authStore.role === ROLES.ADMIN || authStore.role === ROLES.MANAGER) && isParkingType(flat.type)">
                 <a @click="deactivateFlat(flat)" class="rounded-lg">Pasifleştir</a>
               </li>
             </ul>
@@ -187,6 +187,7 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { ROLES } from '@/core/constants/roles'
+import { unitTypeLabel, unitTypeValue, isParkingType, isEntryType } from '@/core/constants/units'
 import PageHeader from '@/presentation/components/ui/PageHeader.vue'
 import { useAuthStore } from '@/application/stores/auth'
 import FlatEditModal from './components/FlatEditModal.vue'
@@ -253,8 +254,9 @@ const filteredFlats = computed(() => {
 
   // Tip
 if (filters.value.type !== null) {
-  const t = Number(filters.value.type)
-  filtered = filtered.filter(f => Number(f.type) === t)
+  const t = unitTypeValue(filters.value.type)
+  // "Tümü" seçildiğinde değer "null" string'i geliyor -> filtre uygulanmaz
+  if (t !== null) filtered = filtered.filter(f => unitTypeValue(f.type) === t)
 }
 
   // Aktif / Pasif
@@ -417,18 +419,14 @@ const getFlatStatusColor = (flat) => {
   return 'bg-green-500'
 }
 
-// 0/1/2 için kat etiketi
+// Kat etiketi (tip hem 0/1/2 hem "Floor"/"Entry"/"Parking" gelebilir)
 const floorLabel = (flat) => {
-  if (flat.type === 2) return 'Otopark'
-  if (flat.type === 1) return 'Giriş'
+  if (isParkingType(flat.type)) return 'Otopark'
+  if (isEntryType(flat.type)) return 'Giriş'
   return `${flat.floorNumber}. Kat`
 }
 
-// 0/1/2 → label
-const typeLabel = (t) => {
-  const map = { 0: 'Kat', 1: 'Giriş', 2: 'Otopark' }
-  return map[t] ?? t
-}
+const typeLabel = (t) => unitTypeLabel(t, t)
 
 // Lifecycle
 onMounted(fetchFlats)

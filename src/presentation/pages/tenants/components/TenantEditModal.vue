@@ -181,6 +181,7 @@ import { ref, watch, computed } from 'vue'
 import BaseModal from '@/presentation/components/common/BaseModal.vue'
 import { useDirtyGuard } from '@/application/composables/useDirtyGuard'
 import tenantsService from '@/infrastructure/services/tenantsService'
+import { unitTypeLabel } from '@/core/constants/units'
 
 const props = defineProps({
   tenant: Object,
