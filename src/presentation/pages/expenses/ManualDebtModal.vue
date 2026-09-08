@@ -50,6 +50,22 @@
           </select>
         </div>
 
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text">Borçlu *</span>
+          </label>
+          <select v-if="flatTenantId" v-model="form.debtor" class="select select-bordered w-full font-bold">
+            <option value="tenant">Kiracı{{ selectedFlatTenantName ? ` — ${selectedFlatTenantName}` : '' }}</option>
+            <option value="owner">Mal Sahibi</option>
+          </select>
+          <div v-else class="input input-bordered w-full flex items-center font-bold text-[#5a7186] bg-[#f6fafd]">
+            Mal Sahibi <span class="ml-2 text-[10px] font-bold uppercase tracking-widest text-[#8298ab]">(ünitede kiracı yok)</span>
+          </div>
+          <p v-if="flatTenantId && form.debtor === 'owner'" class="mt-2 text-[10px] font-bold uppercase tracking-tight italic text-amber-600">
+            Ünitede kiracı olmasına rağmen bu borç mal sahibine yazılacak.
+          </p>
+        </div>
+
         <div class="grid grid-cols-2 gap-5">
           <div class="form-control">
             <label class="label"><span class="label-text">Yıl *</span></label>
@@ -107,6 +123,7 @@
             <thead class="sticky top-0 bg-[#f6fafd] z-10">
               <tr class="border-b border-[#d9e7f2]">
                 <th class="py-4 px-5 text-[10px] font-black text-[#8298ab] uppercase tracking-widest">Daire / Kiracı</th>
+                <th class="py-4 px-5 text-[10px] font-black text-[#8298ab] uppercase tracking-widest">Borçlu</th>
                 <th class="py-4 px-5 text-[10px] font-black text-[#8298ab] uppercase tracking-widest text-center">Tutar (₺)</th>
                 <th class="py-4 px-5 text-[10px] font-black text-[#8298ab] uppercase tracking-widest">Açıklama</th>
               </tr>
@@ -116,6 +133,17 @@
                 <td class="px-5 py-3">
                   <div class="text-[13px] font-black text-[#16283a] uppercase tracking-tight">{{ f.code }}</div>
                   <div class="text-[10px] font-bold text-[#8298ab] uppercase tracking-tighter">{{ f.tenantName || 'Boş Daire' }}</div>
+                </td>
+                <td class="px-5 py-3">
+                  <select
+                    v-if="f.tenantId"
+                    v-model="f.debtor"
+                    class="select select-bordered select-sm w-full font-bold !bg-white"
+                  >
+                    <option value="tenant">Kiracı</option>
+                    <option value="owner">Mal Sahibi</option>
+                  </select>
+                  <span v-else class="text-[10px] font-black text-[#8298ab] uppercase tracking-widest">Mal Sahibi</span>
                 </td>
                 <td class="px-5 py-3">
                   <input 
@@ -210,7 +238,9 @@ const form = ref({
   amount: '',
   dueDate: new Date(new Date().getFullYear(), new Date().getMonth() + 1, 15).toISOString().split('T')[0],
   description: '',
-  invoiceNumber: ''
+  invoiceNumber: '',
+  // 'tenant' | 'owner' — borcun kime yazılacağı. Ünitede kiracı yoksa her zaman 'owner'.
+  debtor: 'tenant'
 })
 
 // Toplu Form State
@@ -224,6 +254,18 @@ const typeLabel = computed(() => {
   return 'Su'
 })
 const hasBulkData = computed(() => bulkEntries.value.some(e => e.amount > 0))
+
+// Seçili ünitenin kiracı/mal sahibi bilgisi. Düzenlemede daire listesi henüz
+// yüklenmemiş olabileceği için initialData'ya da düşülür.
+const selectedFlat = computed(() => flats.value.find(f => f.id === form.value.flatId) || null)
+const flatTenantId = computed(() => selectedFlat.value?.tenantId ?? props.initialData?.tenantId ?? null)
+const flatOwnerId = computed(() => selectedFlat.value?.ownerId ?? props.initialData?.ownerId ?? null)
+const selectedFlatTenantName = computed(() => selectedFlat.value?.tenantCompanyName || '')
+
+// Kiracısı olmayan üniteye kiracı borcu yazılamaz
+watch(flatTenantId, (id) => {
+  if (!id) form.value.debtor = 'owner'
+})
 
 // Debug watch
 watch(bulkEntries, (newVal) => {
@@ -246,6 +288,7 @@ const fetchFlats = async () => {
       tenantName: f.tenantCompanyName,
       tenantId: f.tenantId,
       ownerId: f.ownerId,
+      debtor: f.tenantId ? 'tenant' : 'owner',
       amount: 0,
       description: ''
     }))
@@ -268,16 +311,12 @@ const handleSubmit = async () => {
   loading.value = true
   try {
     const payload = { ...form.value }
-    if (props.initialData) {
-      payload.tenantId = props.initialData.tenantId
-      payload.ownerId = props.initialData.ownerId
-    } else {
-      const selectedFlat = flats.value.find(f => f.id === form.value.flatId)
-      if (selectedFlat) {
-        payload.tenantId = selectedFlat.tenantId || null
-        payload.ownerId = selectedFlat.ownerId || null
-      }
-    }
+    delete payload.debtor
+
+    // Borçlu kuralı: TenantId dolu ise borç kiracının, boş ise mal sahibinin sayılır.
+    const toOwner = form.value.debtor === 'owner' || !flatTenantId.value
+    payload.tenantId = toOwner ? null : flatTenantId.value
+    payload.ownerId = flatOwnerId.value
 
     if (payload.id) {
       await utilityDebtsService.updateUtilityDebt(payload.id, payload)
@@ -309,7 +348,7 @@ const handleBulkSubmit = async () => {
       amount: e.amount,
       dueDate: bulkDueDate.value,
       description: e.description || `Toplu ${typeLabel.value} girişi`,
-      tenantId: e.tenantId,
+      tenantId: (e.debtor === 'owner' || !e.tenantId) ? null : e.tenantId,
       ownerId: e.ownerId
     }))
 
@@ -331,7 +370,9 @@ onMounted(() => {
       ...props.initialData,
       dueDate: props.initialData.dueDate ? new Date(props.initialData.dueDate).toISOString().split('T')[0] : form.value.dueDate,
       periodYear: props.initialData.periodYear || new Date().getFullYear(),
-      periodMonth: props.initialData.periodMonth || new Date().getMonth() + 1
+      periodMonth: props.initialData.periodMonth || new Date().getMonth() + 1,
+      // Kayıtlı borçta TenantId doluysa kiracının, boşsa mal sahibinin borcudur
+      debtor: props.initialData.tenantId ? 'tenant' : 'owner'
     }
   }
 })
