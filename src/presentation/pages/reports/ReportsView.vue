@@ -347,6 +347,8 @@ import dashboardService from '@/infrastructure/services/dashboardService'
 import { toLocalIsoDate, todayLocalIso } from '@/core/utils/dateUtils'
 import documentsService from '@/infrastructure/services/documentsService'
 import { useNotification } from '@/application/composables/useNotification'
+import { useAuthStore } from '@/application/stores/auth'
+import { ROLES } from '@/core/constants/roles'
 
 // State
 const loading = ref(false)
@@ -490,6 +492,7 @@ const isBuildingWideReport = computed(() => !filters.tenantId && !filters.ownerI
 const { showSuccess, showError, showWarning } = useNotification()
 const statementBusy = ref(false)
 const canStatement = computed(() => !!filters.tenantId !== !!filters.ownerId)
+const authStore = useAuthStore()
 const canSendStatement = computed(() => [ROLES.ADMIN, ROLES.MANAGER, ROLES.DATA_ENTRY].includes(authStore.role))
 
 const statementArgs = () => ({
