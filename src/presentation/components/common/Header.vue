@@ -334,6 +334,9 @@ const setTabsBasedOnRole = (role) => {
       { label: 'Talepler',    value: 'service-requests', route: '/service-requests' },
       { label: 'Raporlar',    value: 'reports',   route: '/reports'    },
     ]
+    if ([ROLES.ADMIN, ROLES.MANAGER].includes(r)) {
+      tabs.value.push({ label: 'Otomasyon', value: 'automation', route: '/automation' })
+    }
   } else if (r === ROLES.TENANT) {
     tabs.value = [
       { label: 'Özet',    value: 'tenant-dashboard', route: '/tenant-dashboard' },

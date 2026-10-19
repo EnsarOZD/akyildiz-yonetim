@@ -27,6 +27,8 @@ const Profile = () => import('../pages/users/ProfileView.vue')
 const MyProperties = () => import('../pages/owners/MyPropertiesView.vue')
 const MyTenants = () => import('../pages/owners/MyTenantsView.vue')
 const OwnerDashboard = () => import('../pages/owners/OwnerDashboardView.vue')
+const Automation = () => import('../pages/automation/AutomationView.vue')
+const AidatPanel = () => import('../pages/expenses/AidatPanel.vue')
 const ServiceRequests = () => import('../pages/service-requests/ServiceRequestsView.vue')
 
 const routes = [
@@ -42,6 +44,8 @@ const routes = [
   { path: '/utilities', name: 'Utilities', component: Utilities, meta: { requiresAuth: true, roles: ['admin', 'manager', 'dataentry'] } },
   { path: '/flats', name: 'Flats', component: Flats, meta: { requiresAuth: true, roles: ['admin', 'manager', 'dataentry'] } },
   { path: '/reports', name: 'Reports', component: Reports, meta: { requiresAuth: true, roles: ['admin', 'manager', 'observer'] } },
+  { path: '/automation', name: 'Automation', component: Automation, meta: { requiresAuth: true, roles: ['admin', 'manager'] } },
+  { path: '/aidat-definitions', name: 'AidatDefinitions', component: AidatPanel, meta: { requiresAuth: true, roles: ['admin', 'manager', 'dataentry'] } },
   { path: '/notifications', name: 'Notifications', component: Notifications, meta: { requiresAuth: true } },
   { path: '/my-payments', name: 'MyPayments', component: () => import('../pages/tenants/MyPaymentsView.vue'), meta: { requiresAuth: true, roles: ['admin', 'manager', 'tenant'] } },
 

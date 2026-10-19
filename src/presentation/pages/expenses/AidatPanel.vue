@@ -24,10 +24,10 @@
               </select>
             </div>
             <div class="form-control">
-              <label class="label"><span class="label-text">Kat</span></label>
-              <select v-model="selectedUnit" class="select select-bordered w-full" :disabled="!selectedTenant">
+              <label class="label"><span class="label-text">Ünite</span></label>
+              <select v-model="selectedFlatId" class="select select-bordered w-full" :disabled="!selectedTenant">
                 <option disabled value="">Seçiniz</option>
-                <option v-for="unit in selectedTenantUnits" :key="unit" :value="unit">{{ unit }}</option>
+                <option v-for="f in selectedTenantUnits" :key="f.id" :value="f.id">{{ f.code }}</option>
               </select>
             </div>
             <div class="form-control">
@@ -100,7 +100,10 @@
               <tr v-for="item in filteredDuesList" :key="item.id" class="hover">
                 <td><span class="badge badge-ghost">{{ item.year }}</span></td>
                 <td class="font-medium">{{ item.company }}</td>
-                <td>{{ item.unit }}</td>
+                <td>
+                  {{ item.unit }}
+                  <span v-if="!item.flatId" class="badge badge-warning badge-sm ml-1">Ünite seçilmemiş</span>
+                </td>
                 <td>{{ formatCurrency(item.amount) }}</td>
                 <td class="font-bold text-success">{{ formatCurrency(item.vatIncludedAmount || item.amount * 1.2) }}</td>
                 <td class="text-right">
@@ -144,7 +147,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed, watch } from 'vue'
+import { ref, onMounted, computed, watch, nextTick } from 'vue'
 import { useNotify } from '@/application/composables/useNotify'
 import aidatService from '@/infrastructure/services/aidatService'
 import tenantsService from '@/infrastructure/services/tenantsService'
@@ -154,7 +157,7 @@ const { notifySuccess, notifyError } = useNotify()
 const emit = defineEmits(['stats'])
 const tenants = ref([])
 const selectedTenant = ref('')
-const selectedUnit = ref('')
+const selectedFlatId = ref('')
 const year = ref(new Date().getFullYear())
 const amount = ref('')
 const duesList = ref([])
@@ -198,11 +201,11 @@ const formatInput = (e) => {
 
 const selectedTenantUnits = computed(() => {
   const tenant = tenants.value.find(t => t.id === selectedTenant.value)
-  return tenant ? tenant.units || [] : []
+  return tenant ? tenant.flats || [] : []
 })
 
 const isFormValid = computed(() => {
-  return selectedTenant.value && selectedUnit.value && parseAmount() > 0 && year.value >= 2020
+  return selectedTenant.value && selectedFlatId.value && parseAmount() > 0 && year.value >= 2020
 })
 
 // Filtreleme için computed'lar
@@ -266,6 +269,7 @@ const fetchDues = async () => {
 
       return {
         id: d.id,
+        flatId: d.flatId ?? null,
         year,
         tenantId,
         company,
@@ -284,7 +288,7 @@ const fetchDues = async () => {
 
 const resetForm = () => {
   selectedTenant.value = ''
-  selectedUnit.value = ''
+  selectedFlatId.value = ''
   amount.value = ''
   year.value = new Date().getFullYear()
   selectedId.value = null
@@ -312,9 +316,12 @@ const handleConfirmDelete = async () => {
   }
 }
 
-const editDues = (item) => {
+const editDues = async (item) => {
   selectedTenant.value = item.tenantId
-  selectedUnit.value = item.unit
+  // tenant watcher ünite seçimini temizler; önce onun çalışmasını bekle
+  await nextTick()
+  // Eski kayıtlarda flatId yoksa kiracının ünitelerinden koda göre eşleştir
+  selectedFlatId.value = item.flatId || (tenants.value.find(t => t.id === item.tenantId)?.flats || []).find(f => f.code === item.unit)?.id || ''
   amount.value = item.amount.toString().replace('.', ',')
   year.value = item.year
   selectedId.value = item.id
@@ -329,9 +336,11 @@ const handleSubmit = async () => {
 
   const vatAmount = parseFloat((rawAmount * 1.2).toFixed(2))
 
+  const flat = selectedTenantUnits.value.find(f => f.id === selectedFlatId.value)
   const data = {
     tenantId: selectedTenant.value,
-    unit: selectedUnit.value,
+    flatId: selectedFlatId.value,
+    unit: flat?.code || '',
     year: year.value,
     amount: rawAmount,
     vatIncludedAmount: vatAmount
@@ -343,7 +352,7 @@ const handleSubmit = async () => {
       notifySuccess('Aidat güncellendi.')
     } else {
       const exists = duesList.value.find(
-        d => d.year === year.value && d.tenantId === selectedTenant.value && d.unit === selectedUnit.value
+        d => d.year === year.value && d.tenantId === selectedTenant.value && (d.flatId ? d.flatId === selectedFlatId.value : d.unit === flat?.code)
       )
       if (exists) {
         notifyError('Bu şirketin bu katı için bu yıl zaten aidat tanımlanmış.')
@@ -362,7 +371,7 @@ const handleSubmit = async () => {
   await fetchDues()
 }
 
-watch(selectedTenant, () => { selectedUnit.value = '' })
+watch(selectedTenant, () => { selectedFlatId.value = '' })
 
 onMounted(async () => {
   try {
@@ -371,7 +380,7 @@ onMounted(async () => {
     tenants.value = response.map(t => ({
       id: t.id,
       company: t.companyName,                    // 👈 template bu ismi bekliyor
-      units: (t.flats || []).map(f => f.code).filter(Boolean) // 👈 “Kat” listesini buradan doldur
+      flats: (t.flats || []).filter(f => f.id && f.code).map(f => ({ id: f.id, code: f.code }))
     }))
     await fetchDues()
   } catch (error) {

@@ -54,6 +54,20 @@
           </div>
         </div>
 
+        <!-- Hatırlatma tercihi -->
+        <div class="bg-[#f6fafd] border border-[#d9e7f2] rounded-2xl p-4">
+          <label class="label cursor-pointer justify-between gap-4">
+            <span class="label-text font-bold">Hatırlatma gönder</span>
+            <input
+              type="checkbox"
+              class="toggle toggle-primary"
+              :checked="remindersEnabled"
+              :disabled="savingReminders"
+              @change="toggleReminders($event)"
+            />
+          </label>
+        </div>
+
         <!-- 2. Ünite Atamaları -->
         <div class="space-y-4">
           <div class="flex items-center gap-3 px-1">
@@ -122,6 +136,8 @@
 import { ref, watch, computed } from 'vue';
 import BaseModal from '@/presentation/components/common/BaseModal.vue';
 import { mask as vMask } from 'vue-the-mask';
+import automationService from '@/infrastructure/services/automationService';
+import { useNotification } from '@/application/composables/useNotification';
 
 const props = defineProps({
   visible: Boolean,
@@ -140,6 +156,27 @@ const formData = ref({
   isActive: true,
   monthlyDues: 0,
 });
+
+const { showSuccess, showError } = useNotification();
+const remindersEnabled = ref(true);
+const savingReminders = ref(false);
+
+const toggleReminders = async (event) => {
+  const enabled = event.target.checked;
+  if (!formData.value.id) return;
+  savingReminders.value = true;
+  try {
+    await automationService.setOwnerReminders(formData.value.id, enabled);
+    remindersEnabled.value = enabled;
+    if (props.initialData) props.initialData.remindersEnabled = enabled; // liste önbelleği tutarlı kalsın
+    showSuccess(enabled ? 'Hatırlatmalar açıldı.' : 'Hatırlatmalar kapatıldı.');
+  } catch (err) {
+    event.target.checked = !enabled;
+    showError('Hatırlatma tercihi kaydedilemedi.');
+  } finally {
+    savingReminders.value = false;
+  }
+};
 
 const isUnitAvailable = (unit) => {
   return props.availableUnits.includes(unit) || (props.initialData?.allUnits?.includes(unit));
@@ -160,6 +197,7 @@ watch(() => props.visible, (newVal) => {
       isActive: props.initialData.isActive ?? true,
       monthlyDues: props.initialData.monthlyDues ?? 0,
     };
+    remindersEnabled.value = props.initialData.remindersEnabled !== false;
   }
 });
 

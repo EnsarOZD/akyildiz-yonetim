@@ -279,6 +279,23 @@
             </div>
           </div>
 
+          <!-- Hatırlatma tercihi -->
+          <div class="card bg-base-200 p-4">
+            <label class="label cursor-pointer justify-between gap-4">
+              <span>
+                <span class="block font-semibold text-gray-700">Hatırlatma gönder</span>
+                <span class="block text-xs text-base-content/60">Vadesi yaklaşan ve geciken borçlar için otomatik hatırlatma e-postası/bildirimi gönderilir.</span>
+              </span>
+              <input
+                type="checkbox"
+                class="toggle toggle-primary"
+                :checked="tenant.remindersEnabled !== false"
+                :disabled="savingReminders"
+                @change="toggleReminders($event)"
+              />
+            </label>
+          </div>
+
           <!-- İletişim -->
           <div class="card bg-base-200 p-4">
             <h4 class="text-lg font-semibold mb-4 text-gray-700">👤 İletişim Kişisi</h4>
@@ -361,6 +378,7 @@ import { useRoute, useRouter } from 'vue-router'
 import AdvanceAccountManager from '@/presentation/components/shared/AdvanceAccountManager.vue'
 import TenantEditModal from './TenantEditModal.vue'
 import tenantsService from '@/infrastructure/services/tenantsService.js'
+import automationService from '@/infrastructure/services/automationService'
 import paymentsService from '@/infrastructure/services/paymentsService'
 import utilityDebtsService from '@/infrastructure/services/utilityDebtsService'
 import { useAuthStore } from '@/application/stores/auth'
@@ -403,6 +421,22 @@ const handleUpdateTenant = async (data) => {
   } catch (err) {
     console.error('Kiracı güncellenirken hata:', err)
     handleNetworkError(err, { component: 'TenantDetailPage', action: 'handleUpdateTenant' })
+  }
+}
+
+const savingReminders = ref(false)
+const toggleReminders = async (event) => {
+  const enabled = event.target.checked
+  savingReminders.value = true
+  try {
+    await automationService.setTenantReminders(tenantId.value, enabled)
+    tenant.value = { ...tenant.value, remindersEnabled: enabled }
+    notifySuccess(enabled ? 'Hatırlatmalar açıldı.' : 'Hatırlatmalar kapatıldı.')
+  } catch (err) {
+    event.target.checked = !enabled
+    notifyError('Hatırlatma tercihi kaydedilemedi.')
+  } finally {
+    savingReminders.value = false
   }
 }
 
