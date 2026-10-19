@@ -176,6 +176,10 @@
                       :class="item.isPaid ? 'bg-brand-500/10 text-brand-600' : (item.isPartial ? 'bg-amber-500/10 text-amber-600' : 'bg-rose-500/10 text-rose-500')">
                       {{ debtStatusLabel(item) }}
                     </span>
+                    <button v-else-if="item.canDownloadReceipt" type="button" @click="downloadReceipt(item)" :disabled="downloadingId === item.paymentId"
+                      class="text-[10px] font-black uppercase tracking-wider text-brand-600 hover:underline disabled:opacity-40">
+                      Makbuz indir
+                    </button>
                     <span v-else class="text-[#8298ab]">—</span>
                   </td>
                 </tr>
@@ -220,6 +224,10 @@
                  <span class="text-[10px] font-black uppercase" :class="item.isPayment ? 'text-emerald-500' : 'text-amber-500'">
                     {{ item.isPayment ? 'TAHSİLAT' : 'TAHAKKUK' }}
                  </span>
+                 <button v-if="item.isPayment && item.canDownloadReceipt" type="button" @click="downloadReceipt(item)" :disabled="downloadingId === item.paymentId"
+                    class="text-[10px] font-black uppercase tracking-wider text-brand-600 disabled:opacity-40">
+                    Makbuz indir
+                 </button>
                  <div v-if="!item.isPayment" class="flex items-center gap-2">
                     <span class="text-[10px] font-black uppercase" :class="item.isPaid ? 'text-brand-600' : (item.isPartial ? 'text-amber-600' : 'text-rose-500')">
                        {{ debtStatusLabel(item).toLocaleUpperCase('tr-TR') }}
@@ -254,6 +262,8 @@ import utilityDebtsService from '@/infrastructure/services/utilityDebtsService'
 import paymentsService from '@/infrastructure/services/paymentsService'
 import tenantsService from '@/infrastructure/services/tenantsService'
 import dashboardService from '@/infrastructure/services/dashboardService'
+import documentsService from '@/infrastructure/services/documentsService'
+import { useNotification } from '@/application/composables/useNotification'
 
 const route = useRoute()
 const authStore = useAuthStore()
@@ -411,6 +421,8 @@ const reportItems = computed(() => {
           description: p.description || p.Type || 'Tahsilat kaydı',
           invoiceNumber: p.receiptNumber ?? p.ReceiptNumber ?? p.invoiceNumber ?? p.InvoiceNumber ?? null,
           amount: Number(p.amount ?? 0),
+          paymentId: p.id,
+          canDownloadReceipt: !!p.id && !String(p.receiptNumber || '').startsWith('AVANS-') && !String(p.receiptNumber || '').startsWith('MANUEL-'),
           isPayment: true,
           isPaid: true,
           lastPaymentDate: null
@@ -463,6 +475,20 @@ watch(selectedTenantId, () => {
   currentPage.value = 1
   fetchData()
 })
+
+// Makbuz indir (kendi ödemesi)
+const { showError } = useNotification()
+const downloadingId = ref(null)
+const downloadReceipt = async (item) => {
+  downloadingId.value = item.paymentId
+  try {
+    await documentsService.downloadReceipt(item.paymentId)
+  } catch (e) {
+    showError(e?.message || 'Makbuz indirilemedi.')
+  } finally {
+    downloadingId.value = null
+  }
+}
 
 // Helpers
 const debtTypeLabel = (type) => {

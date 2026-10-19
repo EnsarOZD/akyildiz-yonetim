@@ -22,6 +22,11 @@ const automationService = {
     return apiService.post(`${base}/accrual/run?period=${encodeURIComponent(period)}`)
   },
 
+  // period: kapsanan ay ('yyyy-MM')
+  async runStatements(period) {
+    return apiService.post(`${base}/statements/run?period=${encodeURIComponent(period)}`)
+  },
+
   async runReminders() {
     return apiService.post(`${base}/reminders/run`)
   },

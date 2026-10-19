@@ -92,6 +92,25 @@
             </div>
           </div>
 
+          <!-- Ekstre -->
+          <div class="flex flex-col lg:flex-row lg:items-end gap-3 p-4 rounded-2xl border border-gray-100 bg-gray-50">
+            <div class="form-control">
+              <label class="label py-1"><span class="label-text text-xs font-bold">Ekstre başlangıç</span></label>
+              <input v-model="statementRange.startDate" type="date" class="input input-bordered input-sm" />
+            </div>
+            <div class="form-control">
+              <label class="label py-1"><span class="label-text text-xs font-bold">Ekstre bitiş</span></label>
+              <input v-model="statementRange.endDate" type="date" class="input input-bordered input-sm" />
+            </div>
+            <div class="flex flex-wrap gap-2">
+              <button class="btn btn-sm btn-outline" :disabled="statementBusy" @click="downloadStatement">Ekstre PDF (sunucu)</button>
+              <button v-if="canSendStatement" class="btn btn-sm btn-outline btn-primary" :disabled="statementBusy" @click="emailStatement">
+                <span v-if="statementBusy" class="loading loading-spinner loading-xs"></span>
+                Ekstreyi e-postayla gönder
+              </button>
+            </div>
+          </div>
+
           <!-- Filtre -->
           <div class="flex items-center gap-2 flex-wrap">
             <button
@@ -385,6 +404,8 @@ import { useAuthStore } from '@/application/stores/auth'
 import { useErrorHandler } from '@/application/composables/useErrorHandler'
 import { useNotify } from '@/application/composables/useNotify'
 import { getPaymentMethodLabel } from '@/core/constants/enums'
+import documentsService from '@/infrastructure/services/documentsService'
+import { toLocalIsoDate } from '@/core/utils/dateUtils'
 
 const route = useRoute()
 const router = useRouter()
@@ -403,6 +424,35 @@ const showAdvanceModal = ref(false)
 const showEditModal = ref(false)
 const timelineFilter = ref('all')
 const { notifySuccess, notifyError } = useNotify()
+
+// Ekstre: varsayılan aralık geçen ayın ilk günü → son günü
+const defaultStatementRange = () => {
+  const now = new Date()
+  return {
+    startDate: toLocalIsoDate(new Date(now.getFullYear(), now.getMonth() - 1, 1)),
+    endDate: toLocalIsoDate(new Date(now.getFullYear(), now.getMonth(), 0))
+  }
+}
+const statementRange = ref(defaultStatementRange())
+const statementBusy = ref(false)
+const canSendStatement = computed(() => authStore.role === 'admin' || authStore.role === 'manager')
+
+const runStatement = async (action, okText, failText) => {
+  const { startDate, endDate } = statementRange.value
+  if (!startDate || !endDate) { notifyError('Ekstre için başlangıç ve bitiş tarihini seçin.'); return }
+  if (endDate < startDate) { notifyError('Bitiş tarihi başlangıçtan önce olamaz.'); return }
+  statementBusy.value = true
+  try {
+    await action({ tenantId: tenantId.value, startDate, endDate })
+    if (okText) notifySuccess(okText)
+  } catch (e) {
+    notifyError(e?.message || failText)
+  } finally {
+    statementBusy.value = false
+  }
+}
+const downloadStatement = () => runStatement(a => documentsService.downloadStatement(a), null, 'Ekstre indirilemedi.')
+const emailStatement = () => runStatement(a => documentsService.sendStatement(a), 'Ekstre e-postayla gönderildi.', 'Ekstre gönderilemedi.')
 
 const filteredPayments = computed(() => {
   return payments.value.filter(p => !p.receiptNumber?.startsWith('AVANS-'))

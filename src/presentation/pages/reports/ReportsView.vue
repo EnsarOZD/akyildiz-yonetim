@@ -9,6 +9,15 @@
         </svg>
       </template>
       <template #actions>
+        <template v-if="canStatement">
+          <button @click="downloadServerStatement" :disabled="statementBusy" class="btn btn-sm btn-outline gap-2">
+            Ekstre PDF (sunucu)
+          </button>
+          <button @click="emailStatement" :disabled="statementBusy" class="btn btn-sm btn-outline btn-primary gap-2">
+            <span v-if="statementBusy" class="loading loading-spinner loading-xs"></span>
+            Ekstreyi e-postayla gönder
+          </button>
+        </template>
         <button @click="exportToExcel" class="btn btn-sm btn-outline btn-success gap-2">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -336,6 +345,8 @@ import PageHeader from '@/presentation/components/ui/PageHeader.vue'
 import paymentsService from '@/infrastructure/services/paymentsService'
 import dashboardService from '@/infrastructure/services/dashboardService'
 import { toLocalIsoDate, todayLocalIso } from '@/core/utils/dateUtils'
+import documentsService from '@/infrastructure/services/documentsService'
+import { useNotification } from '@/application/composables/useNotification'
 
 // State
 const loading = ref(false)
@@ -474,6 +485,44 @@ const clearFilters = () => {
 
 // Kiracı / mal sahibi seçili değilse rapor bina genelidir
 const isBuildingWideReport = computed(() => !filters.tenantId && !filters.ownerId)
+
+// Ekstre (sunucu PDF / e-posta): yalnızca tam olarak bir kiracı VEYA bir mal sahibi seçiliyken
+const { showSuccess, showError, showWarning } = useNotification()
+const statementBusy = ref(false)
+const canStatement = computed(() => !!filters.tenantId !== !!filters.ownerId)
+
+const statementArgs = () => ({
+  tenantId: filters.tenantId || undefined,
+  ownerId: filters.ownerId || undefined,
+  startDate: filters.startDate,
+  endDate: filters.endDate
+})
+
+const runStatementAction = async (action, okText, failText) => {
+  if (!filters.startDate || !filters.endDate) {
+    showWarning('Ekstre için başlangıç ve bitiş tarihini seçin.')
+    return
+  }
+  if (filters.endDate < filters.startDate) {
+    showWarning('Bitiş tarihi başlangıçtan önce olamaz.')
+    return
+  }
+  statementBusy.value = true
+  try {
+    await action(statementArgs())
+    if (okText) showSuccess(okText)
+  } catch (e) {
+    showError(e?.message || failText)
+  } finally {
+    statementBusy.value = false
+  }
+}
+
+const downloadServerStatement = () =>
+  runStatementAction(a => documentsService.downloadStatement(a), null, 'Ekstre indirilemedi.')
+
+const emailStatement = () =>
+  runStatementAction(a => documentsService.sendStatement(a), 'Ekstre e-postayla gönderildi.', 'Ekstre gönderilemedi.')
 
 // Birim bazlı karşılaştırma: backend kategorilerini Türkçe etiketlerle eşle
 const CATEGORY_LABELS = { Electricity: 'Elektrik', Water: 'Su', Aidat: 'Aidat' }

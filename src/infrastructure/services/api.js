@@ -158,6 +158,46 @@ class ApiService {
     return this.request(endpoint, { method: 'DELETE', ...options })
   }
 
+  // Binary (PDF vb.) indirme: { blob, filename } döner
+  async getBlob(endpoint, params = {}) {
+    const queryString = new URLSearchParams(params).toString()
+    const path = queryString ? `${endpoint}?${queryString}` : endpoint
+    const headers = {}
+    const token = this.getAuthToken()
+    if (token) headers['Authorization'] = `Bearer ${token}`
+
+    const response = await fetch(`${this.baseURL}${path}`, { method: 'GET', headers })
+    if (!response.ok) {
+      let message = `Sunucu hatası. (HTTP ${response.status})`
+      try {
+        const text = await response.text()
+        if (text) {
+          try {
+            const data = JSON.parse(text)
+            message = (typeof data === 'string' ? data : (data.errorMessage || data.message || data.title)) || message
+          } catch {
+            message = text
+          }
+        }
+      } catch { /* yoksay */ }
+      const error = new Error(message)
+      error.status = response.status
+      error.response = { status: response.status, data: message }
+      if (response.status === 401 && !window.location.pathname.includes('/login')) {
+        localStorage.removeItem('authToken')
+        window.location.href = '/login?reason=session_expired'
+      }
+      throw error
+    }
+    const disposition = response.headers.get('Content-Disposition') || ''
+    const match = /filename\*?=(?:UTF-8'')?"?([^";]+)"?/i.exec(disposition)
+    let filename = null
+    if (match) {
+      try { filename = decodeURIComponent(match[1]) } catch { filename = match[1] }
+    }
+    return { blob: await response.blob(), filename }
+  }
+
   // File upload için
   async uploadFile(endpoint, file, onProgress = null) {
     const formData = new FormData()

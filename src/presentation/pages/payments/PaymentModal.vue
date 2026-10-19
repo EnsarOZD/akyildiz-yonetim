@@ -159,6 +159,17 @@
           </select>
           <p v-if="step1Touched && !form.bank" class="text-red-600 text-[10px] font-bold uppercase tracking-wide mt-1.5 ml-1">Banka seçin.</p>
         </div>
+        <div class="form-control">
+          <label class="label"><span class="label-text">Dekont / Referans No</span></label>
+          <input
+            v-model="form.receiptNumber"
+            type="text"
+            maxlength="100"
+            class="input input-bordered w-full"
+            :disabled="receiptNumberLocked"
+            placeholder="İsteğe bağlı"
+          />
+        </div>
       </div>
     </div>
 
@@ -383,7 +394,9 @@ const stepLabels = ['Temel Bilgiler', 'Borç Eşleştirme', 'Özet & Onay']
 const step1Touched = ref(false)
 
 // ── Form state ────────────────────────────────────────────────
-const form = reactive({ id: null, tenantId: null, ownerId: null, amount: null, date: '', type: '', bank: '', description: '' })
+const form = reactive({ id: null, tenantId: null, ownerId: null, amount: null, date: '', type: '', bank: '', description: '', receiptNumber: '' })
+// Sistem tarafından üretilen numaralar (AVANS-/MANUEL-) değiştirilmez
+const receiptNumberLocked = computed(() => /^(AVANS|MANUEL)-/.test(String(form.receiptNumber || '')))
 watch(() => props.payment, (val) => { Object.assign(form, val || {}) }, { immediate: true, deep: true })
 
 // ── Input Formatters (Thousand Separator) ─────────────────────
@@ -589,6 +602,11 @@ const handleSave = async () => {
       targetDebtType: fType < 3 ? fType : null,
       bankName: form.bank,
       description: form.description || ''
+    }
+    // Dekont / Referans No: yalnızca yeni girildiyse veya değiştirildiyse gönderilir
+    const receiptNo = String(form.receiptNumber || '').trim()
+    if (receiptNo && !receiptNumberLocked.value && receiptNo !== String(props.payment?.receiptNumber || '').trim()) {
+      basePayload.receiptNumber = receiptNo
     }
 
     let saved;

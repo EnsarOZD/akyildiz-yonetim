@@ -218,16 +218,17 @@
               <th class="py-4 text-[10px] font-black text-[#8298ab] uppercase tracking-widest text-left px-4">Tarih</th>
               <th class="py-4 text-[10px] font-black text-[#8298ab] uppercase tracking-widest text-left px-4">Kiracı / Ünite</th>
               <th class="py-4 text-[10px] font-black text-[#8298ab] uppercase tracking-widest text-left px-4">Banka / Açıklama</th>
+              <th class="py-4 text-[10px] font-black text-[#8298ab] uppercase tracking-widest text-left px-4">Makbuz No</th>
               <th class="py-4 text-[10px] font-black text-[#8298ab] uppercase tracking-widest text-right px-4">Tutar (Alacak)</th>
               <th class="py-4 text-[10px] font-black text-[#8298ab] uppercase tracking-widest text-center px-4">Aksiyon</th>
             </tr>
           </thead>
           <tbody class="divide-y-0">
             <tr v-if="loading">
-              <td colspan="6" class="py-12 text-center text-[#8298ab]">Yükleniyor...</td>
+              <td colspan="7" class="py-12 text-center text-[#8298ab]">Yükleniyor...</td>
             </tr>
             <tr v-else-if="filteredPayments.length === 0">
-              <td colspan="6" class="py-20 text-center">
+              <td colspan="7" class="py-20 text-center">
                 <p class="text-sm font-medium text-slate-500">Ödeme kaydı bulunamadı</p>
               </td>
             </tr>
@@ -263,6 +264,13 @@
                   <span class="text-[10px] font-bold text-[#8298ab] uppercase tracking-widest truncate max-w-[150px]">{{ getPaymentDisplayLabel(p) }}</span>
                 </div>
               </td>
+              <td class="px-4 py-3 whitespace-nowrap">
+                <template v-if="hasReceipt(p)">
+                  <p class="text-[11px] font-bold text-slate-700 tabular-nums">{{ p.receiptSerial || '—' }}</p>
+                  <span class="badge badge-xs font-bold mt-0.5" :class="receiptStatusClass(p.receiptEmailStatus)">{{ receiptStatusLabel(p.receiptEmailStatus) }}</span>
+                </template>
+                <span v-else class="text-[#8298ab]">—</span>
+              </td>
               <td class="px-4 py-3 text-right">
                 <p class="text-[14px] font-black text-emerald-600 tabular-nums tracking-tight">
                   {{ formatCurrency(p.amount) }}
@@ -276,7 +284,9 @@
                       <circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/><circle cx="5" cy="12" r="1.5"/>
                     </svg>
                   </button>
-                  <ul tabindex="0" class="dropdown-content menu p-1.5 shadow-card bg-base-100 border border-slate-200 rounded-xl w-32 z-10 text-xs">
+                  <ul tabindex="0" class="dropdown-content menu p-1.5 shadow-card bg-base-100 border border-slate-200 rounded-xl w-44 z-10 text-xs">
+                    <li v-if="hasReceipt(p)"><a @click="downloadReceipt(p)" class="rounded-lg">Makbuz indir</a></li>
+                    <li v-if="hasReceipt(p) && canWrite"><a @click="resendReceipt(p)" class="rounded-lg">Makbuzu tekrar gönder</a></li>
                     <li><a @click="startEdit(p)" class="rounded-lg">Düzenle</a></li>
                     <li><a @click="deletePayment(p.id)" class="rounded-lg text-error">Sil</a></li>
                   </ul>
@@ -426,6 +436,8 @@ import FinancialReports from '@/presentation/components/shared/FinancialReports.
 import AuditLogs from '@/presentation/components/shared/AuditLogs.vue'
 import { useErrorHandler } from '@/application/composables/useErrorHandler'
 import { useNotify } from '@/application/composables/useNotify'
+import documentsService from '@/infrastructure/services/documentsService'
+import { invalidateFinanceCaches } from '@/application/stores/cacheInvalidation'
 import { usePaymentsStore } from '@/application/stores/payments.js'
 import { useTenantsStore } from '@/application/stores/tenants.js'
 import { useDashboardStore } from '@/application/stores/dashboard'
@@ -664,7 +676,8 @@ const newPayment = ref({
   amount: null,
   type: '',
   bank: '',
-  description: ''
+  description: '',
+  receiptNumber: ''
 })
 
 const editMode = ref(false)
@@ -684,7 +697,8 @@ const reallyClosePaymentModal = () => {
     amount: null,
     type: '',
     bank: '',
-    description: ''
+    description: '',
+    receiptNumber: ''
   }
   editMode.value = false
   selectedPaymentId.value = null
@@ -738,6 +752,39 @@ const confirmBulkDelete = async () => {
   }
 }
 
+/* ---- Makbuz ---- */
+// Avans kullanımı (AVANS-) ve manuel (MANUEL-) kayıtlarda makbuz düzenlenmez
+const hasReceipt = (p) => {
+  const n = String(p?.receiptNumber || '')
+  return !n.startsWith('AVANS-') && !n.startsWith('MANUEL-')
+}
+const canWrite = computed(() => authStore.role === ROLES.ADMIN || authStore.role === ROLES.MANAGER)
+const RECEIPT_STATUS_LABELS = { Sent: 'Gönderildi', Failed: 'Gönderilemedi', Skipped: 'E-posta yok', NotSent: '—' }
+const RECEIPT_STATUS_CLASSES = { Sent: 'badge-success', Failed: 'badge-error', Skipped: 'badge-warning', NotSent: 'badge-ghost' }
+const receiptStatusLabel = (s) => RECEIPT_STATUS_LABELS[s] || '—'
+const receiptStatusClass = (s) => RECEIPT_STATUS_CLASSES[s] || 'badge-ghost'
+
+const downloadReceipt = async (p) => {
+  try {
+    await documentsService.downloadReceipt(p.id)
+  } catch (e) {
+    notifyError(e?.message || 'Makbuz indirilemedi.')
+  }
+}
+
+const resendReceipt = async (p) => {
+  try {
+    const res = await documentsService.resendReceipt(p.id)
+    invalidateFinanceCaches()
+    await paymentsStore.fetchIfNeeded({}, true)
+    if (res?.receiptEmailStatus === 'Sent') notifySuccess('Makbuz e-postayla gönderildi.')
+    else if (res?.receiptEmailStatus === 'Skipped') notifyError('Alıcının e-posta adresi yok, makbuz gönderilemedi.')
+    else notifyError('Makbuz gönderilemedi.')
+  } catch (e) {
+    notifyError(e?.message || 'Makbuz gönderilemedi.')
+  }
+}
+
 const startEdit = (payment) => {
   newPayment.value = { 
     id: payment.id,
@@ -747,7 +794,8 @@ const startEdit = (payment) => {
     amount: payment.amount ?? null,
     type: normalizePaymentType(payment.type),
     bank: payment.bank ?? '',
-    description: payment.description ?? ''
+    description: payment.description ?? '',
+    receiptNumber: payment.receiptNumber ?? ''
   }
   selectedPaymentId.value = payment.id
   editMode.value = true
@@ -769,7 +817,8 @@ const handlePaymentSave = async () => {
     amount: null,
     type: '',
     bank: '',
-    description: ''
+    description: '',
+    receiptNumber: ''
   }
   const wasEdit = editMode.value
   editMode.value = false

@@ -12,11 +12,15 @@
           <span v-if="remindersRunning" class="loading loading-spinner loading-xs"></span>
           Hatırlatmaları şimdi gönder
         </button>
+        <button class="btn btn-sm btn-outline gap-2" :disabled="statementsRunning" @click="showStatementsConfirm = true">
+          <span v-if="statementsRunning" class="loading loading-spinner loading-xs"></span>
+          Ekstreleri şimdi gönder (geçen ay)
+        </button>
       </template>
     </PageHeader>
 
     <!-- Kapalı özellik uyarıları (kayıtlı ayarlara göre) -->
-    <div v-if="savedSettings && (!savedSettings.accrualEnabled || !savedSettings.remindersEnabled)" class="space-y-2">
+    <div v-if="savedSettings && (!savedSettings.accrualEnabled || !savedSettings.remindersEnabled || !savedSettings.statementsMonthlyEnabled)" class="space-y-2">
       <div v-if="!savedSettings.accrualEnabled" role="alert" class="alert alert-warning text-sm">
         <span>
           <strong>Otomatik tahakkuk kapalı.</strong>
@@ -27,6 +31,12 @@
         <span>
           <strong>Hatırlatmalar kapalı.</strong>
           Kiracı ve maliklere otomatik ödeme hatırlatması gönderilmez.
+        </span>
+      </div>
+      <div v-if="!savedSettings.statementsMonthlyEnabled" role="alert" class="alert alert-warning text-sm">
+        <span>
+          <strong>Aylık ekstre kapalı.</strong>
+          Kiracı ve maliklere aylık hesap ekstresi otomatik e-postalanmaz.
         </span>
       </div>
     </div>
@@ -77,6 +87,14 @@
               — bu tarihten önce vadesi geçmiş borçlar için otomatik hatırlatma gönderilmez.
             </p>
           </div>
+        </div>
+        <div class="space-y-2">
+          <h4 class="text-xs font-bold uppercase tracking-widest text-slate-500">Aylık ekstre</h4>
+          <label class="label cursor-pointer justify-start gap-3">
+            <input type="checkbox" class="toggle toggle-primary" v-model="settings.statementsMonthlyEnabled" />
+            <span class="label-text">Aylık ekstre açık</span>
+          </label>
+          <p class="text-xs text-slate-600">Açıldığında, bir önceki ayın ekstreleri ilk çalışmada (09:00 sonrası) gönderilir.</p>
         </div>
         <p class="text-xs text-slate-500">Otomatik işler her gün 09:00'dan sonra çalışır.</p>
         <p v-if="settingsError" class="text-sm text-red-600 font-medium">{{ settingsError }}</p>
@@ -210,6 +228,16 @@
       @cancel="showAccrualConfirm = false"
     />
     <ConfirmModal
+      :isOpen="showStatementsConfirm"
+      title="Ekstreler Gönderilecek"
+      :message="`${previousPeriod} dönemi için kiracı ve maliklere ekstreler e-postayla gönderilecek. Devam etmek istiyor musunuz?`"
+      confirmLabel="Evet, Gönder"
+      confirmClass="btn-primary"
+      :loading="statementsRunning"
+      @confirm="runStatements"
+      @cancel="showStatementsConfirm = false"
+    />
+    <ConfirmModal
       :isOpen="showRemindersConfirm"
       title="Hatırlatmalar Gönderilecek"
       message="Vadesi yaklaşan ve geciken borçlar için hatırlatmalar şimdi gönderilecek. Devam etmek istiyor musunuz?"
@@ -239,6 +267,7 @@ const defaultSettings = () => ({
   accrualDayOfMonth: 1,
   accrualDueDayOfMonth: 10,
   remindersEnabled: false,
+  statementsMonthlyEnabled: false,
   daysBeforeDue: 3,
   overdueRepeatDays: 7
 })
@@ -256,6 +285,15 @@ const previewLoading = ref(false)
 const accrualRunning = ref(false)
 const showAccrualConfirm = ref(false)
 
+const statementsRunning = ref(false)
+const showStatementsConfirm = ref(false)
+// Geçen ay (yerel saate göre) 'yyyy-MM'
+const previousPeriod = (() => {
+  const now = new Date()
+  const d = new Date(now.getFullYear(), now.getMonth() - 1, 1)
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+})()
+
 const remindersRunning = ref(false)
 const showRemindersConfirm = ref(false)
 
@@ -263,7 +301,7 @@ const runs = ref([])
 const runsLoading = ref(false)
 const unmatched = ref([])
 
-const JOB_LABELS = { MonthlyAccrual: 'Aylık aidat', DailyReminders: 'Günlük hatırlatma' }
+const JOB_LABELS = { MonthlyAccrual: 'Aylık aidat', DailyReminders: 'Günlük hatırlatma', MonthlyStatements: 'Aylık ekstre' }
 const STATUS_LABELS = { Running: 'Çalışıyor', Succeeded: 'Başarılı', Failed: 'Hata' }
 const STATUS_CLASSES = { Running: 'badge-info', Succeeded: 'badge-success', Failed: 'badge-error' }
 
@@ -387,6 +425,21 @@ const runAccrual = async () => {
     reportRunError(e, 'Aidat oluşturulamadı.')
   } finally {
     accrualRunning.value = false
+  }
+}
+
+const runStatements = async () => {
+  statementsRunning.value = true
+  try {
+    const res = await automationService.runStatements(previousPeriod)
+    reportRunResult(res, 'Ekstreler gönderildi.')
+    showStatementsConfirm.value = false
+    await loadRuns()
+  } catch (e) {
+    showStatementsConfirm.value = false
+    reportRunError(e, 'Ekstreler gönderilemedi.')
+  } finally {
+    statementsRunning.value = false
   }
 }
 
