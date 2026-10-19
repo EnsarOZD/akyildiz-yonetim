@@ -406,6 +406,7 @@ import { useNotify } from '@/application/composables/useNotify'
 import { getPaymentMethodLabel } from '@/core/constants/enums'
 import documentsService from '@/infrastructure/services/documentsService'
 import { toLocalIsoDate } from '@/core/utils/dateUtils'
+import { ROLES } from '@/core/constants/roles'
 
 const route = useRoute()
 const router = useRouter()
@@ -435,7 +436,7 @@ const defaultStatementRange = () => {
 }
 const statementRange = ref(defaultStatementRange())
 const statementBusy = ref(false)
-const canSendStatement = computed(() => authStore.role === 'admin' || authStore.role === 'manager')
+const canSendStatement = computed(() => [ROLES.ADMIN, ROLES.MANAGER, ROLES.DATA_ENTRY].includes(authStore.role))
 
 const runStatement = async (action, okText, failText) => {
   const { startDate, endDate } = statementRange.value

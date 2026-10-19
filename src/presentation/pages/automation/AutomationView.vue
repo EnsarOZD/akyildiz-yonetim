@@ -20,7 +20,7 @@
     </PageHeader>
 
     <!-- Kapalı özellik uyarıları (kayıtlı ayarlara göre) -->
-    <div v-if="savedSettings && (!savedSettings.accrualEnabled || !savedSettings.remindersEnabled || !savedSettings.statementsMonthlyEnabled)" class="space-y-2">
+    <div v-if="savedSettings && (!savedSettings.accrualEnabled || !savedSettings.remindersEnabled || !savedSettings.statementsMonthlyEnabled || !savedSettings.receiptsAutoEmailEnabled)" class="space-y-2">
       <div v-if="!savedSettings.accrualEnabled" role="alert" class="alert alert-warning text-sm">
         <span>
           <strong>Otomatik tahakkuk kapalı.</strong>
@@ -37,6 +37,11 @@
         <span>
           <strong>Aylık ekstre kapalı.</strong>
           Kiracı ve maliklere aylık hesap ekstresi otomatik e-postalanmaz.
+        </span>
+      </div>
+      <div v-if="!savedSettings.receiptsAutoEmailEnabled" role="alert" class="alert alert-warning text-sm">
+        <span>
+          <strong>Otomatik makbuz e-postası kapalı</strong> — ödemeler numaralanır, makbuz elle gönderilebilir.
         </span>
       </div>
     </div>
@@ -95,6 +100,14 @@
             <span class="label-text">Aylık ekstre açık</span>
           </label>
           <p class="text-xs text-slate-600">Açıldığında, bir önceki ayın ekstreleri ilk çalışmada (09:00 sonrası) gönderilir.</p>
+        </div>
+        <div class="space-y-2">
+          <h4 class="text-xs font-bold uppercase tracking-widest text-slate-500">Makbuz</h4>
+          <label class="label cursor-pointer justify-start gap-3">
+            <input type="checkbox" class="toggle toggle-primary" v-model="settings.receiptsAutoEmailEnabled" />
+            <span class="label-text">Makbuz e-postası (otomatik)</span>
+          </label>
+          <p class="text-xs text-slate-600">Açıkken her yeni tamamlanan ödemenin makbuzu ödeyenin e-posta adresine hemen gönderilir. Kapalıyken ödemeler yine numaralanır; makbuz Ödemeler sayfasından elle gönderilebilir.</p>
         </div>
         <p class="text-xs text-slate-500">Otomatik işler her gün 09:00'dan sonra çalışır.</p>
         <p v-if="settingsError" class="text-sm text-red-600 font-medium">{{ settingsError }}</p>
@@ -268,6 +281,7 @@ const defaultSettings = () => ({
   accrualDueDayOfMonth: 10,
   remindersEnabled: false,
   statementsMonthlyEnabled: false,
+  receiptsAutoEmailEnabled: false,
   daysBeforeDue: 3,
   overdueRepeatDays: 7
 })

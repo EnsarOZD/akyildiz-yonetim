@@ -422,7 +422,8 @@ const reportItems = computed(() => {
           invoiceNumber: p.receiptNumber ?? p.ReceiptNumber ?? p.invoiceNumber ?? p.InvoiceNumber ?? null,
           amount: Number(p.amount ?? 0),
           paymentId: p.id,
-          canDownloadReceipt: !!p.id && !String(p.receiptNumber || '').startsWith('AVANS-') && !String(p.receiptNumber || '').startsWith('MANUEL-'),
+          // Makbuz yalnızca tamamlanmış ödemelerde (string enum); avans kullanımı / manuel kayıtta yok
+          canDownloadReceipt: !!p.id && p.status === 'Completed' && !String(p.receiptNumber || '').startsWith('AVANS-') && !String(p.receiptNumber || '').startsWith('MANUEL-'),
           isPayment: true,
           isPaid: true,
           lastPaymentDate: null

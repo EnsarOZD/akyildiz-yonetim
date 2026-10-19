@@ -9,15 +9,16 @@
         </svg>
       </template>
       <template #actions>
-        <template v-if="canStatement">
-          <button @click="downloadServerStatement" :disabled="statementBusy" class="btn btn-sm btn-outline gap-2">
+        <!-- title sarmalayıcıda: devre dışı düğmeler bazı tarayıcılarda ipucu göstermez -->
+        <span v-if="canStatement" class="inline-flex gap-2" :title="statementFilterBlocked ? STATEMENT_FILTER_HINT : undefined">
+          <button @click="downloadServerStatement" :disabled="statementBusy || statementFilterBlocked" class="btn btn-sm btn-outline gap-2">
             Ekstre PDF (sunucu)
           </button>
-          <button v-if="canSendStatement" @click="emailStatement" :disabled="statementBusy" class="btn btn-sm btn-outline btn-primary gap-2">
+          <button v-if="canSendStatement" @click="emailStatement" :disabled="statementBusy || statementFilterBlocked" class="btn btn-sm btn-outline btn-primary gap-2">
             <span v-if="statementBusy" class="loading loading-spinner loading-xs"></span>
             Ekstreyi e-postayla gönder
           </button>
-        </template>
+        </span>
         <button @click="exportToExcel" class="btn btn-sm btn-outline btn-success gap-2">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -492,6 +493,9 @@ const isBuildingWideReport = computed(() => !filters.tenantId && !filters.ownerI
 const { showSuccess, showError, showWarning } = useNotification()
 const statementBusy = ref(false)
 const canStatement = computed(() => !!filters.tenantId !== !!filters.ownerId)
+// Sunucu ekstresi tür / borçlu türü filtresini uygulamaz: bu filtreler seçiliyken yanıltıcı olmaması için devre dışı
+const STATEMENT_FILTER_HINT = 'Ekstre tür/borçlu türü filtresi uygulamaz; filtreleri temizleyin.'
+const statementFilterBlocked = computed(() => !!filters.utilityType || filters.debtorType !== 'All')
 const authStore = useAuthStore()
 const canSendStatement = computed(() => [ROLES.ADMIN, ROLES.MANAGER, ROLES.DATA_ENTRY].includes(authStore.role))
 

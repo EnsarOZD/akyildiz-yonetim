@@ -267,7 +267,7 @@
               <td class="px-4 py-3 whitespace-nowrap">
                 <template v-if="hasReceipt(p)">
                   <p class="text-[11px] font-bold text-slate-700 tabular-nums">{{ p.receiptSerial || '—' }}</p>
-                  <span class="badge badge-xs font-bold mt-0.5" :class="receiptStatusClass(p.receiptEmailStatus)">{{ receiptStatusLabel(p.receiptEmailStatus) }}</span>
+                  <span class="badge badge-xs font-bold mt-0.5" :class="[receiptStatusClass(p.receiptEmailStatus), { 'cursor-help': receiptStatusTitle(p) }]" :title="receiptStatusTitle(p)">{{ receiptStatusLabel(p.receiptEmailStatus) }}</span>
                 </template>
                 <span v-else class="text-[#8298ab]">—</span>
               </td>
@@ -286,7 +286,12 @@
                   </button>
                   <ul tabindex="0" class="dropdown-content menu p-1.5 shadow-card bg-base-100 border border-slate-200 rounded-xl w-44 z-10 text-xs">
                     <li v-if="hasReceipt(p)"><a @click="downloadReceipt(p)" class="rounded-lg">Makbuz indir</a></li>
-                    <li v-if="hasReceipt(p) && canWrite"><a @click="resendReceipt(p)" class="rounded-lg">Makbuzu tekrar gönder</a></li>
+                    <li v-if="hasReceipt(p) && canWrite" :class="{ disabled: isResending(p) }">
+                      <a @click="!isResending(p) && resendReceipt(p)" :aria-disabled="isResending(p)" class="rounded-lg">
+                        <span v-if="isResending(p)" class="loading loading-spinner loading-xs"></span>
+                        {{ isResending(p) ? 'Gönderiliyor…' : 'Makbuzu tekrar gönder' }}
+                      </a>
+                    </li>
                     <li><a @click="startEdit(p)" class="rounded-lg">Düzenle</a></li>
                     <li><a @click="deletePayment(p.id)" class="rounded-lg text-error">Sil</a></li>
                   </ul>
@@ -753,11 +758,17 @@ const confirmBulkDelete = async () => {
 }
 
 /* ---- Makbuz ---- */
-// Avans kullanımı (AVANS-) ve manuel (MANUEL-) kayıtlarda makbuz düzenlenmez
+// Yalnızca tamamlanmış ödemelerde makbuz vardır; avans kullanımı (AVANS-) ve manuel (MANUEL-) kayıtlarda düzenlenmez
 const hasReceipt = (p) => {
+  if (p?.status !== 'Completed') return false
   const n = String(p?.receiptNumber || '')
   return !n.startsWith('AVANS-') && !n.startsWith('MANUEL-')
 }
+// Satır bazında "tekrar gönder" meşgul bayrağı (aynı ödeme için çift gönderimi engeller)
+const resendingIds = ref(new Set())
+const isResending = (p) => resendingIds.value.has(p?.id)
+const receiptStatusTitle = (p) =>
+  p?.receiptEmailStatus === 'Failed' && p?.receiptEmailError ? p.receiptEmailError : undefined
 const canWrite = computed(() => [ROLES.ADMIN, ROLES.MANAGER, ROLES.DATA_ENTRY].includes(authStore.role))
 const RECEIPT_STATUS_LABELS = { Sent: 'Gönderildi', Failed: 'Gönderilemedi', Skipped: 'E-posta yok', NotSent: '—' }
 const RECEIPT_STATUS_CLASSES = { Sent: 'badge-success', Failed: 'badge-error', Skipped: 'badge-warning', NotSent: 'badge-ghost' }
@@ -773,6 +784,8 @@ const downloadReceipt = async (p) => {
 }
 
 const resendReceipt = async (p) => {
+  if (isResending(p)) return
+  resendingIds.value = new Set(resendingIds.value).add(p.id)
   try {
     const res = await documentsService.resendReceipt(p.id)
     invalidateFinanceCaches()
@@ -782,6 +795,10 @@ const resendReceipt = async (p) => {
     else notifyError('Makbuz gönderilemedi.')
   } catch (e) {
     notifyError(e?.message || 'Makbuz gönderilemedi.')
+  } finally {
+    const next = new Set(resendingIds.value)
+    next.delete(p.id)
+    resendingIds.value = next
   }
 }
 
