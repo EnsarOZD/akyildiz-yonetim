@@ -335,9 +335,11 @@ const loadPersonnel = async () => {
   try {
     // Sadece personelleri getir (Admin/Manager role de personel sayılabilir)
     const allUsers = await usersService.getUsers()
-    personnel.value = allUsers.filter(u => 
+    personnel.value = (Array.isArray(allUsers) ? allUsers : []).filter(u => 
       ['admin', 'manager', 'staff', 'technician'].includes(u.role?.toLowerCase())
     )
+  } catch (err) {
+    notifyError('Personel listesi alınamadı: ' + (err.message || 'Bilinmeyen hata'))
   } finally {
     personnelLoading.value = false
   }

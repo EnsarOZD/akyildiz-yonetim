@@ -92,7 +92,9 @@ export default defineConfig({
     minify: 'terser',
     terserOptions: {
       compress: {
-        drop_console: true, // console.log'ları kaldır
+        // Yalnızca log/debug/info kaldırılır; console.warn/error production'da hata takibi için kalır
+        drop_console: false,
+        pure_funcs: ['console.log', 'console.debug', 'console.info'],
         drop_debugger: true
       }
     }

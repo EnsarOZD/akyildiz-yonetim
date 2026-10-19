@@ -95,6 +95,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import apiService from '@/infrastructure/services/api'
+import { invalidateFinanceCaches } from '@/application/stores/cacheInvalidation'
 import { useErrorHandler } from '@/application/composables/useErrorHandler'
 
 const emit = defineEmits(['close', 'refresh', 'success'])
@@ -179,6 +180,7 @@ async function handleSubmit () {
    }
    console.log('create-aidat payload =>', payload)
     const result = await apiService.post('/utilitydebts/create-aidat', payload)
+    invalidateFinanceCaches() // Yeni borçlar oluştu: store önbelleklerini temizle
 
     const createdTenant = Number(result?.tenantDuesCreated ?? 0)
     const createdOwner = Number(result?.ownerDuesCreated ?? 0)

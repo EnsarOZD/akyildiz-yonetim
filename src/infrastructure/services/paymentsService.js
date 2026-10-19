@@ -1,4 +1,6 @@
 import apiService from './api.js'
+import { invalidateFinanceCaches } from '@/application/stores/cacheInvalidation'
+import { unwrapPaged, MAX_PAGE_SIZE } from './pagedResult.js'
 
 class PaymentsService {
   async getPayments(filters = {}) {
@@ -16,12 +18,13 @@ class PaymentsService {
 
     const requestParams = {
       ...params,
-      pageSize: Math.min(filters.pageSize || 1000, 1000),
+      pageSize: Math.min(filters.pageSize || MAX_PAGE_SIZE, MAX_PAGE_SIZE),
       pageNumber: filters.pageNumber || 1
     }
 
     const response = await apiService.get('/payments', requestParams)
-    return Array.isArray(response) ? response : (response?.items ?? [])
+    // Tümü istendiğinde kırpma olursa uyar (toplamlar istemci tarafında hesaplanıyor)
+    return unwrapPaged(response, 'ödeme', requestParams.pageSize >= MAX_PAGE_SIZE && requestParams.pageNumber === 1)
   }
 
   // ID'ye göre ödeme getir
@@ -73,7 +76,7 @@ class PaymentsService {
 
     // Backend now returns PagedResult<T>; callers (store + AdvanceAccountManager) already
     // handle both array and {items} shapes — just ensure we fetch the full page.
-    params.pageSize = 100
+    params.pageSize = MAX_PAGE_SIZE
     return apiService.get('/advanceaccounts', params)
   }
 
@@ -89,12 +92,16 @@ class PaymentsService {
 
   // Avans hesabı sil
   async deleteAdvanceAccount(id) {
-    return apiService.delete(`/advanceaccounts/${id}`)
+    const result = await apiService.delete(`/advanceaccounts/${id}`)
+    this.invalidateCache()
+    return result
   }
 
   // Avans hesabından borç öde
   async useAdvanceAccount(data) {
-    return apiService.post('/advanceaccounts/use', data)
+    const result = await apiService.post('/advanceaccounts/use', data)
+    this.invalidateCache()
+    return result
   }
 
   // Finansal raporları getir
@@ -148,7 +155,10 @@ class PaymentsService {
     return apiService.get('/expenses/stats')
   }
 
-  invalidateCache() {}
+  // Store önbelleklerini (tüm filtre anahtarları) temizle — mutasyonlardan sonra çağrılır
+  invalidateCache() {
+    invalidateFinanceCaches()
+  }
 }
 
 export default new PaymentsService() 

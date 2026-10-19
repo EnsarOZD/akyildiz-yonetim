@@ -1,4 +1,5 @@
 import apiService from '@/infrastructure/services/api'
+import { MAX_PAGE_SIZE } from '@/infrastructure/services/pagedResult'
 
 const base = '/tenants'
 
@@ -35,8 +36,10 @@ const tenantsService = {
       params.append('floor', String(filters.floorNumber))
     }
 
+    // Dropdown'lar ve istemci tarafı filtrelenen sayfalar tüm kiracıları bekliyor;
+    // varsayılan olarak backend üst sınırı (5000) istenir (eski varsayılan 20 listeyi kırpıyordu)
     if (filters.pageSize) params.append('pageSize', String(filters.pageSize))
-    else params.append('pageSize', '20')
+    else params.append('pageSize', String(MAX_PAGE_SIZE))
 
     const qs = params.toString()
     const url = qs ? `${base}?${qs}` : base

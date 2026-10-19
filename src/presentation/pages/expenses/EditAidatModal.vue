@@ -131,6 +131,7 @@
 
 <script setup>
 import { ref, onMounted, watch } from 'vue'
+import { datePart } from '@/core/utils/dateUtils'
 import BaseModal from '@/presentation/components/common/BaseModal.vue'
 import utilityDebtsService from '@/infrastructure/services/utilityDebtsService'
 import { useErrorHandler } from '@/application/composables/useErrorHandler'
@@ -180,7 +181,7 @@ onMounted(() => {
     local.value.toplamTutar = Number(props.record.toplamTutar ?? props.record.amount ?? 0)
     local.value.periodYear = props.record.periodYear || new Date().getFullYear()
     local.value.periodMonth = props.record.periodMonth || (new Date().getMonth() + 1)
-    local.value.dueDate = props.record.dueDate ? new Date(props.record.dueDate).toISOString().split('T')[0] : ''
+    local.value.dueDate = props.record.dueDate ? datePart(props.record.dueDate) : ''
     local.value.description = props.record.description || ''
     local.value.invoiceNumber = props.record.invoiceNumber || ''
   }

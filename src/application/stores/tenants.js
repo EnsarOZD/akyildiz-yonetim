@@ -14,6 +14,8 @@ export const useTenantsStore = defineStore('tenants', {
 
     getters: {
         tenants: (state) => state.itemsByKey['default'] || [],
+        // Varsayılan (filtresiz) liste yükleniyor mu — Tenants/Payments sayfaları kullanıyor
+        loading: (state) => state.loadingByKey['default'] === true,
         stats: (state) => state.statsByKey['default'] || {
             activeCount: 0,
             occupancyRate: 0,

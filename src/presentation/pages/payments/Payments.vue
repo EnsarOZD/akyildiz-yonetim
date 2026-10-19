@@ -431,7 +431,7 @@ import { useTenantsStore } from '@/application/stores/tenants.js'
 import { useDashboardStore } from '@/application/stores/dashboard'
 import { useUtilityDebtsStore } from '@/application/stores/utilityDebts'
 import { paymentTypes, getPaymentTypeLabel, paymentTypeToValue } from '@/core/constants/enums'
-import { safeFormatDate } from '@/core/utils/dateUtils'
+import { safeFormatDate, todayLocalIso, datePart } from '@/core/utils/dateUtils'
 import { formatCurrency, getAvatarColor, getAvatarInitial } from '@/core/utils/uiHelpers'
 import EmptyState from '@/presentation/components/ui/EmptyState.vue'
 import PageHeader from '@/presentation/components/ui/PageHeader.vue'
@@ -602,7 +602,8 @@ const filteredPayments = computed(() => {
     )
   }
 
-  return filtered.sort((a, b) => new Date(getPaymentDate(b)) - new Date(getPaymentDate(a)))
+  // Store dizisini yerinde sıralamamak için kopya üzerinde sırala
+  return [...filtered].sort((a, b) => new Date(getPaymentDate(b)) - new Date(getPaymentDate(a)))
 })
 
 /* ---- Bulk Seçim ---- */
@@ -657,7 +658,7 @@ watch([filters, pageSize], () => {
 /* ---- Modal form ---- */
 const newPayment = ref({
   id: null,
-  date: new Date().toISOString().substring(0, 10),
+  date: todayLocalIso(),
   tenantId: '',
   ownerId: null,
   amount: null,
@@ -677,7 +678,7 @@ const reallyClosePaymentModal = () => {
   pendingCloseAction.value = null
   newPayment.value = {
     id: null,
-    date: new Date().toISOString().substring(0, 10),
+    date: todayLocalIso(),
     tenantId: '',
     ownerId: null,
     amount: null,
@@ -740,7 +741,7 @@ const confirmBulkDelete = async () => {
 const startEdit = (payment) => {
   newPayment.value = { 
     id: payment.id,
-    date: (getPaymentDate(payment) || new Date().toISOString()).substring(0,10),
+    date: datePart(getPaymentDate(payment)) || todayLocalIso(),
     tenantId: payment.tenantId || '',
     ownerId: payment.ownerId ?? null,
     amount: payment.amount ?? null,
@@ -762,7 +763,7 @@ const handlePaymentSave = async () => {
   showModal.value = false
   newPayment.value = {
     id: null,
-    date: new Date().toISOString().substring(0, 10),
+    date: todayLocalIso(),
     tenantId: '',
     ownerId: null,
     amount: null,

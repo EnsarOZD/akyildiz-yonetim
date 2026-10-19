@@ -505,7 +505,7 @@ const setLoading = (inc) => {
 /* ---------- API ---------- */
 const fetchFlats = async () => {
   try {
-    const response = await api.get('/Flats?pageSize=100')
+    const response = await api.get('/Flats?pageSize=5000')
     return Array.isArray(response) ? response : (response?.items ?? [])
   } catch (error) {
     console.error('Flat bilgileri alınırken hata:', error)
@@ -580,9 +580,9 @@ const fetchDues = async () => {
   try {
     const [duesRes, flatsRes, tenantsRes, ownersRes] = await Promise.all([
       utilityDebtsService.getUtilityDebts({ period: selectedPeriod.value || undefined }),
-      api.get('/Flats?pageSize=100'),
-      api.get('/Tenants?pageSize=100'),
-      api.get('/Owners?pageSize=100'),
+      api.get('/Flats?pageSize=5000'),
+      api.get('/Tenants?pageSize=5000'),
+      api.get('/Owners?pageSize=5000'),
     ])
 
     const toArray = (r) => Array.isArray(r) ? r : (r?.items ?? [])

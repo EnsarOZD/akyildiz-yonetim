@@ -249,7 +249,7 @@
               <td class="px-4 py-3 whitespace-nowrap text-[11px] font-mono font-black text-slate-600 tracking-tighter">{{ formatPeriod(item.periodYear, item.periodMonth) }}</td>
               <td class="px-4 py-3">
                 <p class="text-[13.5px] font-black text-slate-800 leading-tight uppercase tracking-tight truncate group-hover:text-brand-600 transition-colors">{{ item.tenantName }}</p>
-                <p class="text-[10px] font-bold text-[#8298ab] uppercase tracking-widest mt-1">{{ item.unitCode }}</p>
+                <p class="text-[10px] font-bold text-[#8298ab] uppercase tracking-widest mt-1">Ünite: {{ item.unitCode }}</p>
               </td>
               <td class="px-4 py-3">
                 <span :class="[
@@ -335,6 +335,7 @@ import utilityDebtsService from '@/infrastructure/services/utilityDebtsService'
 import PageHeader from '@/presentation/components/ui/PageHeader.vue'
 import paymentsService from '@/infrastructure/services/paymentsService'
 import dashboardService from '@/infrastructure/services/dashboardService'
+import { toLocalIsoDate, todayLocalIso } from '@/core/utils/dateUtils'
 
 // State
 const loading = ref(false)
@@ -402,7 +403,7 @@ const fetchData = async () => {
         endDate: debtEndDate,
         type: filters.utilityType || undefined,
         debtorType: filters.debtorType === 'All' ? undefined : filters.debtorType,
-        pageSize: 1000 // Rappor için limit artırıldı
+        pageSize: 5000 // Rapor için backend üst sınırı
       }),
       paymentsService.getPayments({
         tenantId: filters.tenantId || undefined,
@@ -412,7 +413,7 @@ const fetchData = async () => {
         utilityType: filters.utilityType || undefined,
         debtorType: filters.debtorType === 'All' ? undefined : filters.debtorType,
         excludeAdvanceUse: true,
-        pageSize: 1000 // Rapor için limit artırıldı
+        pageSize: 5000 // Rapor için backend üst sınırı
       })
     ])
     
@@ -511,7 +512,7 @@ const reportItems = computed(() => {
         periodYear: d.periodYear,
         periodMonth: d.periodMonth,
         tenantName: d.tenantName || (owner ? `${owner.firstName} ${owner.lastName} (M. Sahibi)` : 'Bilinmiyor'),
-        unitCode: d.flatInfo || d.unit || '-',
+        unitCode: d.flatInfo || d.unit || '-', // Backend FlatInfo = ünite kodu (Flat.Code)
         description: d.description || `${d.type === 'Electricity' ? 'Elektrik' : d.type === 'Water' ? 'Su' : 'Aidat'} faturası`,
         invoiceNumber: d.invoiceNumber ?? d.InvoiceNumber ?? null,
         amount: Number(d.amount ?? 0),
@@ -531,7 +532,8 @@ const reportItems = computed(() => {
         periodYear: p.periodYear,
         periodMonth: p.periodMonth,
         tenantName: p.tenantName || p.ownerName || 'Bilinmiyor',
-        unitCode: p.flatInfo || '-',
+        // Ödeme tek bir üniteye bağlı değildir (birden çok borca dağıtılabilir) → ünite gösterilmez
+        unitCode: '-',
         description: p.description || p.Type || 'Tahsilat kaydı',
         invoiceNumber: p.receiptNumber ?? p.ReceiptNumber ?? p.invoiceNumber ?? p.InvoiceNumber ?? null,
         amount: Number(p.amount ?? 0),
@@ -613,10 +615,9 @@ watch([filters, pageSize], () => {
 }, { deep: true })
 
 // Helpers
-// Yerel saat dilimine göre YYYY-MM-DD (toISOString UTC'ye kaydığı için kullanılmaz)
-const toLocalIso = (d) =>
-  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
-const todayIso = () => toLocalIso(new Date())
+// Yerel saat dilimine göre YYYY-MM-DD (toISOString UTC'ye kaydığı için kullanılmaz) — ortak yardımcılar
+const toLocalIso = toLocalIsoDate
+const todayIso = todayLocalIso
 
 const formatCurrency = (val) => 
   new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(Number(val ?? 0))
@@ -709,7 +710,7 @@ const exportToExcel = async () => {
     XLSX.utils.book_append_sheet(wb, compWs, "Birim Karsilastirma")
   }
 
-  XLSX.writeFile(wb, `Akyildiz_Finans_Raporu_${new Date().toISOString().split('T')[0]}.xlsx`)
+  XLSX.writeFile(wb, `Akyildiz_Finans_Raporu_${todayLocalIso()}.xlsx`)
 }
 
 const exportToPDF = async () => {
@@ -726,7 +727,7 @@ const exportToPDF = async () => {
   const pageH  = doc.internal.pageSize.getHeight()  // 210 mm
   const margin = 14
   const genDate = new Date().toLocaleString('tr-TR')
-  const dateStr = new Date().toISOString().split('T')[0]
+  const dateStr = todayLocalIso()
 
   // ── Renk Paleti ────────────────────────────────────────────────────────────
   const NAVY  = [15,  52,  96]

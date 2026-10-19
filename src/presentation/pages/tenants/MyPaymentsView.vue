@@ -81,8 +81,10 @@
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"/></svg>
           </div>
           <div>
-            <p class="text-[10px] font-black text-white/70 uppercase tracking-widest mb-1">Cari Bakiye</p>
+            <p class="text-[10px] font-black text-white/70 uppercase tracking-widest mb-1">{{ balanceLabel }}</p>
             <p class="text-xl font-black text-white">{{ formatCurrency(Math.abs(rawSummary.balance)) }}</p>
+            <p v-if="filters.startDate && !isPeriodOnlyBalance" class="text-[10px] font-bold text-white/70">Devreden: {{ formatCurrency(rawSummary.opening) }}</p>
+            <p v-else-if="isPeriodOnlyBalance" class="text-[10px] font-bold text-white/70">Seçili tarih aralığı için</p>
           </div>
         </div>
       </section>
@@ -167,11 +169,12 @@
                     <p class="text-sm font-black" :class="item.isPayment ? 'text-emerald-500' : 'text-rose-500'">
                       {{ item.isPayment ? '+' : '-' }} {{ formatCurrency(item.amount) }}
                     </p>
+                    <p v-if="item.isPartial" class="text-[10px] font-bold text-amber-600">Kalan: {{ formatCurrency(item.remainingAmount) }}</p>
                   </td>
                   <td class="px-6 py-4 text-center">
                     <span v-if="!item.isPayment" class="px-3 py-1 rounded-full text-[10px] font-black uppercase" 
-                      :class="item.isPaid ? 'bg-brand-500/10 text-brand-600' : 'bg-rose-500/10 text-rose-500'">
-                      {{ item.isPaid ? 'Ödendi' : 'Bekliyor' }}
+                      :class="item.isPaid ? 'bg-brand-500/10 text-brand-600' : (item.isPartial ? 'bg-amber-500/10 text-amber-600' : 'bg-rose-500/10 text-rose-500')">
+                      {{ debtStatusLabel(item) }}
                     </span>
                     <span v-else class="text-[#8298ab]">—</span>
                   </td>
@@ -208,6 +211,7 @@
                     <p class="text-sm font-black" :class="item.isPayment ? 'text-emerald-500' : 'text-rose-500'">
                        {{ item.isPayment ? '+' : '-' }}{{ formatCurrency(item.amount) }}
                     </p>
+                    <p v-if="item.isPartial" class="text-[10px] font-bold text-amber-600">Kalan: {{ formatCurrency(item.remainingAmount) }}</p>
                     <span class="text-[10px] font-bold text-[#8298ab]">{{ formatPeriod(item.periodYear, item.periodMonth) }}</span>
                  </div>
               </div>
@@ -217,8 +221,8 @@
                     {{ item.isPayment ? 'TAHSİLAT' : 'TAHAKKUK' }}
                  </span>
                  <div v-if="!item.isPayment" class="flex items-center gap-2">
-                    <span class="text-[10px] font-black uppercase" :class="item.isPaid ? 'text-brand-600' : 'text-rose-500'">
-                       {{ item.isPaid ? 'ÖDENDİ' : 'BEKLİYOR' }}
+                    <span class="text-[10px] font-black uppercase" :class="item.isPaid ? 'text-brand-600' : (item.isPartial ? 'text-amber-600' : 'text-rose-500')">
+                       {{ debtStatusLabel(item).toLocaleUpperCase('tr-TR') }}
                     </span>
                     <span v-if="!item.isPaid && isOverdue(item.lastPaymentDate)" class="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse"></span>
                  </div>
@@ -243,11 +247,13 @@
 
 <script setup>
 import { ref, reactive, computed, onMounted, watch } from 'vue'
+import { todayLocalIso, isPastDue } from '@/core/utils/dateUtils'
 import { useRoute } from 'vue-router'
 import { useAuthStore } from '@/application/stores/auth'
 import utilityDebtsService from '@/infrastructure/services/utilityDebtsService'
 import paymentsService from '@/infrastructure/services/paymentsService'
 import tenantsService from '@/infrastructure/services/tenantsService'
+import dashboardService from '@/infrastructure/services/dashboardService'
 
 const route = useRoute()
 const authStore = useAuthStore()
@@ -255,6 +261,10 @@ const loading = ref(false)
 const debtsData = ref([])
 const paymentsData = ref([])
 const tenantInfo = ref(null)
+// Devreden bakiye (başlangıç tarihinden önceki net). /reports/opening-balance yalnızca
+// FinanceRead rolleri (admin/manager/dataentry/observer) içindir; kiracı rolü çağıramaz.
+const openingBalance = ref(0)
+const openingBalanceLoaded = ref(false)
 
 // Rol bazlı kapsam: kiracı yalnız kendi verisini görür; admin/manager bir kiracı seçer.
 const role = computed(() => authStore.role?.toLowerCase() || '')
@@ -273,7 +283,7 @@ const filters = reactive({
 // Lifecycle
 const loadTenants = async () => {
   try {
-    const res = await tenantsService.getTenants({ pageSize: 1000, isActive: true })
+    const res = await tenantsService.getTenants({ pageSize: 5000, isActive: true })
     tenants.value = Array.isArray(res) ? res : (res?.items || [])
   } catch (e) {
     console.error('Kiracılar yüklenemedi:', e)
@@ -329,6 +339,20 @@ const fetchData = async () => {
       promises.push(tenantsService.getTenantById(tenantId).then(t => { tenantInfo.value = t }))
     }
 
+    // Başlangıç tarihi varsa devreden bakiyeyi çek (yalnızca yetkili roller; kiracı için endpoint yasak)
+    openingBalance.value = 0
+    openingBalanceLoaded.value = false
+    if (filters.startDate && !isTenantUser.value && tenantId) {
+      promises.push(
+        dashboardService.getOpeningBalance({ beforeDate: filters.startDate, tenantId })
+          .then(ob => {
+            openingBalance.value = Number(ob?.openingBalance ?? 0)
+            openingBalanceLoaded.value = true
+          })
+          .catch(e => console.error('Devreden bakiye alınamadı:', e))
+      )
+    }
+
     await Promise.allSettled(promises)
   } catch (e) {
     console.error('Veri çekme hatası:', e)
@@ -354,6 +378,10 @@ const reportItems = computed(() => {
       const isPaid = d.status?.toLowerCase() === 'paid'
       if (filters.status === 'unpaid' && isPaid) return
       if (filters.status === 'paid' && !isPaid) return
+      const amount = Number(d.amount ?? 0)
+      const remainingAmount = isPaid ? 0 : Number(d.remainingAmount ?? amount)
+      // Kısmen ödenmiş borç: kalan tutar > 0 ama tahakkuktan az
+      const isPartial = !isPaid && remainingAmount > 0 && remainingAmount < amount
 
       items.push({
         date: d.dueDate || d.createdAt || d.date,
@@ -361,9 +389,11 @@ const reportItems = computed(() => {
         periodMonth: d.periodMonth,
         description: d.description || `${debtTypeLabel(d.type) || 'Aidat'} faturası`,
         invoiceNumber: d.invoiceNumber ?? d.InvoiceNumber ?? null,
-        amount: Number(d.amount ?? 0),
+        amount,
+        remainingAmount,
         isPayment: false,
         isPaid,
+        isPartial,
         lastPaymentDate: d.dueDate || null,
         flatCode: d.flatCode || d.unit || null,
         debtTypeLabel: debtTypeLabel(d.type)
@@ -396,12 +426,24 @@ const reportItems = computed(() => {
   })
 })
 
-// Özet kartlar ve export için ham veriden hesapla (filtreden bağımsız)
+// Özet kartlar ve export için ham veriden hesapla (tür/durum filtresinden bağımsız)
+// Başlangıç tarihi filtresi varsa veriler yalnızca o aralığı kapsar: devreden bakiye alınabildiyse
+// eklenir (gerçek güncel bakiye), alınamadıysa (kiracı rolü) sonuç yalnızca "Dönem Farkı"dır.
 const rawSummary = computed(() => {
   const totalDebt = debtsData.value.reduce((s, d) => s + Number(d.amount ?? 0), 0)
   const totalPayment = paymentsData.value.reduce((s, p) => s + Number(p.amount ?? 0), 0)
-  return { totalDebt, totalPayment, balance: totalPayment - totalDebt }
+  const opening = openingBalanceLoaded.value ? openingBalance.value : 0
+  return { totalDebt, totalPayment, opening, balance: opening + totalPayment - totalDebt }
 })
+
+// Başlangıç tarihi var ama devreden bakiye bilinmiyorsa bakiye yalnızca dönem farkıdır
+const isPeriodOnlyBalance = computed(() => !!filters.startDate && !openingBalanceLoaded.value)
+const balanceLabel = computed(() => isPeriodOnlyBalance.value ? 'Dönem Farkı' : 'Güncel Bakiye')
+const balanceLabelAscii = computed(() => isPeriodOnlyBalance.value ? 'DONEM FARKI' : 'GUNCEL BAKIYE')
+
+// Borç satırı durum etiketi
+const debtStatusLabel = (item) => item.isPaid ? 'Ödendi' : (item.isPartial ? 'Kısmi' : 'Bekliyor')
+const debtStatusAscii = (item) => item.isPaid ? 'Odendi' : (item.isPartial ? 'Kismi' : 'Bekliyor')
 
 // Pagination
 const currentPage = ref(1)
@@ -436,10 +478,8 @@ const formatDate = (date) => {
   return new Date(date).toLocaleDateString('tr-TR')
 }
 
-const isOverdue = (date) => {
-  if (!date) return false
-  return new Date(date) < new Date()
-}
+// Vade günü içinde gecikmiş sayılmaz; yerel takvim günü karşılaştırılır
+const isOverdue = (date) => isPastDue(date)
 
 const formatPeriod = (year, month) => {
   if (!year || !month) return '-'
@@ -449,7 +489,7 @@ const formatPeriod = (year, month) => {
 // EXPORTS
 const exportToExcel = async () => {
   const XLSX = await import('xlsx')
-  const dateStr = new Date().toISOString().split('T')[0]
+  const dateStr = todayLocalIso()
   const companyName = tenantInfo.value?.companyName || authStore.fullName
 
   const wb = XLSX.utils.book_new()
@@ -470,7 +510,7 @@ const exportToExcel = async () => {
       i.invoiceNumber || '',
       !i.isPayment ? i.amount : '',
       i.isPayment ? i.amount : '',
-      i.isPayment ? 'Odendi' : (i.isPaid ? 'Odendi' : 'Bekliyor'),
+      i.isPayment ? 'Odendi' : (i.isPartial ? `Kismi (Kalan ${i.remainingAmount})` : debtStatusAscii(i)),
       i.lastPaymentDate ? formatDate(i.lastPaymentDate) : ''
     ])
   })
@@ -478,7 +518,10 @@ const exportToExcel = async () => {
   wsData.push([])
   wsData.push(['', '', '', 'TOPLAM BORC TAHAKKUKU', '', rawSummary.value.totalDebt, '', '', ''])
   wsData.push(['', '', '', 'TOPLAM ODEME', '', '', rawSummary.value.totalPayment, '', ''])
-  wsData.push(['', '', '', 'NET BAKIYE', '', '', rawSummary.value.balance, '', ''])
+  if (filters.startDate && !isPeriodOnlyBalance.value) {
+    wsData.push(['', '', '', 'DEVREDEN BAKIYE', '', '', rawSummary.value.opening, '', ''])
+  }
+  wsData.push(['', '', '', balanceLabelAscii.value, '', '', rawSummary.value.balance, '', ''])
 
   const ws = XLSX.utils.aoa_to_sheet(wsData)
   ws['!cols'] = [{ wch: 14 }, { wch: 10 }, { wch: 18 }, { wch: 40 }, { wch: 16 }, { wch: 16 }, { wch: 16 }, { wch: 12 }, { wch: 14 }]
@@ -500,7 +543,7 @@ const exportToPDF = async () => {
   const pageH  = doc.internal.pageSize.getHeight()
   const margin = 14
   const genDate = new Date().toLocaleString('tr-TR')
-  const dateStr = new Date().toISOString().split('T')[0]
+  const dateStr = todayLocalIso()
   const companyName = tenantInfo.value?.companyName || authStore.fullName
 
   const NAVY  = [15,  52,  96]
@@ -576,7 +619,7 @@ const exportToPDF = async () => {
   drawCard(margin,                      'TOPLAM BORC TAHAKKUKU',  rawSummary.value.totalDebt,    [254,242,242], RED,   [160,20,20])
   drawCard(margin + boxW + gap,         'TOPLAM ODEME',           rawSummary.value.totalPayment, [240,253,244], GREEN, [16,90,40])
   const isPos = rawSummary.value.balance >= 0
-  drawCard(margin + (boxW + gap) * 2,   'GUNCEL BAKIYE',
+  drawCard(margin + (boxW + gap) * 2,   balanceLabelAscii.value,
     rawSummary.value.balance,
     isPos ? [239,246,255] : [254,242,242],
     isPos ? [37,99,235]   : RED,
@@ -594,9 +637,9 @@ const exportToPDF = async () => {
     period:   formatPeriod(i.periodYear, i.periodMonth),
     desc:     (i.description || '-').length > 42 ? (i.description || '').substring(0, 42) + '...' : (i.description || '-'),
     invoice:  i.invoiceNumber || '-',
-    debt:     !i.isPayment ? formatCurrency(i.amount) : '-',
+    debt:     !i.isPayment ? (i.isPartial ? `${formatCurrency(i.amount)}\nKalan: ${formatCurrency(i.remainingAmount)}` : formatCurrency(i.amount)) : '-',
     payment:  i.isPayment  ? formatCurrency(i.amount) : '-',
-    status:   i.isPayment  ? 'Odeme' : (i.isPaid ? 'Odendi' : 'Bekliyor'),
+    status:   i.isPayment  ? 'Odeme' : debtStatusAscii(i),
     lastPaid: i.lastPaymentDate ? formatDate(i.lastPaymentDate) : '-'
   }))
 
@@ -639,7 +682,7 @@ const exportToPDF = async () => {
       if (data.cell.raw === 'Odeme' || data.cell.raw === 'Odendi') {
         data.cell.styles.textColor = [16, 100, 45]
         data.cell.styles.fillColor = [240, 253, 244]
-      } else if (data.cell.raw === 'Bekliyor') {
+      } else if (data.cell.raw === 'Bekliyor' || data.cell.raw === 'Kismi') {
         data.cell.styles.textColor = [146, 60, 14]
         data.cell.styles.fillColor = [255, 251, 235]
       }
@@ -675,7 +718,7 @@ const exportToPDF = async () => {
     doc.line(tbX + 5, finalY + 25, tbX + tbW - 5, finalY + 25)
     doc.setTextColor(...GOLD)
     doc.setFontSize(8.5)
-    doc.text('Net Bakiye:', tbX + 5, finalY + 30)
+    doc.text(isPeriodOnlyBalance.value ? 'Donem Farki:' : 'Guncel Bakiye:', tbX + 5, finalY + 30)
     doc.text(formatCurrency(rawSummary.value.balance), tbX + tbW - 5, finalY + 30, { align: 'right' })
   }
 

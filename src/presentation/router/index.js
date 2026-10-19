@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import authService from '@/infrastructure/services/authService'
 import { useAuthStore } from '@/application/stores/auth'
+import { isBackendActive } from '@/core/utils/backendMode'
 
 // Lazy loaded components for better performance
 const Dashboard = () => import('../pages/dashboard/Dashboard.vue')
@@ -94,6 +95,15 @@ const AUTH_TIMEOUT = 15 * 60 * 1000 // 15 dakika
 
 let loginRedirectCount = 0;
 
+// Rolün giriş sonrası varsayılan sayfası
+const getDefaultRouteForRole = (role) => {
+  const r = String(role || '').toLowerCase();
+  if (r === 'admin') return '/admin';
+  if (r === 'tenant') return '/tenant-dashboard';
+  if (r === 'owner') return '/owner-dashboard';
+  return '/dashboard';
+};
+
 router.beforeEach(async (to, from, next) => {
   const requiresAuth = to.meta.requiresAuth;
   const isPublic = to.meta.public;
@@ -109,17 +119,27 @@ router.beforeEach(async (to, from, next) => {
     return next('/login');
   }
 
-  if (to.path === '/login' && (from.path === '/login' || !requiresAuth)) {
+  // Giriş yapmış kullanıcı /login'e giderse rolünün varsayılan sayfasına yönlendir
+  // (/login public olduğu için aşağıdaki genel kontrol bu duruma hiç ulaşmıyordu)
+  if (to.path === '/login') {
+    if (isBackendActive() && localStorage.getItem('authToken') && to.query.reason !== 'session_expired') {
+      const authStore = useAuthStore();
+      if (!(authStore.isInitialized && authStore.role)) {
+        await authStore.fetchUserProfile();
+      }
+      if (authStore.role && localStorage.getItem('authToken')) {
+        return next(getDefaultRouteForRole(authStore.role));
+      }
+    }
     return next();
   }
   if (isPublic) {
     return next();
   }
 
-  const isBackendActive = import.meta.env.VITE_API_BASE_URL &&
-    import.meta.env.VITE_API_BASE_URL !== 'http://localhost:5000/api';
+  const backendActive = isBackendActive();
 
-  if (isBackendActive) {
+  if (backendActive) {
     const authStore = useAuthStore();
 
     // Fast path: store already initialized — use cached state, no API call
@@ -159,11 +179,7 @@ router.beforeEach(async (to, from, next) => {
 
     // Giriş yapmış kullanıcı ana sayfa veya login'e gitmeye çalışırsa
     if (user && (to.path === '/' || to.path === '/login')) {
-      let target = '/dashboard';
-      if (userRole === 'admin') target = '/admin';
-      else if (userRole === 'tenant') target = '/tenant-dashboard';
-      else if (userRole === 'owner') target = '/owner-dashboard';
-      else if (userRole === 'observer') target = '/dashboard';
+      const target = getDefaultRouteForRole(userRole);
 
       if (to.path !== target) return next(target);
       return next();

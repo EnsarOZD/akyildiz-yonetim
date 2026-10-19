@@ -219,6 +219,7 @@
 
 <script setup>
 import { ref, reactive, computed, onMounted, watch } from 'vue'
+import { toLocalIsoDate, todayLocalIso, datePart } from '@/core/utils/dateUtils'
 import expensesService from '@/infrastructure/services/expensesService'
 import PageHeader from '@/presentation/components/ui/PageHeader.vue'
 import ExpenseModal from './ExpenseModal.vue'
@@ -280,18 +281,18 @@ const getDateRange = (filter) => {
   switch (filter) {
     case 'this_month':
       return {
-        startDate: new Date(year, month, 1).toISOString().split('T')[0],
-        endDate: new Date(year, month + 1, 0).toISOString().split('T')[0]
+        startDate: toLocalIsoDate(new Date(year, month, 1)),
+        endDate: toLocalIsoDate(new Date(year, month + 1, 0))
       }
     case 'last_month':
       return {
-        startDate: new Date(year, month - 1, 1).toISOString().split('T')[0],
-        endDate: new Date(year, month, 0).toISOString().split('T')[0]
+        startDate: toLocalIsoDate(new Date(year, month - 1, 1)),
+        endDate: toLocalIsoDate(new Date(year, month, 0))
       }
     case 'this_year':
       return {
-        startDate: new Date(year, 0, 1).toISOString().split('T')[0],
-        endDate: new Date(year, 11, 31).toISOString().split('T')[0]
+        startDate: toLocalIsoDate(new Date(year, 0, 1)),
+        endDate: toLocalIsoDate(new Date(year, 11, 31))
       }
     default:
       return { startDate: null, endDate: null }
@@ -399,7 +400,7 @@ watch(dateFilter, () => {
 })
 
 /** Yeni kayıt formu */
-const today = new Date().toISOString().substr(0, 10)
+const today = todayLocalIso()
 const newExpense = ref({
   expenseDate: today,
   title: '',
@@ -444,7 +445,7 @@ const fetchExpenses = async () => {
 const startEdit = (expense) => {
   newExpense.value = {
     ...expense,
-    expenseDate: new Date(expense.expenseDate).toISOString().substr(0, 10)
+    expenseDate: datePart(expense.expenseDate)
   }
   selectedExpenseId.value = expense.id
   editMode.value = true

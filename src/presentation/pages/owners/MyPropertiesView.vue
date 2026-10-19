@@ -341,6 +341,7 @@ import PaginationBar from '@/presentation/components/common/PaginationBar.vue'
 import dashboardService from '@/infrastructure/services/dashboardService'
 import { useAuthStore } from '@/application/stores/auth'
 import { formatCurrency } from '@/core/utils/currencyUtils'
+import { isPastDue } from '@/core/utils/dateUtils'
 
 const authStore = useAuthStore()
 const loading = ref(true)
@@ -386,11 +387,11 @@ const tenantDebts = computed(() =>
 
 function applyDebtFilters(list, search, typeFilter, statusFilter) {
   const q = search.trim().toLowerCase()
-  const now = new Date()
+  // Gecikme yerel takvim gününe göre: vade günü içinde gecikmiş sayılmaz
   return list.filter(d => {
     if (typeFilter && normalizeType(d.type) !== typeFilter) return false
-    if (statusFilter === 'overdue' && !(d.dueDate && new Date(d.dueDate) < now)) return false
-    if (statusFilter === 'upcoming' && (d.dueDate && new Date(d.dueDate) < now)) return false
+    if (statusFilter === 'overdue' && !(d.dueDate && isPastDue(d.dueDate))) return false
+    if (statusFilter === 'upcoming' && (d.dueDate && isPastDue(d.dueDate))) return false
     if (!q) return true
     const typeLabel = debtTypeLabel(d.type).toLowerCase()
     const unit = (d.flatCode || '').toLowerCase()
@@ -453,10 +454,9 @@ const ownerTotalDebt = computed(() =>
 const tenantTotalDebt = computed(() =>
   tenantDebts.value.reduce((sum, d) => sum + Number(d.remainingAmount || 0), 0)
 )
-const ownerOverdueItems = computed(() => {
-  const now = new Date()
-  return ownerDebts.value.filter(d => !d.dueDate || new Date(d.dueDate) < now)
-})
+const ownerOverdueItems = computed(() =>
+  ownerDebts.value.filter(d => !d.dueDate || isPastDue(d.dueDate))
+)
 const ownerOverdueDebt = computed(() =>
   ownerOverdueItems.value.reduce((sum, d) => sum + Number(d.remainingAmount || 0), 0)
 )
@@ -467,7 +467,7 @@ const lastPaymentAmount = computed(() => lastPayment.value?.amount ?? 0)
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-const isOverdue = (debt) => debt.dueDate && new Date(debt.dueDate) < new Date()
+const isOverdue = (debt) => !!debt.dueDate && isPastDue(debt.dueDate)
 
 const normalizeType = (type) => {
   const map = { 0: 'Aidat', 1: 'Electricity', 2: 'Water' }

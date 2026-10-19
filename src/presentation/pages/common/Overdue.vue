@@ -178,6 +178,7 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
+import { todayLocalIso, isPastDue, daysPastDue } from '@/core/utils/dateUtils'
 import apiService from '@/infrastructure/services/api'
 import { useAuthStore } from '@/application/stores/auth'
 import utilityDebtsService from '@/infrastructure/services/utilityDebtsService'
@@ -191,7 +192,6 @@ const tenants = ref([])
 const loading = ref(false)
 const authStore = useAuthStore()
 const userRole = computed(() => authStore.role)
-const userId = computed(() => authStore.userId)
 
 // Filtre değişkenleri
 const filterTenant = ref('')
@@ -209,13 +209,10 @@ const formatCurrency = (value) => {
   return Number(value).toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' })
 }
 
+// Takvim günü bazında gecikme (vade günü 0 gün; saat/UTC kaymasından etkilenmez)
 const getDaysOverdue = (dueDate) => {
   if (!dueDate) return 0
-  const now = new Date()
-  const due = new Date(dueDate)
-  const diffTime = now - due
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-  return diffDays > 0 ? diffDays : 0
+  return Math.max(0, daysPastDue(dueDate))
 }
 
 // Filtreleme mantığı
@@ -230,8 +227,8 @@ const filteredOverdueItems = computed(() => {
     // Dönem filtresi
     const matchesPeriod = !filterPeriod.value || item.period === filterPeriod.value
     
-    // Tutar aralığı filtresi
-    const amount = Number(item.amount || 0)
+    // Tutar aralığı filtresi (kalan/ödenmemiş tutar üzerinden — tabloda gösterilen tutar)
+    const amount = Number(item.unpaidAmount || 0)
     let matchesAmount = true
     if (filterAmountRange.value) {
       switch (filterAmountRange.value) {
@@ -282,7 +279,7 @@ const TYPE_LABELS = { Rent: 'Kira', Dues: 'Aidat', Utility: 'Fatura', Other: 'Di
 
 const fetchTenants = async () => {
   try {
-    const response = await apiService.get('/tenants', { pageSize: 100 })
+    const response = await apiService.get('/tenants', { pageSize: 5000 })
     const data = Array.isArray(response) ? response : (response?.items ?? [])
     tenants.value = data
   } catch (error) {
@@ -296,11 +293,10 @@ const fetchOverduePayments = async () => {
   try {
     const response = await utilityDebtsService.getUtilityDebts({ excludePaid: true })
     const items = Array.isArray(response) ? response : (response?.items ?? [])
-    const now = new Date()
-    
     const overdueItems = items.filter(d => {
       // dueDate yoksa gecikmiş sayıyoruz — tarihi girilmemiş eski borçlar
-      const isOverdue = !d.dueDate || new Date(d.dueDate) < now
+      // Vade günü içinde gecikmiş sayılmaz; yalnızca vade tarihi bugünden önceyse (yerel takvim günü)
+      const isOverdue = !d.dueDate || isPastDue(d.dueDate)
       const hasUnpaidAmount = d.status !== 'Paid' && Number(d.remainingAmount || 0) > 0
       return isOverdue && hasUnpaidAmount
     })
@@ -337,30 +333,6 @@ const fetchOverduePayments = async () => {
   }
 }
 
-const markAsPaid = async (paymentId) => {
-  try {
-    const payment = overduePayments.value.find(p => p.id === paymentId)
-    await apiService.put(`/payments/${paymentId}`, {
-      id: paymentId,
-      amount: payment?.amount,
-      type: payment?.type,
-      status: 'Completed',
-      paymentDate: payment?.paymentDate,
-      description: payment?.description,
-      receiptNumber: payment?.receiptNumber,
-      tenantId: payment?.tenantId,
-      ownerId: payment?.ownerId,
-    })
-    await fetchOverduePayments()
-  } catch (error) {
-    console.error('Ödeme durumu güncellenirken hata:', error)
-  }
-}
-
-const totalOverdueAmount = computed(() => {
-  return overduePayments.value.reduce((sum, payment) => sum + Number(payment.amount || 0), 0)
-})
-
 const isManagerOrViewer = computed(() =>
   ['admin', 'manager', 'observer', 'dataentry'].includes(userRole.value)
 )
@@ -393,7 +365,7 @@ const exportToExcel = async () => {
     { wch: 18 }, { wch: 16 }, { wch: 14 }, { wch: 18 }, { wch: 18 }
   ]
 
-  XLSX.writeFile(wb, `Gecikmiş_Ödemeler_${new Date().toISOString().split('T')[0]}.xlsx`)
+  XLSX.writeFile(wb, `Gecikmiş_Ödemeler_${todayLocalIso()}.xlsx`)
 }
 
 // ── EXPORT: PDF ─────────────────────────────────────────────────────────────
@@ -411,7 +383,7 @@ const exportToPDF = async () => {
   const pageH  = doc.internal.pageSize.getHeight()
   const margin = 14
   const genDate = new Date().toLocaleString('tr-TR')
-  const dateStr = new Date().toISOString().split('T')[0]
+  const dateStr = todayLocalIso()
 
   const NAVY  = [15, 52, 96]
   const GOLD  = [180, 145, 40]

@@ -247,6 +247,7 @@ import { tr } from 'date-fns/locale'
 import { useClickOutside } from '@/application/composables/useClickOutside'
 import { useNotify } from '@/application/composables/useNotify'
 import { useBackendMode } from '@/application/composables/useBackendMode'
+import { isBackendActive } from '@/core/utils/backendMode'
 
 const authStore = useAuthStore()
 const notificationsStore = useNotificationsStore()
@@ -357,15 +358,13 @@ const setTabsBasedOnRole = (role) => {
 }
 
 onMounted(() => {
-  const isBackendActive = import.meta.env.VITE_API_BASE_URL &&
-    import.meta.env.VITE_API_BASE_URL !== 'http://localhost:5000/api'
+  const backendActive = isBackendActive()
 
-  if (isBackendActive) {
+  if (backendActive) {
     loadUserFromBackend()
     if (authStore.user) notificationsStore.refresh()
   } else {
-    const isDemo = !import.meta.env.VITE_API_BASE_URL ||
-      import.meta.env.VITE_API_BASE_URL === 'http://localhost:5000/api'
+    const isDemo = isDemoMode.value
     if (isDemo) {
       setTimeout(() => {
         userInfo.value = { firstName: 'Demo', lastName: 'Kullanıcı', role: 'admin' }
@@ -376,8 +375,7 @@ onMounted(() => {
 })
 
 watch(() => authStore.user, (newUser) => {
-  if (newUser && import.meta.env.VITE_API_BASE_URL &&
-      import.meta.env.VITE_API_BASE_URL !== 'http://localhost:5000/api') {
+  if (newUser && isBackendActive()) {
     notificationsStore.refresh()
   }
 })
@@ -413,10 +411,9 @@ const formatDate = (date) => {
 
 const logout = async () => {
   showUserDropdown.value = false
-  const isBackendActive = import.meta.env.VITE_API_BASE_URL &&
-    import.meta.env.VITE_API_BASE_URL !== 'http://localhost:5000/api'
+  const backendActive = isBackendActive()
   try {
-    if (isBackendActive) await authService.logout()
+    if (backendActive) await authService.logout()
   } catch { /* ignore */ }
   userInfo.value = null
   tabs.value = []

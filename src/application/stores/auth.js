@@ -16,10 +16,9 @@ export const useAuthStore = defineStore('auth', () => {
     // Aynı anda birden fazla çağrı varsa tek isteğe indir
     if (_fetchPromise) return _fetchPromise
 
-    const isBackendActive = import.meta.env.VITE_API_BASE_URL &&
-      import.meta.env.VITE_API_BASE_URL !== 'http://localhost:5000/api'
+    const backendActive = isBackendActive()
 
-    if (isBackendActive) {
+    if (backendActive) {
       _fetchPromise = (async () => {
         try {
           const backendUser = await authService.checkAuthStatus()
@@ -45,8 +44,8 @@ export const useAuthStore = defineStore('auth', () => {
     }
 
     // Demo modu
-    const isDemoMode = !import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_BASE_URL === 'http://localhost:5000/api'
-    if (isDemoMode) {
+    const demoMode = isDemoMode()
+    if (demoMode) {
       user.value = { uid: 'demo-user-id', email: 'demo@akyildiz.com' }
       role.value = 'admin'
       companyId.value = 'demo-company'
@@ -64,10 +63,9 @@ export const useAuthStore = defineStore('auth', () => {
   // 👇 Bu fonksiyon App.vue'de çağrılmalı
   function initAuthListener() {
     // Backend API kontrolü
-    const isBackendActive = import.meta.env.VITE_API_BASE_URL &&
-      import.meta.env.VITE_API_BASE_URL !== 'http://localhost:5000/api'
+    const backendActive = isBackendActive()
 
-    if (isBackendActive) {
+    if (backendActive) {
       // Listener'ı yalnızca bir kez kaydet
       if (!_listenerRegistered) {
         _listenerRegistered = true
@@ -89,9 +87,9 @@ export const useAuthStore = defineStore('auth', () => {
     }
 
     // Demo modu kontrolü
-    const isDemoMode = !import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_BASE_URL === 'http://localhost:5000/api'
+    const demoMode = isDemoMode()
 
-    if (isDemoMode) {
+    if (demoMode) {
       fetchUserProfile()
       return
     }

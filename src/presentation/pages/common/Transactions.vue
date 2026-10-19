@@ -156,6 +156,7 @@ import { usePaymentsStore } from '@/application/stores/payments'
 import { useUtilityDebtsStore } from '@/application/stores/utilityDebts'
 import { useExpensesStore } from '@/application/stores/expenses'
 import { useTenantsStore } from '@/application/stores/tenants'
+import { datePart } from '@/core/utils/dateUtils'
 
 const paymentsStore = usePaymentsStore()
 const utilityDebtsStore = useUtilityDebtsStore()
@@ -195,15 +196,17 @@ const fetchTenants = async () => {
 const fetchData = async () => {
   try {
     const [paymentsResponse, expensesResponse, debtsResponse] = await Promise.all([
-      paymentsStore.fetchIfNeeded({ pageSize: 50 }),
-      expensesStore.fetchIfNeeded({ pageSize: 50 }),
-      utilityDebtsStore.fetchIfNeeded({ pageSize: 50 })
+      // Toplamlar istemci tarafında hesaplandığı için tüm kayıtlar (backend üst sınırı 5000) istenir
+      paymentsStore.fetchIfNeeded({ pageSize: 5000 }),
+      expensesStore.fetchIfNeeded({ pageSize: 5000 }),
+      utilityDebtsStore.fetchIfNeeded({ pageSize: 5000 })
     ])
 
     payments.value = (paymentsResponse || []).map(payment => {
       // Backend artık isim ve daire bilgisini (TenantName/OwnerName/FlatInfo) kendisi getiriyor
       return {
         ...payment,
+        date: payment.date || payment.paymentDate || payment.createdAt, // DTO'da 'date' yok, paymentDate kullanılır
         type: 'income',
         payer: payment.tenantName || payment.ownerName || 'Bilinmiyor',
         unit: payment.flatInfo || '-'
@@ -212,6 +215,7 @@ const fetchData = async () => {
 
     expenses.value = (expensesResponse || []).map(expense => ({
       ...expense,
+      date: expense.date || expense.expenseDate || expense.createdAt, // DTO'da 'date' yok, expenseDate kullanılır
       type: 'expense'
     }))
 
@@ -257,8 +261,10 @@ const totalTransactionsCount = computed(() => {
 const filteredTransactions = computed(() => {
   return allTransactions.value.filter(item => {
     const matchesType = !filterType.value || item.type === filterType.value
-    const matchesStart = !filterStart.value || item.date >= filterStart.value
-    const matchesEnd = !filterEnd.value || item.date <= filterEnd.value
+    // Tarihler gün bazında karşılaştırılır ('2026-10-19T10:00' > '2026-10-19' olduğu için bitiş günü dışarıda kalıyordu)
+    const day = datePart(item.date)
+    const matchesStart = !filterStart.value || day >= filterStart.value
+    const matchesEnd = !filterEnd.value || day <= filterEnd.value
     const matchesSearch = !searchTerm.value || item.description?.toLowerCase().includes(searchTerm.value.toLowerCase())
     return matchesType && matchesStart && matchesEnd && matchesSearch
   })

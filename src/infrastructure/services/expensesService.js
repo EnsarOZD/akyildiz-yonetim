@@ -1,4 +1,6 @@
 import apiService from './api.js'
+import { invalidateFinanceCaches } from '@/application/stores/cacheInvalidation'
+import { unwrapPaged, MAX_PAGE_SIZE } from './pagedResult.js'
 
 class ExpensesService {
   async getExpenses(filters = {}) {
@@ -12,12 +14,13 @@ class ExpensesService {
 
     const requestParams = {
       ...params,
-      pageSize: Math.min(filters.pageSize || 50, 100),
+      // Liste/grafik istemci tarafında filtrelendiği için varsayılan olarak tümü (backend üst sınırı) istenir
+      pageSize: Math.min(filters.pageSize || MAX_PAGE_SIZE, MAX_PAGE_SIZE),
       pageNumber: filters.pageNumber || 1
     }
 
     const response = await apiService.get('/expenses', requestParams)
-    return Array.isArray(response) ? response : (response?.items ?? [])
+    return unwrapPaged(response, 'gider', requestParams.pageSize >= MAX_PAGE_SIZE && requestParams.pageNumber === 1)
   }
 
   // ID'ye göre gider getir
@@ -27,17 +30,23 @@ class ExpensesService {
 
   // Yeni gider oluştur
   async createExpense(expenseData) {
-    return apiService.post('/expenses', expenseData)
+    const result = await apiService.post('/expenses', expenseData)
+    this.invalidateCache()
+    return result
   }
 
   // Gider güncelle
   async updateExpense(id, expenseData) {
-    return apiService.put(`/expenses/${id}`, expenseData)
+    const result = await apiService.put(`/expenses/${id}`, expenseData)
+    this.invalidateCache()
+    return result
   }
 
   // Gider sil
   async deleteExpense(id) {
-    return apiService.delete(`/expenses/${id}`)
+    const result = await apiService.delete(`/expenses/${id}`)
+    this.invalidateCache()
+    return result
   }
 
   // İstatistikler
@@ -46,6 +55,11 @@ class ExpensesService {
     if (filters.startDate) params.startDate = filters.startDate
     if (filters.endDate) params.endDate = filters.endDate
     return apiService.get('/expenses/stats', params)
+  }
+
+  // Store önbelleklerini (tüm filtre anahtarları) temizle — mutasyonlardan sonra çağrılır
+  invalidateCache() {
+    invalidateFinanceCaches()
   }
 }
 

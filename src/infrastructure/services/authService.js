@@ -10,7 +10,6 @@ class AuthService {
   async login(email, password) {
     try {
       const response = await apiService.post('/Auth/login', { email, password })
-      console.log('Backend login response:', response)
 
       if (response) {
         // Handle various token property names (token, access_token, jwt, Token)
@@ -219,7 +218,6 @@ class AuthService {
     try {
       // /auth/me endpoint'ini test et
       const meResponse = await apiService.get('/auth/me')
-      console.log('✅ /auth/me endpoint response:', meResponse)
       return meResponse
     } catch (error) {
       console.log('❌ /auth/me endpoint not available:', error.message)
@@ -232,7 +230,6 @@ class AuthService {
     const token = localStorage.getItem('authToken')
     if (token) {
       const decoded = this.decodeJWT(token)
-      console.log('🔍 JWT Token decoded:', decoded)
       return decoded
     }
     return null

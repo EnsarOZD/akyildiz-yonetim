@@ -79,6 +79,7 @@
 
 <script setup>
 import { ref } from 'vue'
+import { todayLocalIso } from '@/core/utils/dateUtils'
 import BaseModal from '@/presentation/components/common/BaseModal.vue'
 import utilityDebtsService from '@/infrastructure/services/utilityDebtsService'
 import { useErrorHandler } from '@/application/composables/useErrorHandler'
@@ -89,7 +90,7 @@ const { showSuccess } = useErrorHandler()
 const { notifyError } = useNotify()
 
 const loading = ref(false)
-const period = ref(new Date().toISOString().substring(0, 7)) // YYYY-MM
+const period = ref(todayLocalIso().substring(0, 7)) // YYYY-MM
 const utilityType = ref('Electricity')
 
 const handleClose = () => {

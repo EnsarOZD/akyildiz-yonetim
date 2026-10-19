@@ -162,6 +162,7 @@ import utilityDebtsService from '@/infrastructure/services/utilityDebtsService'
 import paymentsService from '@/infrastructure/services/paymentsService'
 import tenantsService from '@/infrastructure/services/tenantsService'
 import { formatCurrency } from '@/core/utils/currencyUtils'
+import { isPastDue } from '@/core/utils/dateUtils'
 
 const authStore = useAuthStore()
 const loading = ref(true)
@@ -175,10 +176,10 @@ const totalDebt = computed(() =>
     .reduce((sum, d) => sum + Number(d.remainingAmount ?? d.amount ?? 0), 0)
 )
 
-const overdueItems = computed(() => {
-  const now = new Date()
-  return debts.value.filter(d => d.dueDate && new Date(d.dueDate) < now && d.status?.toLowerCase() !== 'paid')
-})
+// Vade günü içinde gecikmiş sayılmaz; yerel takvim günü karşılaştırılır
+const overdueItems = computed(() =>
+  debts.value.filter(d => d.dueDate && isPastDue(d.dueDate) && d.status?.toLowerCase() !== 'paid')
+)
 
 const overdueDebt = computed(() =>
   overdueItems.value.reduce((sum, d) => sum + Number(d.remainingAmount ?? d.amount ?? 0), 0)
@@ -192,15 +193,12 @@ const pendingDebts = computed(() =>
 )
 
 const lastPayment = computed(() => 
-  payments.value.length > 0 ? payments.value.sort((a, b) => new Date(b.paymentDate || b.date) - new Date(a.paymentDate || a.date))[0] : null
+  payments.value.length > 0 ? [...payments.value].sort((a, b) => new Date(b.paymentDate || b.date) - new Date(a.paymentDate || a.date))[0] : null
 )
 
 const lastPaymentAmount = computed(() => lastPayment.value?.amount || 0)
 
-const isOverdue = (dateStr) => {
-  if (!dateStr) return false
-  return new Date(dateStr) < new Date()
-}
+const isOverdue = (dateStr) => isPastDue(dateStr)
 
 const loadData = async () => {
   loading.value = true

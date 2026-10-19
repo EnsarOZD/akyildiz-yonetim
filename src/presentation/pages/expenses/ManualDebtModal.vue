@@ -211,6 +211,7 @@
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
+import { toLocalIsoDate, todayLocalIso, datePart } from '@/core/utils/dateUtils'
 import BaseModal from '@/presentation/components/common/BaseModal.vue'
 import api from '@/infrastructure/services/api'
 import utilityDebtsService from '@/infrastructure/services/utilityDebtsService'
@@ -236,7 +237,7 @@ const form = ref({
   periodYear: new Date().getFullYear(),
   periodMonth: new Date().getMonth() + 1,
   amount: '',
-  dueDate: new Date(new Date().getFullYear(), new Date().getMonth() + 1, 15).toISOString().split('T')[0],
+  dueDate: toLocalIsoDate(new Date(new Date().getFullYear(), new Date().getMonth() + 1, 15)),
   description: '',
   invoiceNumber: '',
   // 'tenant' | 'owner' — borcun kime yazılacağı. Ünitede kiracı yoksa her zaman 'owner'.
@@ -244,8 +245,8 @@ const form = ref({
 })
 
 // Toplu Form State
-const bulkPeriod = ref(new Date().toISOString().substring(0, 7))
-const bulkDueDate = ref(new Date(new Date().getFullYear(), new Date().getMonth() + 1, 15).toISOString().split('T')[0])
+const bulkPeriod = ref(todayLocalIso().substring(0, 7))
+const bulkDueDate = ref(toLocalIsoDate(new Date(new Date().getFullYear(), new Date().getMonth() + 1, 15)))
 const bulkEntries = ref([])
 
 const typeLabel = computed(() => {
@@ -300,7 +301,7 @@ const fetchFlats = async () => {
 const updateBulkDates = () => {
   const [y, m] = bulkPeriod.value.split('-').map(Number)
   const date = new Date(y, m, 15) // Takip eden ayın 15'i default
-  bulkDueDate.value = date.toISOString().split('T')[0]
+  bulkDueDate.value = toLocalIsoDate(date)
 }
 
 const handleClose = () => {
@@ -368,7 +369,7 @@ onMounted(() => {
     form.value = {
       ...form.value,
       ...props.initialData,
-      dueDate: props.initialData.dueDate ? new Date(props.initialData.dueDate).toISOString().split('T')[0] : form.value.dueDate,
+      dueDate: props.initialData.dueDate ? datePart(props.initialData.dueDate) : form.value.dueDate,
       periodYear: props.initialData.periodYear || new Date().getFullYear(),
       periodMonth: props.initialData.periodMonth || new Date().getMonth() + 1,
       // Kayıtlı borçta TenantId doluysa kiracının, boşsa mal sahibinin borcudur

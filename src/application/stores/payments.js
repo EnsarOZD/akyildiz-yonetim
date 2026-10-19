@@ -17,6 +17,8 @@ export const usePaymentsStore = defineStore('payments', {
 
   getters: {
     payments: (state) => state.itemsByKey[state.currentCacheKey] || [],
+    // Aktif (son istenen) filtre anahtarı yükleniyor mu
+    loading: (state) => state.loadingByKey[state.currentCacheKey] === true,
     advanceAccounts: (state) => state.advanceAccountsByKey[state.currentAdvanceKey] || []
   },
 
@@ -35,6 +37,9 @@ export const usePaymentsStore = defineStore('payments', {
 
     async fetchIfNeeded(filters = {}, force = false) {
       const cacheKey = this.getCacheKey(filters)
+      // Son istenen filtre aktif anahtar olur (önbellekten dönülse bile);
+      // aksi halde 'payments' getter'ı başka bir sayfanın (ör. Transactions) listesini gösterebilir
+      this.currentCacheKey = cacheKey
 
       if (!force && this.itemsByKey[cacheKey] && this.lastFetchedByKey[cacheKey] && (Date.now() - this.lastFetchedByKey[cacheKey] < TTL_MS)) {
         return this.itemsByKey[cacheKey]
@@ -51,7 +56,6 @@ export const usePaymentsStore = defineStore('payments', {
         try {
           const data = await paymentsService.getPayments(filters)
           this.itemsByKey[cacheKey] = data || []
-          this.currentCacheKey = cacheKey
           this.lastFetchedByKey[cacheKey] = Date.now()
           return this.itemsByKey[cacheKey]
         } catch (err) {

@@ -1,4 +1,6 @@
 import apiService from './api.js'
+import { invalidateFinanceCaches } from '@/application/stores/cacheInvalidation'
+import { unwrapPaged, MAX_PAGE_SIZE } from './pagedResult.js'
 
 class UtilityDebtsService {
   // Tüm utility debt'leri getir
@@ -24,12 +26,13 @@ class UtilityDebtsService {
 
     const requestParams = {
       ...params,
-      pageSize: Math.min(filters.pageSize || 1000, 1000),
+      pageSize: Math.min(filters.pageSize || MAX_PAGE_SIZE, MAX_PAGE_SIZE),
       pageNumber: filters.pageNumber || 1
     }
 
     const response = await apiService.get('/UtilityDebts', requestParams)
-    return Array.isArray(response) ? response : (response?.items ?? [])
+    // Tümü istendiğinde kırpma olursa uyar (toplamlar istemci tarafında hesaplanıyor)
+    return unwrapPaged(response, 'borç', requestParams.pageSize >= MAX_PAGE_SIZE && requestParams.pageNumber === 1)
   }
 
   // ID'ye göre utility debt getir
@@ -97,10 +100,12 @@ class UtilityDebtsService {
 
   // Ortak gider paylaştır
   async distributeSharedExpense(period, utilityType) {
-    return apiService.post('/utilitydebts/distribute', {
+    const result = await apiService.post('/utilitydebts/distribute', {
       period: period,
       utilityType: utilityType
     })
+    this.invalidateCache()
+    return result
   }
 
   // Excel'den borç içe aktar
@@ -108,13 +113,18 @@ class UtilityDebtsService {
     const formData = new FormData()
     formData.append('file', file)
     
-    return apiService.request('/UtilityDebts/import', {
+    const result = await apiService.request('/UtilityDebts/import', {
       method: 'POST',
       body: formData
     })
+    this.invalidateCache()
+    return result
   }
 
-  invalidateCache() {}
+  // Store önbelleklerini (tüm filtre anahtarları) temizle — mutasyonlardan sonra çağrılır
+  invalidateCache() {
+    invalidateFinanceCaches()
+  }
 }
 
 export default new UtilityDebtsService() 
