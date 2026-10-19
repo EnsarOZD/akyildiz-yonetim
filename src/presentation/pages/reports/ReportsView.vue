@@ -13,7 +13,7 @@
           <button @click="downloadServerStatement" :disabled="statementBusy" class="btn btn-sm btn-outline gap-2">
             Ekstre PDF (sunucu)
           </button>
-          <button @click="emailStatement" :disabled="statementBusy" class="btn btn-sm btn-outline btn-primary gap-2">
+          <button v-if="canSendStatement" @click="emailStatement" :disabled="statementBusy" class="btn btn-sm btn-outline btn-primary gap-2">
             <span v-if="statementBusy" class="loading loading-spinner loading-xs"></span>
             Ekstreyi e-postayla gönder
           </button>
@@ -490,6 +490,7 @@ const isBuildingWideReport = computed(() => !filters.tenantId && !filters.ownerI
 const { showSuccess, showError, showWarning } = useNotification()
 const statementBusy = ref(false)
 const canStatement = computed(() => !!filters.tenantId !== !!filters.ownerId)
+const canSendStatement = computed(() => [ROLES.ADMIN, ROLES.MANAGER, ROLES.DATA_ENTRY].includes(authStore.role))
 
 const statementArgs = () => ({
   tenantId: filters.tenantId || undefined,

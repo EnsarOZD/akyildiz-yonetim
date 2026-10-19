@@ -758,7 +758,7 @@ const hasReceipt = (p) => {
   const n = String(p?.receiptNumber || '')
   return !n.startsWith('AVANS-') && !n.startsWith('MANUEL-')
 }
-const canWrite = computed(() => authStore.role === ROLES.ADMIN || authStore.role === ROLES.MANAGER)
+const canWrite = computed(() => [ROLES.ADMIN, ROLES.MANAGER, ROLES.DATA_ENTRY].includes(authStore.role))
 const RECEIPT_STATUS_LABELS = { Sent: 'Gönderildi', Failed: 'Gönderilemedi', Skipped: 'E-posta yok', NotSent: '—' }
 const RECEIPT_STATUS_CLASSES = { Sent: 'badge-success', Failed: 'badge-error', Skipped: 'badge-warning', NotSent: 'badge-ghost' }
 const receiptStatusLabel = (s) => RECEIPT_STATUS_LABELS[s] || '—'
