@@ -162,56 +162,6 @@
       </div>
     </div>
 
-    <!-- Birim Bazlı Karşılaştırma (Elektrik / Su / Aidat) -->
-    <div v-if="comparisonRows.length > 0" class="app-card !p-0 mb-6">
-      <div class="flex items-center justify-between px-4 py-3 border-b border-slate-200">
-        <div class="flex items-center gap-2">
-          <span class="text-sm font-semibold text-slate-700">Birim Bazlı Karşılaştırma</span>
-          <span class="text-xs text-[#8298ab]">Bina geneli · Gelir / Gider</span>
-        </div>
-        <span class="text-[10px] font-bold text-[#8298ab] uppercase tracking-widest">Fark = Tahsilat − Gider</span>
-      </div>
-      <div class="overflow-x-auto">
-        <table class="table table-sm w-full">
-          <thead>
-            <tr class="border-b border-[#d9e7f2]">
-              <th class="py-4 text-[10px] font-black text-[#8298ab] uppercase tracking-widest px-4 text-left">Kategori</th>
-              <th class="py-4 text-[10px] font-black text-[#8298ab] uppercase tracking-widest px-4 text-right">Tahakkuk</th>
-              <th class="py-4 text-[10px] font-black text-[#8298ab] uppercase tracking-widest px-4 text-right">Tahsilat</th>
-              <th class="py-4 text-[10px] font-black text-[#8298ab] uppercase tracking-widest px-4 text-right">Gider</th>
-              <th class="py-4 text-[10px] font-black text-[#8298ab] uppercase tracking-widest px-4 text-right">Fark</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y-0">
-            <tr
-              v-for="row in comparisonRows"
-              :key="row.category"
-              class="group hover:bg-[#f6fafd] transition-colors border-b border-[#ecf3f9]"
-            >
-              <td class="px-4 py-3 text-[13px] font-black text-slate-800 uppercase tracking-tight">{{ row.label }}</td>
-              <td class="px-4 py-3 text-right text-[13px] font-black tabular-nums tracking-tight text-slate-500">{{ formatCurrency(row.accrued) }}</td>
-              <td class="px-4 py-3 text-right text-[13px] font-black tabular-nums tracking-tight text-emerald-600">{{ formatCurrency(row.collected) }}</td>
-              <td class="px-4 py-3 text-right text-[13px] font-black tabular-nums tracking-tight text-red-500">{{ formatCurrency(row.expense) }}</td>
-              <td class="px-4 py-3 text-right text-[13px] font-black tabular-nums tracking-tight" :class="row.difference >= 0 ? 'text-emerald-600' : 'text-red-500'">
-                {{ formatCurrency(row.difference) }}
-              </td>
-            </tr>
-          </tbody>
-          <tfoot v-if="comparisonTotal">
-            <tr class="border-t-2 border-slate-200 bg-slate-50/60">
-              <td class="px-4 py-3 text-[12px] font-black text-slate-700 uppercase tracking-widest">Toplam</td>
-              <td class="px-4 py-3 text-right text-[13px] font-black tabular-nums tracking-tight text-slate-600">{{ formatCurrency(comparisonTotal.accrued) }}</td>
-              <td class="px-4 py-3 text-right text-[13px] font-black tabular-nums tracking-tight text-emerald-600">{{ formatCurrency(comparisonTotal.collected) }}</td>
-              <td class="px-4 py-3 text-right text-[13px] font-black tabular-nums tracking-tight text-red-500">{{ formatCurrency(comparisonTotal.expense) }}</td>
-              <td class="px-4 py-3 text-right text-[13px] font-black tabular-nums tracking-tight" :class="comparisonTotal.difference >= 0 ? 'text-emerald-600' : 'text-red-500'">
-                {{ formatCurrency(comparisonTotal.difference) }}
-              </td>
-            </tr>
-          </tfoot>
-        </table>
-      </div>
-    </div>
-
     <!-- Tablo Kartı -->
     <div class="app-card !p-0">
       <!-- Tablo Başlığı -->
@@ -321,9 +271,11 @@
               <td class="px-4 py-3 text-center">
                 <span v-if="!item.isPayment" :class="[
                   'px-2 py-0.5 rounded-lg text-[9.5px] font-black uppercase tracking-widest',
-                  item.isPaid ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'
+                  item.isPaid ? 'bg-emerald-50 text-emerald-600'
+                  : item.isNotDue ? 'bg-sky-50 text-sky-600'
+                  : 'bg-amber-50 text-amber-600'
                 ]">
-                  {{ item.isPaid ? 'Ödendi' : 'Bekliyor' }}
+                  {{ debtStatusLabel(item) }}
                 </span>
                 <span v-else class="text-[#8298ab] text-xs">—</span>
               </td>
@@ -407,8 +359,8 @@ onMounted(async () => {
   const today = new Date()
   const startOfYear = new Date(today.getFullYear(), 0, 1)
   
-  filters.startDate = startOfYear.toISOString().substring(0, 10)
-  filters.endDate = today.toISOString().substring(0, 10)
+  filters.startDate = toLocalIso(startOfYear)
+  filters.endDate = toLocalIso(today)
   
   await Promise.all([
     fetchTenants(),
@@ -438,12 +390,16 @@ const fetchTenants = async () => {
 const fetchData = async () => {
   loading.value = true
   try {
+    // Borçlar vade tarihine göre filtrelenir. Bitiş tarihi bugüne (veya ileriye) uzanıyorsa
+    // üst sınır kaldırılır; böylece vadesi henüz gelmemiş tahakkuklar da rapora girer.
+    const debtEndDate = filters.endDate && filters.endDate < todayIso() ? filters.endDate : undefined
+
     const [debts, payments] = await Promise.all([
       utilityDebtsService.getUtilityDebts({
         tenantId: filters.tenantId || undefined,
         ownerId: filters.ownerId || undefined,
         startDate: filters.startDate || undefined,
-        endDate: filters.endDate || undefined,
+        endDate: debtEndDate,
         type: filters.utilityType || undefined,
         debtorType: filters.debtorType === 'All' ? undefined : filters.debtorType,
         pageSize: 1000 // Rappor için limit artırıldı
@@ -463,17 +419,20 @@ const fetchData = async () => {
     debtsData.value = debts || []
     paymentsData.value = payments || []
 
-    // Birim bazlı karşılaştırma: bina geneli, yalnız tarih + borçlu türü filtresi.
+    // Birim bazlı karşılaştırma bina genelini ilgilendirir: ekranda gösterilmez,
+    // yalnızca kiracı / mal sahibi seçilmemiş (bina geneli) Excel/PDF raporlarına eklenir.
     // Yetkisiz roller (viewer vb.) için sessizce boş geçilir.
-    try {
-      categoryComparison.value = await dashboardService.getCategoryComparison({
-        startDate: filters.startDate || undefined,
-        endDate: filters.endDate || undefined,
-        debtorType: filters.debtorType
-      })
-    } catch (e) {
-      console.error('Birim bazlı karşılaştırma alınamadı:', e)
-      categoryComparison.value = null
+    categoryComparison.value = null
+    if (isBuildingWideReport.value) {
+      try {
+        categoryComparison.value = await dashboardService.getCategoryComparison({
+          startDate: filters.startDate || undefined,
+          endDate: filters.endDate || undefined,
+          debtorType: filters.debtorType
+        })
+      } catch (e) {
+        console.error('Birim bazlı karşılaştırma alınamadı:', e)
+      }
     }
 
     // Devreden bakiye: yalnızca başlangıç tarihi seçiliyse anlamlı
@@ -512,6 +471,9 @@ const clearFilters = () => {
   fetchData()
 }
 
+// Kiracı / mal sahibi seçili değilse rapor bina genelidir
+const isBuildingWideReport = computed(() => !filters.tenantId && !filters.ownerId)
+
 // Birim bazlı karşılaştırma: backend kategorilerini Türkçe etiketlerle eşle
 const CATEGORY_LABELS = { Electricity: 'Elektrik', Water: 'Su', Aidat: 'Aidat' }
 
@@ -525,6 +487,7 @@ const mapComparisonRow = (row) => ({
 })
 
 const comparisonRows = computed(() => {
+  if (!isBuildingWideReport.value) return []
   const rows = categoryComparison.value?.rows
   return Array.isArray(rows) ? rows.map(mapComparisonRow) : []
 })
@@ -537,7 +500,8 @@ const comparisonTotal = computed(() => {
 // Data Processing
 const reportItems = computed(() => {
   const items = []
-  
+  const today = todayIso()
+
   // Borçlar (Expense context)
   if (filters.type === 'all' || filters.type === 'debt') {
     debtsData.value.forEach(d => {
@@ -553,6 +517,7 @@ const reportItems = computed(() => {
         amount: Number(d.amount ?? 0),
         isPayment: false,
         isPaid: d.status === 'Paid',
+        isNotDue: d.status !== 'Paid' && !!d.dueDate && String(d.dueDate).substring(0, 10) > today,
         lastPaymentDate: d.dueDate || null
       })
     })
@@ -572,19 +537,31 @@ const reportItems = computed(() => {
         amount: Number(p.amount ?? 0),
         isPayment: true,
         isPaid: true,
+        isNotDue: false,
         lastPaymentDate: null
       })
     })
   }
   
-  // Sıralama: Dönem (Yıl-Ay) -> Tarih (Giriş sırası)
-  // Sıralama: Sadece Tarih (Yeniden Eskiye - Descending)
+  // Sıralama: Eskiden yeniye (devir satırı en üstte kalır, ekstre gibi okunur).
+  // Aynı tarihte önce dönem, sonra borç tahakkuku, ardından tahsilat gelir.
   return items.sort((a, b) => {
-    const dA = a.date ? new Date(a.date) : new Date(0)
-    const dB = b.date ? new Date(b.date) : new Date(0)
-    return dB - dA
+    const dA = a.date ? new Date(a.date).getTime() : 0
+    const dB = b.date ? new Date(b.date).getTime() : 0
+    if (dA !== dB) return dA - dB
+    const pA = (a.periodYear || 0) * 100 + (a.periodMonth || 0)
+    const pB = (b.periodYear || 0) * 100 + (b.periodMonth || 0)
+    if (pA !== pB) return pA - pB
+    return Number(a.isPayment) - Number(b.isPayment)
   })
 })
+
+// Borç durumu: Ödendi / Vadesi Gelmedi / Vadesi Geçti
+const debtStatusLabel = (item, ascii = false) => {
+  if (item.isPaid) return ascii ? 'Odendi' : 'Ödendi'
+  if (item.isNotDue) return 'Vadesi Gelmedi'
+  return ascii ? 'Vadesi Gecti' : 'Vadesi Geçti'
+}
 
 // Devreden bakiye yalnızca başlangıç tarihi filtresi varken gösterilir
 const hasOpeningBalance = computed(() => !!filters.startDate)
@@ -636,6 +613,11 @@ watch([filters, pageSize], () => {
 }, { deep: true })
 
 // Helpers
+// Yerel saat dilimine göre YYYY-MM-DD (toISOString UTC'ye kaydığı için kullanılmaz)
+const toLocalIso = (d) =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+const todayIso = () => toLocalIso(new Date())
+
 const formatCurrency = (val) => 
   new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(Number(val ?? 0))
 
@@ -681,7 +663,7 @@ const exportToExcel = async () => {
     'Fatura No': i.invoiceNumber || '',
     'Borç (-)': !i.isPayment ? i.amount : 0,
     'Tahsilat (+)': i.isPayment ? i.amount : 0,
-    'Durum': i.isPaid ? 'Ödendi' : 'Bekliyor',
+    'Durum': i.isPayment ? '' : debtStatusLabel(i),
     'Vade Tarihi': i.lastPaymentDate ? formatDate(i.lastPaymentDate) : ''
   }))
 
@@ -894,7 +876,7 @@ const exportToPDF = async () => {
     invoice:   i.invoiceNumber || '-',
     debt:      !i.isPayment ? formatCurrency(i.amount) : '-',
     payment:   i.isPayment  ? formatCurrency(i.amount) : '-',
-    status:    i.isPayment  ? 'Tahsilat' : (i.isPaid ? 'Odendi' : 'Bekliyor'),
+    status:    i.isPayment  ? 'Tahsilat' : debtStatusLabel(i, true),
     lastPaid:  i.lastPaymentDate ? formatDate(i.lastPaymentDate) : '-'
   }))
 
@@ -959,7 +941,7 @@ const exportToPDF = async () => {
       invoice: { halign: 'center', cellWidth: 24, fontSize: 7 },
       debt:     { halign: 'right',  cellWidth: 26, textColor: RED },
       payment:  { halign: 'right',  cellWidth: 26, textColor: GREEN },
-      status:   { halign: 'center', cellWidth: 20 },
+      status:   { halign: 'center', cellWidth: 25 },
       lastPaid: { halign: 'center', cellWidth: 22, textColor: [16, 100, 45] },
     },
     didParseCell(data) {
@@ -973,9 +955,12 @@ const exportToPDF = async () => {
       if (data.cell.raw === 'Tahsilat') {
         data.cell.styles.textColor   = [16, 100, 45]
         data.cell.styles.fillColor   = [240, 253, 244]
-      } else if (data.cell.raw === 'Bekliyor') {
+      } else if (data.cell.raw === 'Vadesi Gecti') {
         data.cell.styles.textColor   = [146, 60, 14]
         data.cell.styles.fillColor   = [255, 251, 235]
+      } else if (data.cell.raw === 'Vadesi Gelmedi') {
+        data.cell.styles.textColor   = [3, 105, 161]
+        data.cell.styles.fillColor   = [240, 249, 255]
       } else if (data.cell.raw === 'Odendi') {
         data.cell.styles.textColor   = [16, 100, 45]
       }
