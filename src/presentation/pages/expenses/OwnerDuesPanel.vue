@@ -167,10 +167,12 @@ import PageHeader from '@/presentation/components/ui/PageHeader.vue'
 import ownerDuesService from '@/infrastructure/services/ownerDuesService'
 import tenantsService from '@/infrastructure/services/tenantsService'
 import { useErrorHandler } from '@/application/composables/useErrorHandler'
+import { useNotification } from '@/application/composables/useNotification'
 import { UNIT_OPTIONS } from '@/core/constants/units'
 import ConfirmModal from '@/presentation/components/common/ConfirmModal.vue'
 
 const { handleNetworkError, handleValidationError, showSuccess } = useErrorHandler()
+const { showError: notifyError, showInfo: notifyInfo } = useNotification()
 
 const year = ref(new Date().getFullYear())
 const selectedUnit = ref('')

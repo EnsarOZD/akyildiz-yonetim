@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import authService from '@/infrastructure/services/authService'
+import { isBackendActive, isDemoMode } from '@/core/utils/backendMode'
 
 export const useAuthStore = defineStore('auth', () => {
   const user = ref(null)
