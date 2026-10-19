@@ -49,7 +49,11 @@ export const ENTITY_TYPES = [
   { value: 'AdvanceAccount', label: 'Avans Hesabı' },
   { value: 'Tenant', label: 'Kiracı' },
   { value: 'Owner', label: 'Mal Sahibi' },
-  { value: 'Flat', label: 'Daire' },
+  { value: 'Flat', label: 'Ünite' },
+  { value: 'PaymentDebt', label: 'Ödeme Dağıtımı' },
+  { value: 'Expense', label: 'Gider' },
+  { value: 'AidatDefinition', label: 'Aidat Tanımı' },
+  { value: 'User', label: 'Kullanıcı' },
 ];
 
 // ---------- EXPENSE (Gider) ----------

@@ -171,13 +171,13 @@
             <div v-if="selectedLog.oldValues" class="bg-red-500/[0.03] border border-red-500/20 rounded-2xl p-5 space-y-3">
               <span class="text-[10px] font-black text-red-600 uppercase tracking-widest">Eski Veriler</span>
               <pre class="text-[10px] font-mono text-red-200/70 overflow-x-auto custom-scrollbar leading-relaxed">
-                {{ JSON.stringify(selectedLog.oldValues, null, 2) }}
+                {{ prettyJson(selectedLog.oldValues) }}
               </pre>
             </div>
             <div v-if="selectedLog.newValues" class="bg-green-500/[0.03] border border-green-500/20 rounded-2xl p-5 space-y-3">
               <span class="text-[10px] font-black text-emerald-600 uppercase tracking-widest">Yeni Veriler</span>
               <pre class="text-[10px] font-mono text-green-200/70 overflow-x-auto custom-scrollbar leading-relaxed">
-                {{ JSON.stringify(selectedLog.newValues, null, 2) }}
+                {{ prettyJson(selectedLog.newValues) }}
               </pre>
             </div>
           </div>
@@ -247,6 +247,14 @@ const loadLogs = async () => {
   } finally {
     loading.value = false
   }
+}
+
+// Backend Old/NewValues JSON metni olarak döner; okunur biçimde göster
+const prettyJson = (value) => {
+  if (typeof value === 'string') {
+    try { return JSON.stringify(JSON.parse(value), null, 2) } catch { return value }
+  }
+  return JSON.stringify(value, null, 2)
 }
 
 const showDetails = (log) => {

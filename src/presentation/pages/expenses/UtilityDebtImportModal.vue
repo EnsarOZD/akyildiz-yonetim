@@ -16,7 +16,9 @@
             <ul class="text-[11px] text-brand-200/70 space-y-1.5 font-medium leading-relaxed">
               <li class="flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-brand-400"></span> Firma, Tarih, Ödeme Türü, Tutar, Açıklama sütunları zorunludur.</li>
               <li class="flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-brand-400"></span> Firma ismi Kiracı veya Mülk Sahibi adı ile tam eşleşmelidir.</li>
-              <li class="flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-brand-400"></span> Tutar sütunu sadece sayısal (örn: 1250.50) olmalıdır.</li>
+              <li class="flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-brand-400"></span> Tutar sayısal olmalıdır (örn: 1.250,50 veya 1250.50).</li>
+              <li class="flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-brand-400"></span> Birden fazla ünitesi olan kiracı/mal sahibi için Ünite sütunu (ünite kodu) gereklidir.</li>
+              <li class="flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-brand-400"></span> Aynı dönem ve türde zaten kayıtlı borçlar atlanır.</li>
             </ul>
           </div>
         </div>
@@ -89,7 +91,7 @@
 
       <!-- 2. Sonuç Raporu Ekranı -->
       <div v-else class="space-y-6 animate-fade-in">
-        <div class="grid grid-cols-2 gap-4">
+        <div class="grid gap-4" :class="importResult.skippedCount ? 'grid-cols-3' : 'grid-cols-2'">
           <div class="p-5 bg-green-500/5 border border-green-500/10 rounded-2xl text-center">
             <p class="text-[10px] font-black text-[#8298ab] uppercase tracking-widest mb-2">Başarılı İşlem</p>
             <p class="text-3xl font-black text-emerald-600 tabular-nums">{{ importResult.successCount }}</p>
@@ -97,6 +99,22 @@
           <div class="p-5 bg-red-500/5 border border-red-500/10 rounded-2xl text-center">
             <p class="text-[10px] font-black text-[#8298ab] uppercase tracking-widest mb-2">Hatalı İşlem</p>
             <p class="text-3xl font-black text-red-600 tabular-nums">{{ importResult.failedCount }}</p>
+          </div>
+          <div v-if="importResult.skippedCount" class="p-5 bg-amber-500/5 border border-amber-500/10 rounded-2xl text-center">
+            <p class="text-[10px] font-black text-[#8298ab] uppercase tracking-widest mb-2">Atlanan</p>
+            <p class="text-3xl font-black text-amber-600 tabular-nums">{{ importResult.skippedCount }}</p>
+          </div>
+        </div>
+
+        <!-- Atlanan (mükerrer) Satırlar -->
+        <div v-if="importResult.skipped && importResult.skipped.length > 0" class="space-y-3">
+          <h5 class="text-[10px] font-black text-[#8298ab] uppercase tracking-widest px-1">Atlanan Satırlar (Mükerrer)</h5>
+          <div class="max-h-40 overflow-y-auto border border-[#d9e7f2] bg-[#f6fafd] rounded-2xl p-4 custom-scrollbar">
+            <ul class="space-y-2">
+              <li v-for="(msg, idx) in importResult.skipped" :key="'s' + idx" class="p-2 bg-amber-500/5 border border-amber-500/10 rounded-xl">
+                <p class="text-[11px] text-amber-700 font-medium leading-relaxed">{{ msg }}</p>
+              </li>
+            </ul>
           </div>
         </div>
 
