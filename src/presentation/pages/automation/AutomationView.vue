@@ -7,12 +7,29 @@
         </svg>
       </template>
       <template #actions>
+        <router-link to="/aidat-definitions" class="btn btn-sm btn-ghost">Aidat Tanımları</router-link>
         <button class="btn btn-sm btn-outline gap-2" :disabled="remindersRunning" @click="showRemindersConfirm = true">
           <span v-if="remindersRunning" class="loading loading-spinner loading-xs"></span>
           Hatırlatmaları şimdi gönder
         </button>
       </template>
     </PageHeader>
+
+    <!-- Kapalı özellik uyarıları (kayıtlı ayarlara göre) -->
+    <div v-if="savedSettings && (!savedSettings.accrualEnabled || !savedSettings.remindersEnabled)" class="space-y-2">
+      <div v-if="!savedSettings.accrualEnabled" role="alert" class="alert alert-warning text-sm">
+        <span>
+          <strong>Otomatik tahakkuk kapalı.</strong>
+          Aylık aidat borçları otomatik oluşturulmaz. Önizleme ile kontrol ettikten sonra aşağıdaki ayarlardan açın.
+        </span>
+      </div>
+      <div v-if="!savedSettings.remindersEnabled" role="alert" class="alert alert-warning text-sm">
+        <span>
+          <strong>Hatırlatmalar kapalı.</strong>
+          Kiracı ve maliklere otomatik ödeme hatırlatması gönderilmez.
+        </span>
+      </div>
+    </div>
 
     <!-- Ayarlar -->
     <div class="app-card">
@@ -55,8 +72,13 @@
                 <input type="number" min="1" max="60" v-model.number="settings.overdueRepeatDays" class="input input-bordered w-full" />
               </div>
             </div>
+            <p v-if="savedSettings && savedSettings.remindersStartDate" class="text-xs text-slate-600">
+              Hatırlatma başlangıcı: <strong>{{ formatDateOnly(savedSettings.remindersStartDate) }}</strong>
+              — bu tarihten önce vadesi geçmiş borçlar için otomatik hatırlatma gönderilmez.
+            </p>
           </div>
         </div>
+        <p class="text-xs text-slate-500">Otomatik işler her gün 09:00'dan sonra çalışır.</p>
         <p v-if="settingsError" class="text-sm text-red-600 font-medium">{{ settingsError }}</p>
         <div class="flex justify-end">
           <button type="submit" class="btn btn-primary" :disabled="savingSettings">
@@ -211,16 +233,19 @@ import { todayLocalIso } from '@/core/utils/dateUtils'
 
 const { showSuccess, showError, showWarning } = useNotification()
 
+// Sunucu varsayılanlarıyla aynı: özellikler kapalı gelir
 const defaultSettings = () => ({
-  accrualEnabled: true,
+  accrualEnabled: false,
   accrualDayOfMonth: 1,
   accrualDueDayOfMonth: 10,
-  remindersEnabled: true,
+  remindersEnabled: false,
   daysBeforeDue: 3,
   overdueRepeatDays: 7
 })
 
 const settings = ref(defaultSettings())
+// Sunucuda kayıtlı ayarlar (uyarı bantları ve salt okunur hatırlatma başlangıcı bunlara göre gösterilir)
+const savedSettings = ref(null)
 const settingsLoading = ref(true)
 const savingSettings = ref(false)
 const settingsError = ref('')
@@ -260,11 +285,18 @@ const errorText = (e, fallback) => {
   return e?.message || fallback
 }
 
+// 'yyyy-MM-ddT00:00:00' → 'dd.MM.yyyy' (saat dilimi kaydırması olmadan)
+const formatDateOnly = (v) => {
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(v || ''))
+  return m ? `${m[3]}.${m[2]}.${m[1]}` : '-'
+}
+
 const loadSettings = async () => {
   settingsLoading.value = true
   try {
     const s = await automationService.getSettings()
     settings.value = { ...defaultSettings(), ...(s || {}) }
+    savedSettings.value = { ...settings.value }
   } catch (e) {
     showError(errorText(e, 'Ayarlar yüklenemedi.'))
   } finally {
@@ -276,8 +308,13 @@ const saveSettings = async () => {
   savingSettings.value = true
   settingsError.value = ''
   try {
-    await automationService.saveSettings({ ...settings.value })
+    // remindersStartDate sunucu tarafından yönetilir (salt okunur), gönderilmez
+    const payload = { ...settings.value }
+    delete payload.remindersStartDate
+    await automationService.saveSettings(payload)
     showSuccess('Otomasyon ayarları kaydedildi.')
+    // kayıtlı durumu ve sunucunun yazdığı hatırlatma başlangıcını yenile
+    await loadSettings()
   } catch (e) {
     settingsError.value = errorText(e, 'Ayarlar kaydedilemedi.')
     showError(settingsError.value)
