@@ -472,7 +472,11 @@ const { isDirty, resetDirty } = useDirtyGuard(() => ({ ...form }))
 // ── Listeler ──────────────────────────────────────────────────
 const owners = ref([])
 const tenantsSafe = computed(() => props.tenants || [])
-const banksSafe   = computed(() => props.banks || [])
+// Kayıtlı ödemenin bankası listeden kaldırılmışsa da seçili görünsün
+const banksSafe   = computed(() => {
+  const list = props.banks || []
+  return form.bank && !list.includes(form.bank) ? [form.bank, ...list] : list
+})
 
 const getTenantDisplayName = (t) =>
   t?.companyName || t?.company || t?.contactPersonName ||

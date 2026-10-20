@@ -65,7 +65,7 @@
       <!-- ─── Row 3: Tabbed Content ─── -->
       <section class="app-card animate-slide-up !p-0 overflow-hidden shadow-2xl shadow-slate-200">
         <!-- Modern Tab Switcher -->
-        <div class="flex items-center gap-2 p-3 bg-slate-50 border-b border-slate-100">
+        <div class="flex items-center gap-2 p-3 bg-slate-50 border-b border-slate-100 overflow-x-auto">
           <button
             v-for="tab in tabs"
             :key="tab.key"
@@ -118,6 +118,7 @@ import { ref, reactive, computed, onMounted, defineComponent, h } from 'vue'
 import PageHeader from '@/presentation/components/ui/PageHeader.vue'
 import Owners from '../owners/Owners.vue'
 import UserManagement from './UserManagement.vue'
+import BankSettings from './BankSettings.vue'
 import { useTenantsStore } from '@/application/stores/tenants'
 import TargetedNotificationModal from '../notifications/components/TargetedNotificationModal.vue'
 
@@ -133,6 +134,7 @@ const tabCounts = reactive({
 const tabComponents = {
   owners: Owners,
   users: UserManagement,
+  banks: BankSettings,
 }
 
 // SVG icon components for tabs
@@ -147,9 +149,16 @@ const UsersIcon = defineComponent({
   ])
 })
 
+const BanksIcon = defineComponent({
+  render: () => h('svg', { fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [
+    h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '1.75', d: 'M12 3l9 4.5H3L12 3zM4.5 9.75v7.5m5-7.5v7.5m5-7.5v7.5m5-7.5v7.5M3 20.25h18' })
+  ])
+})
+
 const tabs = computed(() => [
   { key: 'owners', label: 'Mal Sahipleri',      icon: OwnersIcon, badge: tabCounts.owners || null },
   { key: 'users',  label: 'Kullanıcı Yönetimi', icon: UsersIcon,  badge: tabCounts.users || null },
+  { key: 'banks',  label: 'Bankalar',           icon: BanksIcon },
 ])
 
 const currentComponent = computed(() => tabComponents[activeTab.value] ?? null)

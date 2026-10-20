@@ -429,6 +429,7 @@
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
+import settingsService, { DEFAULT_BANKS } from '@/infrastructure/services/settingsService'
 import { ROLES } from '@/core/constants/roles'
 import { useAuthStore } from '@/application/stores/auth'
 import PaymentModal from './PaymentModal.vue'
@@ -468,7 +469,16 @@ const formatDate = (d) => safeFormatDate(d, 'dd MMM yyyy')
 const payments = computed(() => paymentsStore.payments)
 const tenants = computed(() => tenantsStore.tenants)
 const advanceAccounts = computed(() => paymentsStore.advanceAccounts)
-const banks = ref(['Ziraat', 'İş Bankası', 'Garanti', 'Yapı Kredi', 'Halkbank'])
+const banks = ref([...DEFAULT_BANKS])
+
+const loadBanks = async () => {
+  try {
+    const list = await settingsService.getBanks()
+    if (Array.isArray(list) && list.length) banks.value = list
+  } catch {
+    // varsayılan liste kalır
+  }
+}
 
 const showModal = ref(false)
 const showAdvanceManager = ref(false)
@@ -903,5 +913,6 @@ onMounted(() => {
   tenantsStore.fetchIfNeeded()
   paymentsStore.fetchAdvanceAccounts()
   paymentsStore.fetchIfNeeded()
+  loadBanks()
 })
 </script>
