@@ -142,6 +142,26 @@
             <h3 class="text-[13.5px] font-black text-slate-800 uppercase tracking-tight">Gider Listesi</h3>
             <span class="px-2 py-0.5 rounded-md bg-slate-100 text-[10px] font-black text-[#8298ab] uppercase tracking-widest">{{ filteredExpenses.length }} Kayıt</span>
           </div>
+          <span class="text-[13px] font-black text-red-500 tabular-nums tracking-tight">{{ formatCurrency(filteredTotal) }}</span>
+        </div>
+
+        <!-- Filtreler -->
+        <div class="px-4 py-3 border-b border-[#ecf3f9]">
+          <CustomFilterBar
+            :search="filters.searchTerm"
+            search-placeholder="Başlık, açıklama veya tutar ara..."
+            :select-type="filters.type"
+            :select-type-options="expenseTypeOptions"
+            :period="filters.period"
+            :start-date="filters.startDate"
+            :end-date="filters.endDate"
+            @update:search="val => (filters.searchTerm = val)"
+            @update:selectType="val => (filters.type = val)"
+            @update:period="val => (filters.period = val)"
+            @update:startDate="val => (filters.startDate = val)"
+            @update:endDate="val => (filters.endDate = val)"
+            @clearFilters="clearFilters"
+          />
         </div>
 
         <!-- Tablo -->
@@ -259,7 +279,9 @@ const deleting = ref(false)
 const filters = reactive({
   searchTerm: '',
   period: '',
-  type: ''
+  type: '',
+  startDate: '',
+  endDate: ''
 })
 
 /** Para/Tarih formatları */
@@ -358,6 +380,15 @@ const filteredExpenses = computed(() => {
     })
   }
 
+  // Tarih aralığı: 'yyyy-MM-dd' yerel gün olarak karşılaştırılır (iki uç dahil)
+  if (filters.startDate || filters.endDate) {
+    list = list.filter(e => {
+      if (!e.expenseDate) return false
+      const day = toLocalIsoDate(new Date(e.expenseDate))
+      return (!filters.startDate || day >= filters.startDate) && (!filters.endDate || day <= filters.endDate)
+    })
+  }
+
   if (filters.type) {
     list = list.filter(e => getExpenseTypeString(e.type) === filters.type)
   }
@@ -377,6 +408,10 @@ const filteredExpenses = computed(() => {
     return db - da
   })
 })
+
+const filteredTotal = computed(() =>
+  filteredExpenses.value.reduce((sum, e) => sum + Number(e.amount || 0), 0)
+)
 
 /** Sayfalama Mantığı */
 const currentPage = ref(1)
@@ -544,7 +579,7 @@ const saveExpense = async (expenseData) => {
 
 /** Filtreleri sıfırla */
 const clearFilters = () => {
-  Object.assign(filters, { searchTerm: '', period: '', type: '' })
+  Object.assign(filters, { searchTerm: '', period: '', type: '', startDate: '', endDate: '' })
 }
 const handleClearFilters = () => {
   clearFilters()

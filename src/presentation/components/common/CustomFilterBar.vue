@@ -47,6 +47,8 @@
     <input
       v-if="startDate !== undefined"
       type="date"
+      title="Başlangıç tarihi"
+      aria-label="Başlangıç tarihi"
       class="input input-bordered input-sm"
       :value="startDate"
       @input="$emit('update:startDate', $event.target.value)"
@@ -54,6 +56,8 @@
     <input
       v-if="endDate !== undefined"
       type="date"
+      title="Bitiş tarihi"
+      aria-label="Bitiş tarihi"
       class="input input-bordered input-sm"
       :value="endDate"
       @input="$emit('update:endDate', $event.target.value)"
