@@ -54,9 +54,9 @@
                 <input
                   v-model="invoiceInputs[r.debtId]"
                   type="text"
-                  maxlength="100"
+                  maxlength="50"
                   class="input input-bordered input-xs w-full"
-                  :disabled="!canWrite"
+                  :disabled="!canEnterInvoices"
                   placeholder="Fatura no"
                   :data-testid="'invoice-' + r.flatCode"
                 />
@@ -79,7 +79,7 @@
       </table>
     </div>
 
-    <div v-if="finalized && canWrite" class="flex justify-end">
+    <div v-if="finalized && canEnterInvoices" class="flex justify-end">
       <button type="button" class="btn btn-sm btn-primary" :disabled="!changed.length || saving" data-testid="save-invoices" @click="saveInvoices">
         <span v-if="saving" class="loading loading-spinner loading-xs"></span>
         Fatura numaralarını kaydet
@@ -98,6 +98,7 @@ import { formatDate, formatNumber, formatMoney, errorText, exportReportExcel } f
 const props = defineProps({
   detail: { type: Object, required: true },
   canWrite: { type: Boolean, default: false },
+  canEnterInvoices: { type: Boolean, default: false },
   saving: { type: Boolean, default: false },
   error: { type: String, default: '' }
 })

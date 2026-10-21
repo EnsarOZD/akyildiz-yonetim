@@ -228,6 +228,7 @@
       <InvoiceReport
         :detail="detail"
         :can-write="canWrite"
+        :can-enter-invoices="canEnterInvoices"
         :saving="invoiceSaving"
         :error="invoiceError"
         @save-invoices="saveInvoices"
@@ -330,7 +331,9 @@ const readonly = computed(() => detail.value?.status === 'Finalized')
 
 const authStore = useAuthStore()
 const { showSuccess } = useNotification()
-const canWrite = computed(() => ['admin', 'manager'].includes(authStore.role))
+const roleName = computed(() => (authStore.role || '').toLowerCase())
+const canWrite = computed(() => ['admin', 'manager'].includes(roleName.value))
+const canEnterInvoices = computed(() => ['admin', 'manager', 'dataentry'].includes(roleName.value))
 
 // ---------- Yükleme ----------
 
@@ -618,7 +621,11 @@ async function saveInvoices(items) {
   invoiceError.value = ''
   try {
     const dto = await electricityService.saveInvoiceNumbers(props.periodId, items)
-    if (dto) hydrate(dto)
+    if (!dto) {
+      invoiceError.value = 'Sunucudan yanıt alınamadı; kayıt doğrulanamadı.'
+      return
+    }
+    hydrate(dto)
     showSuccess('Fatura numaraları kaydedildi.')
   } catch (e) {
     invoiceError.value = errorText(e, 'Fatura numaraları kaydedilemedi.')
