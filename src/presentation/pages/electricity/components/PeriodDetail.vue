@@ -85,6 +85,8 @@
         </div>
       </fieldset>
 
+      <p v-if="!readonly && datesMissing" class="text-sm text-red-600" data-testid="dates-missing">Tarih alanları boş bırakılamaz.</p>
+
       <!-- Okumalar -->
       <div class="overflow-x-auto border border-slate-200 rounded-xl bg-white">
         <table class="table table-sm" data-testid="readings-table">
@@ -243,7 +245,7 @@ import electricityService from '@/infrastructure/services/electricityService'
 import tenantsService from '@/infrastructure/services/tenantsService'
 import ownersService from '@/infrastructure/services/ownersService'
 import {
-  readingWarning, STATUS_LABELS, dateOnly, formatDate, periodLabel, daysBetween, midpointDate,
+  readingWarning, meterConsumptionWarning, STATUS_LABELS, dateOnly, formatDate, periodLabel, daysBetween, midpointDate,
   formatNumber, formatMoney, formatRate, errorText, partyName
 } from '../electricityHelpers'
 
@@ -273,6 +275,7 @@ let inFlight = false
 let queued = false
 let lastSentKey = ''
 let keySeq = 0
+let gen = 0 // dönem değişince artar; eski dönemin geç gelen yanıtı yok sayılır
 
 const readonly = computed(() => detail.value?.status === 'Finalized')
 
@@ -407,16 +410,24 @@ function buildBody() {
 // Kirli kontrolü: sunucunun verdiği id'ler içerik sayılmaz (id alınca yeniden kayıt tetiklenmez)
 const keyOf = (body) => JSON.stringify({ ...body, readings: body.readings.map(({ id, ...rest }) => rest) })
 
+// Zorunlu tarih alanlarından biri boşsa kayıt gönderilmez
+const datesMissing = computed(() => {
+  const f = form.value
+  if (!f.startDate || !f.endDate || !f.dueDate) return true
+  return rows.value.some(r => !chainOf(r).isLast && !r.endDate)
+})
+
 const currentKey = computed(() => keyOf(buildBody().body))
 
 // ---------- Otomatik kayıt ----------
 
 watch(currentKey, (key) => {
   if (readonly.value || !detail.value) return
-  if (key === lastSentKey && !inFlight) {
+  if (key === lastSentKey) {
+    // Gönderilmiş (veya hydrate ile yüklenmiş) içerik: kayıt gerekmez
     clearTimeout(timer)
     timer = null
-    if (saveState.value === 'pending') saveState.value = 'saved'
+    if (!inFlight && saveState.value === 'pending') saveState.value = 'saved'
     return
   }
   saveState.value = 'pending'
@@ -426,8 +437,10 @@ watch(currentKey, (key) => {
 
 async function save() {
   timer = null
-  if (readonly.value) return
+  // Dönem yüklenirken / başka döneme geçilmişken eski girdiler gönderilmez
+  if (readonly.value || loading.value || !detail.value || detail.value.id !== props.periodId) return
   if (inFlight) { queued = true; return }
+  if (datesMissing.value) { if (saveState.value === 'pending') saveState.value = 'idle'; return }
   const { body, sentSeq } = buildBody()
   const key = keyOf(body)
   if (key === lastSentKey) { if (saveState.value === 'pending') saveState.value = 'saved'; return }
@@ -435,23 +448,32 @@ async function save() {
   inFlight = true
   saveState.value = 'saving'
   lastSentKey = key
+  const myGen = gen
   try {
     const res = await electricityService.updatePeriod(props.periodId, body)
+    if (myGen !== gen) return // eski dönemin yanıtı
     applyResponse(res, sentSeq)
     pageError.value = ''
     saveState.value = 'saved'
   } catch (e) {
+    if (myGen !== gen) return
     // Kullanıcı girdisi korunur; aynı girdi tekrar gönderilmez, yeni değişiklik yeniden dener
     pageError.value = errorText(e, 'Dönem kaydedilemedi.')
     saveState.value = 'error'
   } finally {
     inFlight = false
-    const dirty = currentKey.value !== lastSentKey
-    if (queued || (dirty && !timer)) {
-      queued = false
-      if (dirty) save()
-    } else if (dirty) {
-      saveState.value = 'pending'
+    // Eski dönemin isteği: yeni dönemin durumuna dokunma (yeni dönem kendi kaydını tetikler)
+    if (myGen !== gen) {
+      // Yeni dönemde istek sürerken biriken kayıt varsa şimdi gönder (save kendi korumalarını uygular)
+      if (queued) { queued = false; save() }
+    } else {
+      const dirty = currentKey.value !== lastSentKey
+      if (queued || (dirty && !timer)) {
+        queued = false
+        if (dirty) save()
+      } else if (dirty) {
+        saveState.value = 'pending'
+      }
     }
   }
 }
@@ -493,24 +515,34 @@ const calcFor = (row) => {
 
 const hintFor = (warning, pc) => {
   if (warning === 'error') return 'Son okuma ilk okumadan küçük.'
-  if (warning === 'high') return `Tüketim önceki dönemin 3 katından fazla (önceki: ${formatNumber(pc)} kWh).`
-  if (warning === 'low') return `Tüketim önceki dönemin %30'undan az (önceki: ${formatNumber(pc)} kWh).`
+  if (warning === 'high') return `Sayaç toplam tüketimi önceki dönemin 3 katından fazla (önceki: ${formatNumber(pc)} kWh).`
+  if (warning === 'low') return `Sayaç toplam tüketimi önceki dönemin %30'undan az (önceki: ${formatNumber(pc)} kWh).`
   return ''
 }
+
+// Sayaç düzeyi high/low: toplam tüketim önceki dönemle karşılaştırılır; hiç okuma girilmemişse uyarı yok
+const meterWarnings = computed(() => {
+  const readings = detail.value?.readings || []
+  const result = new Map()
+  for (const [meterId, list] of meterGroups.value) {
+    const pc = readings.find(x => x.meterId === meterId && x.previousConsumption != null)?.previousConsumption ?? null
+    const chained = list.map(r => {
+      const c = chainOf(r)
+      return { previousIndex: num(c.previousIndex), currentIndex: num(r.currentIndex) }
+    })
+    result.set(meterId, { warning: meterConsumptionWarning(chained, pc), previousConsumption: pc })
+  }
+  return result
+})
 
 const view = computed(() => {
   const reportRows = detail.value?.reportRows || []
   return rows.value.map(row => {
     const c = chainOf(row)
     const calc = calcFor(row)
-    const prevIdx = num(c.previousIndex)
-    const curIdx = num(row.currentIndex)
-    const warning = readingWarning({
-      previousIndex: prevIdx,
-      currentIndex: curIdx,
-      consumption: curIdx - prevIdx,
-      previousConsumption: calc?.previousConsumption
-    })
+    const mw = meterWarnings.value.get(row.meterId) || { warning: null, previousConsumption: null }
+    // 'error' satır bazlı, 'high'/'low' sayaç bazlı
+    const warning = readingWarning({ previousIndex: num(c.previousIndex), currentIndex: num(row.currentIndex) }) || mw.warning
     const report = row.id ? reportRows.filter(x => x.readingId === row.id) : []
     const names = [...new Set(report.map(x => x.debtorName).filter(Boolean))]
     return {
@@ -518,7 +550,7 @@ const view = computed(() => {
       ...c,
       calc,
       warning,
-      hint: hintFor(warning, calc?.previousConsumption) || calc?.error || '',
+      hint: hintFor(warning, mw.previousConsumption) || calc?.error || '',
       serverError: !!calc?.error,
       report,
       poolShare: report.reduce((s, x) => s + Number(x.poolShare || 0), 0),
@@ -590,6 +622,7 @@ function removeRow(row) {
 
 // Dönem değişince yeniden yükle
 watch(() => props.periodId, () => {
+  gen++
   clearTimeout(timer)
   timer = null
   queued = false

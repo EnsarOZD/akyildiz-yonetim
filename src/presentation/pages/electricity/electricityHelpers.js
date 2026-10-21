@@ -91,3 +91,20 @@ export function partyName(x) {
   return x?.companyName || x?.company || x?.contactPersonName || x?.fullName ||
     [x?.firstName, x?.lastName].filter(Boolean).join(' ') || x?.name || x?.email || `#${x?.id}`
 }
+
+/**
+ * Sayaç düzeyi tüketim uyarısı (yalnız 'high' | 'low').
+ * Sayacın tüm satırlarının toplam tüketimi (Σ current − previous) önceki dönem tüketimiyle karşılaştırılır.
+ * Sayacın hiçbir satırına henüz okuma girilmemişse (her satırda current == previous) uyarı verilmez.
+ * Satır bazlı 'error' için readingWarning kullanılır.
+ * @param {{previousIndex:number, currentIndex:number}[]} rows
+ * @param {number|null} previousConsumption
+ * @returns {null|'high'|'low'}
+ */
+export function meterConsumptionWarning(rows, previousConsumption) {
+  if (!rows?.length) return null
+  if (rows.every(r => (Number(r.currentIndex) || 0) === (Number(r.previousIndex) || 0))) return null
+  const total = rows.reduce((s, r) => s + ((Number(r.currentIndex) || 0) - (Number(r.previousIndex) || 0)), 0)
+  const w = readingWarning({ previousIndex: 0, currentIndex: 0, consumption: total, previousConsumption })
+  return w === 'high' || w === 'low' ? w : null
+}
