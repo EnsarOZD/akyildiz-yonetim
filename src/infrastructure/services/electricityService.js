@@ -48,6 +48,9 @@ const electricityService = {
   async revertPeriod(id) {
     return apiService.post(`${base}/periods/${id}/revert`)
   },
+  async deletePeriod(id) {
+    return apiService.delete(`${base}/periods/${id}`)
+  },
   // items: [{ debtId, invoiceNumber }] (gövde düz dizi)
   async saveInvoiceNumbers(id, items) {
     return apiService.put(`${base}/periods/${id}/invoice-numbers`, items)

@@ -75,7 +75,7 @@
           <div class="flex flex-wrap gap-6">
             <label class="label cursor-pointer gap-2 justify-start">
               <input v-model="form.sharesCommonPool" type="checkbox" class="checkbox checkbox-sm" />
-              <span class="label-text">Ortak havuza pay verir</span>
+              <span class="label-text">Ortak alan payı alır</span>
             </label>
             <label class="label cursor-pointer gap-2 justify-start">
               <input v-model="form.isActive" type="checkbox" class="checkbox checkbox-sm" />
@@ -262,7 +262,7 @@ const save = async () => {
     isActive: f.isActive,
     // Oran arayüzde yüzde, sunucuya 0-1 aralığında gider
     units: f.kind === 'Unit'
-      ? f.units.map(u => ({ flatId: u.flatId, ratio: Math.round(Number(u.percent) * 1e4) / 1e6 }))
+      ? f.units.map(u => ({ flatId: u.flatId, ratio: Math.round(Number(u.percent) * 100) / 1e4 }))
       : []
   }
   saving.value = true

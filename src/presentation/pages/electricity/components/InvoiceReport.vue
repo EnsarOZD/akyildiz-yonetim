@@ -6,8 +6,8 @@
         <span v-if="!finalized" class="badge badge-sm badge-ghost" data-testid="preview-badge">Önizleme</span>
       </div>
       <div class="flex flex-wrap gap-2">
-        <button v-if="finalized" type="button" class="btn btn-xs btn-outline" :disabled="pdfBusy" data-testid="pdf-btn" @click="downloadPdf">
-          <span v-if="pdfBusy" class="loading loading-spinner loading-xs"></span>PDF
+        <button type="button" class="btn btn-xs btn-outline" :disabled="pdfBusy" data-testid="pdf-btn" @click="downloadPdf">
+          <span v-if="pdfBusy" class="loading loading-spinner loading-xs"></span>{{ finalized ? 'PDF' : 'PDF (önizleme)' }}
         </button>
         <button type="button" class="btn btn-xs btn-outline" :disabled="!rows.length" data-testid="excel-btn" @click="downloadExcel">Excel</button>
         <button v-if="finalized && canWrite" type="button" class="btn btn-xs btn-outline btn-error" data-testid="revert-btn" @click="emit('revert')">Onayı geri al</button>

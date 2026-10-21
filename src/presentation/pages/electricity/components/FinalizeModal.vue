@@ -16,22 +16,24 @@
             <tr>
               <th>Kat</th>
               <th>Cari</th>
+              <th>Aralık</th>
               <th class="text-right">KDV Dahil</th>
             </tr>
           </thead>
           <tbody>
             <tr v-if="!debts.length">
-              <td colspan="3" class="text-center text-slate-400 py-4">Oluşacak borç yok.</td>
+              <td colspan="4" class="text-center text-slate-400 py-4">Oluşacak borç yok.</td>
             </tr>
             <tr v-for="r in debts" :key="r.readingId + '-' + r.flatId">
               <td>{{ r.flatCode }}</td>
               <td>{{ r.debtorName || '-' }}</td>
+              <td class="whitespace-nowrap text-xs">{{ formatDate(r.startDate) }} - {{ formatDate(r.endDate) }}</td>
               <td class="text-right whitespace-nowrap">{{ formatMoney(r.total) }}</td>
             </tr>
           </tbody>
           <tfoot v-if="debts.length">
             <tr class="font-bold">
-              <td colspan="2">Toplam ({{ debts.length }} borç)</td>
+              <td colspan="3">Toplam ({{ debts.length }} borç)</td>
               <td class="text-right whitespace-nowrap" data-testid="finalize-total">{{ formatMoney(sum) }}</td>
             </tr>
           </tfoot>
@@ -54,7 +56,7 @@
 
 <script setup>
 import { computed } from 'vue'
-import { formatMoney } from '../electricityHelpers'
+import { formatDate, formatMoney } from '../electricityHelpers'
 
 const props = defineProps({
   detail: { type: Object, required: true },

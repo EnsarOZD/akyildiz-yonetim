@@ -26,6 +26,14 @@
             data-testid="finalize-btn"
             @click="openFinalize"
           >Onayla</button>
+          <button
+            v-if="!readonly && canWrite"
+            type="button"
+            class="btn btn-sm btn-outline btn-error"
+            :disabled="deleting"
+            data-testid="delete-period-btn"
+            @click="openDelete"
+          >Dönemi sil</button>
         </div>
       </div>
 
@@ -249,7 +257,7 @@
     <div v-if="revertOpen" class="modal modal-open" data-testid="revert-modal">
       <div class="modal-box max-w-md">
         <h3 class="font-bold text-lg mb-2">Onayı Geri Al</h3>
-        <p class="text-sm text-slate-600">Onay geri alınırsa bu döneme ait elektrik borçları silinir. Devam edilsin mi?</p>
+        <p class="text-sm text-slate-600">Onay geri alınırsa bu döneme ait elektrik borçları silinir. Devam edilsin mi? Kesilmiş fatura numaraları da silinir.</p>
         <p v-if="revertError" class="text-sm text-red-600 mt-3 whitespace-pre-line" data-testid="revert-error">{{ revertError }}</p>
         <div class="modal-action">
           <button type="button" class="btn btn-sm btn-ghost" :disabled="reverting" @click="revertOpen = false">Vazgeç</button>
@@ -262,13 +270,31 @@
       <div class="modal-backdrop" @click="!reverting && (revertOpen = false)"></div>
     </div>
 
+    <!-- Taslak dönemi sil -->
+    <div v-if="deleteOpen" class="modal modal-open" data-testid="delete-modal">
+      <div class="modal-box max-w-md">
+        <h3 class="font-bold text-lg mb-2">Dönemi Sil</h3>
+        <p class="text-sm text-slate-600">Taslak dönem silinsin mi?</p>
+        <p v-if="deleteError" class="text-sm text-red-600 mt-3 whitespace-pre-line" data-testid="delete-error">{{ deleteError }}</p>
+        <div class="modal-action">
+          <button type="button" class="btn btn-sm btn-ghost" :disabled="deleting" @click="deleteOpen = false">Vazgeç</button>
+          <button type="button" class="btn btn-sm btn-error" :disabled="deleting" data-testid="delete-confirm" @click="confirmDelete">
+            <span v-if="deleting" class="loading loading-spinner loading-xs"></span>
+            Sil
+          </button>
+        </div>
+      </div>
+      <div class="modal-backdrop" @click="!deleting && (deleteOpen = false)"></div>
+    </div>
+
     <!-- Ara okuma -->
     <div v-if="split" class="modal modal-open">
       <div class="modal-box max-w-md">
         <h3 class="font-bold text-lg mb-2">Ara Okuma Ekle</h3>
         <p class="text-sm text-slate-500 mb-4">
           {{ split.meterName }}: mevcut son satır seçilen tarihte kapanır, yeni satır bu tarihten dönem sonuna kadar sürer.
-          Yeni satırın borçlusunu tabloda seçebilirsiniz.
+          İki satırın borçlusu da varsayılan olarak ünitenin şimdiki kiracısıdır; tabloda önceki satırın borçlusunu
+          çıkan kiracı olarak seçin.
         </p>
         <label class="form-control w-full">
           <span class="label-text text-sm mb-1">Ara okuma tarihi</span>
@@ -494,7 +520,7 @@ watch(currentKey, (key) => {
 async function save() {
   timer = null
   // Dönem yüklenirken / başka döneme geçilmişken eski girdiler gönderilmez
-  if (readonly.value || loading.value || !detail.value || detail.value.id !== props.periodId) return
+  if (readonly.value || loading.value || !detail.value || detail.value.id !== props.periodId || deleted) return
   if (inFlight) { queued = true; return }
   if (datesMissing.value) { if (saveState.value === 'pending') saveState.value = 'idle'; return }
   const { body, sentSeq } = buildBody()
@@ -542,6 +568,10 @@ const finalizeError = ref('')
 const revertOpen = ref(false)
 const reverting = ref(false)
 const revertError = ref('')
+const deleteOpen = ref(false)
+const deleting = ref(false)
+const deleteError = ref('')
+let deleted = false // silinen dönem için otomatik kayıt gönderilmez
 const invoiceSaving = ref(false)
 const invoiceError = ref('')
 
@@ -613,6 +643,35 @@ async function confirmRevert() {
     revertError.value = errorText(e, 'Onay geri alınamadı.')
   } finally {
     reverting.value = false
+  }
+}
+
+function openDelete() {
+  deleteError.value = ''
+  deleteOpen.value = true
+}
+
+async function confirmDelete() {
+  if (deleting.value) return
+  deleting.value = true
+  deleteError.value = ''
+  // Bekleyen otomatik kayıt iptal edilir; süren istek bitince silinir
+  clearTimeout(timer)
+  timer = null
+  queued = false
+  deleted = true
+  try {
+    while (inFlight) await sleep(30)
+    await electricityService.deletePeriod(props.periodId)
+    deleteOpen.value = false
+    showSuccess('Taslak dönem silindi.')
+    emit('back')
+  } catch (e) {
+    deleted = false
+    deleteError.value = errorText(e, 'Dönem silinemedi.')
+    if (currentKey.value !== lastSentKey) save()
+  } finally {
+    deleting.value = false
   }
 }
 
@@ -786,6 +845,8 @@ watch(() => props.periodId, () => {
   pageError.value = ''
   finalizeOpen.value = false
   revertOpen.value = false
+  deleteOpen.value = false
+  deleted = false
   invoiceError.value = ''
   load()
 })
@@ -800,7 +861,7 @@ onBeforeUnmount(() => {
   if (timer) {
     clearTimeout(timer)
     timer = null
-    save()
+    if (!deleted) save()
   }
 })
 </script>
