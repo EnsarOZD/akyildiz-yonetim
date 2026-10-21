@@ -15,15 +15,9 @@
         >{{ t.label }}</button>
       </div>
 
-      <!-- Task 9: PeriodList.vue -->
-      <div v-if="activeTab === 'periods'" class="app-card p-6 text-sm text-slate-500">
-        Dönem listesi yakında.
-      </div>
+      <PeriodList v-if="activeTab === 'periods'" @open="openPeriod" />
 
-      <!-- Task 9: PeriodDetail.vue -->
-      <div v-else-if="activeTab === 'detail'" class="app-card p-6 text-sm text-slate-500">
-        Dönem detayı yakında.
-      </div>
+      <PeriodDetail v-else-if="activeTab === 'detail' && selectedPeriodId" :period-id="selectedPeriodId" @back="closePeriod" />
 
       <MeterSettings v-else-if="activeTab === 'meters'" />
     </div>
@@ -32,11 +26,14 @@
 
 <script setup>
 import { ref, computed, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import PageHeader from '@/presentation/components/ui/PageHeader.vue'
 import MeterSettings from './components/MeterSettings.vue'
+import PeriodList from './components/PeriodList.vue'
+import PeriodDetail from './components/PeriodDetail.vue'
 
 const route = useRoute()
+const router = useRouter()
 
 // Seçili dönem ?period=<id> sorgu parametresinde tutulur
 const selectedPeriodId = computed(() => {
@@ -50,6 +47,18 @@ watch(selectedPeriodId, (id) => {
   if (id) activeTab.value = 'detail'
   else if (activeTab.value === 'detail') activeTab.value = 'periods'
 })
+
+const openPeriod = (id) => {
+  // Sekme, sorgu parametresi değişince watch ile 'detail' olur
+  if (selectedPeriodId.value === id) activeTab.value = 'detail'
+  else router.push({ query: { ...route.query, period: id } })
+}
+
+const closePeriod = () => {
+  const query = { ...route.query }
+  delete query.period
+  router.push({ query })
+}
 
 const tabs = computed(() => {
   const list = [{ label: 'Dönemler', value: 'periods' }]
