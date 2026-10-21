@@ -1,0 +1,1 @@
+import{f as a}from"./index-CIRfa3y_.js";const s="/settings",n=["Ziraat","İş Bankası","Garanti","Yapı Kredi","Halkbank"],t={getBanks:async()=>a.get(`${s}/banks`),saveBanks:async n=>a.put(`${s}/banks`,{banks:n})};export{n as D,t as s};
