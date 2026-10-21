@@ -100,6 +100,7 @@
               </div>
               <button type="button" class="btn btn-ghost btn-xs text-red-600" @click="form.units.splice(i, 1)">Kaldır</button>
             </div>
+            <p v-if="form.units.length" class="text-sm" :class="totalOk ? 'text-slate-600' : 'text-red-600'">Toplam: %{{ totalPercent }}</p>
           </div>
 
           <p v-if="formError" class="text-sm text-red-600">{{ formError }}</p>
@@ -167,6 +168,11 @@ function emptyForm() {
 const sortedMeters = computed(() =>
   [...meters.value].sort((a, b) => (a.sortOrder - b.sortOrder) || String(a.name).localeCompare(String(b.name), 'tr-TR'))
 )
+
+const totalPercent = computed(() =>
+  Number(form.value.units.reduce((sum, u) => sum + (Number(u.percent) || 0), 0).toFixed(4))
+)
+const totalOk = computed(() => Math.abs(totalPercent.value - 100) <= 0.01)
 
 const kindLabel = (k) => KINDS.find(x => x.value === k)?.label || k
 
@@ -242,6 +248,12 @@ const addUnitRow = () => {
 const save = async () => {
   formError.value = ''
   const f = form.value
+  if (f.kind === 'Unit') {
+    if (f.units.some(u => !u.flatId)) { formError.value = 'Her satırda ünite seçilmelidir.'; return }
+    if (f.units.some(u => u.percent === '' || u.percent === null || !Number.isFinite(Number(u.percent)))) {
+      formError.value = 'Oran girilmelidir.'; return
+    }
+  }
   const body = {
     name: f.name.trim(),
     kind: f.kind,
@@ -250,7 +262,7 @@ const save = async () => {
     isActive: f.isActive,
     // Oran arayüzde yüzde, sunucuya 0-1 aralığında gider
     units: f.kind === 'Unit'
-      ? f.units.filter(u => u.flatId).map(u => ({ flatId: u.flatId, ratio: Number(u.percent) / 100 }))
+      ? f.units.map(u => ({ flatId: u.flatId, ratio: Math.round(Number(u.percent) * 1e4) / 1e6 }))
       : []
   }
   saving.value = true
