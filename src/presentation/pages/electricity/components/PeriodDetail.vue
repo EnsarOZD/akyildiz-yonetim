@@ -16,7 +16,17 @@
             {{ STATUS_LABELS[detail.status] || detail.status }}
           </span>
         </div>
-        <div v-if="!readonly" class="text-xs" data-testid="save-state" :class="saveStateClass">{{ saveStateText }}</div>
+        <div class="flex items-center gap-3">
+          <div v-if="!readonly" class="text-xs" data-testid="save-state" :class="saveStateClass">{{ saveStateText }}</div>
+          <button
+            v-if="!readonly && canWrite"
+            type="button"
+            class="btn btn-sm btn-primary"
+            :disabled="!canFinalize"
+            data-testid="finalize-btn"
+            @click="openFinalize"
+          >Onayla</button>
+        </div>
       </div>
 
       <div v-if="pageError" class="alert alert-error text-sm whitespace-pre-line" data-testid="page-error">{{ pageError }}</div>
@@ -214,7 +224,42 @@
           </span>
         </div>
       </div>
+
+      <InvoiceReport
+        :detail="detail"
+        :can-write="canWrite"
+        :saving="invoiceSaving"
+        :error="invoiceError"
+        @save-invoices="saveInvoices"
+        @revert="openRevert"
+      />
     </template>
+
+    <FinalizeModal
+      v-if="finalizeOpen && detail"
+      :detail="detail"
+      :error="finalizeError"
+      :busy="finalizing"
+      @close="finalizeOpen = false"
+      @confirm="confirmFinalize"
+    />
+
+    <!-- Onayı geri al -->
+    <div v-if="revertOpen" class="modal modal-open" data-testid="revert-modal">
+      <div class="modal-box max-w-md">
+        <h3 class="font-bold text-lg mb-2">Onayı Geri Al</h3>
+        <p class="text-sm text-slate-600">Onay geri alınırsa bu döneme ait elektrik borçları silinir. Devam edilsin mi?</p>
+        <p v-if="revertError" class="text-sm text-red-600 mt-3 whitespace-pre-line" data-testid="revert-error">{{ revertError }}</p>
+        <div class="modal-action">
+          <button type="button" class="btn btn-sm btn-ghost" :disabled="reverting" @click="revertOpen = false">Vazgeç</button>
+          <button type="button" class="btn btn-sm btn-error" :disabled="reverting" data-testid="revert-confirm" @click="confirmRevert">
+            <span v-if="reverting" class="loading loading-spinner loading-xs"></span>
+            Geri al
+          </button>
+        </div>
+      </div>
+      <div class="modal-backdrop" @click="!reverting && (revertOpen = false)"></div>
+    </div>
 
     <!-- Ara okuma -->
     <div v-if="split" class="modal modal-open">
@@ -244,6 +289,10 @@ import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
 import electricityService from '@/infrastructure/services/electricityService'
 import tenantsService from '@/infrastructure/services/tenantsService'
 import ownersService from '@/infrastructure/services/ownersService'
+import { useAuthStore } from '@/application/stores/auth'
+import { useNotification } from '@/application/composables/useNotification'
+import FinalizeModal from './FinalizeModal.vue'
+import InvoiceReport from './InvoiceReport.vue'
 import {
   readingWarning, meterConsumptionWarning, STATUS_LABELS, dateOnly, formatDate, periodLabel, daysBetween, midpointDate,
   formatNumber, formatMoney, formatRate, errorText, partyName
@@ -278,6 +327,10 @@ let keySeq = 0
 let gen = 0 // dönem değişince artar; eski dönemin geç gelen yanıtı yok sayılır
 
 const readonly = computed(() => detail.value?.status === 'Finalized')
+
+const authStore = useAuthStore()
+const { showSuccess } = useNotification()
+const canWrite = computed(() => ['admin', 'manager'].includes(authStore.role))
 
 // ---------- Yükleme ----------
 
@@ -478,6 +531,102 @@ async function save() {
   }
 }
 
+// ---------- Onay / geri alma / fatura no ----------
+
+const finalizeOpen = ref(false)
+const finalizing = ref(false)
+const finalizeError = ref('')
+const revertOpen = ref(false)
+const reverting = ref(false)
+const revertError = ref('')
+const invoiceSaving = ref(false)
+const invoiceError = ref('')
+
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms))
+
+// Bekleyen otomatik kaydı gönderir ve bitmesini bekler; ekrandaki içerik sunucuda ise true
+async function flushSave() {
+  clearTimeout(timer)
+  timer = null
+  while (inFlight) await sleep(30)
+  if (currentKey.value !== lastSentKey) {
+    if (datesMissing.value) return false
+    await save()
+    while (inFlight) await sleep(30)
+  }
+  return currentKey.value === lastSentKey && saveState.value !== 'error'
+}
+
+const canFinalize = computed(() =>
+  canWrite.value && !readonly.value && !detail.value?.errors?.length && !datesMissing.value &&
+  !finalizing.value && !['pending', 'saving', 'error'].includes(saveState.value))
+
+async function openFinalize() {
+  if (!canFinalize.value) return
+  finalizeError.value = ''
+  if (!(await flushSave())) return
+  finalizeOpen.value = true
+}
+
+async function confirmFinalize() {
+  if (finalizing.value) return
+  finalizing.value = true
+  finalizeError.value = ''
+  try {
+    if (!(await flushSave())) {
+      finalizeError.value = 'Değişiklikler kaydedilemedi; onaylanmadı.'
+      return
+    }
+    const dto = await electricityService.finalizePeriod(props.periodId)
+    hydrate(dto)
+    saveState.value = 'idle'
+    pageError.value = ''
+    finalizeOpen.value = false
+    showSuccess('Dönem onaylandı.')
+  } catch (e) {
+    finalizeError.value = errorText(e, 'Dönem onaylanamadı.')
+  } finally {
+    finalizing.value = false
+  }
+}
+
+function openRevert() {
+  revertError.value = ''
+  revertOpen.value = true
+}
+
+async function confirmRevert() {
+  if (reverting.value) return
+  reverting.value = true
+  revertError.value = ''
+  try {
+    const dto = await electricityService.revertPeriod(props.periodId)
+    hydrate(dto)
+    saveState.value = 'idle'
+    invoiceError.value = ''
+    revertOpen.value = false
+    showSuccess('Onay geri alındı.')
+  } catch (e) {
+    revertError.value = errorText(e, 'Onay geri alınamadı.')
+  } finally {
+    reverting.value = false
+  }
+}
+
+async function saveInvoices(items) {
+  invoiceSaving.value = true
+  invoiceError.value = ''
+  try {
+    const dto = await electricityService.saveInvoiceNumbers(props.periodId, items)
+    if (dto) hydrate(dto)
+    showSuccess('Fatura numaraları kaydedildi.')
+  } catch (e) {
+    invoiceError.value = errorText(e, 'Fatura numaraları kaydedilemedi.')
+  } finally {
+    invoiceSaving.value = false
+  }
+}
+
 // Yanıt yalnız hesap alanlarını / rapor satırlarını günceller; giriş alanlarına dokunmaz.
 function applyResponse(res, sentSeq) {
   if (!res) return
@@ -628,6 +777,9 @@ watch(() => props.periodId, () => {
   queued = false
   saveState.value = 'idle'
   pageError.value = ''
+  finalizeOpen.value = false
+  revertOpen.value = false
+  invoiceError.value = ''
   load()
 })
 

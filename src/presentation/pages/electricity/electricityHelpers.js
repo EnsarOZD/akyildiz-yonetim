@@ -108,3 +108,28 @@ export function meterConsumptionWarning(rows, previousConsumption) {
   const w = readingWarning({ previousIndex: 0, currentIndex: 0, consumption: total, previousConsumption })
   return w === 'high' || w === 'low' ? w : null
 }
+
+/**
+ * Fatura raporunu Excel'e aktarır (sayılar sayı hücresi).
+ * Dosya: Elektrik_{DebtYear}_{MM}.xlsx, sayfa: "Fatura Raporu"
+ */
+export async function exportReportExcel(detail) {
+  const XLSX = await import('xlsx')
+  const header = [
+    'Kat', 'Cari', 'Sayaç', 'Başlangıç', 'Bitiş', 'Gün', 'İlk Okuma', 'Son Okuma', 'Tüketim',
+    'Kendi Tutar', 'Havuz Payı', 'KDV Hariç', 'KDV Dahil', 'Fatura No', 'Okuma Metni', 'Gider Metni'
+  ]
+  const n = (v) => (v === null || v === undefined || v === '' || isNaN(Number(v)) ? null : Number(v))
+  const aoa = [header]
+  for (const r of detail?.reportRows || []) {
+    aoa.push([
+      r.flatCode, r.debtorName || '', r.meterName, formatDate(r.startDate), formatDate(r.endDate), n(r.days),
+      n(r.previousIndex), n(r.currentIndex), n(r.consumption), n(r.ownAmount), n(r.poolShare), n(r.exclVat), n(r.total),
+      r.invoiceNumber || '', r.readingText || '', r.expenseText || ''
+    ])
+  }
+  const ws = XLSX.utils.aoa_to_sheet(aoa)
+  const wb = XLSX.utils.book_new()
+  XLSX.utils.book_append_sheet(wb, ws, 'Fatura Raporu')
+  XLSX.writeFile(wb, `Elektrik_${detail.debtYear}_${String(detail.debtMonth).padStart(2, '0')}.xlsx`)
+}
