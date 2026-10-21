@@ -9,6 +9,7 @@ const Tenants = () => import('../pages/tenants/Tenants.vue')
 const Payments = () => import('../pages/payments/Payments.vue')
 const Expenses = () => import('../pages/expenses/Expenses.vue')
 const Utilities = () => import('../pages/expenses/Utilities.vue')
+const Electricity = () => import('../pages/electricity/Electricity.vue')
 const TenantDetailPage = () => import('../pages/tenants/components/TenantDetailPage.vue')
 const AdminDashboard = () => import('../pages/dashboard/AdminDashboard.vue')
 const LoginView = () => import('../pages/auth/LoginView.vue')
@@ -42,6 +43,7 @@ const routes = [
   { path: '/payments', name: 'Payments', component: Payments, meta: { requiresAuth: true, roles: ['admin', 'manager', 'dataentry'] } },
   { path: '/expenses', name: 'Expenses', component: Expenses, meta: { requiresAuth: true, roles: ['admin', 'manager', 'dataentry'] } },
   { path: '/utilities', name: 'Utilities', component: Utilities, meta: { requiresAuth: true, roles: ['admin', 'manager', 'dataentry'] } },
+  { path: '/electricity', name: 'Electricity', component: Electricity, meta: { requiresAuth: true, roles: ['admin', 'manager', 'dataentry'] } },
   { path: '/flats', name: 'Flats', component: Flats, meta: { requiresAuth: true, roles: ['admin', 'manager', 'dataentry'] } },
   { path: '/reports', name: 'Reports', component: Reports, meta: { requiresAuth: true, roles: ['admin', 'manager', 'observer'] } },
   { path: '/automation', name: 'Automation', component: Automation, meta: { requiresAuth: true, roles: ['admin', 'manager'] } },

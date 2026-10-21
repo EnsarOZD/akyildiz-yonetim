@@ -330,6 +330,7 @@ const setTabsBasedOnRole = (role) => {
       { label: 'Ödemeler',    value: 'payments',  route: '/payments'   },
       { label: 'Giderler',    value: 'expenses',  route: '/expenses'   },
       { label: 'Borçlar',     value: 'utilities', route: '/utilities'  },
+      { label: 'Elektrik',    value: 'electricity', route: '/electricity' },
       { label: 'Üniteler',    value: 'flats',     route: '/flats'      },
       { label: 'Talepler',    value: 'service-requests', route: '/service-requests' },
       { label: 'Raporlar',    value: 'reports',   route: '/reports'    },

@@ -199,6 +199,7 @@ const moreItems = computed(() => {
     { name: 'Talepler',     path: '/service-requests', icon: ChatIcon     },
     { name: 'Giderler',     path: '/expenses',      icon: ExpenseIcon  },
     { name: 'Borçlar',      path: '/utilities',     icon: BoltIcon     },
+    { name: 'Elektrik',     path: '/electricity',   icon: BoltIcon     },
     { name: 'Üniteler',     path: '/flats',         icon: HomeIcon     },
     { name: 'Mal Sahipleri', path: '/owners',       icon: BuildingIcon },
     { name: 'Bildirimler',  path: '/notifications', icon: BellIcon     },
