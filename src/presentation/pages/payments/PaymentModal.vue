@@ -139,6 +139,7 @@
             :class="{ '!border-red-500/50': step1Touched && form.type === '' }"
           >
             <option disabled value="">Seçin</option>
+            <option v-if="!editMode" value="all">Toplu – borçlardan seç</option>
             <option value="0">Aidat</option>
             <option value="1">Elektrik</option>
             <option value="2">Su</option>
@@ -217,11 +218,18 @@
         </div>
 
         <div v-if="autoAllocate" class="text-sm text-brand-600 bg-brand-50 rounded-lg p-3 border border-brand-200">
-          Backend borçları en eskiden başlayarak kapatacak, fazla tutar avans hesabına aktarılacak.
+          {{ form.type === 'all' ? 'Tüm türlerdeki borçlar' : 'Borçlar' }} en eskiden başlayarak kapatılacak, fazla tutar avans hesabına aktarılacak.
+        </div>
+
+        <div v-else class="flex items-center justify-between gap-2">
+          <span class="text-xs text-gray-500">{{ tenantDebts.length }} ödenmemiş borç</span>
+          <button type="button" @click="distributeOldestFirst" class="btn btn-xs btn-outline btn-primary">
+            Tutarı en eskiden dağıt
+          </button>
         </div>
 
         <!-- Manuel borç listesi -->
-        <div v-else class="space-y-2 max-h-64 overflow-y-auto overscroll-contain">
+        <div v-if="!autoAllocate" class="space-y-2 max-h-64 overflow-y-auto overscroll-contain">
           <div
             v-for="debt in tenantDebts"
             :key="debt.id"
@@ -369,7 +377,7 @@ import ownersService from '@/infrastructure/services/ownersService'
 import utilityDebtsService from '@/infrastructure/services/utilityDebtsService'
 import { useErrorHandler } from '@/application/composables/useErrorHandler'
 import { useNotify } from '@/application/composables/useNotify'
-import { getPaymentTypeLabel, getDebtTypeLabel } from '@/core/constants/enums'
+import { getPaymentTypeLabel, getDebtTypeLabel, debtTypeToValue } from '@/core/constants/enums'
 import { useDirtyGuard } from '@/application/composables/useDirtyGuard'
 
 const props = defineProps({
@@ -397,7 +405,11 @@ const step1Touched = ref(false)
 const form = reactive({ id: null, tenantId: null, ownerId: null, amount: null, date: '', type: '', bank: '', description: '', receiptNumber: '' })
 // Sistem tarafından üretilen numaralar (AVANS-/MANUEL-) değiştirilmez
 const receiptNumberLocked = computed(() => /^(AVANS|MANUEL)-/.test(String(form.receiptNumber || '')))
-watch(() => props.payment, (val) => { Object.assign(form, val || {}) }, { immediate: true, deep: true })
+watch(() => props.payment, (val) => {
+  Object.assign(form, val || {})
+  // Yeni ödemede varsayılan: toplu (tüm türlerdeki borçlardan seçim)
+  if (!props.editMode && form.type === '') form.type = 'all'
+}, { immediate: true, deep: true })
 
 // ── Input Formatters (Thousand Separator) ─────────────────────
 const isAmountFocused = ref(false)
@@ -468,6 +480,8 @@ const updateRowAmount = (id, val) => {
 
 // ── Dirty guard ───────────────────────────────────────────────
 const { isDirty, resetDirty } = useDirtyGuard(() => ({ ...form }))
+// Yüklenen ödeme (varsayılan tip dahil) temiz başlangıç sayılır
+watch(() => props.payment, () => resetDirty(), { deep: true })
 
 // ── Listeler ──────────────────────────────────────────────────
 const owners = ref([])
@@ -513,6 +527,26 @@ const toggleDebt = (id) => {
   else selectedDebts.value.splice(idx, 1)
 }
 
+const debtRemaining = (d) => Number(d.remainingAmount || d.amount) || 0
+const roundCents = (v) => Math.round(v * 100) / 100
+
+// Gelen tutarı en eski borçtan başlayarak dağıtır; son borca kısmi tutar düşer, artan avansa kalır
+const distributeOldestFirst = () => {
+  let left = roundCents(Number(form.amount) || 0)
+  const ids = []
+  const allocations = {}
+  for (const d of tenantDebts.value) {
+    if (left <= 0) break
+    const amt = roundCents(Math.min(left, debtRemaining(d)))
+    if (amt <= 0) continue
+    ids.push(d.id)
+    allocations[d.id] = amt
+    left = roundCents(left - amt)
+  }
+  selectedDebts.value = ids
+  debtAllocations.value = allocations
+}
+
 const totalAllocated = computed(() =>
   selectedDebts.value.reduce((s, id) => s + (Number(debtAllocations.value[id]) || 0), 0)
 )
@@ -521,14 +555,18 @@ const fetchDebts = async () => {
   loadingDebts.value = true
   tenantDebts.value = []
   try {
-    // DebtType enum: Aidat=0, Electricity=1, Water=2 — Doğalgaz/Diğer (>=3) eşleşen tipi yok, filtre gönderilmez
-    const fTypeNum = form.type !== '' ? parseInt(form.type) : -1
+    // DebtType enum: Aidat=0, Electricity=1, Water=2 — Toplu ('all') ve Doğalgaz/Diğer (>=3) için filtre gönderilmez
+    const fTypeNum = form.type !== '' && form.type !== 'all' ? parseInt(form.type) : -1
     const filterType = fTypeNum >= 0 && fTypeNum <= 2 ? fTypeNum : undefined
+    let debts = []
     if (paymentType.value === 'tenant' && form.tenantId) {
-      tenantDebts.value = await utilityDebtsService.getUtilityDebts({ tenantId: form.tenantId, excludePaid: true, type: filterType }) || []
+      debts = await utilityDebtsService.getUtilityDebts({ tenantId: form.tenantId, excludePaid: true, type: filterType }) || []
     } else if (paymentType.value === 'owner' && form.ownerId) {
-      tenantDebts.value = await utilityDebtsService.getUtilityDebts({ ownerId: form.ownerId, excludePaid: true, type: filterType }) || []
+      debts = await utilityDebtsService.getUtilityDebts({ ownerId: form.ownerId, excludePaid: true, type: filterType }) || []
     }
+    // En eski vade önce (dağıtım ve liste sırası)
+    const dueTime = (d) => (d.dueDate ? new Date(d.dueDate).getTime() : Number.MAX_SAFE_INTEGER)
+    tenantDebts.value = [...debts].sort((a, b) => dueTime(a) - dueTime(b))
   } catch (e) {
     handleNetworkError(e, { component: 'PaymentModal', action: 'fetchDebts' })
   } finally {
@@ -591,19 +629,33 @@ const handleSave = async () => {
     errorMessage.value = 'Manuel eşleştirme için en az 1 borç seçmelisiniz.'
     return
   }
+  if (!autoAllocate.value && roundCents(totalAllocated.value) > roundCents(Number(form.amount) || 0)) {
+    errorMessage.value = 'Borçlara dağıtılan tutar ödeme tutarını aşamaz.'
+    return
+  }
 
   isLoading.value = true
   errorMessage.value = ''
   try {
-    const fType = parseInt(form.type)
+    // Toplu: seçilen borçların hepsi aynı türdeyse o tür, karışık ya da otomatikse Diğer
+    let fType = parseInt(form.type)
+    if (form.type === 'all') {
+      const kinds = new Set(
+        autoAllocate.value ? [] : tenantDebts.value
+          .filter(d => selectedDebts.value.includes(d.id))
+          .map(d => debtTypeToValue(d.type))
+      )
+      fType = kinds.size === 1 ? [...kinds][0] : 4
+    }
     const basePayload = {
       tenantId: paymentType.value === 'tenant' ? form.tenantId : null,
       ownerId:  paymentType.value === 'owner'  ? form.ownerId  : null,
       amount: Number(form.amount),
       paymentDate: form.date,
       // 0->1(Dues), 1&2->2(Utility), o.w->3(Other)
-      type: fType === 0 ? 1 : (fType === 1 || fType === 2 ? 2 : 3), 
-      targetDebtType: fType < 3 ? fType : null,
+      type: fType === 0 ? 1 : (fType === 1 || fType === 2 ? 2 : 3),
+      // Toplu otomatikte tür filtresi yok: tüm borçlar en eskiden kapanır
+      targetDebtType: form.type !== 'all' && fType < 3 ? fType : null,
       bankName: form.bank,
       description: form.description || ''
     }

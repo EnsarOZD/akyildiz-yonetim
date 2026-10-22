@@ -9,7 +9,7 @@ export const PAYMENT_TYPES = [
 ];
 
 export const DEBT_TYPES = [
-  { value: 0, slug: 'dues', label: 'Aidat', icon: '🧾' },
+  { value: 0, slug: 'dues', label: 'Aidat', icon: '🧾', aliases: ['aidat'] },
   { value: 1, slug: 'electricity', label: 'Elektrik', icon: '⚡️' },
   { value: 2, slug: 'water', label: 'Su', icon: '💧' },
   { value: 3, slug: 'gas', label: 'Doğalgaz', icon: '🔥' },
@@ -18,13 +18,13 @@ export const DEBT_TYPES = [
 export const PAYMENT_STATUSES = [
   { value: 0, slug: 'pending', label: 'Beklemede' },
   { value: 1, slug: 'completed', label: 'Tamamlandı' },
-  { value: 2, slug: 'canceled', label: 'İptal Edildi' },
+  { value: 2, slug: 'canceled', label: 'İptal Edildi', aliases: ['cancelled'] },
 ];
 
 export const PAYMENT_METHODS = [
   { value: 0, slug: 'cash', label: 'Nakit' },
-  { value: 1, slug: 'bank-transfer', label: 'Banka Havalesi / EFT' },
-  { value: 2, slug: 'credit-card', label: 'Kredi Kartı' },
+  { value: 1, slug: 'bank-transfer', label: 'Banka Havalesi / EFT', aliases: ['banktransfer'] },
+  { value: 2, slug: 'credit-card', label: 'Kredi Kartı', aliases: ['creditcard'] },
 ];
 
 export const DEBT_STATUSES = [
@@ -81,7 +81,8 @@ export const FLAT_CATEGORIES = [
 // ---------- UTIL ----------
 const toMaps = (arr) => ({
   byValue: Object.fromEntries(arr.map(x => [String(x.value), x])),
-  bySlug: Object.fromEntries(arr.map(x => [String(x.slug ?? x.value).toLowerCase(), x])),
+  // aliases: backend enum adları slug ile tutmadığında (örn. "Aidat", "Cancelled", "BankTransfer")
+  bySlug: Object.fromEntries(arr.flatMap(x => [String(x.slug ?? x.value), ...(x.aliases || [])].map(k => [k.toLowerCase(), x]))),
 });
 const normNum = (v) => { if (v === '' || v === null || v === undefined) return null; const n = Number(v); return Number.isFinite(n) ? n : null; };
 const normSlug = (v) => String(v ?? '').toLowerCase();
