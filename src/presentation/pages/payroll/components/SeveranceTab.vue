@@ -180,6 +180,10 @@ const removeMovement = async (m) => {
 const addCeiling = () => ceilings.value.push({ from: '', amount: null })
 
 const saveCeilings = async () => {
+  if (ceilings.value.some(c => !c.from || !(Number(c.amount) > 0))) {
+    showError('Her satırda tarih ve sıfırdan büyük tutar olmalı.')
+    return
+  }
   busy.value = true
   try {
     const saved = await payrollService.saveSeveranceCeilings(

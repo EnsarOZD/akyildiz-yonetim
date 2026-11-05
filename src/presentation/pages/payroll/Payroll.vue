@@ -19,8 +19,11 @@
         >{{ t.label }}</button>
       </div>
 
-      <PeriodTab v-if="activeTab === 'period'" />
-      <div v-else class="app-card text-center text-sm text-slate-500 py-10">Bu bölüm yakında eklenecek.</div>
+      <PeriodTab v-if="activeTab === 'period'" :key="periodKeyNonce" />
+      <EmployeesTab v-else-if="activeTab === 'employees'" />
+      <SeveranceTab v-else-if="activeTab === 'severance'" />
+
+      <HistoryImportModal v-model="showHistory" @imported="periodKeyNonce++" />
     </div>
   </div>
 </template>
