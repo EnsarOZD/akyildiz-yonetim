@@ -105,7 +105,7 @@
       </template>
     </div>
 
-    <PaymentModal v-model="showPayments" :period="period" :line="paymentLine" @changed="reload" />
+    <PaymentModal v-model="showPayments" :period="period" :line="paymentLine" @changed="refreshTotals" />
     <PayrollUploadModal v-model="showUpload" :period="period" @saved="onPayrollSaved" />
 
     <!-- Onay: farklar / mevcut giderler -->
@@ -177,7 +177,8 @@ const edits = reactive({})
 const { isDirty, resetDirty } = useDirtyGuard(() => edits)
 
 const showPayments = ref(false)
-const paymentLine = ref(null)
+const paymentLineId = ref(null)
+const paymentLine = computed(() => data.value?.lines.find(l => l.id === paymentLineId.value) || null)
 const showUpload = ref(false)
 const showApprove = ref(false)
 const showUnapprove = ref(false)
@@ -218,9 +219,11 @@ const load = async () => {
   }
 }
 
-const reload = async () => {
+// Ödeme değişince yalnız sunucu verisini (ödenen/kalan/toplamlar) tazeler; grid girdileri (edits) korunur.
+const refreshTotals = async () => {
   try {
-    applyPeriod(await payrollService.getPeriod(period.value))
+    const p = await payrollService.getPeriod(period.value)
+    if (p) data.value = p
   } catch (e) {
     showError(errorText(e, 'Maaş dönemi yüklenemedi.'))
   }
@@ -287,7 +290,7 @@ const saveLines = async () => {
 }
 
 const openPayments = (line) => {
-  paymentLine.value = line
+  paymentLineId.value = line.id
   showPayments.value = true
 }
 
