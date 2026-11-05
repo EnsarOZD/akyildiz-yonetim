@@ -1,6 +1,6 @@
 <template>
   <div class="p-4 sm:p-6 min-h-screen pb-24 md:pb-6 space-y-6">
-    <PageHeader title="Otomasyon" subtitle="Aylık aidat tahakkuku ve ödeme hatırlatmalarını yönetin">
+    <PageHeader title="Otomasyon" subtitle="Aylık aidat tahakkuku, aidat faturaları ve ödeme hatırlatmalarını yönetin">
       <template #icon>
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 6v6l4 2m6-2a10 10 0 11-20 0 10 10 0 0120 0z" />
@@ -181,6 +181,9 @@
       </div>
     </div>
 
+    <!-- Aidat fatura dökümü ve toplu fatura numarası girişi -->
+    <AidatInvoicePanel ref="invoicePanel" />
+
     <!-- Eşleşmeyen tanımlar -->
     <div v-if="unmatched.length" class="app-card border border-amber-300 bg-amber-50/60">
       <div class="flex items-start justify-between gap-4 flex-wrap">
@@ -267,6 +270,7 @@
 import { ref, onMounted } from 'vue'
 import PageHeader from '@/presentation/components/ui/PageHeader.vue'
 import ConfirmModal from '@/presentation/components/common/ConfirmModal.vue'
+import AidatInvoicePanel from './components/AidatInvoicePanel.vue'
 import automationService from '@/infrastructure/services/automationService'
 import { useNotification } from '@/application/composables/useNotification'
 import { invalidateFinanceCaches } from '@/application/stores/cacheInvalidation'
@@ -310,6 +314,8 @@ const previousPeriod = (() => {
 
 const remindersRunning = ref(false)
 const showRemindersConfirm = ref(false)
+
+const invoicePanel = ref(null)
 
 const runs = ref([])
 const runsLoading = ref(false)
@@ -433,7 +439,8 @@ const runAccrual = async () => {
     reportRunResult(res, 'Aidat tahakkuku tamamlandı.')
     preview.value = null
     showAccrualConfirm.value = false
-    await Promise.all([loadRuns(), loadUnmatched()])
+    // yeni oluşan aidatlar fatura dökümünde görünsün
+    await Promise.all([loadRuns(), loadUnmatched(), invoicePanel.value?.load()])
   } catch (e) {
     showAccrualConfirm.value = false
     reportRunError(e, 'Aidat oluşturulamadı.')
