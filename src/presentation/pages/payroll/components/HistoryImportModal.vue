@@ -15,7 +15,7 @@
 
       <div v-if="results && !busy" class="overflow-x-auto">
         <table class="table table-sm">
-          <thead><tr><th>Dosya</th><th>Ay</th><th class="text-right">Kişi</th><th class="text-right">Net</th><th class="text-right">Vergi</th><th class="text-right">SGK</th><th class="text-right">Karşılık</th><th>Durum</th></tr></thead>
+          <thead><tr><th>Dosya</th><th>Ay</th><th class="text-right">Kişi</th><th class="text-right">Net</th><th class="text-right">Vergi</th><th class="text-right">SGK</th><th class="text-right">Karşılık</th><th class="text-right">İzin karşılığı</th><th>Durum</th></tr></thead>
           <tbody>
             <tr v-for="(r, i) in results" :key="i">
               <td class="text-xs break-all">{{ r.fileName }}</td>
@@ -25,6 +25,7 @@
               <td class="text-right whitespace-nowrap">{{ formatMoney(r.tax) }}</td>
               <td class="text-right whitespace-nowrap">{{ formatMoney(r.sgk) }}</td>
               <td class="text-right whitespace-nowrap">{{ formatMoney(r.severance) }}</td>
+              <td class="text-right whitespace-nowrap">{{ formatMoney(r.leave) }}</td>
               <td>
                 <span class="badge badge-sm whitespace-normal h-auto py-0.5" :class="statusCls(r.status)">{{ r.status }}</span>
                 <div v-if="r.message" class="text-xs text-slate-500 mt-1">{{ r.message }}</div>

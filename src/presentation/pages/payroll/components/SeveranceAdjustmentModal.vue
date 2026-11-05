@@ -35,7 +35,8 @@ import { errorText } from './payrollHelpers'
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
   employees: { type: Array, default: () => [] },
-  employeeId: { type: String, default: '' }
+  employeeId: { type: String, default: '' },
+  fund: { type: String, default: 'Severance' }
 })
 const emit = defineEmits(['update:modelValue', 'saved'])
 const { showSuccess, showError } = useNotification()
@@ -56,7 +57,7 @@ const submit = async () => {
   try {
     await payrollService.addSeveranceAdjustment({
       employeeId: form.employeeId, date: form.date, amount: Number(form.amount), note: form.note
-    })
+    }, props.fund)
     showSuccess('Düzeltme kaydedildi.')
     emit('saved')
     emit('update:modelValue', false)

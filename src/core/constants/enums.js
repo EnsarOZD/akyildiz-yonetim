@@ -69,6 +69,7 @@ export const EXPENSE_TYPES = [
   { value: 'Tax', label: 'Vergi', icon: '📄' },
   { value: 'SocialSecurity', label: 'SGK', icon: '🏛️' },
   { value: 'Severance', label: 'Tazminat', icon: '🤝' },
+  { value: 'AnnualLeave', label: 'Yıllık izin', icon: '🏖️' },
   { value: 'Other', label: 'Diğer', icon: '📦' },
 ];
 

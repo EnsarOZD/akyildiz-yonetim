@@ -74,13 +74,14 @@ const payrollService = {
   addPayment(period, data) { return apiService.post(`${base}/periods/${period}/payments`, data) },
   deletePayment(period, id) { return apiService.delete(`${base}/periods/${period}/payments/${id}`) },
 
-  // ───── kıdem tazminatı fonu ─────
-  getSeveranceSummary() { return apiService.get(`${base}/severance`) },
-  getSeveranceMovements(employeeId) { return apiService.get(`${base}/severance/${employeeId}`) },
-  addSeveranceAdjustment(data) { return apiService.post(`${base}/severance/adjustments`, data) },
-  deleteSeveranceAdjustment(id) { return apiService.delete(`${base}/severance/adjustments/${id}`) },
-  addSeverancePayment(data) { return apiService.post(`${base}/severance/payments`, data) },
-  deleteSeverancePayment(id) { return apiService.delete(`${base}/severance/payments/${id}`) },
+  // ───── fonlar (fund: 'Severance' | 'AnnualLeave') ─────
+  getSeveranceSummary(fund = 'Severance') { return apiService.get(`${base}/severance?fund=${enc(fund)}`) },
+  getSeveranceMovements(employeeId, fund = 'Severance') { return apiService.get(`${base}/severance/${employeeId}?fund=${enc(fund)}`) },
+  addSeveranceAdjustment(data, fund = 'Severance') { return apiService.post(`${base}/severance/adjustments?fund=${enc(fund)}`, data) },
+  deleteSeveranceAdjustment(id, fund = 'Severance') { return apiService.delete(`${base}/severance/adjustments/${id}?fund=${enc(fund)}`) },
+  /** AnnualLeave için data: payeeEmployeeId | payeeName (yalnız biri), leaveStart, leaveEnd */
+  addSeverancePayment(data, fund = 'Severance') { return apiService.post(`${base}/severance/payments?fund=${enc(fund)}`, data) },
+  deleteSeverancePayment(id, fund = 'Severance') { return apiService.delete(`${base}/severance/payments/${id}?fund=${enc(fund)}`) },
   getSeveranceCeilings() { return apiService.get(`${base}/settings/severance-ceilings`) },
   saveSeveranceCeilings(ceilings) { return apiService.put(`${base}/settings/severance-ceilings`, ceilings) }
 }

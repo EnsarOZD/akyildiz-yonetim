@@ -15,26 +15,28 @@
           <h3 class="font-bold text-sm">Personel bazında fon</h3>
           <div class="flex gap-2">
             <button type="button" class="btn btn-outline btn-sm" @click="openAdjustment()">Düzeltme ekle</button>
-            <button type="button" class="btn btn-primary btn-sm" @click="openPayment()">Tazminat ödemesi</button>
+            <button type="button" class="btn btn-primary btn-sm" @click="openPayment()">{{ isLeave ? 'İzin ödemesi' : 'Tazminat ödemesi' }}</button>
           </div>
         </div>
         <div v-if="!summary.employees.length" class="text-center py-6 text-sm text-slate-500">Kayıt yok.</div>
         <div v-else class="overflow-x-auto">
           <table class="table table-sm">
-            <thead><tr><th>Ad Soyad</th><th>Durum</th><th class="text-right">Hizmet (gün)</th><th class="text-right">Karşılık</th><th class="text-right">Ödenen</th><th class="text-right">Bakiye</th><th class="text-right">Tahmini tazminat</th><th class="text-right">Fark</th></tr></thead>
+            <thead><tr><th>Ad Soyad</th><th>Durum</th><th class="text-right">Hizmet (gün)</th><th class="text-right">{{ isLeave ? 'Birikmiş karşılık' : 'Karşılık' }}</th><th class="text-right">Ödenen</th><th class="text-right">Bakiye</th><template v-if="!isLeave"><th class="text-right">Tahmini tazminat</th><th class="text-right">Fark</th></template></tr></thead>
             <tbody>
               <tr v-for="e in summary.employees" :key="e.employeeId" class="hover cursor-pointer" @click="toggle(e)">
                 <td class="font-medium">{{ e.fullName }}</td>
                 <td>
                   <span class="badge badge-xs" :class="e.isActive ? 'badge-success' : 'badge-ghost'">{{ e.isActive ? 'Aktif' : 'Ayrıldı' }}</span>
-                  <span v-if="!e.eligible" class="badge badge-xs badge-ghost ml-1" title="Kıdem tazminatı için henüz hak kazanılmadı">Hak doğmadı</span>
+                  <span v-if="!isLeave && !e.eligible" class="badge badge-xs badge-ghost ml-1" title="Kıdem tazminatı için henüz hak kazanılmadı">Hak doğmadı</span>
                 </td>
                 <td class="text-right">{{ e.serviceDays }}</td>
                 <td class="text-right whitespace-nowrap">{{ formatMoney(e.accrued) }}</td>
                 <td class="text-right whitespace-nowrap">{{ formatMoney(e.paid) }}</td>
                 <td class="text-right whitespace-nowrap font-bold">{{ formatMoney(e.balance) }}</td>
-                <td class="text-right whitespace-nowrap">{{ formatMoney(e.estimated) }}</td>
-                <td class="text-right whitespace-nowrap" :class="e.gap > 0 ? 'text-error font-bold' : ''">{{ formatMoney(e.gap) }}</td>
+                <template v-if="!isLeave">
+                  <td class="text-right whitespace-nowrap">{{ formatMoney(e.estimated) }}</td>
+                  <td class="text-right whitespace-nowrap" :class="e.gap > 0 ? 'text-error font-bold' : ''">{{ formatMoney(e.gap) }}</td>
+                </template>
               </tr>
             </tbody>
           </table>
@@ -47,13 +49,14 @@
         <div v-else-if="!movements.length" class="text-sm text-slate-500">Hareket yok.</div>
         <div v-else class="overflow-x-auto">
           <table class="table table-sm">
-            <thead><tr><th>Tarih</th><th>Tür</th><th>Dönem</th><th class="text-right">Tutar</th><th>Not</th><th></th></tr></thead>
+            <thead><tr><th>Tarih</th><th>Tür</th><th>Dönem</th><th class="text-right">Tutar</th><th v-if="isLeave">Ödenen</th><th>Not</th><th></th></tr></thead>
             <tbody>
               <tr v-for="m in movements" :key="m.id">
                 <td class="whitespace-nowrap">{{ formatDate(m.date) }}</td>
                 <td><span class="badge badge-xs" :class="KIND_CLS[m.kind] || 'badge-ghost'">{{ m.kind }}</span></td>
                 <td>{{ m.periodLabel || '-' }}</td>
                 <td class="text-right whitespace-nowrap" :class="m.kind === 'Ödeme' ? 'text-error' : ''">{{ m.kind === 'Ödeme' ? '-' : '' }}{{ formatMoney(m.amount) }}</td>
+                <td v-if="isLeave" class="text-xs">{{ m.payee || '-' }}</td>
                 <td class="text-xs">{{ m.note }}</td>
                 <td class="text-right">
                   <button v-if="m.kind !== 'Karşılık'" type="button" class="btn btn-ghost btn-xs text-error" :disabled="busy" @click="removeMovement(m)">Sil</button>
@@ -64,7 +67,7 @@
         </div>
       </div>
 
-      <div class="app-card space-y-3">
+      <div v-if="!isLeave" class="app-card space-y-3">
         <div class="flex items-center justify-between">
           <h3 class="font-bold text-sm">Kıdem tazminatı tavanları</h3>
           <div class="flex gap-2">
@@ -86,8 +89,8 @@
       </div>
     </template>
 
-    <SeverancePaymentModal v-model="showPayment" :employees="summary?.employees || []" :employee-id="modalEmployeeId" @saved="reload" />
-    <SeveranceAdjustmentModal v-model="showAdjustment" :employees="summary?.employees || []" :employee-id="modalEmployeeId" @saved="reload" />
+    <SeverancePaymentModal v-model="showPayment" :employees="summary?.employees || []" :employee-id="modalEmployeeId" :fund="fund" @saved="reload" />
+    <SeveranceAdjustmentModal v-model="showAdjustment" :employees="summary?.employees || []" :employee-id="modalEmployeeId" :fund="fund" @saved="reload" />
   </div>
 </template>
 
@@ -98,6 +101,9 @@ import { useNotification } from '@/application/composables/useNotification'
 import SeverancePaymentModal from './SeverancePaymentModal.vue'
 import SeveranceAdjustmentModal from './SeveranceAdjustmentModal.vue'
 import { formatMoney, formatDate, errorText } from './payrollHelpers'
+
+const props = defineProps({ fund: { type: String, default: 'Severance' } })
+const isLeave = computed(() => props.fund === 'AnnualLeave')
 
 const KIND_CLS = { 'Karşılık': 'badge-info', 'Düzeltme': 'badge-warning', 'Ödeme': 'badge-error' }
 
@@ -119,7 +125,7 @@ const loadMovements = async () => {
   if (!openId.value) return
   movLoading.value = true
   try {
-    movements.value = (await payrollService.getSeveranceMovements(openId.value)) || []
+    movements.value = (await payrollService.getSeveranceMovements(openId.value, props.fund)) || []
   } catch (e) {
     showError(errorText(e, 'Hareketler yüklenemedi.'))
   } finally {
@@ -129,9 +135,9 @@ const loadMovements = async () => {
 
 const loadSummary = async () => {
   try {
-    summary.value = await payrollService.getSeveranceSummary()
+    summary.value = await payrollService.getSeveranceSummary(props.fund)
   } catch (e) {
-    showError(errorText(e, 'Tazminat fonu yüklenemedi.'))
+    showError(errorText(e, isLeave.value ? 'Yıllık izin fonu yüklenemedi.' : 'Tazminat fonu yüklenemedi.'))
   }
 }
 
@@ -146,7 +152,7 @@ const loadCeilings = async () => {
 
 onMounted(async () => {
   loading.value = true
-  await Promise.all([loadSummary(), loadCeilings()])
+  await Promise.all([loadSummary(), isLeave.value ? Promise.resolve() : loadCeilings()])
   loading.value = false
 })
 
@@ -166,8 +172,8 @@ const openAdjustment = () => { modalEmployeeId.value = openId.value || ''; showA
 const removeMovement = async (m) => {
   busy.value = true
   try {
-    if (m.kind === 'Ödeme') await payrollService.deleteSeverancePayment(m.id)
-    else await payrollService.deleteSeveranceAdjustment(m.id)
+    if (m.kind === 'Ödeme') await payrollService.deleteSeverancePayment(m.id, props.fund)
+    else await payrollService.deleteSeveranceAdjustment(m.id, props.fund)
     showSuccess('Kayıt silindi.')
     await reload()
   } catch (e) {

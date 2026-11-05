@@ -67,6 +67,7 @@
                 <th class="text-right">Yol</th>
                 <th class="text-right">Mesai</th>
                 <th class="text-right">Tatil</th>
+                <th class="text-right">Yemek</th>
                 <th class="text-right">Hakediş</th>
                 <th class="text-right">Bordro net</th>
                 <th class="text-right">Fark</th>
@@ -87,6 +88,7 @@
                 <td class="text-right whitespace-nowrap">{{ formatMoney(l.transportAmount) }}</td>
                 <td class="text-right whitespace-nowrap">{{ formatMoney(l.overtimeAmount) }}</td>
                 <td class="text-right whitespace-nowrap">{{ formatMoney(l.holidayAmount) }}</td>
+                <td class="text-right whitespace-nowrap">{{ formatMoney(l.mealAmount) }}</td>
                 <td class="text-right whitespace-nowrap font-medium">{{ formatMoney(l.netEntitlement) }}</td>
                 <td class="text-right whitespace-nowrap">{{ formatMoney(l.payrollNet) }}</td>
                 <td class="text-right whitespace-nowrap">
@@ -362,9 +364,9 @@ const downloadPdf = async () => {
 const downloadExcel = async () => {
   try {
     const XLSX = await import('xlsx')
-    const aoa = [['Ad Soyad', 'TCKN', 'Görev', 'Gün', 'Mesai', 'Tatil', 'Prim', 'Hakediş']]
+    const aoa = [['Ad Soyad', 'TCKN', 'Görev', 'Gün', 'Mesai', 'Tatil', 'Prim', 'Hakediş (yemek hariç)']]
     for (const l of data.value?.lines || []) {
-      aoa.push([l.fullName, l.nationalId, l.position || '', l.workDays, l.overtimeHours, l.holidayDays, Number(l.bonus), Number(l.netEntitlement)])
+      aoa.push([l.fullName, l.nationalId, l.position || '', l.workDays, l.overtimeHours, l.holidayDays, Number(l.bonus), Number(l.netEntitlement) - Number(l.mealAmount || 0)])
     }
     const wb = XLSX.utils.book_new()
     XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(aoa), 'Muhasebe Listesi')
