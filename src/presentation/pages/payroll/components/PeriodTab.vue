@@ -366,7 +366,7 @@ const downloadExcel = async () => {
     const XLSX = await import('xlsx')
     const aoa = [['Ad Soyad', 'TCKN', 'Görev', 'Gün', 'Mesai', 'Tatil', 'Prim', 'Hakediş (yemek hariç)']]
     for (const l of data.value?.lines || []) {
-      aoa.push([l.fullName, l.nationalId, l.position || '', l.workDays, l.overtimeHours, l.holidayDays, Number(l.bonus), Number(l.netEntitlement) - Number(l.mealAmount || 0)])
+      aoa.push([l.fullName, l.nationalId, l.position || '', l.workDays, l.overtimeHours, l.holidayDays, Number(l.bonus), Math.round((Number(l.netEntitlement) - Number(l.mealAmount || 0)) * 100) / 100])
     }
     const wb = XLSX.utils.book_new()
     XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(aoa), 'Muhasebe Listesi')

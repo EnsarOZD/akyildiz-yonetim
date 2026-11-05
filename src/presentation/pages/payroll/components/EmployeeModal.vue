@@ -13,7 +13,7 @@
         <div class="form-control"><label class="label py-1"><span class="label-text text-xs">İşten ayrılma</span></label>
           <input v-model="form.endDate" type="date" class="input input-bordered input-sm" /></div>
         <div class="form-control"><label class="label py-1"><span class="label-text text-xs">Yıllık izin günü</span></label>
-          <input v-model.number="form.annualLeaveDays" type="number" min="0" max="365" step="1" class="input input-bordered input-sm" required /></div>
+          <input v-model.number="form.annualLeaveDays" type="number" min="0" max="60" step="1" class="input input-bordered input-sm" required /></div>
         <div class="form-control justify-end"><label class="label cursor-pointer justify-start gap-2 py-1">
           <input v-model="form.isActive" type="checkbox" class="checkbox checkbox-sm" /><span class="label-text text-sm">Aktif</span></label></div>
         <div class="form-control md:col-span-2"><label class="label py-1"><span class="label-text text-xs">Not</span></label>
