@@ -3,7 +3,7 @@
     <!-- Başlık -->
     <div class="text-center">
       <h2 class="text-2xl font-bold text-gray-800">Yıllık Aidat Yönetimi</h2>
-      <p class="text-gray-500 mt-2">Kiracılar için yıllık aidat tutarlarını tanımlayın ve yönetin</p>
+      <p class="text-gray-500 mt-2">Kiracılar ve boş üniteler için mal sahiplerine yazılacak yıllık aidat tutarlarını tanımlayın</p>
     </div>
 
     <!-- Aidat Tanımlama Formu -->
@@ -11,23 +11,32 @@
       <div class="card-body">
         <h3 class="card-title">Yeni Aidat Tanımlama</h3>
         <form @submit.prevent="handleSubmit" class="space-y-4">
+          <div class="join" role="radiogroup" aria-label="Borçlu türü">
+            <button type="button" class="btn btn-sm join-item" :class="debtorType === 'Tenant' ? 'btn-primary' : 'btn-ghost'"
+                    :aria-pressed="debtorType === 'Tenant'" :disabled="!!selectedId" @click="debtorType = 'Tenant'">Kiracı</button>
+            <button type="button" class="btn btn-sm join-item" :class="debtorType === 'Owner' ? 'btn-primary' : 'btn-ghost'"
+                    :aria-pressed="debtorType === 'Owner'" :disabled="!!selectedId" @click="debtorType = 'Owner'">Mal sahibi (boş ünite)</button>
+          </div>
+          <p v-if="debtorType === 'Owner'" class="text-sm text-base-content/70">
+            Malik tanımı yalnızca ünitede kiracı yokken kullanılır; ünite kiracılıysa aidat kiracıya yazılır.
+          </p>
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
             <div class="form-control">
               <label class="label"><span class="label-text">Yıl</span></label>
               <input type="number" v-model.number="year" class="input input-bordered w-full" min="2020" />
             </div>
             <div class="form-control">
-              <label class="label"><span class="label-text">Şirket</span></label>
-              <select v-model="selectedTenant" class="select select-bordered w-full">
+              <label class="label"><span class="label-text">{{ debtorType === 'Owner' ? 'Mal Sahibi' : 'Şirket' }}</span></label>
+              <select v-model="selectedDebtor" class="select select-bordered w-full">
                 <option disabled value="">Seçiniz</option>
-                <option v-for="t in tenants" :key="t.id" :value="t.id">{{ t.company }}</option>
+                <option v-for="p in debtorOptions" :key="p.id" :value="p.id">{{ p.company }}</option>
               </select>
             </div>
             <div class="form-control">
               <label class="label"><span class="label-text">Ünite</span></label>
-              <select v-model="selectedFlatId" class="select select-bordered w-full" :disabled="!selectedTenant">
+              <select v-model="selectedFlatId" class="select select-bordered w-full" :disabled="!selectedDebtor">
                 <option disabled value="">Seçiniz</option>
-                <option v-for="f in selectedTenantUnits" :key="f.id" :value="f.id">{{ f.code }}</option>
+                <option v-for="f in selectedDebtorUnits" :key="f.id" :value="f.id">{{ f.code }}</option>
               </select>
             </div>
             <div class="form-control">
@@ -64,10 +73,10 @@
             </select>
           </div>
           <div class="form-control">
-            <label class="label"><span class="label-text">Şirket Filtresi</span></label>
+            <label class="label"><span class="label-text">Borçlu Filtresi</span></label>
             <select v-model="companyFilter" class="select select-bordered w-full">
-              <option value="">Tüm Şirketler</option>
-              <option v-for="tenant in tenants" :key="tenant.id" :value="tenant.company">{{ tenant.company }}</option>
+              <option value="">Tümü</option>
+              <option v-for="name in availableCompanies" :key="name" :value="name">{{ name }}</option>
             </select>
           </div>
           <div class="form-control">
@@ -79,7 +88,7 @@
           </div>
           <div class="form-control">
             <label class="label"><span class="label-text">Arama</span></label>
-            <input v-model="searchTerm" class="input input-bordered w-full" placeholder="Şirket adı ile ara..." />
+            <input v-model="searchTerm" class="input input-bordered w-full" placeholder="Şirket / malik adı ile ara..." />
           </div>
         </div>
 
@@ -89,7 +98,7 @@
             <thead>
               <tr>
                 <th scope="col">Yıl</th>
-                <th scope="col">Şirket</th>
+                <th scope="col">Borçlu</th>
                 <th scope="col">Kat</th>
                 <th scope="col">Aidat (KDV Hariç)</th>
                 <th scope="col">KDV Dahil Tutar</th>
@@ -99,7 +108,10 @@
             <tbody>
               <tr v-for="item in filteredDuesList" :key="item.id" class="hover">
                 <td><span class="badge badge-ghost">{{ item.year }}</span></td>
-                <td class="font-medium">{{ item.company }}</td>
+                <td class="font-medium">
+                  {{ item.company }}
+                  <span v-if="item.debtorType === 'Owner'" class="badge badge-info badge-sm ml-1" title="Ünite boşken mal sahibine yazılır">Malik</span>
+                </td>
                 <td>
                   {{ item.unit }}
                   <span v-if="!item.flatId" class="badge badge-warning badge-sm ml-1">Ünite seçilmemiş</span>
@@ -151,12 +163,16 @@ import { ref, onMounted, computed, watch, nextTick } from 'vue'
 import { useNotify } from '@/application/composables/useNotify'
 import aidatService from '@/infrastructure/services/aidatService'
 import tenantsService from '@/infrastructure/services/tenantsService'
+import ownersService from '@/infrastructure/services/ownersService'
 import ConfirmModal from '@/presentation/components/common/ConfirmModal.vue'
 
 const { notifySuccess, notifyError } = useNotify()
 const emit = defineEmits(['stats'])
 const tenants = ref([])
-const selectedTenant = ref('')
+const owners = ref([])
+// 'Tenant': kiracı tanımı · 'Owner': ünite boşken mal sahibine yazılan tanım
+const debtorType = ref('Tenant')
+const selectedDebtor = ref('')
 const selectedFlatId = ref('')
 const year = ref(new Date().getFullYear())
 const amount = ref('')
@@ -199,13 +215,15 @@ const formatInput = (e) => {
   amount.value = value;
 }
 
-const selectedTenantUnits = computed(() => {
-  const tenant = tenants.value.find(t => t.id === selectedTenant.value)
-  return tenant ? tenant.flats || [] : []
+const debtorOptions = computed(() => debtorType.value === 'Owner' ? owners.value : tenants.value)
+
+const selectedDebtorUnits = computed(() => {
+  const debtor = debtorOptions.value.find(p => p.id === selectedDebtor.value)
+  return debtor ? debtor.flats || [] : []
 })
 
 const isFormValid = computed(() => {
-  return selectedTenant.value && selectedFlatId.value && parseAmount() > 0 && year.value >= 2020
+  return selectedDebtor.value && selectedFlatId.value && parseAmount() > 0 && year.value >= 2020
 })
 
 // Filtreleme için computed'lar
@@ -217,6 +235,11 @@ const availableYears = computed(() => {
 const availableUnits = computed(() => {
   const units = [...new Set(duesList.value.map(item => item.unit))]
   return units.sort()
+})
+
+const availableCompanies = computed(() => {
+  const names = [...new Set(duesList.value.map(item => item.company))]
+  return names.sort((a, b) => a.localeCompare(b, 'tr'))
 })
 
 const filteredDuesList = computed(() => {
@@ -235,14 +258,14 @@ const filteredDuesList = computed(() => {
   }
 
   if (searchTerm.value) {
-    const search = searchTerm.value.toLowerCase()
-    filtered = filtered.filter(item => 
-      item.company.toLowerCase().includes(search) ||
-      item.unit.toLowerCase().includes(search)
+    const search = searchTerm.value.toLocaleLowerCase('tr')
+    filtered = filtered.filter(item =>
+      item.company.toLocaleLowerCase('tr').includes(search) ||
+      item.unit.toLocaleLowerCase('tr').includes(search)
     )
   }
 
-  return filtered.sort((a, b) => b.year - a.year || a.company.localeCompare(b.company))
+  return [...filtered].sort((a, b) => b.year - a.year || a.company.localeCompare(b.company, 'tr'))
 })
 
 const totalFilteredAmount = computed(() => {
@@ -259,19 +282,23 @@ const fetchDues = async () => {
       const amount = Number(d.amount ?? d.kdvHaric ?? 0)
       const year   = Number(d.year ?? d.periodYear ?? new Date().getFullYear())
       const unit   = d.unit ?? d.flatCode ?? d.flat?.code ?? '-'
-     const tenantId = d.tenantId ?? d.tenant?.id ?? null
-      const company =
-       d.company ??
-        d.companyName ??
-        d.tenantCompanyName ??
-        (tenants.value.find(t => t.id === tenantId)?.company) ??
-        '-'
+      const ownerId = d.ownerId ?? null
+      const isOwner = d.debtorType === 'Owner' || !!ownerId
+      const tenantId = isOwner ? null : (d.tenantId ?? d.tenant?.id ?? null)
+      const company = isOwner
+        ? (d.ownerName || owners.value.find(o => o.id === ownerId)?.company || '-')
+        : (d.company ??
+           d.companyName ??
+           d.tenantName ??
+           (tenants.value.find(t => t.id === tenantId)?.company) ??
+           '-')
 
       return {
         id: d.id,
         flatId: d.flatId ?? null,
         year,
-        tenantId,
+        debtorType: isOwner ? 'Owner' : 'Tenant',
+        debtorId: isOwner ? ownerId : tenantId,
         company,
         unit,
         amount,
@@ -287,7 +314,7 @@ const fetchDues = async () => {
 }
 
 const resetForm = () => {
-  selectedTenant.value = ''
+  selectedDebtor.value = ''
   selectedFlatId.value = ''
   amount.value = ''
   year.value = new Date().getFullYear()
@@ -317,14 +344,16 @@ const handleConfirmDelete = async () => {
 }
 
 const editDues = async (item) => {
-  selectedTenant.value = item.tenantId
-  // tenant watcher ünite seçimini temizler; önce onun çalışmasını bekle
+  selectedId.value = item.id
+  debtorType.value = item.debtorType
   await nextTick()
-  // Eski kayıtlarda flatId yoksa kiracının ünitelerinden koda göre eşleştir
-  selectedFlatId.value = item.flatId || (tenants.value.find(t => t.id === item.tenantId)?.flats || []).find(f => f.code === item.unit)?.id || ''
+  selectedDebtor.value = item.debtorId
+  // borçlu watcher'ı ünite seçimini temizler; önce onun çalışmasını bekle
+  await nextTick()
+  // Eski kayıtlarda flatId yoksa borçlunun ünitelerinden koda göre eşleştir
+  selectedFlatId.value = item.flatId || (debtorOptions.value.find(p => p.id === item.debtorId)?.flats || []).find(f => f.code === item.unit)?.id || ''
   amount.value = item.amount.toString().replace('.', ',')
   year.value = item.year
-  selectedId.value = item.id
 }
 
 const handleSubmit = async () => {
@@ -335,10 +364,12 @@ const handleSubmit = async () => {
   }
 
   const vatAmount = parseFloat((rawAmount * 1.2).toFixed(2))
+  const isOwner = debtorType.value === 'Owner'
 
-  const flat = selectedTenantUnits.value.find(f => f.id === selectedFlatId.value)
+  const flat = selectedDebtorUnits.value.find(f => f.id === selectedFlatId.value)
   const data = {
-    tenantId: selectedTenant.value,
+    tenantId: isOwner ? null : selectedDebtor.value,
+    ownerId: isOwner ? selectedDebtor.value : null,
     flatId: selectedFlatId.value,
     unit: flat?.code || '',
     year: year.value,
@@ -348,14 +379,15 @@ const handleSubmit = async () => {
 
   try {
     if (selectedId.value) {
-      await aidatService.updateAidatDefinition(selectedId.value, data)
+      await aidatService.updateAidatDefinition(selectedId.value, { ...data, isActive: true })
       notifySuccess('Aidat güncellendi.')
     } else {
       const exists = duesList.value.find(
-        d => d.year === year.value && d.tenantId === selectedTenant.value && (d.flatId ? d.flatId === selectedFlatId.value : d.unit === flat?.code)
+        d => d.year === year.value && d.debtorType === debtorType.value && d.debtorId === selectedDebtor.value &&
+          (d.flatId ? d.flatId === selectedFlatId.value : d.unit === flat?.code)
       )
       if (exists) {
-        notifyError('Bu şirketin bu katı için bu yıl zaten aidat tanımlanmış.')
+        notifyError('Bu ünite için bu yıl zaten aidat tanımlanmış.')
         return
       }
 
@@ -364,28 +396,45 @@ const handleSubmit = async () => {
     }
   } catch (error) {
     console.error("Aidat kaydetme hatası:", error)
-    notifyError("Bir hata oluştu.")
+    notifyError(error?.message || "Bir hata oluştu.")
+    return
   }
 
   resetForm()
   await fetchDues()
 }
 
-watch(selectedTenant, () => { selectedFlatId.value = '' })
+watch(debtorType, () => { if (!selectedId.value) selectedDebtor.value = '' })
+watch(selectedDebtor, () => { selectedFlatId.value = '' })
+
+const toFlats = (flats) => (flats || []).filter(f => f.id && f.code).map(f => ({ id: f.id, code: f.code }))
 
 onMounted(async () => {
-  try {
-    const response = await tenantsService.getTenants() || []
+  const [tenantRes, ownerRes] = await Promise.allSettled([
+    tenantsService.getTenants(),
+    ownersService.getOwners()
+  ])
+  if (tenantRes.status === 'fulfilled') {
     // /tenants -> companyName + flats[].code
-    tenants.value = response.map(t => ({
+    tenants.value = (tenantRes.value || []).map(t => ({
       id: t.id,
-      company: t.companyName,                    // 👈 template bu ismi bekliyor
-      flats: (t.flats || []).filter(f => f.id && f.code).map(f => ({ id: f.id, code: f.code }))
+      company: t.companyName,
+      flats: toFlats(t.flats)
     }))
-    await fetchDues()
-  } catch (error) {
-    console.error('Kiracılar çekilirken hata oluştu:', error)
-    tenants.value = []
+  } else {
+    console.error('Kiracılar çekilirken hata oluştu:', tenantRes.reason)
   }
+  if (ownerRes.status === 'fulfilled') {
+    owners.value = (ownerRes.value || [])
+      .filter(o => o.isActive !== false)
+      .map(o => ({
+        id: o.id,
+        company: `${o.firstName || ''} ${o.lastName || ''}`.trim(),
+        flats: toFlats(o.flats)
+      }))
+  } else {
+    console.error('Mal sahipleri çekilirken hata oluştu:', ownerRes.reason)
+  }
+  await fetchDues()
 })
 </script>
