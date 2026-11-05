@@ -119,6 +119,7 @@ import PageHeader from '@/presentation/components/ui/PageHeader.vue'
 import Owners from '../owners/Owners.vue'
 import UserManagement from './UserManagement.vue'
 import BankSettings from './BankSettings.vue'
+import BrandingSettings from './BrandingSettings.vue'
 import { useTenantsStore } from '@/application/stores/tenants'
 import TargetedNotificationModal from '../notifications/components/TargetedNotificationModal.vue'
 
@@ -135,6 +136,7 @@ const tabComponents = {
   owners: Owners,
   users: UserManagement,
   banks: BankSettings,
+  branding: BrandingSettings,
 }
 
 // SVG icon components for tabs
@@ -155,10 +157,17 @@ const BanksIcon = defineComponent({
   ])
 })
 
+const BrandingIcon = defineComponent({
+  render: () => h('svg', { fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [
+    h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '1.75', d: 'M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z' })
+  ])
+})
+
 const tabs = computed(() => [
   { key: 'owners', label: 'Mal Sahipleri',      icon: OwnersIcon, badge: tabCounts.owners || null },
   { key: 'users',  label: 'Kullanıcı Yönetimi', icon: UsersIcon,  badge: tabCounts.users || null },
   { key: 'banks',  label: 'Bankalar',           icon: BanksIcon },
+  { key: 'branding', label: 'Kurum Bilgileri',  icon: BrandingIcon },
 ])
 
 const currentComponent = computed(() => tabComponents[activeTab.value] ?? null)
