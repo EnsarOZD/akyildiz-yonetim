@@ -82,6 +82,7 @@
             </span>
             <span v-if="user.isActive === false" class="badge-overdue text-xs px-2 py-0.5 rounded-full font-medium">Pasif</span>
             <span v-else class="badge-active text-xs px-2 py-0.5 rounded-full font-medium">Aktif</span>
+            <span v-if="user.ccOnReminders" class="badge badge-sm badge-outline badge-info" title="Borç hatırlatma e-postalarında CC'de">CC</span>
           </div>
 
           <!-- Firma -->
@@ -174,6 +175,16 @@
             </div>
           </div>
 
+          <div v-if="isStaffRole" class="form-control">
+            <label class="label cursor-pointer justify-start gap-3 py-1">
+              <input type="checkbox" v-model="newUser.ccOnReminders" class="checkbox checkbox-sm checkbox-primary" />
+              <span class="label-text">Borç hatırlatma e-postalarında CC'ye ekle</span>
+            </label>
+            <label class="label py-0.5">
+              <span class="label-text-alt text-[#8298ab]">Kiracı ve mal sahiplerine giden hatırlatmaların bir kopyası bu kullanıcının e-posta adresine gider.</span>
+            </label>
+          </div>
+
           <div class="flex items-start gap-3 p-3 rounded-xl bg-brand-50 border border-brand-200">
             <svg class="w-4 h-4 text-brand-600 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -250,8 +261,12 @@ const newUser = reactive({
   lastName: '',
   email: '',
   role: '',
-  companyId: null
+  companyId: null,
+  ccOnReminders: false
 })
+
+// Hatırlatma CC'si yalnızca yönetim rollerinde (kiracı/malik dışı) anlamlı
+const isStaffRole = computed(() => !!newUser.role && newUser.role !== ROLES.TENANT && newUser.role !== ROLES.OWNER)
 
 const notification = reactive({
   message: '',
@@ -337,6 +352,7 @@ const editUser = (user) => {
   newUser.email = user.email
   newUser.role = user.role
   newUser.companyId = user.companyId || null
+  newUser.ccOnReminders = !!user.ccOnReminders
   showAddUserModal.value = true
 }
 
@@ -366,6 +382,7 @@ const resetForm = () => {
   newUser.email = ''
   newUser.role = ''
   newUser.companyId = null
+  newUser.ccOnReminders = false
   notification.message = ''
 }
 
@@ -402,6 +419,7 @@ const createUser = async () => {
       email: newUser.email,
       role: newUser.role,
       companyId: needsCompanyId ? newUser.companyId : null,
+      ccOnReminders: isStaffRole.value && newUser.ccOnReminders,
     }
 
     if (isEditMode.value && selectedUser.value) {
