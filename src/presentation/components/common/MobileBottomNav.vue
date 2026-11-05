@@ -209,6 +209,7 @@ const moreItems = computed(() => {
 
   if (role === 'admin' || role === 'manager') {
     items.splice(1, 0, { name: 'Otomasyon', path: '/automation', icon: AutomationIcon })
+    items.splice(2, 0, { name: 'Personel', path: '/payroll', icon: UserIcon })
   }
 
   if (role === 'admin') {
