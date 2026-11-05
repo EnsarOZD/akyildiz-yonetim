@@ -1,7 +1,11 @@
 <template>
   <div class="p-4 sm:p-10 min-h-screen pb-24 md:pb-10">
     <div class="max-w-7xl mx-auto space-y-6">
-      <PageHeader title="Personel & Maaş" subtitle="Aylık maaş dönemleri, ödemeler, bordro ve kıdem tazminatı fonu" />
+      <PageHeader title="Personel & Maaş" subtitle="Aylık maaş dönemleri, ödemeler, bordro ve kıdem tazminatı fonu">
+        <template #actions>
+          <button type="button" class="btn btn-outline btn-sm" @click="showHistory = true">Geçmiş bordroları yükle</button>
+        </template>
+      </PageHeader>
 
       <div role="tablist" class="tabs tabs-boxed bg-base-200 p-1 w-fit max-w-full overflow-x-auto">
         <button
@@ -25,6 +29,9 @@
 import { ref, watch } from 'vue'
 import PageHeader from '@/presentation/components/ui/PageHeader.vue'
 import PeriodTab from './components/PeriodTab.vue'
+import EmployeesTab from './components/EmployeesTab.vue'
+import SeveranceTab from './components/SeveranceTab.vue'
+import HistoryImportModal from './components/HistoryImportModal.vue'
 
 const tabs = [
   { value: 'period', label: 'Maaş Dönemi' },
@@ -41,6 +48,8 @@ const readTab = () => {
     return 'period'
   }
 }
+const showHistory = ref(false)
+const periodKeyNonce = ref(0) // içe aktarım sonrası dönem sekmesini yeniden yükler
 const activeTab = ref(readTab())
 watch(activeTab, (v) => {
   try { localStorage.setItem(STORAGE_KEY, v) } catch { /* yoksay */ }
