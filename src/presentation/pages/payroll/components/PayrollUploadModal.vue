@@ -41,11 +41,15 @@
         <div v-if="preview.missingFromPayroll?.length" class="alert alert-warning text-xs">
           Bordroda bulunmayan personel: {{ preview.missingFromPayroll.join(', ') }}
         </div>
+        <label v-if="hasUnknown" class="alert alert-warning text-xs flex items-start gap-2 cursor-pointer" data-testid="payroll-unknown-confirm">
+          <input v-model="confirmUnknown" type="checkbox" class="checkbox checkbox-sm mt-0.5" />
+          <span>Bu kişiler dönemde yok; maaş gideri bordro toplamından yazılır ama karşılık ve ödeme takibi yapılmaz. Önce Personel sekmesinden ekleyip dönemde 'personel ekle' yapmanız önerilir. Yine de kaydetmek istediğimi onaylıyorum.</span>
+        </label>
       </template>
     </div>
     <template #footer>
       <button type="button" class="btn btn-ghost btn-sm" @click="$emit('update:modelValue', false)">Vazgeç</button>
-      <button type="button" class="btn btn-primary btn-sm" :disabled="!preview || busy || saving" @click="save">
+      <button type="button" class="btn btn-primary btn-sm" :disabled="!canSave" data-testid="payroll-upload-save" @click="save">
         <span v-if="saving" class="loading loading-spinner loading-xs"></span>Kaydet
       </button>
     </template>
@@ -70,21 +74,25 @@ const file = ref(null)
 const preview = ref(null)
 const busy = ref(false)
 const saving = ref(false)
+const confirmUnknown = ref(false)
+const hasUnknown = computed(() => (preview.value?.notInSystem?.length ?? 0) > 0)
+const canSave = computed(() => !!preview.value && !busy.value && !saving.value && (!hasUnknown.value || confirmUnknown.value))
 
 const label = computed(() => {
   const p = parsePeriodKey(props.period)
   return p ? monthLabel(p.year, p.month) : props.period
 })
-const hasDiff = (r) => r.difference !== null && r.difference !== undefined && Math.abs(r.difference) > 1
+const hasDiff = (r) => r.differenceReasons?.length > 0
 
 watch(() => props.modelValue, (open) => {
-  if (open) { file.value = null; preview.value = null }
+  if (open) { file.value = null; preview.value = null; confirmUnknown.value = false }
 })
 
 const onFile = async (ev) => {
   const f = ev.target.files?.[0]
   file.value = f || null
   preview.value = null
+  confirmUnknown.value = false
   if (!f) return
   busy.value = true
   try {

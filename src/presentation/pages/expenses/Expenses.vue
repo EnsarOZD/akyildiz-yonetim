@@ -208,7 +208,8 @@
 
                 <!-- İşlem Menüsü -->
                 <td class="px-4 py-3 text-center">
-                  <div class="dropdown dropdown-end">
+                  <span v-if="e.isPayrollManaged" class="badge badge-ghost badge-sm" data-testid="expense-payroll-badge" title="Bu gider Personel & Maaş modülünden oluşturuldu; değişiklik için o ekranı kullanın.">Maaş modülü</span>
+                  <div v-else class="dropdown dropdown-end">
                     <button tabindex="0" class="btn btn-ghost btn-xs btn-square text-[#8298ab] hover:text-red-500">
                       <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                         <circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/><circle cx="5" cy="12" r="1.5"/>

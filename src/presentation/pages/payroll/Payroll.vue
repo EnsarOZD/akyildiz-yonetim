@@ -19,7 +19,7 @@
         >{{ t.label }}</button>
       </div>
 
-      <PeriodTab v-if="activeTab === 'period'" :key="periodKeyNonce" />
+      <PeriodTab v-if="activeTab === 'period'" ref="periodTabRef" :key="periodKeyNonce" />
       <EmployeesTab v-else-if="activeTab === 'employees'" />
       <div v-else-if="activeTab === 'severance'" class="space-y-4" data-testid="payroll-funds-tab">
         <div role="tablist" class="tabs tabs-bordered">
@@ -36,7 +36,7 @@
         <SeveranceTab :key="activeFund" :fund="activeFund" />
       </div>
 
-      <HistoryImportModal v-model="showHistory" @imported="periodKeyNonce++" />
+      <HistoryImportModal v-model="showHistory" @imported="onImported" />
     </div>
   </div>
 </template>
@@ -72,6 +72,13 @@ const readTab = () => {
 }
 const showHistory = ref(false)
 const periodKeyNonce = ref(0) // içe aktarım sonrası dönem sekmesini yeniden yükler
+const periodTabRef = ref(null)
+const onImported = () => {
+  // Dönem sekmesi yeniden yüklenirken kaydedilmemiş grid değişiklikleri sessizce kaybolmasın.
+  if (activeTab.value === 'period' && periodTabRef.value?.isDirty &&
+    !window.confirm('Dönem sekmesinde kaydedilmemiş değişiklikleriniz var. Geçmiş bordro içe aktarıldı; dönemi yenilemek bu değişiklikleri siler. Yenilensin mi?')) return
+  periodKeyNonce.value++
+}
 const activeTab = ref(readTab())
 watch(activeTab, (v) => {
   try { localStorage.setItem(STORAGE_KEY, v) } catch { /* yoksay */ }

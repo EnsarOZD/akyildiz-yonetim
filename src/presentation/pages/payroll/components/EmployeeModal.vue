@@ -7,7 +7,7 @@
         <div class="form-control"><label class="label py-1"><span class="label-text text-xs">TCKN</span></label>
           <input v-model="form.nationalId" type="text" maxlength="11" inputmode="numeric" class="input input-bordered input-sm" required /></div>
         <div class="form-control"><label class="label py-1"><span class="label-text text-xs">Görev</span></label>
-          <input v-model="form.position" type="text" maxlength="100" class="input input-bordered input-sm" /></div>
+          <input v-model="form.position" type="text" maxlength="50" class="input input-bordered input-sm" /></div>
         <div class="form-control"><label class="label py-1"><span class="label-text text-xs">İşe başlama</span></label>
           <input v-model="form.startDate" type="date" class="input input-bordered input-sm" required /></div>
         <div class="form-control"><label class="label py-1"><span class="label-text text-xs">İşten ayrılma</span></label>

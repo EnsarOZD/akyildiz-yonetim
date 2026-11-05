@@ -377,4 +377,6 @@ const downloadExcel = async () => {
 }
 
 onMounted(load)
+
+defineExpose({ isDirty })
 </script>
