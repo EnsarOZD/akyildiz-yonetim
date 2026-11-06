@@ -62,12 +62,23 @@ const payrollService = {
   },
 
   // ───── onay ─────
-  /** Başarıda dönem DTO'su; farklılık/mevcut gider varsa 409 + gövdede ApproveOutcome (error.response.data). */
-  approve(period, { confirmDifferences = false, confirmExistingExpenses = false } = {}) {
-    const q = `confirmDifferences=${confirmDifferences}&confirmExistingExpenses=${confirmExistingExpenses}`
+  /**
+   * Başarıda dönem DTO'su; farklılık/mevcut gider varsa 409 + gövdede ApproveOutcome (error.response.data).
+   * mealInvoiceNumber verilirse yemek gideri onayla birlikte, fatura no ile oluşur.
+   */
+  approve(period, { confirmDifferences = false, confirmExistingExpenses = false, mealInvoiceNumber = '' } = {}) {
+    let q = `confirmDifferences=${confirmDifferences}&confirmExistingExpenses=${confirmExistingExpenses}`
+    if (mealInvoiceNumber && mealInvoiceNumber.trim()) q += `&mealInvoiceNumber=${enc(mealInvoiceNumber.trim())}`
     return apiService.post(`${base}/periods/${period}/approve?${q}`)
   },
   unapprove(period) { return apiService.post(`${base}/periods/${period}/unapprove`) },
+
+  // ───── yemek faturaları (bordro dışı) ─────
+  getMealInvoices() { return apiService.get(`${base}/meal-invoices`) },
+  /** data: { invoiceNumber, invoiceDate (yyyy-MM-dd, isteğe bağlı) } */
+  saveMealInvoice(period, data) { return apiService.put(`${base}/meal-invoices/${period}`, data) },
+  closeMealInvoice(period) { return apiService.post(`${base}/meal-invoices/${period}/close`) },
+  reopenMealInvoice(period) { return apiService.post(`${base}/meal-invoices/${period}/reopen`) },
 
   // ───── ödemeler ─────
   getPayments(period) { return apiService.get(`${base}/periods/${period}/payments`) },
