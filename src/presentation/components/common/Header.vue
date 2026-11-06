@@ -24,18 +24,69 @@
         </div>
 
         <!-- Desktop nav tabs -->
-        <nav v-if="tabs.length" class="hidden md:flex items-center gap-1 flex-1 justify-center">
-          <router-link
-            v-for="tab in tabs"
-            :key="tab.value"
-            :to="tab.route"
-            class="px-5 py-2.5 rounded-xl text-[13px] font-black transition-all duration-300 tracking-tight"
-            :class="isActiveTab(tab.route)
-              ? 'active-nav-item'
-              : 'text-[#5a7186] hover:text-[#16283a] hover:bg-[#ecf3f9]'"
-          >
-            {{ tab.label }}
-          </router-link>
+        <nav v-if="tabs.length" ref="navRef" class="hidden md:flex items-center gap-1 flex-1 justify-center">
+          <template v-for="tab in tabs" :key="tab.value">
+            <!-- Group with dropdown -->
+            <div v-if="tab.children" class="relative">
+              <button
+                type="button"
+                @click="toggleNavGroup(tab.value)"
+                class="flex items-center gap-1.5 px-5 py-2.5 rounded-xl text-[13px] font-black transition-all duration-300 tracking-tight"
+                :class="isActiveGroup(tab)
+                  ? 'active-nav-item'
+                  : openNavGroup === tab.value
+                    ? 'bg-[#ecf3f9] text-[#16283a]'
+                    : 'text-[#5a7186] hover:text-[#16283a] hover:bg-[#ecf3f9]'"
+                aria-haspopup="menu"
+                :aria-expanded="openNavGroup === tab.value"
+              >
+                {{ tab.label }}
+                <svg class="w-3.5 h-3.5 flex-shrink-0 transition-transform duration-150"
+                  :class="openNavGroup === tab.value ? 'rotate-180' : ''"
+                  fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+
+              <transition
+                enter-active-class="transition ease-out duration-150"
+                enter-from-class="opacity-0 translate-y-1 scale-95"
+                enter-to-class="opacity-100 translate-y-0 scale-100"
+                leave-active-class="transition ease-in duration-100"
+                leave-from-class="opacity-100 translate-y-0 scale-100"
+                leave-to-class="opacity-0 translate-y-1 scale-95"
+              >
+                <div v-if="openNavGroup === tab.value" role="menu" :aria-label="tab.label"
+                  class="absolute left-0 mt-2 w-[280px] rounded-xl border border-[#d9e7f2] bg-white shadow-card-lg p-1.5 origin-top-left z-50">
+                  <router-link
+                    v-for="child in tab.children"
+                    :key="child.route"
+                    :to="child.route"
+                    role="menuitem"
+                    @click="openNavGroup = null"
+                    class="flex flex-col gap-0.5 px-3 py-2.5 rounded-lg hover:bg-[#ecf3f9] transition-colors"
+                    :class="isActiveTab(child.route) ? 'bg-[#e8f3fb] text-brand-600' : ''"
+                  >
+                    <span class="text-[13px] font-bold"
+                      :class="isActiveTab(child.route) ? 'text-brand-600' : 'text-[#16283a]'">{{ child.label }}</span>
+                    <span class="text-xs text-[#5a7186]">{{ child.desc }}</span>
+                  </router-link>
+                </div>
+              </transition>
+            </div>
+
+            <!-- Plain link -->
+            <router-link
+              v-else
+              :to="tab.route"
+              class="px-5 py-2.5 rounded-xl text-[13px] font-black transition-all duration-300 tracking-tight"
+              :class="isActiveTab(tab.route)
+                ? 'active-nav-item'
+                : 'text-[#5a7186] hover:text-[#16283a] hover:bg-[#ecf3f9]'"
+            >
+              {{ tab.label }}
+            </router-link>
+          </template>
         </nav>
 
         <!-- Right side actions -->
@@ -266,8 +317,28 @@ const { notifySuccess, notifyError, notifyInfo } = useNotify()
 const userMenuRef      = ref(null)
 const notificationsRef = ref(null)
 
+const navRef       = ref(null)
+const openNavGroup = ref(null)
+
 useClickOutside(userMenuRef,      () => { showUserDropdown.value = false })
 useClickOutside(notificationsRef, () => { showNotificationsDropdown.value = false })
+useClickOutside(navRef,           () => { openNavGroup.value = null })
+
+const toggleNavGroup = (value) => {
+  openNavGroup.value = openNavGroup.value === value ? null : value
+  if (openNavGroup.value) {
+    showUserDropdown.value = false
+    showNotificationsDropdown.value = false
+  }
+}
+
+const onKeydown = (e) => {
+  if (e.key === 'Escape') openNavGroup.value = null
+}
+onMounted(() => window.addEventListener('keydown', onKeydown))
+onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown))
+
+watch(() => route.fullPath, () => { openNavGroup.value = null })
 
 // Computed
 const userInitials = computed(() => {
@@ -289,6 +360,8 @@ const isActiveTab = (tabRoute) => {
   }
   return route.path.startsWith(tabRoute)
 }
+
+const isActiveGroup = (tab) => tab.children.some(child => isActiveTab(child.route))
 
 // Notification icon helpers
 const notifTypes = {
@@ -325,19 +398,26 @@ const setTabsBasedOnRole = (role) => {
   const r = (role || '').toLowerCase()
   if ([ROLES.ADMIN, ROLES.MANAGER, ROLES.DATA_ENTRY].includes(r)) {
     tabs.value = [
-      { label: 'Özet',        value: 'dashboard', route: '/dashboard'  },
-      { label: 'Kiracılar',   value: 'tenants',   route: '/tenants'    },
-      { label: 'Ödemeler',    value: 'payments',  route: '/payments'   },
-      { label: 'Giderler',    value: 'expenses',  route: '/expenses'   },
-      { label: 'Borçlar',     value: 'utilities', route: '/utilities'  },
-      { label: 'Elektrik',    value: 'electricity', route: '/electricity' },
-      { label: 'Üniteler',    value: 'flats',     route: '/flats'      },
-      { label: 'Talepler',    value: 'service-requests', route: '/service-requests' },
-      { label: 'Raporlar',    value: 'reports',   route: '/reports'    },
+      { label: 'Özet', value: 'dashboard', route: '/dashboard' },
+      { label: 'Mülkler', value: 'properties', children: [
+        { label: 'Üniteler',     route: '/flats',   desc: 'Daire, dükkân ve ofisler' },
+        { label: 'Kiracılar',    route: '/tenants', desc: 'Kiracı kartları ve sözleşmeler' },
+        { label: 'Mal Sahipleri', route: '/owners', desc: 'Ünite sahipleri ve aidatları' },
+      ]},
+      { label: 'Finans', value: 'finance', children: [
+        { label: 'Ödemeler', route: '/payments',    desc: 'Tahsilat kayıtları' },
+        { label: 'Borçlar',  route: '/utilities',   desc: 'Aidat, su, ortak gider borçları' },
+        { label: 'Elektrik', route: '/electricity', desc: 'Sayaç okuma ve faturalar' },
+        { label: 'Giderler', route: '/expenses',    desc: 'Bina harcamaları' },
+      ]},
+      { label: 'Talepler', value: 'service-requests', route: '/service-requests' },
+      { label: 'Raporlar', value: 'reports',          route: '/reports' },
     ]
     if ([ROLES.ADMIN, ROLES.MANAGER].includes(r)) {
-      tabs.value.push({ label: 'Otomasyon', value: 'automation', route: '/automation' })
-      tabs.value.push({ label: 'Personel', value: 'payroll', route: '/payroll' })
+      tabs.value.push({ label: 'Yönetim', value: 'management', children: [
+        { label: 'Otomasyon', route: '/automation', desc: 'Hatırlatma ve zamanlanmış işler' },
+        { label: 'Personel',  route: '/payroll',    desc: 'Bordro ve maaşlar' },
+      ]})
     }
   } else if (r === ROLES.TENANT) {
     tabs.value = [
@@ -387,7 +467,7 @@ watch(() => authStore.user, (newUser) => {
 
 const toggleUserDropdown = () => {
   showUserDropdown.value = !showUserDropdown.value
-  if (showUserDropdown.value) showNotificationsDropdown.value = false
+  if (showUserDropdown.value) { showNotificationsDropdown.value = false; openNavGroup.value = null }
 }
 const toggleNotifications = () => {
   // On mobile, go straight to notifications page
@@ -399,6 +479,7 @@ const toggleNotifications = () => {
   showNotificationsDropdown.value = !showNotificationsDropdown.value
   if (showNotificationsDropdown.value) {
     showUserDropdown.value = false
+    openNavGroup.value = null
     notificationsStore.refresh()
   }
 }
