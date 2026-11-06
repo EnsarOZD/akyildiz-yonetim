@@ -1,4 +1,10 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
+
+async function openNavItem(page: Page, group: string, item: RegExp) {
+  const nav = page.getByTestId('sidebar').locator('nav');
+  await nav.getByRole('button', { name: group }).click();
+  await nav.getByRole('menuitem', { name: item }).click();
+}
 
 test.describe('Dashboard Sayfası', () => {
   test('Admin dashboard yüklenir ve sidebar görünür', async ({ page }) => {
@@ -17,21 +23,21 @@ test.describe('Dashboard Sayfası', () => {
     await page.goto('/dashboard');
     await page.waitForLoadState('networkidle');
     // Kiracılar linkine tıkla
-    await page.getByRole('link', { name: /kiracı/i }).first().click();
+    await openNavItem(page, 'Mülkler', /Kiracılar/);
     await expect(page).toHaveURL(/tenants/);
   });
 
   test('Sidebar navigasyon linkleri çalışır - Ödemeler', async ({ page }) => {
     await page.goto('/dashboard');
     await page.waitForLoadState('networkidle');
-    await page.getByRole('link', { name: /ödeme/i }).first().click();
+    await openNavItem(page, 'Finans', /Ödemeler/);
     await expect(page).toHaveURL(/payment/);
   });
 
   test('Sidebar navigasyon linkleri çalışır - Giderler', async ({ page }) => {
     await page.goto('/dashboard');
     await page.waitForLoadState('networkidle');
-    await page.getByRole('link', { name: /gider|aidatlar|işletme/i }).first().click();
+    await openNavItem(page, 'Finans', /Giderler/);
     await expect(page).toHaveURL(/expense/);
   });
 

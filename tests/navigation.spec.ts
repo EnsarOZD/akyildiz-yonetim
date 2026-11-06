@@ -54,15 +54,33 @@ test.describe('Navigasyon ve Routing Testleri', () => {
     expect(body).toMatch(/404|bulunamadı|kayboldu|yanlış/i);
   });
 
-  test('Sidebar\'dan Borçlar linkine tıklayınca /utilities\'e gider', async ({ page }) => {
+  test('Üst menüde Finans → Borçlar /utilities\'e gider ve menü kapanır', async ({ page }) => {
     await page.goto('/dashboard');
     await page.waitForLoadState('networkidle');
-    const borçlarLink = page.getByRole('link', { name: /borç|utilities/i }).first();
-    if (await borçlarLink.isVisible()) {
-      await borçlarLink.click();
-      await page.waitForLoadState('networkidle');
-      await expect(page).toHaveURL(/utilities|expenses/);
-    }
+    const nav = page.getByTestId('sidebar').locator('nav');
+    const finans = nav.getByRole('button', { name: 'Finans' });
+    await finans.click();
+    await expect(finans).toHaveAttribute('aria-expanded', 'true');
+    await nav.getByRole('menuitem', { name: /Borçlar/ }).click();
+    await expect(page).toHaveURL(/\/utilities/);
+    await expect(nav.getByRole('menu')).toHaveCount(0);
+    await expect(finans).toHaveClass(/active-nav-item/);
+  });
+
+  test('Üst menü Esc ve dışarı tıklamayla kapanır, aynı anda tek menü açık', async ({ page }) => {
+    await page.goto('/dashboard');
+    await page.waitForLoadState('networkidle');
+    const nav = page.getByTestId('sidebar').locator('nav');
+    await nav.getByRole('button', { name: 'Finans' }).click();
+    await expect(nav.getByRole('menu')).toHaveCount(1);
+    await nav.getByRole('button', { name: 'Mülkler' }).click();
+    await expect(nav.getByRole('menu')).toHaveCount(1);
+    await expect(nav.getByRole('menu')).toHaveAttribute('aria-label', 'Mülkler');
+    await page.keyboard.press('Escape');
+    await expect(nav.getByRole('menu')).toHaveCount(0);
+    await nav.getByRole('button', { name: 'Mülkler' }).click();
+    await page.mouse.click(10, 400);
+    await expect(nav.getByRole('menu')).toHaveCount(0);
   });
 
   test('Sidebar\'dan Bildirimler linkine tıklayınca /notifications\'a gider', async ({ page }) => {
