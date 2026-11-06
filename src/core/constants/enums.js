@@ -67,6 +67,9 @@ export const EXPENSE_TYPES = [
   { value: 'FoodAndBeverage', label: 'Yeme/İçme', icon: '🍔' },
   { value: 'Salary', label: 'Maaş', icon: '💵' },
   { value: 'Tax', label: 'Vergi', icon: '📄' },
+  { value: 'SocialSecurity', label: 'SGK', icon: '🏛️' },
+  { value: 'Severance', label: 'Tazminat', icon: '🤝' },
+  { value: 'AnnualLeave', label: 'Yıllık izin', icon: '🏖️' },
   { value: 'Other', label: 'Diğer', icon: '📦' },
 ];
 
