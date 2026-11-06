@@ -20,7 +20,7 @@
           </button>
           <button type="button" class="btn btn-sm btn-outline" @click="downloadExcel">Muhasebe Excel</button>
           <button type="button" class="btn btn-sm btn-outline" :disabled="locked" @click="requestUpload">Bordro yükle</button>
-          <button v-if="!approved" type="button" class="btn btn-sm btn-success" :disabled="busy || status !== 'PayrollImported'" :title="status !== 'PayrollImported' ? 'Önce bordro yükleyin' : ''" @click="approve()">
+          <button v-if="!approved" type="button" class="btn btn-sm btn-success" :disabled="busy || status !== 'PayrollImported'" :title="status !== 'PayrollImported' ? 'Önce bordro yükleyin' : ''" @click="openApprove">
             Onayla
           </button>
           <button v-else type="button" class="btn btn-sm btn-warning" :disabled="busy" @click="showUnapprove = true">Onayı geri al</button>
@@ -51,6 +51,12 @@
           <div class="rounded-xl border border-slate-200 px-3 py-2"><div class="text-xs text-slate-500">Firma maliyeti</div><div class="font-bold">{{ formatMoney(data.employerCost) }}</div></div>
         </div>
 
+        <p v-if="data.mealTotal > 0" class="text-xs text-slate-500" data-testid="period-meal-info">
+          * Yemek bordro dışıdır, hakedişe dahil değildir: {{ formatMoney(data.mealTotal) }} —
+          <span :class="mealMeta.cls">{{ mealMeta.label }}</span><template v-if="data.mealInvoiceNumber"> (fatura no {{ data.mealInvoiceNumber }})</template>.
+          Fatura no "Yemek Faturaları" sekmesinden girilir.
+        </p>
+
         <div v-if="!data.lines.length" class="text-center py-6 text-sm text-slate-500">Bu dönemde personel yok.</div>
 
         <div v-else class="overflow-x-auto">
@@ -67,7 +73,7 @@
                 <th class="text-right">Yol</th>
                 <th class="text-right">Mesai</th>
                 <th class="text-right">Tatil</th>
-                <th class="text-right">Yemek</th>
+                <th class="text-right" title="Bordro dışı; hakedişe dahil değil, yemek faturasıyla giderleşir">Yemek*</th>
                 <th class="text-right">Hakediş</th>
                 <th class="text-right">Bordro net</th>
                 <th class="text-right">Fark</th>
@@ -110,6 +116,27 @@
     <PaymentModal v-model="showPayments" :period="period" :line="paymentLine" @changed="refreshTotals" />
     <PayrollUploadModal v-model="showUpload" :period="period" @saved="onPayrollSaved" />
 
+    <!-- Onay: oluşacak giderler + isteğe bağlı yemek fatura no -->
+    <BaseModal v-model="showApproveStart" :title="`${label} dönemini onayla`">
+      <div class="space-y-3 text-sm">
+        <p>Onaylanınca maaş, vergi ve SGK giderleri oluşturulur ve dönem kilitlenir.</p>
+        <div v-if="data && data.mealTotal > 0" class="rounded-xl border border-slate-200 p-3 space-y-2">
+          <p>Personel yemek bedeli (bordro dışı): <b>{{ formatMoney(data.mealTotal) }}</b></p>
+          <label class="form-control flex flex-col">
+            <span class="label-text text-xs mb-1">Yemek fatura no (isteğe bağlı)</span>
+            <input v-model="mealInvoiceNumber" type="text" maxlength="100" class="input input-bordered input-sm" placeholder="Fatura gelmediyse boş bırakın" data-testid="approve-meal-invoice" />
+          </label>
+          <p class="text-xs text-slate-500">Boş bırakırsanız yemek "fatura bekliyor" olarak Yemek Faturaları sekmesinde durur.</p>
+        </div>
+      </div>
+      <template #footer>
+        <button type="button" class="btn btn-ghost btn-sm" @click="showApproveStart = false">Vazgeç</button>
+        <button type="button" class="btn btn-success btn-sm" :disabled="busy" @click="approve()">
+          <span v-if="busy" class="loading loading-spinner loading-xs"></span>Onayla
+        </button>
+      </template>
+    </BaseModal>
+
     <!-- Onay: farklar / mevcut giderler -->
     <BaseModal v-model="showApprove" title="Onay öncesi uyarı" size="lg">
       <div class="space-y-4 text-sm">
@@ -139,7 +166,7 @@
     <ConfirmModal
       :isOpen="showUnapprove"
       title="Onayı geri al"
-      message="Onay geri alınırsa dönemin oluşturduğu giderler silinir. Devam edilsin mi?"
+      message="Onay geri alınırsa dönemin maaş, vergi ve SGK giderleri silinir. Yemek faturası kaydı (varsa) kalır. Devam edilsin mi?"
       confirmLabel="Geri al"
       confirmClass="btn-warning"
       :loading="busy"
@@ -306,6 +333,28 @@ const onPayrollSaved = (p) => {
 }
 
 // ───── onay ─────
+const showApproveStart = ref(false)
+const mealInvoiceNumber = ref('')
+const MEAL_META = {
+  Pending: { label: 'fatura bekliyor', cls: 'text-amber-700 font-medium' },
+  Expensed: { label: 'gidere yazıldı', cls: 'text-success font-medium' },
+  Closed: { label: 'kapatıldı (gider elle girilmiş)', cls: 'text-slate-600' }
+}
+const MEAL_BY_NUMBER = ['Pending', 'Expensed', 'Closed']
+const mealMeta = computed(() => {
+  const s = data.value?.mealInvoiceStatus
+  return MEAL_META[typeof s === 'number' ? MEAL_BY_NUMBER[s] : s] || MEAL_META.Pending
+})
+
+const openApprove = () => {
+  if (isDirty.value) {
+    showError('Önce yaptığınız değişiklikleri kaydedin.')
+    return
+  }
+  mealInvoiceNumber.value = ''
+  showApproveStart.value = true
+}
+
 const approve = async (flags = {}) => {
   if (isDirty.value) {
     showError('Önce yaptığınız değişiklikleri kaydedin.')
@@ -313,7 +362,8 @@ const approve = async (flags = {}) => {
   }
   busy.value = true
   try {
-    applyPeriod(await payrollService.approve(period.value, flags))
+    applyPeriod(await payrollService.approve(period.value, { ...flags, mealInvoiceNumber: mealInvoiceNumber.value }))
+    showApproveStart.value = false
     showApprove.value = false
     showSuccess('Dönem onaylandı; giderler oluşturuldu.')
   } catch (e) {
@@ -322,6 +372,7 @@ const approve = async (flags = {}) => {
     const existing = body?.existingExpenses || []
     if (body && typeof body === 'object' && (diffs.length || existing.length)) {
       outcome.value = { differences: diffs, existingExpenses: existing }
+      showApproveStart.value = false // fatura no korunur; "Yine de onayla" aynı numarayla gönderir
       showApprove.value = true
     } else {
       showError(errorText(e, 'Dönem onaylanamadı.'))
@@ -364,9 +415,9 @@ const downloadPdf = async () => {
 const downloadExcel = async () => {
   try {
     const XLSX = await import('xlsx')
-    const aoa = [['Ad Soyad', 'TCKN', 'Görev', 'Gün', 'Mesai', 'Tatil', 'Prim', 'Hakediş (yemek hariç)']]
+    const aoa = [['Ad Soyad', 'TCKN', 'Görev', 'Gün', 'Mesai', 'Tatil', 'Prim', 'Hakediş']]
     for (const l of data.value?.lines || []) {
-      aoa.push([l.fullName, l.nationalId, l.position || '', l.workDays, l.overtimeHours, l.holidayDays, Number(l.bonus), Math.round((Number(l.netEntitlement) - Number(l.mealAmount || 0)) * 100) / 100])
+      aoa.push([l.fullName, l.nationalId, l.position || '', l.workDays, l.overtimeHours, l.holidayDays, Number(l.bonus), Number(l.netEntitlement)])
     }
     const wb = XLSX.utils.book_new()
     XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(aoa), 'Muhasebe Listesi')

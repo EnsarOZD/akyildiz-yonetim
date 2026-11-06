@@ -1,7 +1,7 @@
 <template>
   <div class="p-4 sm:p-10 min-h-screen pb-24 md:pb-10">
     <div class="max-w-7xl mx-auto space-y-6">
-      <PageHeader title="Personel & Maaş" subtitle="Aylık maaş dönemleri, ödemeler, bordro, kıdem tazminatı ve yıllık izin fonları">
+      <PageHeader title="Personel & Maaş" subtitle="Aylık maaş dönemleri, ödemeler, bordro, yemek faturaları, kıdem tazminatı ve yıllık izin fonları">
         <template #actions>
           <button type="button" class="btn btn-outline btn-sm" @click="showHistory = true">Geçmiş bordroları yükle</button>
         </template>
@@ -20,6 +20,7 @@
       </div>
 
       <PeriodTab v-if="activeTab === 'period'" ref="periodTabRef" :key="periodKeyNonce" />
+      <MealInvoicesTab v-else-if="activeTab === 'meals'" />
       <EmployeesTab v-else-if="activeTab === 'employees'" />
       <div v-else-if="activeTab === 'severance'" class="space-y-4" data-testid="payroll-funds-tab">
         <div role="tablist" class="tabs tabs-bordered">
@@ -46,11 +47,13 @@ import { ref, watch } from 'vue'
 import PageHeader from '@/presentation/components/ui/PageHeader.vue'
 import PeriodTab from './components/PeriodTab.vue'
 import EmployeesTab from './components/EmployeesTab.vue'
+import MealInvoicesTab from './components/MealInvoicesTab.vue'
 import SeveranceTab from './components/SeveranceTab.vue'
 import HistoryImportModal from './components/HistoryImportModal.vue'
 
 const tabs = [
   { value: 'period', label: 'Maaş Dönemi' },
+  { value: 'meals', label: 'Yemek Faturaları' },
   { value: 'employees', label: 'Personel' },
   { value: 'severance', label: 'Fonlar' }
 ]
