@@ -24,6 +24,7 @@
             Onayla
           </button>
           <button v-else type="button" class="btn btn-sm btn-warning" :disabled="busy" @click="showUnapprove = true">Onayı geri al</button>
+          <button v-if="!approved" type="button" class="btn btn-sm btn-outline btn-error" :disabled="busy" data-testid="delete-period" @click="showDelete = true">Dönemi sil</button>
         </div>
       </div>
 
@@ -173,6 +174,17 @@
       @confirm="unapprove"
       @cancel="showUnapprove = false"
     />
+
+    <ConfirmModal
+      :isOpen="showDelete"
+      title="Dönemi sil"
+      :message="`${label} dönemi tüm puantaj/bordro satırları, bordrodan otomatik oluşan ödemeler ve kıdem/izin karşılıklarıyla birlikte silinecek. Ardından bordroyu yeniden yükleyebilirsiniz. Devam edilsin mi?`"
+      confirmLabel="Sil"
+      confirmClass="btn-error"
+      :loading="busy"
+      @confirm="deletePeriod"
+      @cancel="showDelete = false"
+    />
   </div>
 </template>
 
@@ -211,6 +223,7 @@ const paymentLine = computed(() => data.value?.lines.find(l => l.id === paymentL
 const showUpload = ref(false)
 const showApprove = ref(false)
 const showUnapprove = ref(false)
+const showDelete = ref(false)
 const outcome = ref({ differences: [], existingExpenses: [] })
 
 const label = computed(() => {
@@ -395,6 +408,20 @@ const unapprove = async () => {
     showSuccess('Onay geri alındı.')
   } catch (e) {
     showError(errorText(e, 'Onay geri alınamadı.'))
+  } finally {
+    busy.value = false
+  }
+}
+
+const deletePeriod = async () => {
+  busy.value = true
+  try {
+    await payrollService.deletePeriod(period.value)
+    showDelete.value = false
+    applyPeriod(null)
+    showSuccess(`${label.value} dönemi silindi.`)
+  } catch (e) {
+    showError(errorText(e, 'Dönem silinemedi.'))
   } finally {
     busy.value = false
   }

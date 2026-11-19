@@ -43,6 +43,8 @@ const payrollService = {
     }
   },
   createPeriod(period) { return apiService.post(`${base}/periods/${period}`) },
+  /** Onaysız dönemi bağlı satır, otomatik ödeme ve karşılıklarıyla siler. */
+  deletePeriod(period) { return apiService.delete(`${base}/periods/${period}`) },
   addLine(period, employeeId) { return apiService.post(`${base}/periods/${period}/lines`, { employeeId }) },
   saveLines(period, inputs) { return apiService.put(`${base}/periods/${period}/lines`, inputs) },
   refreshWages(period) { return apiService.post(`${base}/periods/${period}/refresh-wages`) },
